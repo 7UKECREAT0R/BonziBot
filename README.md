@@ -6,7 +6,6 @@ Now with open source code for you guys!
 https://discordapp.com/oauth2/authorize?client_id=545806922209558537&permissions=8&scope=bot
 
 ## But can I steal the code...?
-no
-
-## why
-dont be stupid code youtr own bot lmao
+actually yeah go ahead but under license you're required<br />
+to disclose the original source somewhere in your bot...<br />
+<i>if you do that you're good g</i>
