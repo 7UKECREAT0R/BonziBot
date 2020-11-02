@@ -1,11 +1,16 @@
 package com.lukecreator.BonziBot;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.login.LoginException;
 
 import com.lukecreator.BonziBot.Commands.CommandExecutionInfo;
 import com.lukecreator.BonziBot.Commands.CommandSystem;
+import com.lukecreator.BonziBot.Data.IStorableData;
+import com.lukecreator.BonziBot.Managers.PrefixManager;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -31,8 +36,10 @@ public class BonziBot extends ListenerAdapter {
 	
 	JDABuilder builder = null;
 	
+	List<IStorableData> toSaveAndLoad = new ArrayList<IStorableData>();
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
 	CommandSystem commands = new CommandSystem();
+	PrefixManager prefixes = new PrefixManager();
 	
 	public BonziBot(boolean test) {
 		builder = JDABuilder.create(
@@ -49,11 +56,19 @@ public class BonziBot extends ListenerAdapter {
 		builder.addEventListeners(this);
 	}
 	public void start() throws InterruptedException, LoginException {
+		setupStorableData();
 		loadData();
 		setupBot();
 		setupExecutors();
 	}
 	
+	void setupStorableData() {
+		toSaveAndLoad.clear();
+		toSaveAndLoad.add(prefixes);
+		
+		int len = toSaveAndLoad.size();
+		InternalLogger.print("Populated storable data with " + len + " element(s)");
+	}
 	void setupBot() throws InterruptedException, LoginException {
 		JDA bot = builder.build();
 		InternalLogger.print("Starting bot...");
@@ -61,23 +76,29 @@ public class BonziBot extends ListenerAdapter {
 		InternalLogger.print("Bot is ready!");
 	}
 	void setupExecutors() {
-		// Executor stuff.
+		
+		// Autosaving.
+		threadPool.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				saveData();
+			}
+		}, 1, 5, TimeUnit.MINUTES);
+		
 		InternalLogger.print("Executors set up.");
 	}
 	void saveData() {
 		InternalLogger.print("Saving data...");
-		
-		// Save data.
-		
-		
+		for(IStorableData data: toSaveAndLoad) {
+			data.saveData();
+		}
 		InternalLogger.print("Saved data!");
 	}
 	void loadData() {
 		InternalLogger.print("Loading data...");
-		
-		// Load data.
-		
-		
+		for(IStorableData data: toSaveAndLoad) {
+			data.loadData();
+		}
 		InternalLogger.print("Loaded data!");
 	}
 	
