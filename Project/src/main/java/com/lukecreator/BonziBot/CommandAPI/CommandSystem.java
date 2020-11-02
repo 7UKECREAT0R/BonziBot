@@ -76,12 +76,14 @@ public class CommandSystem {
 	void directCommand(CommandExecutionInfo info) {
 		for(ACommand cmd: commands) {
 			String cmdName = cmd.name;
+			InternalLogger.print("checking " + cmdName);
 			if(!info.commandName.equalsIgnoreCase(cmdName))
 				continue;
 			if(!checkQualifications(cmd, info))
 				return;
 			
 			// Should be good to execute.
+			InternalLogger.print("executing " + cmdName);
 			cmd.executeCommand(info);
 		}
 		return;

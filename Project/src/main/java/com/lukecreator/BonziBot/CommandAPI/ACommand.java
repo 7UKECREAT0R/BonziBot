@@ -8,6 +8,9 @@ public abstract class ACommand {
 	public String usage = "nullcommand <nullarg>";
 	public String description = "Does nothing. This command hasn't been programmed yet.";
 	public CommandCategory category = CommandCategory._TOPLEVEL;
+	public boolean worksInDms = true; // TODO
+	public boolean moderatorOnly = false; // TODO
+	public boolean adminOnly = false; // TODO
 	
 	public boolean usesArgs = false;
 	public int goalArgs = 0;
