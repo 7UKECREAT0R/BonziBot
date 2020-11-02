@@ -1,5 +1,7 @@
 package com.lukecreator.BonziBot.Commands;
 
+import com.lukecreator.BonziBot.BonziBot;
+
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -31,10 +33,15 @@ public class CommandExecutionInfo {
 		channel = e.getChannel();
 		pChannel = e.getChannel();
 		message = e.getMessage();
+		fullText = message.getContentRaw();
 	}
 	public CommandExecutionInfo setCommandData(String commandName, String...args) {
 		this.commandName = commandName;
 		this.args = args;
+		return this;
+	}
+	public CommandExecutionInfo setBonziBot(BonziBot in) {
+		bonzi = in;
 		return this;
 	}
 	
@@ -45,13 +52,14 @@ public class CommandExecutionInfo {
 	public String[] args = null;
 	
 	// Never null.
+	public BonziBot bonzi = null;
 	public User executor = null;
+	public Message message = null;
 	public MessageChannel channel = null;
 	
 	// Null if isDirectMessage
 	public Guild guild = null;
 	public Member member = null;
-	public Message message = null;
 	
 	// Sometimes null.
 	public TextChannel tChannel = null;
