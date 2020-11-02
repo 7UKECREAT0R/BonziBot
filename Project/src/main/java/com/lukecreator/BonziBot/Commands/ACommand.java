@@ -12,7 +12,7 @@ public abstract class ACommand {
 	public boolean usesArgs = false;
 	public int goalArgs = 0;
 	public ArgsComparison argsCheck = ArgsComparison.EQUAL;
-	public Permission neededPermission = Permission.UNKNOWN;
+	public Permission[] neededPermissions = new Permission[] { Permission.UNKNOWN };
 	
 	public void executeCommand(CommandExecutionInfo e) {
 		
