@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.entities.Member;
 
 /*
  * Manages the loading of commands, argument
- * parsing, and 
+ * parsing, and execution.
  */
 public class CommandSystem {
 	
