@@ -32,11 +32,11 @@ public class PrefixManager implements IStorableData {
 			return p;
 		}
 	}
-	public void setPrefix(long guild, String prefix) {
-		prefixData.put(guild, prefix);
-	}
 	public void setPrefix(Guild guild, String prefix) {
 		setPrefix(guild.getIdLong(), prefix);
+	}
+	public void setPrefix(long guild, String prefix) {
+		prefixData.put(guild, prefix);
 	}
 	
 	@Override
