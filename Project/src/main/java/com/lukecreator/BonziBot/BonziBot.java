@@ -49,7 +49,6 @@ public class BonziBot extends ListenerAdapter {
 		builder.addEventListeners(this);
 	}
 	public void start() throws InterruptedException, LoginException {
-		
 		loadData();
 		setupBot();
 		setupExecutors();
