@@ -2,7 +2,9 @@ package com.lukecreator.BonziBot.CommandAPI;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ServiceLoader;
+import java.util.Set;
+
+import org.reflections.Reflections;
 
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Constants;
@@ -23,10 +25,14 @@ public class CommandSystem {
 	public CommandSystem() {
 		commands = new ArrayList<ACommand>();
 		
-		ServiceLoader<ACommand> classLoader =
-			ServiceLoader.load(ACommand.class);
-		for(ACommand implClass: classLoader) {
-			commands.add(implClass);
+		try {
+			Reflections refs = new Reflections("com.lukecreator.BonziBot");
+			Set<Class<? extends ACommand>> classes = refs.getSubTypesOf(ACommand.class);
+			for(Class<? extends ACommand> c: classes) {
+				commands.add(c.newInstance());
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			InternalLogger.printError(e);
 		}
 		
 		InternalLogger.print("Registered " + commands.size() + " commands.");
@@ -89,9 +95,9 @@ public class CommandSystem {
 			int al = info.args.length;
 			
 			boolean incorrect = 
-				(ac == ArgsComparison.EQUAL && ga != al) |
-				(ac == ArgsComparison.ANY_HIGHER && ga < al) |
-				(ac == ArgsComparison.ANY_LOWER && ga > al);
+				(ac == ArgsComparison.EQUAL && ga != al) ||
+				(ac == ArgsComparison.ANY_HIGHER && al < ga) ||
+				(ac == ArgsComparison.ANY_LOWER && al > ga);
 			if(incorrect) {
 				BonziUtils.sendUsage(cmd, info);
 				return false;
