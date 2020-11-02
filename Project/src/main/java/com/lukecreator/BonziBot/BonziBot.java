@@ -11,6 +11,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Managers.PrefixManager;
+import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -40,6 +41,7 @@ public class BonziBot extends ListenerAdapter {
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
 	public CommandSystem commands = new CommandSystem();
 	public PrefixManager prefixes = new PrefixManager();
+	public UserAccountManager accounts = new UserAccountManager();
 	
 	public BonziBot(boolean test) {
 		builder = JDABuilder.create(
@@ -71,6 +73,7 @@ public class BonziBot extends ListenerAdapter {
 	void setupStorableData() {
 		toSaveAndLoad.clear();
 		toSaveAndLoad.add(prefixes);
+		toSaveAndLoad.add(accounts);
 		
 		int len = toSaveAndLoad.size();
 		InternalLogger.print("Populated storable data with " + len + " element(s)");
