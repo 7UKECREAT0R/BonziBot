@@ -54,6 +54,18 @@ public class CommandExecutionInfo {
 	public String commandName = null;
 	public String[] args = null;
 	
+	public String getRemainder(int inclusiveIndex) {
+		if(args.length <= inclusiveIndex) return "";
+		String[] rem = new String[args.length - inclusiveIndex];
+		for(int i = inclusiveIndex; i < args.length; i++) {
+			rem[i - inclusiveIndex] = args[i];
+		}
+		return String.join(" ", rem);
+	}
+	public String getRemainder() {
+		return String.join(" ", args);
+	}
+	
 	// Never null.
 	public JDA bot = null;
 	public BonziBot bonzi = null;

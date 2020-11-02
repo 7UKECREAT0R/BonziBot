@@ -6,6 +6,7 @@ import java.util.ServiceLoader;
 
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Constants;
+import com.lukecreator.BonziBot.InternalLogger;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -27,6 +28,8 @@ public class CommandSystem {
 		for(ACommand implClass: classLoader) {
 			commands.add(implClass);
 		}
+		
+		InternalLogger.print("Registered " + commands.size() + " commands.");
 	}
 	
 	/*
@@ -37,11 +40,20 @@ public class CommandSystem {
 		String text = info.fullText;
 		if(BonziUtils.isWhitespace(text)) return;
 		
+		String prefix = BonziUtils.prefixOrDefault(info);
+		
 		String[] parts = text.split
 			(Constants.WHITESPACE_REGEX);
 		if(parts.length == 0) return;
 		
 		String commandName = parts[0];
+		String puc = prefix.toUpperCase();
+		String cuc = commandName.toUpperCase();
+		if(!cuc.startsWith(puc))
+			// User is not talking to bonzi.
+			return;
+		commandName = commandName
+			.substring(prefix.length());
 		
 		// Not counting the first word.
 		int argsLength = parts.length - 1;
