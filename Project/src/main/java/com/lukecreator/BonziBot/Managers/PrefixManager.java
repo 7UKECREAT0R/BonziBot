@@ -6,6 +6,8 @@ import com.lukecreator.BonziBot.Constants;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.IStorableData;
 
+import net.dv8tion.jda.api.entities.Guild;
+
 /*
  * Middleman for interacting with server prefixes.
  */
@@ -18,6 +20,9 @@ public class PrefixManager implements IStorableData {
 	public PrefixManager() {
 		prefixData = new HashMap<Long, String>();
 	}
+	public String getPrefix(Guild guild) {
+		return getPrefix(guild.getIdLong());
+	}
 	public String getPrefix(long guild) {
 		if(prefixData.containsKey(guild))
 			return prefixData.get(guild);
@@ -27,7 +32,13 @@ public class PrefixManager implements IStorableData {
 			return p;
 		}
 	}
-
+	public void setPrefix(long guild, String prefix) {
+		prefixData.put(guild, prefix);
+	}
+	public void setPrefix(Guild guild, String prefix) {
+		setPrefix(guild.getIdLong(), prefix);
+	}
+	
 	@Override
 	public void saveData() {
 		DataSerializer.writeObject(prefixData, FILE);
