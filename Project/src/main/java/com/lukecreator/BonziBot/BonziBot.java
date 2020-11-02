@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.login.LoginException;
 
-import com.lukecreator.BonziBot.Commands.CommandExecutionInfo;
-import com.lukecreator.BonziBot.Commands.CommandSystem;
+import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Managers.PrefixManager;
 
@@ -38,8 +38,8 @@ public class BonziBot extends ListenerAdapter {
 	
 	List<IStorableData> toSaveAndLoad = new ArrayList<IStorableData>();
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
-	CommandSystem commands = new CommandSystem();
-	PrefixManager prefixes = new PrefixManager();
+	public CommandSystem commands = new CommandSystem();
+	public PrefixManager prefixes = new PrefixManager();
 	
 	public BonziBot(boolean test) {
 		builder = JDABuilder.create(
@@ -60,6 +60,12 @@ public class BonziBot extends ListenerAdapter {
 		loadData();
 		setupBot();
 		setupExecutors();
+	}
+	public void saveBackup() {
+		
+	}
+	public void loadBackup() {
+		
 	}
 	
 	void setupStorableData() {

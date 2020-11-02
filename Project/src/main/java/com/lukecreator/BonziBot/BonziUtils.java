@@ -2,8 +2,8 @@ package com.lukecreator.BonziBot;
 
 import java.awt.Color;
 
-import com.lukecreator.BonziBot.Commands.ACommand;
-import com.lukecreator.BonziBot.Commands.CommandExecutionInfo;
+import com.lukecreator.BonziBot.CommandAPI.ACommand;
+import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -46,6 +46,13 @@ public class BonziUtils {
 			changed[i] = nChar;
 		}
 		return new String(changed);
+	}
+	public static String prefixOrDefault(CommandExecutionInfo info) {
+		if(info.isGuildMessage) {
+			return info.bonzi.prefixes.getPrefix(info.guild);
+		} else {
+			return Constants.DEFAULT_PREFIX;
+		}
 	}
 	
 	public static EmbedBuilder successEmbed(String message) {
@@ -113,10 +120,7 @@ public class BonziUtils {
 		String msg = "Wrong Command Usage!";
 		MessageChannel channel = info.channel;
 		
-		String prefix;
-		if(info.isGuildMessage)
-			prefix = info.bonzi.prefixes.getPrefix(info.guild);
-		else prefix = Constants.DEFAULT_PREFIX;
+		String prefix = BonziUtils.prefixOrDefault(info);
 		String desc = prefix + cmd.usage;
 		
 		EmbedBuilder usage = failureEmbed(msg, desc);
