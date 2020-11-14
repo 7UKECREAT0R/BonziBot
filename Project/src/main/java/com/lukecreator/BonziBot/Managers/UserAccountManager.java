@@ -27,6 +27,7 @@ public class UserAccountManager implements IStorableData {
 		accounts.put(id, acct);
 	}
 	
+	// Data
 	public void loadLegacy() {
 		accounts = UserAccountLegacyLoader.execute();
 		InternalLogger.print("Loaded legacy files.");
