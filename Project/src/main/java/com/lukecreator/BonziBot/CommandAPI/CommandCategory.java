@@ -6,6 +6,9 @@ public enum CommandCategory {
 	// top level of the help menu.
 	_TOPLEVEL,
 	
+	// Hidden from the help menu.
+	_HIDDEN,
+	
 	FUN,
 	COINS,
 	MODERATION,

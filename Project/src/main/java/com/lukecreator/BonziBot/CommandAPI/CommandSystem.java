@@ -6,13 +6,17 @@ import java.util.Set;
 
 import org.reflections.Reflections;
 
+import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Constants;
 import com.lukecreator.BonziBot.InternalLogger;
+import com.lukecreator.BonziBot.Managers.AdminManager;
+import com.lukecreator.BonziBot.Managers.CooldownManager;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 
 /*
  * Manages the loading of commands, argument
@@ -20,16 +24,18 @@ import net.dv8tion.jda.api.entities.Member;
  */
 public class CommandSystem {
 	
-	List<ACommand> commands;
+	List<Command> commands;
 	
 	public CommandSystem() {
-		commands = new ArrayList<ACommand>();
+		commands = new ArrayList<Command>();
 		
 		try {
 			Reflections refs = new Reflections("com.lukecreator.BonziBot");
-			Set<Class<? extends ACommand>> classes = refs.getSubTypesOf(ACommand.class);
-			for(Class<? extends ACommand> c: classes) {
-				commands.add(c.newInstance());
+			Set<Class<? extends Command>> classes = refs.getSubTypesOf(Command.class);
+			for(Class<? extends Command> c: classes) {
+				Command inst = c.newInstance();
+				inst.id = Command.LAST_ID++;
+				commands.add(inst);
 			}
 		} catch (InstantiationException | IllegalAccessException e) {
 			InternalLogger.printError(e);
@@ -46,7 +52,7 @@ public class CommandSystem {
 		String text = info.fullText;
 		if(BonziUtils.isWhitespace(text)) return;
 		
-		String prefix = BonziUtils.prefixOrDefault(info);
+		String prefix = BonziUtils.getPrefixOrDefault(info);
 		
 		String[] parts = text.split
 			(Constants.WHITESPACE_REGEX);
@@ -56,7 +62,6 @@ public class CommandSystem {
 		String puc = prefix.toUpperCase();
 		String cuc = commandName.toUpperCase();
 		if(!cuc.startsWith(puc))
-			// User is not talking to bonzi.
 			return;
 		commandName = commandName
 			.substring(prefix.length());
@@ -72,23 +77,40 @@ public class CommandSystem {
 		directCommand(info.setCommandData
 			(commandName, finalArgs));
 	}
+	public List<Command> getRegisteredCommands() {
+		return commands;
+	}
 	
 	void directCommand(CommandExecutionInfo info) {
-		for(ACommand cmd: commands) {
+		for(Command cmd: commands) {
 			String cmdName = cmd.name;
-			InternalLogger.print("checking " + cmdName);
 			if(!info.commandName.equalsIgnoreCase(cmdName))
 				continue;
 			if(!checkQualifications(cmd, info))
 				return;
 			
+			// Set cooldown.
+			if(cmd.hasCooldown) {
+				CooldownManager cm = info.bonzi.cooldowns;
+				long userId = info.executor.getIdLong();
+				cm.applyCooldown(cmd, userId);
+			}
+			
 			// Should be good to execute.
-			InternalLogger.print("executing " + cmdName);
 			cmd.executeCommand(info);
 		}
 		return;
 	}
-	boolean checkQualifications(ACommand cmd, CommandExecutionInfo info) {
+	boolean checkQualifications(Command cmd, CommandExecutionInfo info) {
+		
+		// Check administrator.
+		User ex = info.executor;
+		BonziBot bot = info.bonzi;
+		AdminManager am = bot.admins;
+		if(cmd.adminOnly && !am.getIsAdmin(ex)) {
+			BonziUtils.sendAdminOnly(cmd, info);
+			return false;
+		}
 		
 		// Check arguments.
 		if(cmd.usesArgs) {
@@ -117,6 +139,15 @@ public class CommandSystem {
 			}
 		}
 		
+		// Check cooldown.
+		CooldownManager cdManager = info.bonzi.cooldowns;
+		long userId = info.executor.getIdLong();
+		if(cmd.hasCooldown && cmd.cooldownMs > 0) {
+			if(cdManager.userOnCooldown(cmd, userId)) {
+				BonziUtils.sendOnCooldown(cmd, info, cdManager);
+				return false;
+			}
+		}
 		return true;
 	}
 }
