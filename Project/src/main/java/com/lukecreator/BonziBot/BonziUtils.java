@@ -8,7 +8,9 @@ import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -107,6 +109,9 @@ public class BonziUtils {
 	}
 	public static long getMsForDays(int days) {
 		return days * 86400000l;
+	}
+	public static int calculateLevel(int xp) {
+		return (int)Math.floor(Math.sqrt(((double)xp)*0.1));
 	}
 	
 	public static EmbedBuilder successEmbed(String message) {
@@ -235,7 +240,7 @@ public class BonziUtils {
 		return;
 	}
 	
-	public static int calculateLevel(int xp) {
-		return (int)Math.floor(Math.sqrt(((double)xp)*0.1));
+	public static Guild getBonziGuild(JDA jda) {
+		return jda.getGuildById(Constants.BONZI_GUILD_ID);
 	}
 }

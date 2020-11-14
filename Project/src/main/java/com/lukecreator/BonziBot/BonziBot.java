@@ -9,6 +9,7 @@ import javax.security.auth.login.LoginException;
 
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
+import com.lukecreator.BonziBot.Data.EmojiCache;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Managers.AdminManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
@@ -17,6 +18,7 @@ import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
@@ -42,7 +44,7 @@ public class BonziBot extends ListenerAdapter {
 	List<IStorableData> toSaveAndLoad = new ArrayList<IStorableData>();
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
 	public CommandSystem commands = new CommandSystem();
-	public AdminManager admins = new AdminManager(); // does not extend IStorableData
+	public AdminManager admins = new AdminManager();
 	public PrefixManager prefixes = new PrefixManager();
 	public UserAccountManager accounts = new UserAccountManager();
 	public CooldownManager cooldowns = new CooldownManager();
@@ -64,9 +66,9 @@ public class BonziBot extends ListenerAdapter {
 	public void start() throws InterruptedException, LoginException {
 		setupStorableData();
 		loadData();
-		setupBot();
+		JDA bot = setupBot();
 		setupExecutors();
-		postSetup();
+		postSetup(bot);
 	}
 	public void saveBackup() {
 		
@@ -83,11 +85,12 @@ public class BonziBot extends ListenerAdapter {
 		int len = toSaveAndLoad.size();
 		InternalLogger.print("Populated storable data with " + len + " element(s)");
 	}
-	void setupBot() throws InterruptedException, LoginException {
+	JDA setupBot() throws InterruptedException, LoginException {
 		JDA bot = builder.build();
 		InternalLogger.print("Starting bot...");
 		bot.awaitReady();
 		InternalLogger.print("Bot is ready!");
+		return bot;
 	}
 	void setupExecutors() {
 		// Autosaving.
@@ -100,9 +103,12 @@ public class BonziBot extends ListenerAdapter {
 		
 		InternalLogger.print("Executors set up.");
 	}
-	void postSetup() {
+	void postSetup(JDA jda) {
 		// Anything else that needs to be done.
 		cooldowns.initialize(commands);
+		
+		Guild bonziGuild = BonziUtils.getBonziGuild(jda);
+		EmojiCache.appendGuildEmotes(bonziGuild);
 	}
 	void saveData() {
 		InternalLogger.print("Saving data...");
