@@ -1,11 +1,11 @@
 package com.lukecreator.BonziBot.Commands;
 
-import com.lukecreator.BonziBot.CommandAPI.ACommand;
+import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.ArgsComparison;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 
-public class SayCommand extends ACommand {
+public class SayCommand extends Command {
 	
 	public SayCommand() {
 		this.name = "Say";
