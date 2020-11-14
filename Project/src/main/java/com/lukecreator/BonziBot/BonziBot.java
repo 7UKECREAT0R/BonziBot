@@ -10,6 +10,8 @@ import javax.security.auth.login.LoginException;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.Data.IStorableData;
+import com.lukecreator.BonziBot.Managers.AdminManager;
+import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.PrefixManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
@@ -40,8 +42,10 @@ public class BonziBot extends ListenerAdapter {
 	List<IStorableData> toSaveAndLoad = new ArrayList<IStorableData>();
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
 	public CommandSystem commands = new CommandSystem();
+	public AdminManager admins = new AdminManager(); // does not extend IStorableData
 	public PrefixManager prefixes = new PrefixManager();
 	public UserAccountManager accounts = new UserAccountManager();
+	public CooldownManager cooldowns = new CooldownManager();
 	
 	public BonziBot(boolean test) {
 		builder = JDABuilder.create(
@@ -62,6 +66,7 @@ public class BonziBot extends ListenerAdapter {
 		loadData();
 		setupBot();
 		setupExecutors();
+		postSetup();
 	}
 	public void saveBackup() {
 		
@@ -85,7 +90,6 @@ public class BonziBot extends ListenerAdapter {
 		InternalLogger.print("Bot is ready!");
 	}
 	void setupExecutors() {
-		
 		// Autosaving.
 		threadPool.scheduleAtFixedRate(new Runnable() {
 			@Override
@@ -95,6 +99,10 @@ public class BonziBot extends ListenerAdapter {
 		}, 1, 5, TimeUnit.MINUTES);
 		
 		InternalLogger.print("Executors set up.");
+	}
+	void postSetup() {
+		// Anything else that needs to be done.
+		cooldowns.initialize(commands);
 	}
 	void saveData() {
 		InternalLogger.print("Saving data...");

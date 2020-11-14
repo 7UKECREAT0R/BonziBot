@@ -1,14 +1,18 @@
 package com.lukecreator.BonziBot;
 
 import java.awt.Color;
+import java.util.concurrent.TimeUnit;
 
-import com.lukecreator.BonziBot.CommandAPI.ACommand;
+import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Managers.CooldownManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
 /*
@@ -47,12 +51,62 @@ public class BonziUtils {
 		}
 		return new String(changed);
 	}
-	public static String prefixOrDefault(CommandExecutionInfo info) {
+	public static String getPrefixOrDefault(CommandExecutionInfo info) {
 		if(info.isGuildMessage) {
 			return info.bonzi.prefixes.getPrefix(info.guild);
 		} else {
 			return Constants.DEFAULT_PREFIX;
 		}
+	}
+	public static String getShortTimeStringMs(long ms) {
+		if(ms < 1000) return "0s";
+		
+		int secs = (int)Math.round
+			(((double)ms)/1000.0);
+		
+		// Less than one minute.
+		if(ms < 60000) {
+			return secs + "s";
+		}
+		
+		int mins = (int)Math.floor
+			(((double)secs)/60.0);
+		
+		// Less than one hour.
+		if(ms < 3600000) {
+			int rem_secs = secs % 60;
+			return mins + "m, " + rem_secs + "s";
+		}
+		
+		int hours = (int)Math.floor
+			(((double)mins)/60.0);
+		
+		// Less than one day (24h).
+		if(ms < 86400000) {
+			int rem_secs = secs % 60;
+			int rem_mins = mins % 60;
+			return hours + "h, " + rem_mins + "m, " + rem_secs + "s";
+		}
+		
+		// Over a day, simply round down.
+		int days = (int)Math.floor
+			(((double)hours)/24.0);
+		int rem_secs = secs % 60;
+		int rem_mins = mins % 60;
+		int rem_hours = hours % 24;
+		return days + "d, " + rem_hours + "h, " + rem_mins + "m, " + rem_secs + "s";
+	}
+	public static long getMsForSeconds(int secs) {
+		return secs * 1000l;
+	}
+	public static long getMsForMinutes(int mins) {
+		return mins * 60000l;
+	}
+	public static long getMsForHours(int hours) {
+		return hours * 3600000l;
+	}
+	public static long getMsForDays(int days) {
+		return days * 86400000l;
 	}
 	
 	public static EmbedBuilder successEmbed(String message) {
@@ -116,17 +170,32 @@ public class BonziUtils {
 			.setColor(authorWithColor.getColor());
 	}
 	
-	public static void sendUsage(ACommand cmd, CommandExecutionInfo info) {
+	public static void sendTempMessage(MessageChannel c, CharSequence cs, int seconds) {
+		c.sendMessage(cs).queue(msg -> {
+			msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+		});
+	}
+	public static void sendTempMessage(MessageChannel c, MessageEmbed embed, int seconds) {
+		c.sendMessage(embed).queue(msg -> {
+			msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+		});
+	}
+	public static void sendTempMessage(MessageChannel c, Message m, int seconds) {
+		c.sendMessage(m).queue(msg -> {
+			msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+		});
+	}
+	public static void sendUsage(Command cmd, CommandExecutionInfo info) {
 		String msg = "Wrong Command Usage!";
 		MessageChannel channel = info.channel;
 		
-		String prefix = BonziUtils.prefixOrDefault(info);
+		String prefix = BonziUtils.getPrefixOrDefault(info);
 		String desc = prefix + cmd.usage;
 		
 		EmbedBuilder usage = failureEmbed(msg, desc);
 		channel.sendMessage(usage.build()).queue();
 	}
-	public static void sendNeededPerms(ACommand cmd, CommandExecutionInfo info) {
+	public static void sendNeededPerms(Command cmd, CommandExecutionInfo info) {
 		Permission[] perms = cmd.neededPermissions;
 		String msg = perms.length > 1?
 			"I need the following permissions to execute this command:":
@@ -141,5 +210,32 @@ public class BonziUtils {
 		
 		EmbedBuilder send = quickEmbed(msg, desc, Color.orange);
 		info.channel.sendMessage(send.build()).queue();
+	}
+	public static void sendAdminOnly(Command cmd, CommandExecutionInfo info) {
+		EmbedBuilder eb = quickEmbed
+			("This command is reserved for admins.", "Admins are usually developers"
+					+ "of BonziBot or very well known contributors.",
+			Color.orange);
+		info.channel.sendMessage(eb.build());
+				
+	}
+	public static void sendOnCooldown(Command cmd, CommandExecutionInfo info, CooldownManager cdm) {
+		long userId = info.executor.getIdLong();
+		long timeLeftMs = cdm.getUserCooldown(cmd, userId);
+		String msg;
+		if(timeLeftMs < 100) { // or -1
+			msg = "Command is no longer on cooldown.";
+		} else {
+			msg = "Command is on cooldown!";
+		}
+		String ts = getShortTimeStringMs(timeLeftMs);
+		String desc = ts + " Remaining";
+		EmbedBuilder embed = quickEmbed(msg, desc, Color.yellow);
+		sendTempMessage(info.channel, embed.build(), 5);
+		return;
+	}
+	
+	public static int calculateLevel(int xp) {
+		return (int)Math.floor(Math.sqrt(((double)xp)*0.1));
 	}
 }
