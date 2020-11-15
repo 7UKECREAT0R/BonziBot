@@ -1,11 +1,13 @@
 package com.lukecreator.BonziBot;
 
 import java.awt.Color;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
+import com.lukecreator.NoUpload.Constants;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -15,12 +17,17 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.User;
 
 /*
  * The all heavenly class which does everything lmao
  */
 public class BonziUtils {
+	
+	// Tracks opened private channels and their ids.
+	// Format: <User ID, Private Channel ID>
+	public static HashMap<Long, Long> userPrivateChannels = new HashMap<Long, Long>();
 	
 	/*
 	 * Checks if a string is complete whitespace.
@@ -242,5 +249,47 @@ public class BonziUtils {
 	
 	public static Guild getBonziGuild(JDA jda) {
 		return jda.getGuildById(Constants.BONZI_GUILD_ID);
+	}
+	public static void messageUser(User user, CharSequence text) {
+		long id = user.getIdLong();
+		if(user.hasPrivateChannel() && userPrivateChannels.containsKey(id)) {
+			long cId = userPrivateChannels.get(id);
+			PrivateChannel pc = user.getJDA().getPrivateChannelById(cId);
+			pc.sendMessage(text).queue();
+		} else {
+			user.openPrivateChannel().queue(p -> {
+				long privateChannelId = p.getIdLong();
+				userPrivateChannels.put(id, privateChannelId);
+				p.sendMessage(text).queue();
+			});
+		}
+	}
+	public static void messageUser(User user, MessageEmbed me) {
+		long id = user.getIdLong();
+		if(user.hasPrivateChannel() && userPrivateChannels.containsKey(id)) {
+			long cId = userPrivateChannels.get(id);
+			PrivateChannel pc = user.getJDA().getPrivateChannelById(cId);
+			pc.sendMessage(me).queue();
+		} else {
+			user.openPrivateChannel().queue(p -> {
+				long privateChannelId = p.getIdLong();
+				userPrivateChannels.put(id, privateChannelId);
+				p.sendMessage(me).queue();
+			});
+		}
+	}
+	public static void messageUser(User user, Message msg) {
+		long id = user.getIdLong();
+		if(user.hasPrivateChannel() && userPrivateChannels.containsKey(id)) {
+			long cId = userPrivateChannels.get(id);
+			PrivateChannel pc = user.getJDA().getPrivateChannelById(cId);
+			pc.sendMessage(msg).queue();
+		} else {
+			user.openPrivateChannel().queue(p -> {
+				long privateChannelId = p.getIdLong();
+				userPrivateChannels.put(id, privateChannelId);
+				p.sendMessage(msg).queue();
+			});
+		}
 	}
 }
