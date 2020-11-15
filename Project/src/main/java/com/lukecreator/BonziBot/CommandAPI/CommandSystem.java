@@ -8,10 +8,10 @@ import org.reflections.Reflections;
 
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
-import com.lukecreator.BonziBot.Constants;
 import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Managers.AdminManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
+import com.lukecreator.NoUpload.Constants;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
