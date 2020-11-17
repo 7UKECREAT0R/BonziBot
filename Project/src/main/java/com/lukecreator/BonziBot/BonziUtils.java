@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
-import com.lukecreator.NoUpload.Constants;
+import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -291,5 +291,13 @@ public class BonziUtils {
 				p.sendMessage(msg).queue();
 			});
 		}
+	}
+	public static PrivateChannel getCachedPrivateChannel(User user) {
+		long userId = user.getIdLong();
+		if(user.hasPrivateChannel() && userPrivateChannels.containsKey(userId)) {
+			return user.getJDA().getPrivateChannelById(userPrivateChannels.get(userId));
+		}
+		// Not cached.
+		return null;
 	}
 }

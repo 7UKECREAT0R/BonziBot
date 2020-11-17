@@ -13,9 +13,10 @@ import com.lukecreator.BonziBot.Data.EmojiCache;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Managers.AdminManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
+import com.lukecreator.BonziBot.Managers.GuiManager;
 import com.lukecreator.BonziBot.Managers.PrefixManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
-import com.lukecreator.NoUpload.Constants;
+import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -31,6 +32,8 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -49,6 +52,7 @@ public class BonziBot extends ListenerAdapter {
 	public PrefixManager prefixes = new PrefixManager();
 	public UserAccountManager accounts = new UserAccountManager();
 	public CooldownManager cooldowns = new CooldownManager();
+	public GuiManager guis = new GuiManager();
 	
 	public BonziBot(boolean test) {
 		builder = JDABuilder.create(
@@ -148,10 +152,16 @@ public class BonziBot extends ListenerAdapter {
 		// Send a leave message.
 	}
 	public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent e) {
-		// Mainly going to be used for pagination
+		guis.onReactionAdd(e);
 	}
 	public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent e) {
-		// Mainly going to be used for pagination
+		guis.onReactionRemove(e);
+	}
+	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent e) {
+		guis.onReactionAdd(e);
+	}
+	public void onPrivateMessageReactionRemove(PrivateMessageReactionRemoveEvent e) {
+		guis.onReactionRemove(e);
 	}
 	public void onGenericGuildVoice(GenericGuildVoiceEvent e) {
 		// Used to leave the voice channel if nobody is left.
@@ -165,4 +175,5 @@ public class BonziBot extends ListenerAdapter {
 	public void onTextChannelCreate(TextChannelCreateEvent e) {
 		// For logging.
 	}
+
 }
