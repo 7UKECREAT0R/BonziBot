@@ -1,6 +1,7 @@
 package com.lukecreator.BonziBot.Data;
 
 import net.dv8tion.jda.api.entities.Emote;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 
 /*
@@ -30,7 +31,16 @@ public class GenericEmoji {
 			return re.getIdLong() == this.guildEmojiId;
 		} else {
 			if(this.isGuild) return false;
+			//System.out.println(re.getEmoji() + " vs " + this.genericEmoji);
 			return re.getEmoji().equals(this.genericEmoji);
+		}
+	}
+	public void react(Message msg) {
+		if(isGeneric) {
+			msg.addReaction(genericEmoji).queue();
+		} else {
+			Emote e = EmojiCache.getEmoteById(guildEmojiId);
+			msg.addReaction(e).queue();
 		}
 	}
 	
@@ -52,5 +62,8 @@ public class GenericEmoji {
 		} else {
 			return new GenericEmoji(emote.getEmoji());
 		}
+	}
+	public static GenericEmoji fromEmoji(String emoji) {
+		return new GenericEmoji(emoji);
 	}
 }
