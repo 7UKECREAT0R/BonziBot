@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.IStorableData;
-import com.lukecreator.NoUpload.Constants;
+import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.entities.Guild;
 
