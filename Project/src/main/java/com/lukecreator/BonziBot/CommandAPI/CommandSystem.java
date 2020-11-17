@@ -11,7 +11,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Managers.AdminManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
-import com.lukecreator.NoUpload.Constants;
+import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -58,6 +58,7 @@ public class CommandSystem {
 			(Constants.WHITESPACE_REGEX);
 		if(parts.length == 0) return;
 		
+		
 		String commandName = parts[0];
 		String puc = prefix.toUpperCase();
 		String cuc = commandName.toUpperCase();
@@ -98,6 +99,9 @@ public class CommandSystem {
 			
 			// Should be good to execute.
 			cmd.executeCommand(info);
+			
+			// End
+			break;
 		}
 		return;
 	}
