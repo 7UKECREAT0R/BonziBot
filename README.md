@@ -1,5 +1,7 @@
 # BonziBot
 The most epicest epic bot for epic gamers! Now with open source code for you guys!
+Note this is not the current build that is being run. This is a complete re-code<br />
+from scratch because the old codebase sucked major candy bar
 
 ## Where can I get it?
 https://discordapp.com/oauth2/authorize?client_id=545806922209558537&permissions=8&scope=bot
