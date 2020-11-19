@@ -1,5 +1,7 @@
 package com.lukecreator.BonziBot.GuiAPI;
 
+import java.util.ArrayList;
+
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 
@@ -7,6 +9,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -16,6 +19,8 @@ import net.dv8tion.jda.api.entities.User;
  * Base Gui class. Represents a message containing a Gui.
  */
 public class GuiContainer {
+	
+	public long ownerId;
 	
 	public boolean isGuild = false;
 	public boolean isDm = false;
@@ -36,25 +41,28 @@ public class GuiContainer {
 	
 	Gui gui;
 	
-	public GuiContainer(Gui gui, TextChannel tc) {
+	public GuiContainer(Gui gui, TextChannel tc, User u) {
 		this.gui = gui;
 		this.gui.parent = this;
 		this.isGuild = true;
 		this.guildId = tc.getGuild().getIdLong();
 		this.channelId = tc.getIdLong();
+		this.ownerId = u.getIdLong();
 	}
-	public GuiContainer(Gui gui, GuildChannel gc) {
+	public GuiContainer(Gui gui, GuildChannel gc, User u) {
 		this.gui = gui;
 		this.gui.parent = this;
 		this.isGuild = true;
 		this.guildId = gc.getGuild().getIdLong();
 		this.channelId = gc.getIdLong();
+		this.ownerId = u.getIdLong();
 	}
 	public GuiContainer(Gui gui, PrivateChannel pc) {
 		this.gui = gui;
 		this.gui.parent = this;
 		this.isDm = true;
 		this.userDmId = pc.getUser().getIdLong();
+		this.ownerId = pc.getUser().getIdLong();
 	}
 	
 	/*
@@ -66,7 +74,7 @@ public class GuiContainer {
 		if(isGuild) {
 			Guild g = jda.getGuildById(guildId);
 			TextChannel tc = g.getTextChannelById(channelId);
-			tc.sendMessage(gui.draw()).queue(mmm -> {
+			tc.sendMessage(gui.draw(jda)).queue(mmm -> {
 				for(GuiButton gb: gui.buttons) {
 					gb.icon.react(mmm);
 				}
@@ -84,7 +92,7 @@ public class GuiContainer {
 					if(u.hasPrivateChannel() && BonziUtils.userPrivateChannels.containsKey(userDmId)) {
 						long cId = BonziUtils.userPrivateChannels.get(userDmId);
 						PrivateChannel pc = u.getJDA().getPrivateChannelById(cId);
-						pc.sendMessage(gui.draw()).queue(mmm -> {
+						pc.sendMessage(gui.draw(jda)).queue(mmm -> {
 							for(GuiButton gb: gui.buttons) {
 								gb.icon.react(mmm);
 							}
@@ -98,7 +106,7 @@ public class GuiContainer {
 						u.openPrivateChannel().queue(p -> {
 							long privateChannelId = p.getIdLong();
 							BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
-							p.sendMessage(gui.draw()).queue(mmm -> {
+							p.sendMessage(gui.draw(jda)).queue(mmm -> {
 								for(GuiButton gb: gui.buttons) {
 									gb.icon.react(mmm);
 								}
@@ -116,7 +124,7 @@ public class GuiContainer {
 				if(user.hasPrivateChannel() && BonziUtils.userPrivateChannels.containsKey(userDmId)) {
 					long cId = BonziUtils.userPrivateChannels.get(userDmId);
 					PrivateChannel pc = user.getJDA().getPrivateChannelById(cId);
-					pc.sendMessage(gui.draw()).queue(mmm -> {
+					pc.sendMessage(gui.draw(jda)).queue(mmm -> {
 						for(GuiButton gb: gui.buttons) {
 							gb.icon.react(mmm);
 						}
@@ -130,7 +138,7 @@ public class GuiContainer {
 					user.openPrivateChannel().queue(p -> {
 						long privateChannelId = p.getIdLong();
 						BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
-						p.sendMessage(gui.draw()).queue(mmm -> {
+						p.sendMessage(gui.draw(jda)).queue(mmm -> {
 							for(GuiButton gb: gui.buttons) {
 								gb.icon.react(mmm);
 							}
@@ -152,20 +160,20 @@ public class GuiContainer {
 		if(isGuild) {
 			Guild g = jda.getGuildById(guildId);
 			TextChannel tc = g.getTextChannelById(channelId);
-			tc.editMessageById(messageId, gui.draw()).queue();
+			tc.editMessageById(messageId, gui.draw(jda)).queue();
 		} else {
 			User sender = jda.getUserById(userDmId);
 			if(sender == null) {
 				jda.retrieveUserById(userDmId).queue(u -> {
-					BonziUtils.messageUser(u, gui.draw());
+					BonziUtils.messageUser(u, gui.draw(jda));
 				});
 			} else {
-				BonziUtils.messageUser(sender, gui.draw());
+				BonziUtils.messageUser(sender, gui.draw(jda));
 			}
 		}
 	}
 	/*
-	 * im sorry
+	 * im sorry for cursing your eyes
 	 */
 	public void resetAllReactions(JDA jda) {
 		if(!hasSentMessage) return;
@@ -173,13 +181,13 @@ public class GuiContainer {
 		
 		if(isGuild) {
 			Guild g = jda.getGuildById(guildId);
-			TextChannel tc = g.getTextChannelById(messageId);
-			MessageChannel mc = (MessageChannel)tc;
-			mc.retrieveMessageById(messageId).queue(m -> {
-				m.clearReactions().queue();
-				for(GuiButton gb: gui.buttons) {
-					gb.icon.react(m);
-				}
+			TextChannel tc = g.getTextChannelById(channelId);
+			tc.retrieveMessageById(messageId).queue(m -> {
+				m.clearReactions().queue(v -> {
+					for(GuiButton gb: gui.buttons) {
+						gb.icon.react(m);
+					}
+				});
 			});
 		} else {
 			User sender = jda.getUserById(userDmId);
@@ -189,20 +197,20 @@ public class GuiContainer {
 						long cId = BonziUtils.userPrivateChannels.get(userDmId);
 						PrivateChannel pc = u.getJDA().getPrivateChannelById(cId);
 						pc.retrieveMessageById(messageId).queue(m -> {
-							m.clearReactions().queue();
-							for(GuiButton gb: gui.buttons) {
+							for(MessageReaction r: m.getReactions())
+								if(r.isSelf()) r.removeReaction().queue();
+							for(GuiButton gb: gui.buttons)
 								gb.icon.react(m);
-							}
 						});
 					} else {
 						u.openPrivateChannel().queue(p -> {
 							long privateChannelId = p.getIdLong();
 							BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
 							p.retrieveMessageById(messageId).queue(m -> {
-								m.clearReactions().queue();
-								for(GuiButton gb: gui.buttons) {
+								for(MessageReaction r: m.getReactions())
+									if(r.isSelf()) r.removeReaction().queue();
+								for(GuiButton gb: gui.buttons)
 									gb.icon.react(m);
-								}
 							});
 						});
 					}
@@ -212,20 +220,20 @@ public class GuiContainer {
 					long cId = BonziUtils.userPrivateChannels.get(userDmId);
 					PrivateChannel pc = sender.getJDA().getPrivateChannelById(cId);
 					pc.retrieveMessageById(messageId).queue(m -> {
-						m.clearReactions().queue();
-						for(GuiButton gb: gui.buttons) {
+						for(MessageReaction r: m.getReactions())
+							if(r.isSelf()) r.removeReaction().queue();
+						for(GuiButton gb: gui.buttons)
 							gb.icon.react(m);
-						}
 					});
 				} else {
 					sender.openPrivateChannel().queue(p -> {
 						long privateChannelId = p.getIdLong();
 						BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
 						p.retrieveMessageById(messageId).queue(m -> {
-							m.clearReactions().queue();
-							for(GuiButton gb: gui.buttons) {
+							for(MessageReaction r: m.getReactions())
+								if(r.isSelf()) r.removeReaction().queue();
+							for(GuiButton gb: gui.buttons)
 								gb.icon.react(m);
-							}
 						});
 					});
 				}
@@ -252,11 +260,27 @@ public class GuiContainer {
 	 *   ton of requests so use wisely!
 	 */
 	public void setActiveGui(Gui gui, JDA jda) {
+		if(!gui.wasInitialized()) {
+			gui.parent = this;
+			if(gui.buttons == null)
+				gui.buttons = new ArrayList<GuiButton>();
+			if(isGuild) {
+				TextChannel tc = jda
+					.getGuildById(guildId)
+					.getTextChannelById(channelId);
+				gui.hiddenInit(jda, tc.getGuild(), this.gui.bonziReference);
+			} else {
+				User u = jda.getUserById(this.userDmId);
+				gui.hiddenInit(jda, u, this.gui.bonziReference);
+			}
+		}
 		this.gui = gui;
 		redrawMessage(jda);
 		resetAllReactions(jda);
 	}
-	public void onReaction(ReactionEmote emote) {
+	public void onReaction(ReactionEmote emote, User executor) {
+		if(this.ownerId != executor.getIdLong())
+			return;
 		gui.receiveReaction(emote);
 	}
 }

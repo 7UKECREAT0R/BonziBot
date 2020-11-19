@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
+import net.dv8tion.jda.api.entities.User;
 
 /*
  * Limit one per Entity, represents a imited
@@ -32,7 +33,7 @@ public class AllocGuiList {
 		guis.clear();
 	}
 	
-	public void onReactionAdd(ReactionEmote react, long messageId) {
+	public void onReactionAdd(ReactionEmote react, long messageId, User executor) {
 		for(GuiContainer guiContainer: guis) {
 			if(!guiContainer.hasSentMessage)
 				continue;
@@ -40,7 +41,7 @@ public class AllocGuiList {
 				continue;
 			if(guiContainer.messageId != messageId)
 				continue;
-			guiContainer.onReaction(react);
+			guiContainer.onReaction(react, executor);
 		}
 	}
 }
