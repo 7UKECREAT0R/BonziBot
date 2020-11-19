@@ -27,16 +27,17 @@ public class GuiTestMenu extends GuiPaging {
 	public void initialize(JDA jda) {
 		super.initialize(jda);
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🔵"), 2));
+		this.maxPage = set.length;
 	}
 	
 	@Override
-	public MessageEmbed draw() {
-		String sel = set[currentPage].toString();
+	public MessageEmbed draw(JDA jda) {
+		String sel = set[getCurrentIndex()].toString();
 		EmbedBuilder eb = new EmbedBuilder()
 			.setColor(Color.magenta)
 			.setTitle("Paging Test!")
 			.setDescription("Pick your favorite food!");
-		eb.addField("Page " + this.getPageString(), sel, false);
+		eb.addField(this.getPageString(), sel, false);
 		return eb.build();
 	}
 	
@@ -46,7 +47,7 @@ public class GuiTestMenu extends GuiPaging {
 		
 		if(buttonId == 2) {
 			this.pagingEnabled = false;
-			String sel = set[currentPage].toString();
+			String sel = set[getCurrentIndex()].toString();
 			MessageChannel channel = parent.getChannel(jda);
 			channel.sendMessage("Selected: " + sel).queue();
 		}
