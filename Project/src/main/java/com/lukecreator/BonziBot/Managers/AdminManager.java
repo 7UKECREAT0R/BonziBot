@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.User;
  */
 public class AdminManager {
 	
-	long[] admins = new long[] {
+	final long[] admins = new long[] {
 		415316679610859520l, // Giraffey
 		214183045278728202l, // Luke
 		206395494648381443l  // Zipdip

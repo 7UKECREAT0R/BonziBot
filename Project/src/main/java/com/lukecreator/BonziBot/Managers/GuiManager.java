@@ -3,7 +3,6 @@ package com.lukecreator.BonziBot.Managers;
 import java.util.HashMap;
 
 import com.lukecreator.BonziBot.BonziBot;
-import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.GuiAPI.AllocGuiList;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.GuiAPI.GuiContainer;
@@ -32,14 +31,19 @@ public class GuiManager {
 	/*
 	 * Initialize the GUI if it was not on constructor.
 	 */
-	Gui initGuiIfNot(Gui gui, JDA jda) {
+	Gui initGuiIfNot(Gui gui, JDA jda, TextChannel tc, BonziBot bonzi) {
 		if(!gui.wasInitialized())
-			gui.hiddenInit(jda);
+			gui.hiddenInit(jda, tc.getGuild(), bonzi);
 		return gui;
 	}
-	public void sendAndCreateGui(TextChannel tc, Gui gui, BonziBot main) {
+	Gui initGuiIfNot(Gui gui, JDA jda, PrivateChannel pc, BonziBot bonzi) {
+		if(!gui.wasInitialized())
+			gui.hiddenInit(jda, pc.getUser(), bonzi);
+		return gui;
+	}
+	public void sendAndCreateGui(TextChannel tc, User owner, Gui gui, BonziBot main) {
 		
-		initGuiIfNot(gui, tc.getJDA());
+		initGuiIfNot(gui, tc.getJDA(), tc, main);
 		Guild guild = tc.getGuild();
 		JDA jda = tc.getJDA();
 		long gId = guild.getIdLong();
@@ -51,11 +55,11 @@ public class GuiManager {
 			agl = guildGuis.get(gId);
 		}
 		
-		GuiContainer container = new GuiContainer(gui, tc);
+		GuiContainer container = new GuiContainer(gui, tc, owner);
 		container.sendMessage(jda, gId, main, agl); // Applies automatically.
 	}
 	public void sendAndCreateGui(PrivateChannel pc, Gui gui, BonziBot main) {
-		initGuiIfNot(gui, pc.getJDA());
+		initGuiIfNot(gui, pc.getJDA(), pc, main);
 		User user = pc.getUser();
 		JDA jda = pc.getJDA();
 		long uId = user.getIdLong();
@@ -69,33 +73,6 @@ public class GuiManager {
 		
 		GuiContainer container = new GuiContainer(gui, pc);
 		container.sendMessage(jda, uId, main, agl); // Applies automatically.
-	}
-	public void sendAndCreateGui(User user, Gui gui, BonziBot main) {
-		initGuiIfNot(gui, user.getJDA());
-		JDA jda = user.getJDA();
-		long uId = user.getIdLong();
-		
-		AllocGuiList agl;
-		if(!userGuis.containsKey(uId)) {
-			agl = new AllocGuiList();
-		} else {
-			agl = userGuis.get(uId);
-		}
-		
-		if(user.hasPrivateChannel() && BonziUtils.userPrivateChannels.containsKey(uId)) {
-			long cId = BonziUtils.userPrivateChannels.get(uId);
-			PrivateChannel pc = user.getJDA().getPrivateChannelById(cId);
-			GuiContainer container = new GuiContainer(gui, pc);
-			container.sendMessage(jda, uId, main, agl); // Applies automatically.
-		} else {
-			user.openPrivateChannel().queue(pc -> {
-				long privateChannelId = pc.getIdLong();
-				BonziUtils.userPrivateChannels.put(uId, privateChannelId);
-				GuiContainer container = new GuiContainer(gui, pc);
-				container.sendMessage(jda, uId, main, agl); // Applies automatically.
-			});
-		}
-
 	}
 	
 	public void onReactionAdd(GuildMessageReactionAddEvent e) {
@@ -121,7 +98,7 @@ public class GuiManager {
 		
 		long mId = e.getMessageIdLong();
 		AllocGuiList guiList = guildGuis.get(gId);
-		guiList.onReactionAdd(e.getReactionEmote(), mId);
+		guiList.onReactionAdd(e.getReactionEmote(), mId, e.getUser());
 		guildGuis.put(gId, guiList);
 	}
 	public void onReactionAdd(PrivateMessageReactionAddEvent e) {
@@ -136,7 +113,7 @@ public class GuiManager {
 		
 		long mId = e.getMessageIdLong();
 		AllocGuiList guiList = userGuis.get(uId);
-		guiList.onReactionAdd(e.getReactionEmote(), mId);
+		guiList.onReactionAdd(e.getReactionEmote(), mId, e.getUser());
 		userGuis.put(uId, guiList);
 	}
 	
