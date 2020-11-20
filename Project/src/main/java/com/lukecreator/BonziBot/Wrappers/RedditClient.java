@@ -68,4 +68,9 @@ public class RedditClient {
 		}
 		return null;
 	}
+	public String getSubredditInfoString(String subreddit) {
+		String url = getSubredditAboutUrl(subreddit);
+		String content = BonziUtils.getStringFrom(url);
+		return content;
+	}
 }
