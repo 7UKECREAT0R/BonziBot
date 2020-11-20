@@ -1,11 +1,20 @@
 package com.lukecreator.BonziBot;
 
 import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
@@ -28,6 +37,8 @@ public class BonziUtils {
 	// Tracks opened private channels and their ids.
 	// Format: <User ID, Private Channel ID>
 	public static HashMap<Long, Long> userPrivateChannels = new HashMap<Long, Long>();
+	public static final char[] STANDARD_CHARS = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM".toCharArray();
+	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36 Edg/86.0.622.69";
 	
 	/*
 	 * Checks if a string is complete whitespace.
@@ -35,6 +46,20 @@ public class BonziUtils {
 	public static boolean isWhitespace(String s) {
 		if(s.isEmpty()) return true;
 		return s.chars().allMatch(Character::isWhitespace);
+	}
+	/*
+	 * Strip text of all non-standard characters.
+	 * "Hi, boys! Im stupid?" -> "Hi boys Im stupid"
+	 */
+	public static String stripText(String s) {
+		StringBuilder sb = new StringBuilder();
+		for(char c: s.toCharArray())
+			for(char std: STANDARD_CHARS)
+				if(c == std) {
+					sb.append(c);
+					break;
+				}
+		return sb.toString();
 	}
 	/*
 	 * CONVERTS_CODE_NAMING -> Converts Code Naming
@@ -182,6 +207,11 @@ public class BonziUtils {
 			.setColor(authorWithColor.getColor());
 	}
 	
+	public static void sendGuiFromExecutionInfo(CommandExecutionInfo info, Gui gui) {
+		if(info.isGuildMessage)
+			info.bonzi.guis.sendAndCreateGui(info.tChannel, info.executor, gui, info.bonzi);
+		else info.bonzi.guis.sendAndCreateGui(info.pChannel, gui, info.bonzi);
+	}
 	public static void sendTempMessage(MessageChannel c, CharSequence cs, int seconds) {
 		c.sendMessage(cs).queue(msg -> {
 			msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
@@ -299,5 +329,36 @@ public class BonziUtils {
 		}
 		// Not cached.
 		return null;
+	}
+	
+	// Networking
+	public static String getStringFrom(String url) {
+		StringBuilder output = new StringBuilder();
+		InputStream urlc = null;
+		InputStreamReader isr = null;
+		BufferedReader br = null;
+		try {
+			URL urlObject = new URL(url);
+			URLConnection con = urlObject.openConnection();
+			con.addRequestProperty("user-agent", USER_AGENT);
+			urlc = con.getInputStream();
+			isr = new InputStreamReader(urlc);
+			br = new BufferedReader(isr);
+			
+			String disc;
+			while((disc = br.readLine()) != null)
+				output.append(disc + "\n");
+		} catch(IOException exc) {
+			exc.printStackTrace();
+		} finally {
+			try {
+				if(br != null)
+					br.close();
+			} catch(IOException e) { 
+				e.printStackTrace();
+			}
+		}
+		// Remove trailing newline character.
+		return output.deleteCharAt(output.length() - 1).toString();
 	}
 }

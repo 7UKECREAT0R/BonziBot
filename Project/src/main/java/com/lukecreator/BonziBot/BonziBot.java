@@ -14,9 +14,11 @@ import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Managers.AdminManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.GuiManager;
+import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 import com.lukecreator.BonziBot.Managers.PrefixManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
+import com.lukecreator.BonziBot.Wrappers.RedditClient;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -47,12 +49,14 @@ public class BonziBot extends ListenerAdapter {
 	
 	List<IStorableData> toSaveAndLoad = new ArrayList<IStorableData>();
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
+	public RedditClient reddit = new RedditClient();
 	public CommandSystem commands = new CommandSystem();
 	public AdminManager admins = new AdminManager();
 	public PrefixManager prefixes = new PrefixManager();
 	public UserAccountManager accounts = new UserAccountManager();
 	public CooldownManager cooldowns = new CooldownManager();
 	public GuiManager guis = new GuiManager();
+	public GuildSettingsManager guildSettings = new GuildSettingsManager();
 	
 	public BonziBot(boolean test) {
 		builder = JDABuilder.create(
@@ -86,6 +90,7 @@ public class BonziBot extends ListenerAdapter {
 		toSaveAndLoad.clear();
 		toSaveAndLoad.add(prefixes);
 		toSaveAndLoad.add(accounts);
+		toSaveAndLoad.add(guildSettings);
 		
 		int len = toSaveAndLoad.size();
 		InternalLogger.print("Populated storable data with " + len + " element(s)");
