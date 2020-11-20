@@ -12,6 +12,7 @@ public class SayCommand extends Command {
 		this.description = "Make me say whatever you want!";
 		this.usage = "say <text>";
 		this.category = CommandCategory.FUN;
+		this.unicodeIcon = "🤖";
 		
 		this.usesArgs = true;
 		this.goalArgs = 1;
