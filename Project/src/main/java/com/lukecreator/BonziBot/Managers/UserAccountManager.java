@@ -30,7 +30,7 @@ public class UserAccountManager implements IStorableData {
 	// Data
 	public void loadLegacy() {
 		accounts = UserAccountLegacyLoader.execute();
-		InternalLogger.print("Loaded legacy files.");
+		InternalLogger.print("Loaded legacy user accounts.");
 	}
 	@Override
 	public void saveData() {
