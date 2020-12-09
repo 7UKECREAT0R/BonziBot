@@ -31,5 +31,5 @@ and sends the reaction through crazy pipes and into your eyes!<br />
 Uh yeah the argument parser is pretty thicc if i do say so myself.<br />
 Argument types have their own `isWordParsable` and `parseWord`<br />
 methods which govern how arguments get parsed. This allows custom<br />
-argument types that can be directly supplied and used by `Commands`.
+argument types that can be directly supplied and used by `Commands`.<br />
 *See: `CommandArg.java`, `TimeSpanArg.java`, `IntArg.java`, `ColorArg.java`*
