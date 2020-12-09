@@ -14,10 +14,7 @@ public class DisplayUserInfoCommand extends Command {
 	public DisplayUserInfoCommand() {
 		this.name = "selfinfo";
 		this.description = "shows self info";
-		this.usage = "selfinfo";
 		this.category = CommandCategory._HIDDEN;
-		
-		this.usesArgs = false;
 		this.adminOnly = true;
 	}
 	

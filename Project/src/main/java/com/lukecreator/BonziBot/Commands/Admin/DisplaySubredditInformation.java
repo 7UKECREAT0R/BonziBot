@@ -1,8 +1,8 @@
 package com.lukecreator.BonziBot.Commands.Admin;
 
 import com.lukecreator.BonziBot.BonziBot;
-import com.lukecreator.BonziBot.CommandAPI.ArgsComparison;
 import com.lukecreator.BonziBot.CommandAPI.Command;
+import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.Wrappers.RedditClient;
@@ -15,23 +15,24 @@ public class DisplaySubredditInformation extends Command {
 	public DisplaySubredditInformation() {
 		this.name = "subredditinfo";
 		this.description = "";
-		this.usage = "subredditinfo <subreddit>";
 		this.category = CommandCategory._HIDDEN;
-		
-		this.usesArgs = true;
-		this.goalArgs = 1;
-		this.argsCheck = ArgsComparison.EQUAL;
+		this.args = CommandArgCollection.single("subreddit_name");
 		
 		this.adminOnly = true;
 	}
 	
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
-		String sub = e.args[0];
+		String sub = e.args.getString("subreddit_name");
 		BonziBot bonzi = e.bonzi;
 		RedditClient reddit = bonzi.reddit;
 		SubredditInfo subreddit = reddit
 			.getSubredditInfo(sub);
+		
+		if(subreddit == null) {
+			e.channel.sendMessage("no exist").queue();
+			return;
+		}
 		
 		EmbedBuilder eb = new EmbedBuilder()
 				.setColor(subreddit.color)
