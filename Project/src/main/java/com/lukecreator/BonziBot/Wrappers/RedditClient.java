@@ -1,8 +1,10 @@
 package com.lukecreator.BonziBot.Wrappers;
 
+import java.io.FileNotFoundException;
 import java.security.SecureRandom;
 import java.util.List;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -26,6 +28,18 @@ public class RedditClient {
 	}
 	public String getSubredditAboutUrl(String subreddit) {
 		return "https://www.reddit.com/r/" + subreddit + "/about.json";
+	}
+	public String getSubmissionUrl(Submission sub) {
+		String perma = sub.getPermalink();
+		if(perma.endsWith("_/"))
+			perma = perma.substring(0, perma.length() - 3);
+		return "https://www.reddit.com" + perma;
+	}
+	public String getSubmissionAboutUrl(Submission sub) {
+		String perma = sub.getPermalink();
+		if(perma.endsWith("_/"))
+			perma = perma.substring(0, perma.length() - 2);
+		return "https://www.reddit.com" + perma + "about.json";
 	}
 	
 	public Submission[] getSubmissions(String subreddit) {
@@ -65,12 +79,39 @@ public class RedditClient {
 			return new SubredditInfo(obj);
 		} catch (ParseException e) {
 			e.printStackTrace();
+		} catch(FileNotFoundException e) {
+			return null;
 		}
 		return null;
 	}
 	public String getSubredditInfoString(String subreddit) {
-		String url = getSubredditAboutUrl(subreddit);
-		String content = BonziUtils.getStringFrom(url);
+		String content = "";
+		try {
+			String url = getSubredditAboutUrl(subreddit);
+			content = BonziUtils.getStringFrom(url);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		return content;
+	}
+	public SubredditPostVideoData getSubredditPostInfo(String url) {
+		if(!url.endsWith("about.json")) {
+			if(url.endsWith("/"))
+				url += "about.json";
+			else
+				url += "/about.json";
+		}
+		
+		JSONParser parsing = new JSONParser();
+		try {
+			String content = BonziUtils.getStringFrom(url);
+			JSONArray obj = (JSONArray)parsing.parse(content);
+			return new SubredditPostVideoData((JSONObject)obj.get(0));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

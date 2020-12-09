@@ -10,6 +10,8 @@ import org.json.simple.JSONObject;
  */
 public class SubredditInfo {
 	
+	public boolean subredditExists = true;
+	
 	public String colorHex;
 	public int colorInteger;
 	public Color color;
@@ -17,6 +19,9 @@ public class SubredditInfo {
 	public String name;
 	public String description;
 	public String description_trimmed;
+	public String url;
+	public String iconUrlRaw; // throws 403
+	public String iconUrl;
 	public String visibility;
 	public boolean nsfw;
 	public Date created;
@@ -24,19 +29,32 @@ public class SubredditInfo {
 	public long createdMs;
 	
 	public SubredditInfo(JSONObject json) {
-		JSONObject data = (JSONObject)json.get("data");
-		this.name = (String)data.get("display_name");
-		this.description = (String)data.get("description");
-		this.description_trimmed = (this.description.length() > 2048) ?
-				this.description.substring(0, 2047) : this.description;
-		this.visibility = (String)data.get("subreddit_type");
-		this.colorHex = ((String)data.get("key_color")).replace("#", "0x");
-		this.nsfw = (boolean)data.get("over18");
-		this.createdMs_d = (double)data.get("created");
-		this.createdMs = (long)Math.round(this.createdMs_d);
-		this.created = new Date(this.createdMs);
-		
-		this.colorInteger = Integer.decode(this.colorHex);
-		this.color = new Color(this.colorInteger);
+		try {
+			JSONObject data = (JSONObject)json.get("data");
+			this.name = (String)data.get("display_name");
+			this.description = (String)data.get("description");
+			this.description_trimmed = (this.description.length() > 2048) ?
+					this.description.substring(0, 2047) : this.description;
+			this.visibility = (String)data.get("subreddit_type");
+			this.colorHex = ((String)data.get("key_color")).replace("#", "0x");
+			this.nsfw = (boolean)data.get("over18");
+			this.createdMs_d = (double)data.get("created");
+			this.createdMs = (long)Math.round(this.createdMs_d);
+			this.created = new Date(this.createdMs);
+			this.url = "https://www.reddit.com/" + (String)data.get("display_name_prefixed");
+			this.iconUrlRaw = (String)data.get("community_icon");
+			this.iconUrl = this.iconUrlRaw.split("\\.png\\?")[0] + ".png";
+			
+			if(this.colorHex.length() == 0) {
+				this.color = Color.gray;
+				this.colorInteger = this.color.getRGB();
+			} else {
+				this.colorInteger = Integer.decode(this.colorHex);
+				this.color = new Color(this.colorInteger);
+			}
+		} catch(Exception exc) {
+			// Probably doesn't exist.
+			subredditExists = false;
+		}
 	}
 }
