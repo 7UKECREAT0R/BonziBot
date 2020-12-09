@@ -18,12 +18,11 @@ public class MemeCommand extends Command {
 	};
 	
 	public MemeCommand() {
+		this.subCategory = 0;
 		this.name = "Meme";
 		this.description = "I'll post a spicy (or cringe) meme!";
-		this.usage = "meme";
 		this.category = CommandCategory.FUN;
 		this.unicodeIcon = "😹";
-		this.usesArgs = false;
 	}
 	
 	@Override

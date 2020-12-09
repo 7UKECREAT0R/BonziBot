@@ -11,15 +11,13 @@ public class HelpCommand extends Command {
 	public HelpCommand() {
 		this.name = "Help";
 		this.description = "no desc";
-		this.usage = "help";
 		this.category = CommandCategory._HIDDEN;
-		this.usesArgs = false;
 		this.setCooldown(5000);
 	}
 	
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
-		GuiHelpMenu menu = new GuiHelpMenu();
+		GuiHelpMenu menu = new GuiHelpMenu(false);
 		BonziUtils.sendGuiFromExecutionInfo(e, menu);
 	}
 	
