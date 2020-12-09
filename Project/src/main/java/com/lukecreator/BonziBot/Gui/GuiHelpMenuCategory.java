@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
+import com.lukecreator.BonziBot.CommandAPI.CommandSort;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.GuiAPI.GuiPaging;
 import com.lukecreator.BonziBot.NoUpload.Constants;
@@ -27,6 +28,7 @@ public class GuiHelpMenuCategory extends GuiPaging {
 		CommandSystem system = bonzi.commands;
 		List<Command> targets = system
 			.getCommandsWithCategory(category);
+		targets.sort(new CommandSort());
 		this.allCommands = (Command[]) targets
 			.toArray(new Command[targets.size()]);
 		
@@ -34,7 +36,10 @@ public class GuiHelpMenuCategory extends GuiPaging {
 		int div = GuiHelpMenu.CPP;
 		
 		// Truncate + 1 = Round Up
-		this.maxPage = (len / div) + 1;
+		// (But only if a%b!=0)
+		this.maxPage = len / div;
+		if(len % div != 0)
+			this.maxPage++;
 	}
 	
 	@Override
@@ -46,7 +51,7 @@ public class GuiHelpMenuCategory extends GuiPaging {
 		EmbedBuilder eb;
 		if(u != null)
 			eb = BonziUtils.quickEmbed("Help Menu - " + catName, "", u, Color.magenta);
-		else eb = BonziUtils.quickEmbed("Help Menu" + catName, "", Color.magenta);
+		else eb = BonziUtils.quickEmbed("Help Menu - " + catName, "", Color.magenta);
 		
 		int index = this.getCurrentIndex();
 		int start = index * GuiHelpMenu.CPP;
@@ -58,12 +63,23 @@ public class GuiHelpMenuCategory extends GuiPaging {
 		if(prefix == null)
 			prefix = Constants.DEFAULT_PREFIX;
 		
+		int subCat = 0;
+		
 		for(int i = start; i < end; i++) {
 			Command current = allCommands[i];
 			String icon = current.unicodeIcon;
 			String name = current.name;
 			String desc = current.description;
-			String usage = prefix + current.usage;
+			String cmdName = current.getFilteredCommandName();
+			String usage = (current.args != null) ?
+				current.args.buildUsage(prefix, cmdName) : prefix + cmdName;
+			
+			int subCatOfCmd = current.subCategory;
+			if(subCatOfCmd > subCat) {
+				subCat = subCatOfCmd;
+				eb.addBlankField(false);
+			}
+			
 			eb.addField(icon + " " + name,
 				usage + "\n" + desc, false);
 		}

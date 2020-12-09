@@ -18,7 +18,14 @@ import net.dv8tion.jda.api.entities.User;
  */
 public class GuiHelpMenu extends Gui {
 	
-	public static final int CPP = 5; // Commands per page.
+	public static final int CPP = 8; // Commands per page.
+	
+	public boolean adminMode = false;
+	
+	public GuiHelpMenu(boolean adminMode) {
+		super();
+		this.adminMode = adminMode;
+	}
 	
 	public CommandCategory fromButtonId(int id) {
 		switch(id) {
@@ -28,7 +35,7 @@ public class GuiHelpMenu extends Gui {
 		case 3: return CommandCategory.UTILITIES;
 		case 4: return CommandCategory.MUSIC;
 		case 5: return CommandCategory.UPGRADE;
-		
+		case 6: return CommandCategory._HIDDEN;
 		// should NEVER happen since it's
 		// undefined to be anything else.
 		default: return CommandCategory.FUN;
@@ -43,6 +50,8 @@ public class GuiHelpMenu extends Gui {
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🛠️"), 3));
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🎵"), 4));
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🚀"), 5));
+		if(this.adminMode)
+			this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🛡️"), 6));
 	}
 	
 	@Override
@@ -51,8 +60,8 @@ public class GuiHelpMenu extends Gui {
 		
 		EmbedBuilder eb;
 		if(u != null)
-			eb = BonziUtils.quickEmbed("Help Menu", "", u, Color.magenta);
-		else eb = BonziUtils.quickEmbed("Help Menu", "", Color.magenta);
+			eb = BonziUtils.quickEmbed("Help Menu" + (this.adminMode ? " - ADMIN" : ""), "", u, Color.magenta);
+		else eb = BonziUtils.quickEmbed("Help Menu" + (this.adminMode ? " - ADMIN" : ""), "", Color.magenta);
 		
 		eb.addField("🎊 Fun", "Fun commands that serve no useful purpose!", true);
 		eb.addField("🟡 Coins", "Get rich and buy stuff with the coin commands!", true);
@@ -61,6 +70,7 @@ public class GuiHelpMenu extends Gui {
 		eb.addField("🎵 Music", "Blast music with your friends at 2AM or set the mood.", true);
 		eb.addField("🚀 Upgrades", "Let your members upgrade the server to unlock extra-cool features!", true);
 		eb.setFooter("React with the page you want to view.");
+		if(this.adminMode) eb.addField("🛡 Admin (Hidden)", "Admin commands.", true);
 		return eb.build();
 	}
 	
