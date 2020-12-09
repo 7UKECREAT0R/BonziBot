@@ -38,13 +38,14 @@ public class CommandExecutionInfo {
 		message = e.getMessage();
 		fullText = message.getContentRaw();
 	}
-	public CommandExecutionInfo setCommandData(String commandName, String...args) {
+	public CommandExecutionInfo setCommandData(String commandName, String[] inputArgs, CommandParsedArgs args) {
 		this.commandName = commandName;
+		this.inputArgs = inputArgs;
 		this.args = args;
 		return this;
 	}
 	public CommandExecutionInfo setBonziBot(BonziBot in) {
-		bonzi = in;
+		this.bonzi = in;
 		return this;
 	}
 	
@@ -52,19 +53,8 @@ public class CommandExecutionInfo {
 	public boolean isDirectMessage = false;
 	public String fullText = null;
 	public String commandName = null;
-	public String[] args = null;
-	
-	public String getRemainder(int inclusiveIndex) {
-		if(args.length <= inclusiveIndex) return "";
-		String[] rem = new String[args.length - inclusiveIndex];
-		for(int i = inclusiveIndex; i < args.length; i++) {
-			rem[i - inclusiveIndex] = args[i];
-		}
-		return String.join(" ", rem);
-	}
-	public String getRemainder() {
-		return String.join(" ", args);
-	}
+	public String[] inputArgs = null;
+	public CommandParsedArgs args = null;
 	
 	// Never null.
 	public JDA bot = null;

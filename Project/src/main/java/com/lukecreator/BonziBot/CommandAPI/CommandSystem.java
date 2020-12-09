@@ -11,11 +11,13 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Managers.AdminManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
+import com.lukecreator.BonziBot.Managers.ModeratorManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 
 /*
@@ -75,18 +77,45 @@ public class CommandSystem {
 		}
 		
 		// Send it to the right command.
-		directCommand(info.setCommandData
-			(commandName, finalArgs));
+		directCommand(info, commandName, finalArgs);
 	}
 	public List<Command> getRegisteredCommands() {
 		return commands;
 	}
-	
-	void directCommand(CommandExecutionInfo info) {
+	public List<Command> getCommandsWithCategory(CommandCategory cat) {
+		ArrayList<Command> list = new ArrayList<Command>();
 		for(Command cmd: commands) {
-			String cmdName = cmd.name;
-			if(!info.commandName.equalsIgnoreCase(cmdName))
+			if(cmd.category == cat)
+				list.add(cmd);
+		}
+		return list;
+	}
+	public Command getCommandByName(String name) {
+		Command find = null;
+		for(Command cmd: commands) {
+			if(cmd.name.equalsIgnoreCase(name))
+				find = cmd;
+			if(find == null && cmd
+					.getFilteredCommandName()
+					.equalsIgnoreCase(name))
+				find = cmd;
+			if(find != null)
+				break;
+		}
+		return find;
+	}
+	
+	void directCommand(CommandExecutionInfo info, String commandName, String[] inputArgs) {
+		for(Command cmd: commands) {
+			String cmdName = cmd.getFilteredCommandName();
+			if(!commandName.equalsIgnoreCase(cmdName))
 				continue;
+			
+			CommandParsedArgs cpa = null;
+			if(cmd.args != null)
+				cpa = cmd.args.parse(inputArgs, info.bot);
+			info.setCommandData(commandName, inputArgs, cpa);
+			
 			if(!checkQualifications(cmd, info))
 				return;
 			
@@ -117,18 +146,20 @@ public class CommandSystem {
 		}
 		
 		// Check arguments.
-		if(cmd.usesArgs) {
-			ArgsComparison ac = cmd.argsCheck;
-			int ga = cmd.goalArgs;
-			int al = info.args.length;
-			
-			boolean incorrect = 
-				(ac == ArgsComparison.EQUAL && ga != al) ||
-				(ac == ArgsComparison.ANY_HIGHER && al < ga) ||
-				(ac == ArgsComparison.ANY_LOWER && al > ga);
-			if(incorrect) {
-				BonziUtils.sendUsage(cmd, info);
+		if(cmd.args != null) {
+			if(info.args.underpopulated) {
+				BonziUtils.sendUsage(cmd, info, true, null);
 				return false;
+			}
+			for(int i = 0; i < cmd.args.args.length; i++) {
+				CommandArg arg = cmd.args.args[i];
+				String word = info.inputArgs[i];
+				boolean able = arg.isWordParsable(word);
+				if(!able) {
+					BonziUtils.sendUsage(cmd,
+						info, false, arg.argName);
+					return false;
+				}
 			}
 		}
 		
@@ -143,6 +174,42 @@ public class CommandSystem {
 			}
 		}
 		
+		// Check moderator.
+		if(cmd.moderatorOnly) {
+			if(info.isDirectMessage) {
+				BonziUtils.sendDoesntWorkDms(cmd, info);
+				return false;
+			}
+			Guild guild = info.guild;
+			String prefix = bot.prefixes.getPrefix(guild);
+			ModeratorManager mods = bot.moderators;
+			if(!mods.canCreateModRole(guild)) {
+				BonziUtils.sendNeededPermsForModRole(cmd, info, prefix);
+				return false;
+			}
+			Role modRole = mods.getModRole(guild);
+			Member member = info.member;
+			List<Role> roles = member.getRoles();
+			boolean isMod = false;
+			
+			if(member.hasPermission(Permission.ADMINISTRATOR) || member.isOwner())
+				isMod = true;
+			
+			if(!isMod) {
+				for(Role r: roles) {
+					if(r.getIdLong() == modRole.getIdLong()) {
+						isMod = true;
+						break;
+					}
+				}
+			}
+			
+			if(!isMod) {
+				BonziUtils.sendModOnly(cmd, info, prefix);
+				return true;
+			}
+		}
+		
 		// Check cooldown.
 		CooldownManager cdManager = info.bonzi.cooldowns;
 		long userId = info.executor.getIdLong();
@@ -151,6 +218,12 @@ public class CommandSystem {
 				BonziUtils.sendOnCooldown(cmd, info, cdManager);
 				return false;
 			}
+		}
+		
+		// Check if dms aren't allowed.
+		if(!cmd.worksInDms && info.isDirectMessage) {
+			BonziUtils.sendDoesntWorkDms(cmd, info);
+			return false;
 		}
 		return true;
 	}
