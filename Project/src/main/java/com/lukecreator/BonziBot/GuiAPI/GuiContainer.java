@@ -20,6 +20,8 @@ import net.dv8tion.jda.api.entities.User;
  */
 public class GuiContainer {
 	
+	private boolean enabled = true;
+	
 	public long ownerId;
 	
 	public boolean isGuild = false;
@@ -162,13 +164,30 @@ public class GuiContainer {
 			TextChannel tc = g.getTextChannelById(channelId);
 			tc.editMessageById(messageId, gui.draw(jda)).queue();
 		} else {
-			User sender = jda.getUserById(userDmId);
-			if(sender == null) {
+			User user = jda.getUserById(userDmId);
+			if(user == null) {
 				jda.retrieveUserById(userDmId).queue(u -> {
-					BonziUtils.messageUser(u, gui.draw(jda));
+					PrivateChannel pc = BonziUtils.getCachedPrivateChannel(u);
+					if(pc == null) {
+						u.openPrivateChannel().queue(p -> {
+							p.editMessageById(messageId, gui.draw(jda)).queue();
+							BonziUtils.userPrivateChannels.put(u.getIdLong(), p.getIdLong());
+						});
+					} else {
+						pc.editMessageById(messageId, gui.draw(jda)).queue();
+					}
 				});
 			} else {
-				BonziUtils.messageUser(sender, gui.draw(jda));
+				// User exists.
+				PrivateChannel pc = BonziUtils.getCachedPrivateChannel(user);
+				if(pc == null) {
+					user.openPrivateChannel().queue(p -> {
+						p.editMessageById(messageId, gui.draw(jda)).queue();
+						BonziUtils.userPrivateChannels.put(user.getIdLong(), p.getIdLong());
+					});
+				} else {
+					pc.editMessageById(messageId, gui.draw(jda)).queue();
+				}
 			}
 		}
 	}
@@ -240,6 +259,59 @@ public class GuiContainer {
 			}
 		}
 	}
+	public void removeAllReactions(JDA jda) {
+		if(!hasSentMessage) return;
+		if(messageId == -1) return;
+		
+		if(isGuild) {
+			Guild g = jda.getGuildById(guildId);
+			TextChannel tc = g.getTextChannelById(channelId);
+			tc.retrieveMessageById(messageId).queue(m -> {
+				m.clearReactions().queue();
+			});
+		} else {
+			User sender = jda.getUserById(userDmId);
+			if(sender == null) {
+				jda.retrieveUserById(userDmId).queue(u -> {
+					if(u.hasPrivateChannel() && BonziUtils.userPrivateChannels.containsKey(userDmId)) {
+						long cId = BonziUtils.userPrivateChannels.get(userDmId);
+						PrivateChannel pc = u.getJDA().getPrivateChannelById(cId);
+						pc.retrieveMessageById(messageId).queue(m -> {
+							for(MessageReaction r: m.getReactions())
+								if(r.isSelf()) r.removeReaction().queue();
+						});
+					} else {
+						u.openPrivateChannel().queue(p -> {
+							long privateChannelId = p.getIdLong();
+							BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
+							p.retrieveMessageById(messageId).queue(m -> {
+								for(MessageReaction r: m.getReactions())
+									if(r.isSelf()) r.removeReaction().queue();
+							});
+						});
+					}
+				});
+			} else {
+				if(sender.hasPrivateChannel() && BonziUtils.userPrivateChannels.containsKey(userDmId)) {
+					long cId = BonziUtils.userPrivateChannels.get(userDmId);
+					PrivateChannel pc = sender.getJDA().getPrivateChannelById(cId);
+					pc.retrieveMessageById(messageId).queue(m -> {
+						for(MessageReaction r: m.getReactions())
+							if(r.isSelf()) r.removeReaction().queue();
+					});
+				} else {
+					sender.openPrivateChannel().queue(p -> {
+						long privateChannelId = p.getIdLong();
+						BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
+						p.retrieveMessageById(messageId).queue(m -> {
+							for(MessageReaction r: m.getReactions())
+								if(r.isSelf()) r.removeReaction().queue();
+						});
+					});
+				}
+			}
+		}
+	}
 
 	public MessageChannel getChannel(JDA jda) {
 		if(this.isGuild) {
@@ -253,6 +325,10 @@ public class GuiContainer {
 		PrivateChannel cached = BonziUtils
 			.getCachedPrivateChannel(u);
 		return cached; // Potentially could be null.
+	}
+	public void disable(JDA jda) {
+		removeAllReactions(jda);
+		enabled = false;
 	}
 	
 	/*
@@ -279,6 +355,8 @@ public class GuiContainer {
 		resetAllReactions(jda);
 	}
 	public void onReaction(ReactionEmote emote, User executor) {
+		if(!this.enabled)
+			return;
 		if(this.ownerId != executor.getIdLong())
 			return;
 		gui.receiveReaction(emote);
