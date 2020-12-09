@@ -1,7 +1,7 @@
 # BonziBot
 The most epicest epic bot for epic gamers! Now with open source code for you guys!<br />
 *Note this is not the current build that is being run. This is a complete re-code<br />
-from scratch because the old codebase sucked major candy bar*
+from scratch because the old codebase sucked major doo doo slab*
 
 ## Where can I get it?
 https://discordapp.com/oauth2/authorize?client_id=545806922209558537&permissions=8&scope=bot
@@ -26,3 +26,10 @@ things done! The bot keeps a limited list of `Gui`s according<br />
 to each server they're in. Then when you react it just loops<br />
 and sends the reaction through crazy pipes and into your eyes!<br />
 *See: `Gui.java`, `GuiManager.java`, `GuiTestMenu.java`, `GuiContainer.java`*
+
+## thicc arguments?
+Uh yeah the argument parser is pretty thicc if i do say so myself.<br />
+Argument types have their own `isWordParsable` and `parseWord`<br />
+methods which govern how arguments get parsed. This allows custom<br />
+argument types that can be directly supplied and used by `Commands`.
+*See: `CommandArg.java`, `TimeSpanArg.java`, `IntArg.java`, `ColorArg.java`*
