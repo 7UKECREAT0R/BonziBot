@@ -2,14 +2,13 @@ package com.lukecreator.BonziBot;
 
 import java.awt.Color;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import com.lukecreator.BonziBot.CommandAPI.Command;
@@ -28,6 +27,8 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 
 /*
  * The all heavenly class which does everything lmao
@@ -40,6 +41,13 @@ public class BonziUtils {
 	public static final char[] STANDARD_CHARS = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM".toCharArray();
 	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36 Edg/86.0.622.69";
 	
+	/*
+	 * Append an S to the end of a word if the
+	 * count is higher than 1. English is weird.
+	 */
+	public static String plural(String s, int count) {
+		return s + ((count>1||count==0||count<-1)?'s':'\0');
+	}
 	/*
 	 * Checks if a string is complete whitespace.
 	 */
@@ -85,12 +93,26 @@ public class BonziUtils {
 		}
 		return new String(changed);
 	}
+	/*
+	 * Cuts off string if it gets too l...
+	 */
+	public static String cutOffString(String s, int maxLength) {
+		if(s.length() <= maxLength) return s;
+		String part = s.substring(0, maxLength);
+		return part + "...";
+	}
 	public static String getPrefixOrDefault(CommandExecutionInfo info) {
 		if(info.isGuildMessage) {
 			return info.bonzi.prefixes.getPrefix(info.guild);
 		} else {
 			return Constants.DEFAULT_PREFIX;
 		}
+	}
+	public static String getPrefixOrDefault(GuildMessageReceivedEvent info, BonziBot bonzi) {
+		return bonzi.prefixes.getPrefix(info.getGuild());
+	}
+	public static String getPrefixOrDefault(PrivateMessageReceivedEvent info, BonziBot bonzi) {
+		return Constants.DEFAULT_PREFIX;
 	}
 	public static String getShortTimeStringMs(long ms) {
 		if(ms < 1000) return "0s";
@@ -130,6 +152,23 @@ public class BonziUtils {
 		int rem_hours = hours % 24;
 		return days + "d, " + rem_hours + "h, " + rem_mins + "m, " + rem_secs + "s";
 	}
+	public static String[] splitByLength(String s, int length) {
+		if(s.length() <= length)
+			return new String[] {s};
+		
+		int stringLength = s.length();
+		int truncated = stringLength / length;
+		int roundedUp = truncated + 1;
+		
+		String[] result = new String[roundedUp];
+		for(int i = 0; i < roundedUp; i++) {
+			int startIndex = i * length;
+			int endIndex = startIndex + length - 1;
+			result[i] = s.substring(startIndex, endIndex);
+		}
+		
+		return result;
+	}
 	public static long getMsForSeconds(int secs) {
 		return secs * 1000l;
 	}
@@ -146,31 +185,57 @@ public class BonziUtils {
 		return (int)Math.floor(Math.sqrt(((double)xp)*0.1));
 	}
 	
-	public static EmbedBuilder successEmbed(String message) {
+	public static EmbedBuilder successEmbedIncomplete(String message) {
 		EmbedBuilder eb = new EmbedBuilder();
 		eb.setColor(Color.green);
 		eb.setTitle(message);
 		return eb;
 	}
-	public static EmbedBuilder failureEmbed(String message) {
+	public static EmbedBuilder failureEmbedIncomplete(String message) {
 		EmbedBuilder eb = new EmbedBuilder();
 		eb.setColor(Color.red);
 		eb.setTitle(message);
 		return eb;
 	}
-	public static EmbedBuilder successEmbed(String title, String description) {
+	public static EmbedBuilder successEmbedIncomplete(String title, String description) {
 		EmbedBuilder eb = new EmbedBuilder();
 		eb.setColor(Color.green);
 		eb.setTitle(title);
 		eb.setDescription(description);
 		return eb;
 	}
-	public static EmbedBuilder failureEmbed(String title, String description) {
+	public static EmbedBuilder failureEmbedIncomplete(String title, String description) {
 		EmbedBuilder eb = new EmbedBuilder();
 		eb.setColor(Color.red);
 		eb.setTitle(title);
 		eb.setDescription(description);
 		return eb;
+	}
+	public static MessageEmbed successEmbed(String message) {
+		EmbedBuilder eb = new EmbedBuilder();
+		eb.setColor(Color.green);
+		eb.setTitle(message);
+		return eb.build();
+	}
+	public static MessageEmbed failureEmbed(String message) {
+		EmbedBuilder eb = new EmbedBuilder();
+		eb.setColor(Color.red);
+		eb.setTitle(message);
+		return eb.build();
+	}
+	public static MessageEmbed successEmbed(String title, String description) {
+		EmbedBuilder eb = new EmbedBuilder();
+		eb.setColor(Color.green);
+		eb.setTitle(title);
+		eb.setDescription(description);
+		return eb.build();
+	}
+	public static MessageEmbed failureEmbed(String title, String description) {
+		EmbedBuilder eb = new EmbedBuilder();
+		eb.setColor(Color.red);
+		eb.setTitle(title);
+		eb.setDescription(description);
+		return eb.build();
 	}
 	public static EmbedBuilder quickEmbed(String title, String description) {
 		return new EmbedBuilder()
@@ -227,14 +292,16 @@ public class BonziUtils {
 			msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
 		});
 	}
-	public static void sendUsage(Command cmd, CommandExecutionInfo info) {
-		String msg = "Wrong Command Usage!";
+	public static void sendUsage(Command cmd, CommandExecutionInfo info, boolean tooFew, String incorrect) {
+		String msg = tooFew ? "Too few arguments!" : "Wrong Argument Type: ";
+		if(incorrect != null)
+			msg = msg + incorrect.replace('_', ' ');
 		MessageChannel channel = info.channel;
 		
 		String prefix = BonziUtils.getPrefixOrDefault(info);
-		String desc = prefix + cmd.usage;
+		String desc = cmd.args.buildUsage(prefix, cmd.getFilteredCommandName());
 		
-		EmbedBuilder usage = failureEmbed(msg, desc);
+		EmbedBuilder usage = failureEmbedIncomplete(msg, desc);
 		channel.sendMessage(usage.build()).queue();
 	}
 	public static void sendNeededPerms(Command cmd, CommandExecutionInfo info) {
@@ -252,6 +319,17 @@ public class BonziUtils {
 		
 		EmbedBuilder send = quickEmbed(msg, desc, Color.orange);
 		info.channel.sendMessage(send.build()).queue();
+	}
+	public static void sendNeededPermsForModRole(Command cmd, CommandExecutionInfo info, String prefix) {
+		EmbedBuilder send = quickEmbed("Hey! This command requires moderator role!",
+				"Problem: I need the \"Manage Roles\" permission to make one for you! "
+				+ "You can also use " + prefix + "modrole to set one manually.", Color.red);
+		info.channel.sendMessage(send.build()).queue();
+	}
+	public static void sendModOnly(Command cmd, CommandExecutionInfo info, String prefix) {
+		EmbedBuilder eb = quickEmbed("This command is reserved for moderators/admins.",
+				"Use " + prefix + "modrole to see the current moderator role.", Color.orange);
+		info.channel.sendMessage(eb.build());
 	}
 	public static void sendAdminOnly(Command cmd, CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed
@@ -273,8 +351,13 @@ public class BonziUtils {
 		String ts = getShortTimeStringMs(timeLeftMs);
 		String desc = ts + " Remaining";
 		EmbedBuilder embed = quickEmbed(msg, desc, Color.yellow);
-		sendTempMessage(info.channel, embed.build(), 5);
+		info.channel.sendMessage(embed.build()).queue();
 		return;
+	}
+	public static void sendDoesntWorkDms(Command cmd, CommandExecutionInfo info) {
+		EmbedBuilder eb = quickEmbed("This command doesn't work in DMs!",
+				"Try running the command in a server instead!", Color.orange);
+		info.channel.sendMessage(eb.build());
 	}
 	
 	public static Guild getBonziGuild(JDA jda) {
@@ -330,9 +413,8 @@ public class BonziUtils {
 		// Not cached.
 		return null;
 	}
-	
 	// Networking
-	public static String getStringFrom(String url) {
+	public static String getStringFrom(String url) throws FileNotFoundException {
 		StringBuilder output = new StringBuilder();
 		InputStream urlc = null;
 		InputStreamReader isr = null;

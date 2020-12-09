@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class InternalLogger {
 	
-	enum Severity {
+	public enum Severity {
 		MINOR,
 		ERROR,
 		FATAL,

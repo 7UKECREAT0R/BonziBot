@@ -11,11 +11,16 @@ import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.Data.EmojiCache;
 import com.lukecreator.BonziBot.Data.IStorableData;
+import com.lukecreator.BonziBot.Data.JokeProvider;
 import com.lukecreator.BonziBot.Managers.AdminManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
+import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.GuiManager;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
+import com.lukecreator.BonziBot.Managers.ModeratorManager;
 import com.lukecreator.BonziBot.Managers.PrefixManager;
+import com.lukecreator.BonziBot.Managers.TagManager;
+import com.lukecreator.BonziBot.Managers.UpgradeManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 import com.lukecreator.BonziBot.Wrappers.RedditClient;
@@ -47,16 +52,21 @@ public class BonziBot extends ListenerAdapter {
 	
 	JDABuilder builder = null;
 	
-	List<IStorableData> toSaveAndLoad = new ArrayList<IStorableData>();
+	List<IStorableData> storableData = new ArrayList<IStorableData>();
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
-	public RedditClient reddit = new RedditClient();
+	public GuildSettingsManager guildSettings = new GuildSettingsManager();
+	public EventWaiterManager eventWaiter = new EventWaiterManager();
+	public UserAccountManager accounts = new UserAccountManager();
+	public ModeratorManager moderators = new ModeratorManager();
+	public CooldownManager cooldowns = new CooldownManager();
+	public UpgradeManager upgrades = new UpgradeManager();
+	public PrefixManager prefixes = new PrefixManager();
 	public CommandSystem commands = new CommandSystem();
 	public AdminManager admins = new AdminManager();
-	public PrefixManager prefixes = new PrefixManager();
-	public UserAccountManager accounts = new UserAccountManager();
-	public CooldownManager cooldowns = new CooldownManager();
+	public RedditClient reddit = new RedditClient();
+	public JokeProvider jokes = new JokeProvider();
 	public GuiManager guis = new GuiManager();
-	public GuildSettingsManager guildSettings = new GuildSettingsManager();
+	public TagManager tags = new TagManager();
 	
 	public BonziBot(boolean test) {
 		builder = JDABuilder.create(
@@ -65,8 +75,11 @@ public class BonziBot extends ListenerAdapter {
 			GatewayIntent.GUILD_MEMBERS,
 			GatewayIntent.GUILD_MESSAGES,
 			GatewayIntent.GUILD_MESSAGE_REACTIONS,
-			GatewayIntent.GUILD_EMOJIS
-			).disableCache(CacheFlag.ACTIVITY, CacheFlag.CLIENT_STATUS);
+			GatewayIntent.GUILD_EMOJIS,
+			GatewayIntent.DIRECT_MESSAGES,
+			GatewayIntent.DIRECT_MESSAGE_REACTIONS
+			).disableCache(CacheFlag.ACTIVITY,
+				CacheFlag.CLIENT_STATUS);
 		
 		String token = test ? Constants.BOT_TOKEN_TEST : Constants.BOT_TOKEN;
 		builder.setToken(token);
@@ -79,20 +92,17 @@ public class BonziBot extends ListenerAdapter {
 		setupExecutors();
 		postSetup(bot);
 	}
-	public void saveBackup() {
-		
-	}
-	public void loadBackup() {
-		
-	}
 	
 	void setupStorableData() {
-		toSaveAndLoad.clear();
-		toSaveAndLoad.add(prefixes);
-		toSaveAndLoad.add(accounts);
-		toSaveAndLoad.add(guildSettings);
+		storableData.clear();
+		storableData.add(prefixes);
+		storableData.add(accounts);
+		storableData.add(guildSettings);
+		storableData.add(tags);
+		storableData.add(moderators);
+		storableData.add(upgrades);
 		
-		int len = toSaveAndLoad.size();
+		int len = storableData.size();
 		InternalLogger.print("Populated storable data with " + len + " element(s)");
 	}
 	JDA setupBot() throws InterruptedException, LoginException {
@@ -122,14 +132,14 @@ public class BonziBot extends ListenerAdapter {
 	}
 	void saveData() {
 		InternalLogger.print("Saving data...");
-		for(IStorableData data: toSaveAndLoad) {
+		for(IStorableData data: storableData) {
 			data.saveData();
 		}
 		InternalLogger.print("Saved data!");
 	}
 	void loadData() {
 		InternalLogger.print("Loading data...");
-		for(IStorableData data: toSaveAndLoad) {
+		for(IStorableData data: storableData) {
 			data.loadData();
 		}
 		InternalLogger.print("Loaded data!");
@@ -139,13 +149,23 @@ public class BonziBot extends ListenerAdapter {
 	public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
 		// Execute commands and chat-related things.
 		if(e.getAuthor().isBot()) return;
+		if(tags.receiveMessage(e, this)) return;
+		eventWaiter.onMessage(e.getMessage());
 		CommandExecutionInfo info = new CommandExecutionInfo(e);
 		commands.onInput(info.setBonziBot(this));
 	}
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
 		if(e.getAuthor().isBot()) return;
+		if(tags.receiveMessage(e)) return;
+		eventWaiter.onMessage(e.getMessage());
 		CommandExecutionInfo info = new CommandExecutionInfo(e);
 		commands.onInput(info.setBonziBot(this));
+		
+		// Cache the channel for future use.
+		// (used in BonziUtils.messageUser)
+		long pcid = e.getChannel().getIdLong();
+		long uid = e.getAuthor().getIdLong();
+		BonziUtils.userPrivateChannels.put(uid, pcid);
 	}
 	public void onGuildJoin(GuildJoinEvent e) {
 		// Give off the opening speech.
@@ -180,5 +200,4 @@ public class BonziBot extends ListenerAdapter {
 	public void onTextChannelCreate(TextChannelCreateEvent e) {
 		// For logging.
 	}
-
 }
