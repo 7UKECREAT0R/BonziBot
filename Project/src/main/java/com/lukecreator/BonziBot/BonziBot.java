@@ -19,6 +19,7 @@ import com.lukecreator.BonziBot.Managers.GuiManager;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 import com.lukecreator.BonziBot.Managers.ModeratorManager;
 import com.lukecreator.BonziBot.Managers.PrefixManager;
+import com.lukecreator.BonziBot.Managers.ReactionManager;
 import com.lukecreator.BonziBot.Managers.TagManager;
 import com.lukecreator.BonziBot.Managers.UpgradeManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
@@ -58,6 +59,7 @@ public class BonziBot extends ListenerAdapter {
 	public EventWaiterManager eventWaiter = new EventWaiterManager();
 	public UserAccountManager accounts = new UserAccountManager();
 	public ModeratorManager moderators = new ModeratorManager();
+	public ReactionManager reactions = new ReactionManager();
 	public CooldownManager cooldowns = new CooldownManager();
 	public UpgradeManager upgrades = new UpgradeManager();
 	public PrefixManager prefixes = new PrefixManager();
@@ -178,15 +180,19 @@ public class BonziBot extends ListenerAdapter {
 	}
 	public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent e) {
 		guis.onReactionAdd(e);
+		reactions.reactionAddGuild(e);
 	}
 	public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent e) {
 		guis.onReactionRemove(e);
+		reactions.reactionRemoveGuild(e);
 	}
 	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent e) {
 		guis.onReactionAdd(e);
+		reactions.reactionAddPrivate(e);
 	}
 	public void onPrivateMessageReactionRemove(PrivateMessageReactionRemoveEvent e) {
 		guis.onReactionRemove(e);
+		reactions.reactionRemovePrivate(e);
 	}
 	public void onGenericGuildVoice(GenericGuildVoiceEvent e) {
 		// Used to leave the voice channel if nobody is left.

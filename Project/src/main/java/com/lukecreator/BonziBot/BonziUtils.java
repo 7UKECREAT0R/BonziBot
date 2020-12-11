@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import com.lukecreator.BonziBot.CommandAPI.Command;
+import com.lukecreator.BonziBot.CommandAPI.CommandArg;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
@@ -292,16 +293,19 @@ public class BonziUtils {
 			msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
 		});
 	}
-	public static void sendUsage(Command cmd, CommandExecutionInfo info, boolean tooFew, String incorrect) {
-		String msg = tooFew ? "Too few arguments!" : "Wrong Argument Type: ";
-		if(incorrect != null)
-			msg = msg + incorrect.replace('_', ' ');
+	public static void sendUsage(Command cmd, CommandExecutionInfo info, boolean tooFew, CommandArg arg) {
+		String msg = "";
+		if(arg != null) {
+			msg = "Incorrect argument type for " + BonziUtils.titleString(arg.argName);
+		} else if(tooFew) {
+			msg = "Too few arguments!";
+		}
 		MessageChannel channel = info.channel;
 		
 		String prefix = BonziUtils.getPrefixOrDefault(info);
-		String desc = cmd.args.buildUsage(prefix, cmd.getFilteredCommandName());
-		
+		String desc = (arg != null) ? arg.getErrorDescription() + "\n" : "";
 		EmbedBuilder usage = failureEmbedIncomplete(msg, desc);
+		usage.addField("Correct Usage:", cmd.args.buildUsage(prefix, cmd.getFilteredCommandName()), false);
 		channel.sendMessage(usage.build()).queue();
 	}
 	public static void sendNeededPerms(Command cmd, CommandExecutionInfo info) {
@@ -357,7 +361,7 @@ public class BonziUtils {
 	public static void sendDoesntWorkDms(Command cmd, CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed("This command doesn't work in DMs!",
 				"Try running the command in a server instead!", Color.orange);
-		info.channel.sendMessage(eb.build());
+		info.channel.sendMessage(eb.build()).queue();
 	}
 	
 	public static Guild getBonziGuild(JDA jda) {
