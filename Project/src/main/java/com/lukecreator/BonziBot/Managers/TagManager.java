@@ -176,7 +176,7 @@ public class TagManager implements IStorableData {
 				tags.remove(i);
 			}
 			if(check.name.equalsIgnoreCase(name)) {
-				
+				tags.remove(i);
 				return;
 			}
 		}
@@ -229,6 +229,32 @@ public class TagManager implements IStorableData {
 		}
 		tags.add(tag);
 		setPrivateTags(tags, guildId);
+	}
+	public void removePrivateTagByName(String name, Guild g) {
+		List<TagData> tags = this.getPrivateTags(g);
+		for(int i = 0; i < tags.size(); i++) {
+			TagData check = tags.get(i);
+			if(check == null || check.name == null) {
+				tags.remove(i);
+			}
+			if(check.name.equalsIgnoreCase(name)) {
+				tags.remove(i);
+			}
+		}
+		this.setPrivateTags(tags, g);
+	}
+	public void removePrivateTagByName(String name, long guildId) {
+		List<TagData> tags = this.getPrivateTags(guildId);
+		for(int i = 0; i < tags.size(); i++) {
+			TagData check = tags.get(i);
+			if(check == null || check.name == null) {
+				tags.remove(i);
+			}
+			if(check.name.equalsIgnoreCase(name)) {
+				tags.remove(i);
+			}
+		}
+		this.setPrivateTags(tags, guildId);
 	}
 	public String usePrivateTagByName(String name, Guild g) {
 		List<TagData> tags = this.getPrivateTags(g);
