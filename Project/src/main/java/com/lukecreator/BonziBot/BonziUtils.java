@@ -8,12 +8,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArg;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.Modifier;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
@@ -21,12 +27,14 @@ import com.lukecreator.BonziBot.NoUpload.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.PrivateChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
@@ -48,6 +56,13 @@ public class BonziUtils {
 	 */
 	public static String plural(String s, int count) {
 		return s + ((count>1||count==0||count<-1)?'s':'\0');
+	}
+	/*
+	 * Similar to String.valueOf(int) but
+	 *    places commas where needed.
+	 */
+	public static String comma(int num) {
+		return NumberFormat.getInstance().format(num);
 	}
 	/*
 	 * Checks if a string is complete whitespace.
@@ -101,6 +116,40 @@ public class BonziUtils {
 		if(s.length() <= maxLength) return s;
 		String part = s.substring(0, maxLength);
 		return part + "...";
+	}
+	/*
+	 * Joins strings together and appends "or" to the delimiter for the last element
+	 * (a, b, c, or d)
+	 */
+	public static String stringJoinOr(String delimiter, Iterable<? extends CharSequence> collection) {
+        StringJoiner joiner = new StringJoiner(delimiter);
+        Iterator<? extends CharSequence> iter = collection.iterator();
+        while(iter.hasNext()) {
+        	CharSequence chars = iter.next();
+        	boolean last = !iter.hasNext();
+            joiner.add(last ? "or " + chars : chars);
+        }
+        return joiner.toString();
+	}
+	/*
+	 * Joins strings together and appends "and" to the delimiter for the last element
+	 * (a, b, c, and d)
+	 */
+	public static String stringJoinAnd(String delimiter, Iterable<? extends CharSequence> collection) {
+        StringJoiner joiner = new StringJoiner(delimiter);
+        Iterator<? extends CharSequence> iter = collection.iterator();
+        while(iter.hasNext()) {
+        	CharSequence chars = iter.next();
+        	boolean last = !iter.hasNext();
+            joiner.add(last ? "and " + chars : chars);
+        }
+        return joiner.toString();
+	}
+	/*
+	 * Returns the user's name and discriminator formatted.
+	 */
+	public static String fullName(User u) {
+		return u.getName() + "#" + u.getDiscriminator();
 	}
 	public static String getPrefixOrDefault(CommandExecutionInfo info) {
 		if(info.isGuildMessage) {
@@ -305,7 +354,9 @@ public class BonziUtils {
 		String prefix = BonziUtils.getPrefixOrDefault(info);
 		String desc = (arg != null) ? arg.getErrorDescription() + "\n" : "";
 		EmbedBuilder usage = failureEmbedIncomplete(msg, desc);
-		usage.addField("Correct Usage:", cmd.args.buildUsage(prefix, cmd.getFilteredCommandName()), false);
+		String[] usages = cmd.args.buildUsage(prefix, cmd.getFilteredCommandName());
+		String fieldTitle = BonziUtils.plural("Correct Usage", usages.length) + ": ";
+		usage.addField(fieldTitle, String.join("\n", usages), false);
 		channel.sendMessage(usage.build()).queue();
 	}
 	public static void sendNeededPerms(Command cmd, CommandExecutionInfo info) {
@@ -364,6 +415,26 @@ public class BonziUtils {
 		info.channel.sendMessage(eb.build()).queue();
 	}
 	
+	public static Modifier[] getChannelModifiers(TextChannel tc) {
+		String _topic = tc.getTopic();
+		if(_topic == null) return new Modifier[0];
+		String topic = _topic
+			.replaceAll(Constants.WHITESPACE_REGEX, "")
+			.toUpperCase();
+		List<Modifier> list = new ArrayList<Modifier>();
+		for(Modifier mod: Modifier.values()) {
+			if(topic.contains(mod.getCompareName())) {
+				list.add(mod);
+			}
+		}
+		return ((Modifier[])list.toArray
+			(new Modifier[list.size()]));
+	}
+	public static Modifier[] getChannelModifiers(MessageChannel mc) {
+		if(mc.getType() == ChannelType.TEXT)
+			return getChannelModifiers((TextChannel)mc);
+		else return new Modifier[0];
+	}
 	public static Guild getBonziGuild(JDA jda) {
 		return jda.getGuildById(Constants.BONZI_GUILD_ID);
 	}

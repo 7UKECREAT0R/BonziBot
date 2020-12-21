@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot;
 
+import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -7,12 +8,12 @@ import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.login.LoginException;
 
+import com.lukecreator.BonziBot.InternalLogger.Severity;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.Data.EmojiCache;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Data.JokeProvider;
-import com.lukecreator.BonziBot.Managers.AdminManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.GuiManager;
@@ -20,6 +21,7 @@ import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 import com.lukecreator.BonziBot.Managers.ModeratorManager;
 import com.lukecreator.BonziBot.Managers.PrefixManager;
 import com.lukecreator.BonziBot.Managers.ReactionManager;
+import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
 import com.lukecreator.BonziBot.Managers.TagManager;
 import com.lukecreator.BonziBot.Managers.UpgradeManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
@@ -57,6 +59,7 @@ public class BonziBot extends ListenerAdapter {
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
 	public GuildSettingsManager guildSettings = new GuildSettingsManager();
 	public EventWaiterManager eventWaiter = new EventWaiterManager();
+	public SpecialPeopleManager special = new SpecialPeopleManager();
 	public UserAccountManager accounts = new UserAccountManager();
 	public ModeratorManager moderators = new ModeratorManager();
 	public ReactionManager reactions = new ReactionManager();
@@ -64,7 +67,6 @@ public class BonziBot extends ListenerAdapter {
 	public UpgradeManager upgrades = new UpgradeManager();
 	public PrefixManager prefixes = new PrefixManager();
 	public CommandSystem commands = new CommandSystem();
-	public AdminManager admins = new AdminManager();
 	public RedditClient reddit = new RedditClient();
 	public JokeProvider jokes = new JokeProvider();
 	public GuiManager guis = new GuiManager();
@@ -131,6 +133,9 @@ public class BonziBot extends ListenerAdapter {
 		
 		Guild bonziGuild = BonziUtils.getBonziGuild(jda);
 		EmojiCache.appendGuildEmotes(bonziGuild);
+		
+		this.prefixes.setPrefix(674436740446158879l, "btemp:");
+		InternalLogger.print("Set Prego's Prefix");
 	}
 	void saveData() {
 		InternalLogger.print("Saving data...");
@@ -140,11 +145,18 @@ public class BonziBot extends ListenerAdapter {
 		InternalLogger.print("Saved data!");
 	}
 	void loadData() {
-		InternalLogger.print("Loading data...");
+		int progress = 0;
+		int total = storableData.size();
 		for(IStorableData data: storableData) {
-			data.loadData();
+			progress++;
+			InternalLogger.print("Loading " + data.getClass().getName() + "... [" + progress + "/" + total + "]");
+			try {
+				data.loadData();
+			} catch(EOFException exc) {
+				InternalLogger.printError("Could not load file into: " + data.getClass().getName(), Severity.FATAL);
+			}
 		}
-		InternalLogger.print("Loaded data!");
+		InternalLogger.print("Loaded all data!");
 	}
 	
 	// Events
