@@ -25,8 +25,9 @@ public class UserArg extends CommandArg {
 	boolean isValidId(String s) {
 		try {
 			Long.parseLong(s);
-			if(s.length() == 17 || s.length() == 18)
+			if(s.length() == 17 || s.length() == 18) {
 				return true;
+			}
 		} catch(NumberFormatException nfe) {}
 		return false;
 	}
@@ -60,6 +61,14 @@ public class UserArg extends CommandArg {
 	
 	@Override
 	public String getUsageTerm() {
-		return "<@" + argName + ">";
+		if(this.optional)
+			return "[@" + argName + "]";
+		else
+			return "<@" + argName + ">";
+	}
+	
+	@Override
+	public String getErrorDescription() {
+		return "You can either mention a user or use their ID here.";
 	}
 }

@@ -44,4 +44,9 @@ public class BooleanArg extends CommandArg {
 		}
 		object = false;
 	}
+	
+	@Override
+	public String getErrorDescription() {
+		return "You can put a \"yes\", \"no\", \"true\", \"false\", etc... here.";
+	}
 }

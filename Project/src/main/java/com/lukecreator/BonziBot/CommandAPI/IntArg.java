@@ -11,7 +11,7 @@ public class IntArg extends CommandArg {
 		this.type = ArgType.Int;
 	}
 
-	public static final String REGEX = "[0-9]+";
+	public static final String REGEX = "-?[0-9]+";
 	public static final Pattern PATTERN = Pattern.compile(REGEX);
 	
 	@Override
@@ -25,5 +25,10 @@ public class IntArg extends CommandArg {
 		word = word.trim();
 		this.object = Integer.parseInt(word);
 		return;
+	}
+	
+	@Override
+	public String getErrorDescription() {
+		return "Here you can specify any whole number. (2, -10, 146, etc...)";
 	}
 }

@@ -60,6 +60,14 @@ public class RoleArg extends CommandArg {
 	
 	@Override
 	public String getUsageTerm() {
-		return "<@" + argName + ">";
+		if(this.optional)
+			return "[@" + argName + "]";
+		else
+			return "<@" + argName + ">";
+	}
+	
+	@Override
+	public String getErrorDescription() {
+		return "You can either mention a role or use the role's ID.";
 	}
 }

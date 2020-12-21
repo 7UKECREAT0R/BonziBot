@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
+import java.awt.Color;
 import java.util.HashMap;
 
 import com.lukecreator.BonziBot.TimeSpan;
@@ -28,6 +29,9 @@ public class CommandParsedArgs {
 	}
 	public boolean isUnderpopulated() {
 		return this.underpopulated;
+	}
+	public boolean argSpecified(String name) {
+		return data.get(name) != null;
 	}
 	
 	// Getters (ft. poop casts)
@@ -68,5 +72,10 @@ public class CommandParsedArgs {
 		Object o = data.get(name);
 		if(o == null) return null;
 		return (TimeSpan)o;
+	}
+	public Color getColor(String name) {
+		Object o = data.get(name);
+		if(o == null) return null;
+		return (Color)o;
 	}
 }

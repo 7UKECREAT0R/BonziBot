@@ -8,12 +8,21 @@ import net.dv8tion.jda.api.JDA;
 public abstract class CommandArg {
 	
 	public enum ArgType {
-		Int, Float, String, StringRem, Boolean, User, Role, TimeSpan
+		Int, Float, String, StringRem, Boolean, User, Role, TimeSpan, Color, Enum
 	}
 	
 	public CommandArg(String name) {
 		this.argName = name;
 	}
+	public CommandArg optional() {
+		this.optional = true;
+		return this;
+	}
+	
+	/*
+	 * If optional, you can expect the argument to sometimes be null.
+	 */
+	boolean optional;
 	
 	public String argName;
 	public ArgType type;
@@ -40,6 +49,14 @@ public abstract class CommandArg {
 	 * This is how the argument shows up in a string.
 	 */
 	public String getUsageTerm() {
-		return "<" + argName + ">";
+		char a = this.optional ? '[' : '<';
+		char b = this.optional ? ']' : '>';
+		return a + argName + b;
+	}
+	/*
+	 * Same goes for this. Put an example or something.
+	 */
+	public String getErrorDescription() {
+		return "Incorrect Argument Type.";
 	}
 }

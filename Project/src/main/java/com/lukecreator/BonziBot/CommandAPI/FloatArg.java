@@ -11,7 +11,7 @@ public class FloatArg extends CommandArg {
 		this.type = ArgType.Float;
 	}
 
-	public static final String REGEX = "[0-9\\.]+";
+	public static final String REGEX = "-?[0-9]+\\.?[0-9]*";
 	public static final Pattern PATTERN = Pattern.compile(REGEX);
 	
 	@Override
@@ -27,4 +27,8 @@ public class FloatArg extends CommandArg {
 		return;
 	}
 	
+	@Override
+	public String getErrorDescription() {
+		return "Here you should specify any number.";
+	}
 }

@@ -35,19 +35,50 @@ public class CommandArgCollection {
 		return new CommandArgCollection(new StringRemainderArg(argName));
 	}
 	
+	/*
+	 * Tests if optional arguments are fine.
+	 */
+	public void testValidity() throws IllegalArgumentException {
+		boolean foundOptional = false; 
+		for(CommandArg arg: args) {
+			if(arg.optional && !foundOptional) {
+				foundOptional = true;
+				continue;
+			}
+			if(!arg.optional && foundOptional)
+				throw new IllegalArgumentException("All arguments after an optional need to be also optional.");
+		}
+	}
 	public int size() {
 		return args.length;
 	}
 	
 	/*
-	 * Builds a usage string based off of this CommandArgCollection.
+	 * Builds a usage string[] based off of this CommandArgCollection.
+	 *       The array is incase multiple combinations exist.
 	 */
-	public String buildUsage(String prefix, String commandName) {
-		String[] strings = new String[args.length];
-		for(int i = 0; i < args.length; i++)
-			strings[i] = args[i].getUsageTerm().replace('_', ' ');
-		String start = prefix + commandName + " ";
-		return start + String.join(" ", strings);
+	public String[] buildUsage(String prefix, String commandName) {
+		
+		// Count optional possibilities.
+		int optionals = 0;
+		for(CommandArg arg: this.args)
+			if(arg.optional) optionals++;
+		int combinations = optionals + 1;
+		
+		// Holds result.
+		String[] allUsages = new String[combinations];
+		
+		// Build possible results and store in allUsages.
+		for(int x = 0; x < combinations; x++) {
+			int argLength = args.length - x;
+			String[] buffer = new String[argLength];
+			for(int y = 0; y < argLength; y++)
+				buffer[y] = args[y].getUsageTerm().replace('_', ' ');
+			String start = prefix + commandName + " ";
+			allUsages[x] = start + String.join(" ", buffer);
+		}
+		
+		return allUsages;
 	}
 	/*
 	 * Parses an array of words. Ensure the words array does
@@ -55,14 +86,26 @@ public class CommandArgCollection {
 	 */
 	public CommandParsedArgs parse(String[] words, JDA jda) {
 		
-		if(words.length < args.length) {
+		int argCount = args.length;
+		for(CommandArg a: args)
+			if(a.optional) argCount--;
+		if(words.length < argCount) {
 			return new CommandParsedArgs(null, true);
 		}
 		
 		CommandArg[] clone = args.clone();
 		for(int i = 0; i < clone.length; i++) {
-			String word = words[i];
 			CommandArg cmd = clone[i];
+			if(cmd.optional) {
+				// Be careful, word array
+				// might not be big enough
+				if(i >= words.length) {
+					cmd.object = null;
+					clone[i] = cmd;
+					continue;
+				}
+			}
+			String word = words[i];
 			
 			if(cmd.type == ArgType.StringRem) {
 				String s = buildRemainder(words, i);

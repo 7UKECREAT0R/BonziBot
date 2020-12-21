@@ -9,7 +9,8 @@ import org.reflections.Reflections;
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
-import com.lukecreator.BonziBot.Managers.AdminManager;
+import com.lukecreator.BonziBot.Data.Modifier;
+import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.ModeratorManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
@@ -18,6 +19,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
 /*
@@ -60,6 +62,14 @@ public class CommandSystem {
 			(Constants.WHITESPACE_REGEX);
 		if(parts.length == 0) return;
 		
+		// Assign modifiers for the current channel.
+		if(info.isGuildMessage) {
+			TextChannel tc = info.tChannel;
+			Modifier[] mods = BonziUtils.getChannelModifiers(tc);
+			info.setModifiers(mods);
+		} else {
+			info.setModifiers(); // Empty array.
+		}
 		
 		String commandName = parts[0];
 		String puc = prefix.toUpperCase();
@@ -139,7 +149,7 @@ public class CommandSystem {
 		// Check administrator.
 		User ex = info.executor;
 		BonziBot bot = info.bonzi;
-		AdminManager am = bot.admins;
+		SpecialPeopleManager am = bot.special;
 		if(cmd.adminOnly && !am.getIsAdmin(ex)) {
 			BonziUtils.sendAdminOnly(cmd, info);
 			return false;
@@ -147,17 +157,22 @@ public class CommandSystem {
 		
 		// Check arguments.
 		if(cmd.args != null) {
+			// Check if illegal optional argument exists.
+			cmd.args.testValidity();
+			
 			if(info.args.underpopulated) {
 				BonziUtils.sendUsage(cmd, info, true, null);
 				return false;
 			}
 			for(int i = 0; i < cmd.args.args.length; i++) {
 				CommandArg arg = cmd.args.args[i];
+				if(arg.optional && i >= info.inputArgs.length)
+					break;
 				String word = info.inputArgs[i];
 				boolean able = arg.isWordParsable(word);
 				if(!able) {
 					BonziUtils.sendUsage(cmd,
-						info, false, arg.argName);
+						info, false, arg);
 					return false;
 				}
 			}
