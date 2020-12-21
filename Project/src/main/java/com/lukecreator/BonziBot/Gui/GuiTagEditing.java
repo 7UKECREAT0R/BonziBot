@@ -89,7 +89,11 @@ public class GuiTagEditing extends Gui {
 		
 		// Delete
 		if(buttonId == 1) {
-			this.bonziReference.tags.removeTagByName(tagName);
+			
+			if(isPrivate)
+				this.bonziReference.tags.removePrivateTagByName(tagName, guildId);
+			else this.bonziReference.tags.removeTagByName(tagName);
+			
 			startEmbed = new EmbedBuilder();
 			startEmbed.setTitle("Tag was deleted.");
 			startEmbed.setDescription("Previous name: " + tagName);

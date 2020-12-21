@@ -32,7 +32,7 @@ public class GuiTestMenu extends GuiPaging {
 	
 	@Override
 	public MessageEmbed draw(JDA jda) {
-		String sel = set[getCurrentIndex()].toString();
+		String sel = set[this.currentPage - 1].toString();
 		EmbedBuilder eb = new EmbedBuilder()
 			.setColor(Color.magenta)
 			.setTitle("Paging Test!")
@@ -47,7 +47,7 @@ public class GuiTestMenu extends GuiPaging {
 		
 		if(buttonId == 2) {
 			this.pagingEnabled = false;
-			String sel = set[getCurrentIndex()].toString();
+			String sel = set[this.currentPage - 1].toString();
 			MessageChannel channel = parent.getChannel(jda);
 			channel.sendMessage("Selected: " + sel).queue();
 		}

@@ -9,6 +9,8 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandSort;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
+import com.lukecreator.BonziBot.GuiAPI.GuiButton;
 import com.lukecreator.BonziBot.GuiAPI.GuiPaging;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
@@ -43,6 +45,12 @@ public class GuiHelpMenuCategory extends GuiPaging {
 	}
 	
 	@Override
+	public void initialize(JDA jda) {
+		super.initialize(jda);
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📁"), 2));
+	}
+	
+	@Override
 	public MessageEmbed draw(JDA jda) {
 		
 		String catName = category.name;
@@ -53,7 +61,7 @@ public class GuiHelpMenuCategory extends GuiPaging {
 			eb = BonziUtils.quickEmbed("Help Menu - " + catName, "", u, Color.magenta);
 		else eb = BonziUtils.quickEmbed("Help Menu - " + catName, "", Color.magenta);
 		
-		int index = this.getCurrentIndex();
+		int index = this.currentPage - 1;
 		int start = index * GuiHelpMenu.CPP;
 		int end = start + GuiHelpMenu.CPP;
 		if(end > allCommands.length)
@@ -63,7 +71,7 @@ public class GuiHelpMenuCategory extends GuiPaging {
 		if(prefix == null)
 			prefix = Constants.DEFAULT_PREFIX;
 		
-		int subCat = 0;
+		int subCat = -1;
 		
 		for(int i = start; i < end; i++) {
 			Command current = allCommands[i];
@@ -71,13 +79,15 @@ public class GuiHelpMenuCategory extends GuiPaging {
 			String name = current.name;
 			String desc = current.description;
 			String cmdName = current.getFilteredCommandName();
-			String usage = (current.args != null) ?
-				current.args.buildUsage(prefix, cmdName) : prefix + cmdName;
-			
+			String[] usages = (current.args != null) ?
+				current.args.buildUsage(prefix, cmdName) : new String[] { prefix + cmdName };
+			String usage = String.join("\n", usages);
+				
 			int subCatOfCmd = current.subCategory;
 			if(subCatOfCmd > subCat) {
+				if(subCat != -1)
+					eb.addBlankField(false);
 				subCat = subCatOfCmd;
-				eb.addBlankField(false);
 			}
 			
 			eb.addField(icon + " " + name,
@@ -88,7 +98,15 @@ public class GuiHelpMenuCategory extends GuiPaging {
 			eb.setFooter("Page " + this.getPageString() + " - React to see other pages.");
 		else eb.setFooter("This is all the available commands.");
 		
-		
 		return eb.build();
+	}
+	
+	@Override
+	public void onAction(int buttonId, JDA jda) {
+		super.onAction(buttonId, jda);
+		if(buttonId == 2) {
+			GuiHelpMenu menu = new GuiHelpMenu(this.category == CommandCategory._HIDDEN);
+			this.parent.setActiveGui(menu, jda);
+		}
 	}
 }
