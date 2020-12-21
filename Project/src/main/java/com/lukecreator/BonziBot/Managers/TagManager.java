@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot.Managers;
 
+import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -390,7 +391,7 @@ public class TagManager implements IStorableData {
 	}
 	@SuppressWarnings("unchecked")
 	@Override
-	public void loadData() {
+	public void loadData() throws EOFException {
 		Object o1 = DataSerializer.retrieveObject("tags");
 		Object o2 = DataSerializer.retrieveObject("privateTags");
 		if(o1 != null)

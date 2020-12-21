@@ -1,6 +1,7 @@
 package com.lukecreator.BonziBot.Managers;
 
 import java.awt.Color;
+import java.io.EOFException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
@@ -132,7 +133,7 @@ public class ModeratorManager implements IStorableData {
 	}
 	@SuppressWarnings("unchecked")
 	@Override
-	public void loadData() {
+	public void loadData() throws EOFException {
 		Object o = DataSerializer.retrieveObject("modRoles");
 		if(o == null) return;
 		modRoles = (HashMap<Long, Long>) o;

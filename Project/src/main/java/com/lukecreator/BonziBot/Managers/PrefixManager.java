@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot.Managers;
 
+import java.io.EOFException;
 import java.util.HashMap;
 
 import com.lukecreator.BonziBot.Data.DataSerializer;
@@ -45,7 +46,7 @@ public class PrefixManager implements IStorableData {
 	}
 	@SuppressWarnings("unchecked")
 	@Override
-	public void loadData() {
+	public void loadData() throws EOFException {
 		Object data = DataSerializer.retrieveObject(FILE);
 		if(data == null) return;
 		prefixData = (HashMap<Long, String>)data;

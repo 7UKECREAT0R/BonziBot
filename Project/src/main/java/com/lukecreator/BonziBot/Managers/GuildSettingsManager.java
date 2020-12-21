@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot.Managers;
 
+import java.io.EOFException;
 import java.util.HashMap;
 
 import com.lukecreator.BonziBot.Data.DataSerializer;
@@ -39,7 +40,7 @@ public class GuildSettingsManager implements IStorableData {
 	}
 	@SuppressWarnings("unchecked")
 	@Override
-	public void loadData() {
+	public void loadData() throws EOFException {
 		Object o = DataSerializer.retrieveObject("guildSettings");
 		if(o == null) return;
 		settings = (HashMap<Long, GuildSettings>)o;

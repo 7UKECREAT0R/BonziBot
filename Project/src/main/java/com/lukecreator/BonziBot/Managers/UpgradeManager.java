@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot.Managers;
 
+import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -116,7 +117,8 @@ public class UpgradeManager implements IStorableData {
 	}
 	@SuppressWarnings("unchecked")
 	@Override
-	public void loadData() {
+	public void loadData() throws EOFException {
+		
 		Object o1 = DataSerializer.retrieveObject("upgrades.ser");
 		Object o2 = DataSerializer.retrieveObject("upgraders.ser");
 		if(o1 != null)
