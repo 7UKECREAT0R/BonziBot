@@ -21,9 +21,6 @@ public class GuiPaging extends Gui {
 	public String getPageString() {
 		return this.currentPage + "/" + this.maxPage;
 	}
-	public int getCurrentIndex() {
-		return this.currentPage - 1;
-	}
 	
 	protected boolean pagingEnabled = true;
 	protected int minPage = 1;
