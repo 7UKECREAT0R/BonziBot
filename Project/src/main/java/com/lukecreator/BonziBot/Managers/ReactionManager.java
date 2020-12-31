@@ -149,7 +149,7 @@ public class ReactionManager {
 				if(!embed.getTitle().equals(PollCommand.EMBED_TITLE))
 					return;
 				EmbedBuilder eb = new EmbedBuilder(embed);
-				eb.setColor(up>down?Color.green : down>up?Color.red : Color.gray);
+				eb.setColor(up>down?Color.green : down > up ? Color.red : Color.gray);
 				eb.setFooter(PollCommand.generateFooter(up, down));
 				pollMsg.editMessage(eb.build()).queue();
 			});
