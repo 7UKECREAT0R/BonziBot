@@ -16,7 +16,7 @@ public class HelpCommand extends Command {
 		this.description = "no desc";
 		this.category = CommandCategory._HIDDEN;
 		this.args = new CommandArgCollection(new EnumArg("category", CommandCategory.class).optional());
-		this.setCooldown(5000);
+		this.setCooldown(10000);
 	}
 	
 	@Override
