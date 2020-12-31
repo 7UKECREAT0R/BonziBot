@@ -1,12 +1,9 @@
 package com.lukecreator.BonziBot.Commands.Admin;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
-import com.lukecreator.BonziBot.Data.Modifier;
+import com.lukecreator.BonziBot.Managers.RewardManager;
 
 public class TestCommand extends Command {
 
@@ -19,12 +16,10 @@ public class TestCommand extends Command {
 	
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
-		List<String> ls = new ArrayList<String>();
-		for(Modifier mod: e.modifiers) {
-			ls.add(mod.getDisplayName());
-		}
-		String s = String.join(", ", ls);
-		e.channel.sendMessage("Modifiers: " + s).queue();
+		RewardManager rw = e.bonzi.rewards;
+		rw.setLastCollectionTime(e.executor.getIdLong(),
+			System.currentTimeMillis() - RewardManager.ONE_DAY);
+		e.channel.sendMessage("set last collection time to 24 hours ago").queue();
 	}
 	
 }
