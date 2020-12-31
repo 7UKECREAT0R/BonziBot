@@ -1,6 +1,7 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.User;
 
 /*
  * A single argument for a command.
@@ -40,7 +41,7 @@ public abstract class CommandArg {
 	 * Actually parse the string and
 	 * store it into an Object value.
 	 */
-	public void parseWord(String word, JDA jda) {
+	public void parseWord(String word, JDA jda, User user) {
 		object = word;
 	}
 	

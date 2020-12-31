@@ -1,6 +1,7 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.User;
 
 public class StringArg extends CommandArg {
 	
@@ -15,7 +16,7 @@ public class StringArg extends CommandArg {
 	}
 	
 	@Override
-	public void parseWord(String word, JDA jda) {
+	public void parseWord(String word, JDA jda, User user) {
 		this.object = word;
 	}
 }

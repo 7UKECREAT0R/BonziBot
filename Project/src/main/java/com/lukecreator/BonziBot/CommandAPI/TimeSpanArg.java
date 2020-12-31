@@ -3,6 +3,7 @@ package com.lukecreator.BonziBot.CommandAPI;
 import com.lukecreator.BonziBot.TimeSpan;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.User;
 
 public class TimeSpanArg extends CommandArg {
 	
@@ -17,7 +18,7 @@ public class TimeSpanArg extends CommandArg {
 	}
 	
 	@Override
-	public void parseWord(String word, JDA jda) {
+	public void parseWord(String word, JDA jda, User user) {
 		this.object = TimeSpan.parseTimeSpan(word);
 	}
 	

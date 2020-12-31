@@ -2,6 +2,7 @@ package com.lukecreator.BonziBot.CommandAPI;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 
 public class RoleArg extends CommandArg {
 	
@@ -40,7 +41,7 @@ public class RoleArg extends CommandArg {
 		return false;
 	}
 	@Override
-	public void parseWord(String word, JDA jda) {
+	public void parseWord(String word, JDA jda, User user) {
 		// Mention case.
 		// <@&562661671957561365>
 		if(isMention(word)) {

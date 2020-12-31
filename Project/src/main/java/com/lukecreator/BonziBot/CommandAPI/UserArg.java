@@ -34,6 +34,8 @@ public class UserArg extends CommandArg {
 	
 	@Override
 	public boolean isWordParsable(String word) {
+		if(word.equalsIgnoreCase("me"))
+			return true;
 		if(isMention(word))
 			return true;
 		if(isValidId(word))
@@ -41,13 +43,21 @@ public class UserArg extends CommandArg {
 		return false;
 	}
 	@Override
-	public void parseWord(String word, JDA jda) {
+	public void parseWord(String word, JDA jda, User user) {
+		
+		// Self case.
+		if(word.equalsIgnoreCase("me")) {
+			this.object = user;
+			return;
+		}
+		
 		// Mention case.
 		// <@!214183045278728202>
 		if(isMention(word)) {
 			long id = getMentionId(word);
 			User u = jda.getUserById(id);
 			this.object = u;
+			return;
 		}
 		
 		// ID Case
@@ -56,6 +66,7 @@ public class UserArg extends CommandArg {
 			long id = Long.parseLong(word);
 			User u = jda.getUserById(id);
 			this.object = u;
+			return;
 		}
 	}
 	
@@ -69,6 +80,6 @@ public class UserArg extends CommandArg {
 	
 	@Override
 	public String getErrorDescription() {
-		return "You can either mention a user or use their ID here.";
+		return "You can either mention a user use their ID here. (You can also say \"me\"!)";
 	}
 }

@@ -3,6 +3,7 @@ package com.lukecreator.BonziBot.CommandAPI;
 import org.apache.commons.lang3.ArrayUtils;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.User;
 
 public class BooleanArg extends CommandArg {
 	
@@ -29,7 +30,7 @@ public class BooleanArg extends CommandArg {
 	}
 	
 	@Override
-	public void parseWord(String word, JDA jda) {
+	public void parseWord(String word, JDA jda, User user) {
 		for(String s: YES) {
 			if(word.equalsIgnoreCase(s)) {
 				this.object = true;

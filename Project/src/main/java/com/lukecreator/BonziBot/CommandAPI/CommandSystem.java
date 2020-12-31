@@ -10,9 +10,9 @@ import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Data.Modifier;
-import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.ModeratorManager;
+import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.Permission;
@@ -123,7 +123,7 @@ public class CommandSystem {
 			
 			CommandParsedArgs cpa = null;
 			if(cmd.args != null)
-				cpa = cmd.args.parse(inputArgs, info.bot);
+				cpa = cmd.args.parse(inputArgs, info.bot, info.executor);
 			info.setCommandData(commandName, inputArgs, cpa);
 			
 			if(!checkQualifications(cmd, info))
