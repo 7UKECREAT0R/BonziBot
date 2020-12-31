@@ -3,6 +3,11 @@ package com.lukecreator.BonziBot;
 import javax.security.auth.login.LoginException;
 
 public class App {
+	
+	/*
+	 * This is only here for legacy data conversion.
+	 *    It has no real use in the actual bot.
+	 */
 	public enum PremiumCommand {
 		Nickall, // <Server Owner Only> Nicknames every user on the discord. Only server owners can use this command!
 		RainbowRole, // <Server Owner Only> Usage: b:rainbowrole @role. Makes the targeted role rainbow!
@@ -14,6 +19,8 @@ public class App {
 		
 		Premium // Gives all special commands in a single package + all bonzibot premium perks. Can be bought with irl money, or coins.
 	}
+	
+	
 	public static void main(String[] args) throws LoginException, InterruptedException {
 		new BonziBot(true).start();
 	}

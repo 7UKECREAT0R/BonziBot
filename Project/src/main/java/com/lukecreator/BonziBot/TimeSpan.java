@@ -47,8 +47,7 @@ public class TimeSpan implements Serializable {
 		}
 	}
 	
-	// "Constructors"
-	
+	// Static Constructor Methods
 	public static TimeSpan fromMillis(long ms) {
 		return new TimeSpan(ms);
 	}
@@ -68,6 +67,13 @@ public class TimeSpan implements Serializable {
 		long secs = hours * 3600l;
 		return new TimeSpan(secs*1000l);
 	}
+	public static TimeSpan timeUntilMillis(long time) {
+		return timeUntilMillis(time, System.currentTimeMillis());
+	}
+	public static TimeSpan timeUntilMillis(long time, long now) {
+		if(time <= now) return new TimeSpan(0);
+		return new TimeSpan(time - now);
+	}
 	
 	// Getters
 	public long getMillis() {
@@ -84,5 +90,16 @@ public class TimeSpan implements Serializable {
 	}
 	public long getDays() {
 		return getHours() / 24;
+	}
+	
+	public String toShortString() {
+		return BonziUtils.getShortTimeStringMs(ms);
+	}
+	public String toLongString() {
+		return BonziUtils.getLongTimeStringMs(ms);
+	}
+	@Override
+	public String toString() {
+		return this.toShortString();
 	}
 }

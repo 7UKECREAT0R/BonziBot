@@ -55,7 +55,9 @@ public class BonziUtils {
 	 * count is higher than 1. English is weird.
 	 */
 	public static String plural(String s, int count) {
-		return s + ((count>1||count==0||count<-1)?'s':'\0');
+		if(count>1||count==0||count<-1)
+			s += "s";
+		return s;
 	}
 	/*
 	 * Similar to String.valueOf(int) but
@@ -122,34 +124,62 @@ public class BonziUtils {
 	 * (a, b, c, or d)
 	 */
 	public static String stringJoinOr(String delimiter, Iterable<? extends CharSequence> collection) {
-        StringJoiner joiner = new StringJoiner(delimiter);
-        Iterator<? extends CharSequence> iter = collection.iterator();
-        while(iter.hasNext()) {
-        	CharSequence chars = iter.next();
-        	boolean last = !iter.hasNext();
-            joiner.add(last ? "or " + chars : chars);
-        }
-        return joiner.toString();
+		StringJoiner joiner = new StringJoiner(delimiter);
+		Iterator<? extends CharSequence> iter = collection.iterator();
+		while(iter.hasNext()) {
+			CharSequence chars = iter.next();
+			boolean last = !iter.hasNext();
+				joiner.add(last ? "or " + chars : chars);
+		}
+		return joiner.toString();
 	}
 	/*
 	 * Joins strings together and appends "and" to the delimiter for the last element
 	 * (a, b, c, and d)
 	 */
 	public static String stringJoinAnd(String delimiter, Iterable<? extends CharSequence> collection) {
-        StringJoiner joiner = new StringJoiner(delimiter);
-        Iterator<? extends CharSequence> iter = collection.iterator();
-        while(iter.hasNext()) {
-        	CharSequence chars = iter.next();
-        	boolean last = !iter.hasNext();
-            joiner.add(last ? "and " + chars : chars);
-        }
-        return joiner.toString();
+		StringJoiner joiner = new StringJoiner(delimiter);
+		Iterator<? extends CharSequence> iter = collection.iterator();
+		while(iter.hasNext()) {
+			CharSequence chars = iter.next();
+			boolean last = !iter.hasNext();
+				joiner.add((last?"and ":"")+chars);
+		}
+		return joiner.toString();
 	}
 	/*
 	 * Returns the user's name and discriminator formatted.
 	 */
 	public static String fullName(User u) {
 		return u.getName() + "#" + u.getDiscriminator();
+	}
+	/*
+	 * Returns the roman numeral representation of a number.
+	 */
+	public static String numeral(int number) {
+		
+		if(number == 0) return "0";
+		if(number < 0) return "-" + numeral(-number);
+		
+		String[] M = new String[]{"", "M", "MM", "MMM"};
+		String[] C = new String[]{"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+		String[] X = new String[]{"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+		String[] I = new String[]{"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+		
+		// Use division and modulus to select from the table above.
+		String onPlace = I[number % 10];
+		String tePlace = X[(number % 100) / 10];
+		String huPlace = C[(number % 1000) / 100];
+		String thPlace = M[number / 1000];
+		
+		return thPlace + huPlace + tePlace + onPlace;
+	}
+	public static int countChars(String search, char c) {
+		char[] chars = search.toCharArray();
+		int i = 0;
+		for(char _c: chars)
+			if(_c == c) i++;
+		return i;
 	}
 	public static String getPrefixOrDefault(CommandExecutionInfo info) {
 		if(info.isGuildMessage) {
@@ -202,6 +232,50 @@ public class BonziUtils {
 		int rem_hours = hours % 24;
 		return days + "d, " + rem_hours + "h, " + rem_mins + "m, " + rem_secs + "s";
 	}
+	public static String getLongTimeStringMs(long ms) {
+		if(ms < 1000) return "0 seconds";
+		
+		int secs = (int)Math.round
+			(((double)ms)/1000.0);
+		
+		// Less than one minute.
+		if(ms < 60000) {
+			return secs + plural(" second", secs);
+		}
+		
+		int mins = (int)Math.floor
+			(((double)secs)/60.0);
+		
+		// Less than one hour.
+		if(ms < 3600000) {
+			int rem_secs = secs % 60;
+			return mins + plural(" minute", mins) +
+				", " + rem_secs + plural(" second", secs);
+		}
+		
+		int hours = (int)Math.floor
+			(((double)mins)/60.0);
+		
+		// Less than one day (24h).
+		if(ms < 86400000) {
+			int rem_secs = secs % 60;
+			int rem_mins = mins % 60;
+			return hours + plural(" hour", hours) +
+				", " + rem_mins + plural(" minute", rem_mins) +
+				", " + rem_secs + plural(" second", secs);
+		}
+		
+		// Over a day, simply round down.
+		int days = (int)Math.floor
+			(((double)hours)/24.0);
+		int rem_secs = secs % 60;
+		int rem_mins = mins % 60;
+		int rem_hours = hours % 24;
+		return days + plural(" day", days) +
+			", " + rem_hours + plural(" hour", rem_hours) +
+			", " + rem_mins + plural(" minute", rem_mins) +
+			", " + rem_secs + plural(" second", secs);
+	}
 	public static String[] splitByLength(String s, int length) {
 		if(s.length() <= length)
 			return new String[] {s};
@@ -233,6 +307,9 @@ public class BonziUtils {
 	}
 	public static int calculateLevel(int xp) {
 		return (int)Math.floor(Math.sqrt(((double)xp)*0.1));
+	}
+	public static int clamp(int i, int min, int max) {
+		return Math.min(max, Math.max(i, min));
 	}
 	
 	public static EmbedBuilder successEmbedIncomplete(String message) {

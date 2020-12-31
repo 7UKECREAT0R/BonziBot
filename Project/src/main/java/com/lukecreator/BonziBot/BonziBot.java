@@ -18,9 +18,11 @@ import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.GuiManager;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
+import com.lukecreator.BonziBot.Managers.LotteryManager;
 import com.lukecreator.BonziBot.Managers.ModeratorManager;
 import com.lukecreator.BonziBot.Managers.PrefixManager;
 import com.lukecreator.BonziBot.Managers.ReactionManager;
+import com.lukecreator.BonziBot.Managers.RewardManager;
 import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
 import com.lukecreator.BonziBot.Managers.TagManager;
 import com.lukecreator.BonziBot.Managers.UpgradeManager;
@@ -65,8 +67,10 @@ public class BonziBot extends ListenerAdapter {
 	public ReactionManager reactions = new ReactionManager();
 	public CooldownManager cooldowns = new CooldownManager();
 	public UpgradeManager upgrades = new UpgradeManager();
+	public LotteryManager lottery = new LotteryManager();
 	public PrefixManager prefixes = new PrefixManager();
 	public CommandSystem commands = new CommandSystem();
+	public RewardManager rewards = new RewardManager();
 	public RedditClient reddit = new RedditClient();
 	public JokeProvider jokes = new JokeProvider();
 	public GuiManager guis = new GuiManager();
@@ -105,6 +109,8 @@ public class BonziBot extends ListenerAdapter {
 		storableData.add(tags);
 		storableData.add(moderators);
 		storableData.add(upgrades);
+		storableData.add(lottery);
+		storableData.add(rewards);
 		
 		int len = storableData.size();
 		InternalLogger.print("Populated storable data with " + len + " element(s)");
@@ -135,7 +141,8 @@ public class BonziBot extends ListenerAdapter {
 		EmojiCache.appendGuildEmotes(bonziGuild);
 		
 		this.prefixes.setPrefix(674436740446158879l, "btemp:");
-		InternalLogger.print("Set Prego's Prefix");
+		this.prefixes.setPrefix(529089349762023436l, "btemp:");
+		InternalLogger.print("Set Test Prefixes");
 	}
 	void saveData() {
 		InternalLogger.print("Saving data...");
