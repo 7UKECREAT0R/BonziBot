@@ -8,20 +8,30 @@ import java.util.function.Consumer;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Tuple;
 import com.lukecreator.BonziBot.CommandAPI.CommandArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
+import com.lukecreator.BonziBot.Data.GenericReactionEvent;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.User;
 
 public class EventWaiterManager {
 	
+	// User ID, Consumer
 	HashMap<Long, Consumer<? super Message>> waiters =
 		new HashMap<Long, Consumer<? super Message>>();
-	HashMap<Long, Tuple<CommandArg, Consumer<Object>>> argWaiters =
-		new HashMap<Long, Tuple<CommandArg, Consumer<Object>>>();
+	
+	// User ID, Tuple of Arg Type, Consumer
+	HashMap<Long, Tuple<CommandArg, Consumer<Object>>> argWaiters
+		= new HashMap<Long, Tuple<CommandArg, Consumer<Object>>>();
+	
+	// User ID, Array of Tuple of Reaction[] and Consumer
+	HashMap<Long, Tuple<GenericEmoji[], Consumer<Integer>>> reactionWaiters
+		= new HashMap<Long, Tuple<GenericEmoji[], Consumer<Integer>>>();
 	
 	// Base methods used for raw event waiting.
 	public void waitForResponse(User user, Consumer<? super Message> onResponse) {
@@ -47,10 +57,53 @@ public class EventWaiterManager {
 		argWaiters.put(id, tuple);
 	}
 	public void stopWaitingForArgument(User user) {
-		this.stopWaitingForArgument(user.getIdLong());
+		this.argWaiters.remove(user.getIdLong());
 	}
 	public void stopWaitingForArgument(long id) {
-		argWaiters.remove(id);
+		this.argWaiters.remove(id);
+	}
+	
+	// Reaction waiters which return index pressed.
+	public void waitForReaction(User user, Message msg, GenericEmoji[] emoji, Consumer<Integer> consumer) {
+		waitForReaction(user.getIdLong(), msg, emoji, consumer);
+	}
+	public void waitForReaction(long id, Message msg, GenericEmoji[] emoji, Consumer<Integer> consumer) {
+		this.reactionWaiters.put(id, new Tuple<GenericEmoji[], Consumer<Integer>>(emoji, consumer));
+		for(GenericEmoji e: emoji)
+			e.react(msg);
+	}
+	public void stopWaitingForReaction(User user) {
+		this.reactionWaiters.remove(user.getIdLong());
+	}
+	public void stopWaitingForReaction(long id) {
+		this.reactionWaiters.remove(id);
+	}
+	
+	// Allows a boolean response. Confirms something.
+	public void getConfirmation(User user, MessageChannel channel, String title, Consumer<Boolean> consumer) {
+		getConfirmation(user.getIdLong(), channel, title, consumer);
+	}
+	public void getConfirmation(long id, MessageChannel channel, String title, Consumer<Boolean> consumer) {
+		Consumer<Integer> wrapper = (i -> {
+			consumer.accept(i == 0);
+		});
+		
+		GenericEmoji[] emoji = new GenericEmoji[2];
+		emoji[0] = GenericEmoji.fromEmoji("🟩");
+		emoji[1] = GenericEmoji.fromEmoji("🟥");
+		
+		EmbedBuilder eb = BonziUtils.quickEmbed(title,
+			"<@" + id + ">, react with yes or no to confirm.")
+			.setColor(Color.orange);
+		channel.sendMessage(eb.build()).queue(msg -> {
+			this.waitForReaction(id, msg, emoji, wrapper);
+		});
+	}
+	public boolean isWaitingForReaction(User u) {
+		return this.reactionWaiters.containsKey(u.getIdLong());
+	}
+	public boolean isWaitingForReaction(long id) {
+		return this.reactionWaiters.containsKey(id);
 	}
 	
 	public void onMessage(Message msg) {
@@ -102,6 +155,35 @@ public class EventWaiterManager {
 		}
 		
 		event.accept(parsed);
+		return;
+	}
+	public void onReaction(GenericReactionEvent e) {
+		User user = e.user;
+		long uid = user.getIdLong();
+		
+		if(!this.reactionWaiters.containsKey(uid))
+			return;
+		
+		Tuple<GenericEmoji[], Consumer<Integer>> rData
+			= this.reactionWaiters.get(uid);
+		GenericEmoji[] possible = rData.getA();
+		Consumer<Integer> result = rData.getB();
+		
+		for(int i = 0; i < possible.length; i++) {
+			ReactionEmote emote = e.reactionEmote;
+			if(possible[i].isEqual(emote)) {
+				this.reactionWaiters.remove(uid);
+				result.accept(i);
+				return;
+			}
+		}
+		
+		// Not valid emoji.
+		MessageEmbed me = BonziUtils.failureEmbed
+			("Stopped waiting for your reaction."
+			,"Invalid option specified.");
+		e.channel.sendMessage(me).queue();
+		this.reactionWaiters.remove(uid);
 		return;
 	}
 }

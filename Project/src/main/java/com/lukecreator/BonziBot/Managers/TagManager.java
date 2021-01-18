@@ -79,7 +79,6 @@ public class TagManager implements IStorableData {
 		else return null;
 	}
 	public String removeFromPrivateQueue(Member m) {
-		System.out.println("removing from private queue");
 		HashMap<Long, String> queue = getQueueForGuild(m.getGuild());
 		long id = m.getUser().getIdLong();
 		if(queue.containsKey(id)) {
@@ -185,8 +184,6 @@ public class TagManager implements IStorableData {
 	public String useTagByName(String name) {
 		for(int i = 0; i < tags.size(); i++) {
 			TagData tag = tags.get(i);
-			System.out.println("Using: \"" + name + "\"");
-			System.out.println("Tag: " + tag.toString());
 			if(tag == null || tag.name == null) continue;
 			if(tag.name.equalsIgnoreCase(name)) {
 				tag.uses++;
@@ -269,6 +266,30 @@ public class TagManager implements IStorableData {
 			}
 		}
 		return null;
+	}
+	
+	public List<TagData> getPublicTagsOfUser(User u) {
+		return getPublicTagsOfUser(u.getIdLong());
+	}
+	public List<TagData> getPublicTagsOfUser(long id) {
+		List<TagData> ret = new ArrayList<TagData>();
+		for(TagData td: this.tags) {
+			if(td.creatorId == id)
+				ret.add(td);
+		}
+		return ret;
+	}
+	public List<TagData> getPrivateTagsOfUser(User u, Guild g) {
+		return getPrivateTagsOfUser(u.getIdLong(), g.getIdLong());
+	}
+	public List<TagData> getPrivateTagsOfUser(long id, long gId) {
+		List<TagData> base = this.getPrivateTags(gId);
+		List<TagData> ret = new ArrayList<TagData>();
+		for(TagData td: base) {
+			if(td.creatorId == id)
+				ret.add(td);
+		}
+		return ret;
 	}
 	
 	// returns if it should block command execution
