@@ -9,7 +9,8 @@ public enum Modifier {
 	ANONYMOUS("🕵️‍♂️", "Every message sent in the channel will be anonymous!"),
 	LOGGING("🗒️", "Puts log UIs into this channel. Can be used to swiftly punish users!"),
 	COUNTING("🎰", "Let users collaborate and count as high as they can! Maybe even get onto the leaderboard?"),
-	RPG("⚔️", "A full role-playing game with pvp, tons of items, and more! WORK IN PROGRESS.");
+	RPG("⚔️", "A full role-playing game with pvp, tons of items, and more! WORK IN PROGRESS."),
+	NO_EXPOSE("🤐", "Messages deleted in this channel can not be exposed by users. Good for private staff channels.");
 	
 	public String icon;
 	public String desc;

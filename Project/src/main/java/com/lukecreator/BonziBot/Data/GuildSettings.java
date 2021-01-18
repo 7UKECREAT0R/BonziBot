@@ -40,6 +40,9 @@ public class GuildSettings implements Serializable {
 	public boolean enableTags = false;
 	public boolean privateTags = false;
 	
+	// Bot Commands (for the botcommands modifier)
+	public boolean botCommandsEnabled = true;
+	
 	// ----------
 	// FIELDS
 	// ----------
