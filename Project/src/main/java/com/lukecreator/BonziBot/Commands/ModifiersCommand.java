@@ -24,7 +24,7 @@ public class ModifiersCommand extends Command {
 	public void executeCommand(CommandExecutionInfo e) {
 		
 		EmbedBuilder eb = BonziUtils.quickEmbed("Available Modifiers", "Put one of these words anywhere in a channel topic to enable them for that channel!"
-				+ "Feel free to mix and match with other words to make it look natural. \"You get no XP in this channel.\" will enable NOXP and looks a lot better than \"noxp bruh\"", Color.yellow);
+				+ " Feel free to mix and match with other words to make it look natural. \"You get no XP in this channel.\" will enable NOXP and looks a lot better than \"noxp bruh\"", Color.yellow);
 		
 		Modifier[] modifiers = Modifier.values();
 		for(Modifier mod: modifiers) {

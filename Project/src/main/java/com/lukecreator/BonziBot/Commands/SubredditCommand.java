@@ -43,6 +43,10 @@ public class SubredditCommand extends Command {
 		
 		e.channel.sendMessage("Downloading a fresh post...").queue(msg -> {
 			Submission post = client.getRandomSubmission(subName);
+			if(post == null) {
+				e.channel.sendMessage(BonziUtils.failureEmbed("There's nothing on that subreddit!")).queue();
+				return;
+			}
 			if(e.isGuildMessage && !e.tChannel.isNSFW()) {
 				if(sub.nsfw) {
 					e.channel.sendMessage(BonziUtils.failureEmbed("This subreddit is NSFW.", "Please use an NSFW channel for this subreddit specifically!")).queue();
@@ -56,7 +60,7 @@ public class SubredditCommand extends Command {
 			EmbedBuilder eb = new EmbedBuilder()
 				.setColor(sub.color)
 				.setAuthor(sub.name, sub.url, sub.iconUrl)
-				.setTitle(post.getTitle());
+				.setTitle(post.getTitle(), post.getUrl());
 			
 			String postUrl = client.getSubmissionAboutUrl(post);
 			SubredditPostVideoData media
