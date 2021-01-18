@@ -40,6 +40,8 @@ public abstract class CommandArg {
 	/*
 	 * Actually parse the string and
 	 * store it into an Object value.
+	 * 
+	 * Expect guildId to be -1l.
 	 */
 	public void parseWord(String word, JDA jda, User user) {
 		object = word;

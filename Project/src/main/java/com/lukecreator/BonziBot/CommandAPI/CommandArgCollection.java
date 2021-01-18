@@ -12,10 +12,15 @@ import net.dv8tion.jda.api.entities.User;
  */
 public class CommandArgCollection {
 	
+	public String[] usageOverride = null; // Add extra usage line(s) onto the usage of this command.
 	CommandArg[] args;
 	
 	public CommandArgCollection(CommandArg...args) {
 		this.args = args;
+	}
+	public CommandArgCollection withUsageOverride(String...lines) {
+		this.usageOverride = lines;
+		return this;
 	}
 	public static CommandArgCollection fromList(List<CommandArg> list) {
 		CommandArgCollection cac = new CommandArgCollection();
@@ -66,17 +71,33 @@ public class CommandArgCollection {
 			if(arg.optional) optionals++;
 		int combinations = optionals + 1;
 		
+		// If command has a usage override.
+		boolean hasUO = this.usageOverride != null;
+		int extraComb = hasUO ? this.usageOverride.length : 0;
+		
 		// Holds result.
-		String[] allUsages = new String[combinations];
+		String[] allUsages = new String[combinations + extraComb];
 		
 		// Build possible results and store in allUsages.
+		String start = '`' + prefix + commandName;
 		for(int x = 0; x < combinations; x++) {
 			int argLength = args.length - x;
+			String localStart = start;
+			if(argLength > 0)
+				localStart += ' ';
 			String[] buffer = new String[argLength];
 			for(int y = 0; y < argLength; y++)
 				buffer[y] = args[y].getUsageTerm().replace('_', ' ');
-			String start = prefix + commandName + " ";
-			allUsages[x] = start + String.join(" ", buffer);
+			allUsages[x] = localStart + String.join(" ", buffer) + '`';
+		}
+		
+		int baseIndex = combinations;
+		if(hasUO) {
+			for(int ex = 0; ex < extraComb; ex++) {
+				int fIndex = baseIndex + ex;
+				String override = usageOverride[ex];
+				allUsages[fIndex] = start + ' ' + override + '`';
+			}
 		}
 		
 		return allUsages;

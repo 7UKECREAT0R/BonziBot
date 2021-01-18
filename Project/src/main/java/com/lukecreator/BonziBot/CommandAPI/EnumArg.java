@@ -33,9 +33,12 @@ public class EnumArg extends CommandArg {
 	
 	@Override
 	public boolean isWordParsable(String word) {
-		word = word.toUpperCase();
+		word = word.toUpperCase().replace(' ', '_');
 		for(Enum e: enumType) {
 			if(e.name().toUpperCase().contains(word)
+			&& !e.name().startsWith("_"))
+				return true;
+			if(word.contains(e.name().toUpperCase())
 			&& !e.name().startsWith("_"))
 				return true;
 		}
@@ -44,9 +47,14 @@ public class EnumArg extends CommandArg {
 	
 	@Override
 	public void parseWord(String word, JDA jda, User user) {
-		word = word.toUpperCase();
+		word = word.toUpperCase().replace(' ', '_');
 		for(Enum e: enumType) {
 			if(e.name().toUpperCase().contains(word)
+			&& !e.name().startsWith("_")) {
+				this.object = e;
+				return;
+			}
+			if(word.contains(e.name().toUpperCase())
 			&& !e.name().startsWith("_")) {
 				this.object = e;
 				return;

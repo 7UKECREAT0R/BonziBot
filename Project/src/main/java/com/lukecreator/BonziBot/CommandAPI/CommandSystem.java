@@ -11,6 +11,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Data.Modifier;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
+import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.ModeratorManager;
 import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
@@ -30,11 +31,10 @@ public class CommandSystem {
 	
 	List<Command> commands;
 	
-	public CommandSystem() {
+	public CommandSystem(Reflections refs) {
 		commands = new ArrayList<Command>();
 		
 		try {
-			Reflections refs = new Reflections("com.lukecreator.BonziBot");
 			Set<Class<? extends Command>> classes = refs.getSubTypesOf(Command.class);
 			for(Class<? extends Command> c: classes) {
 				Command inst = c.newInstance();
@@ -145,6 +145,13 @@ public class CommandSystem {
 		return;
 	}
 	boolean checkQualifications(Command cmd, CommandExecutionInfo info) {
+		
+		// Is Bonzi awaiting confirmation via eventwaiter?
+		EventWaiterManager ewm = info.bonzi.eventWaiter;
+		if(ewm.isWaitingForReaction(info.executor)) {
+			BonziUtils.sendAwaitingConfirmation(info);
+			return false;
+		}
 		
 		// Check administrator.
 		User ex = info.executor;

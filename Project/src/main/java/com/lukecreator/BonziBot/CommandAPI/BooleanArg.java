@@ -8,10 +8,10 @@ import net.dv8tion.jda.api.entities.User;
 public class BooleanArg extends CommandArg {
 	
 	public static final String[] YES = new String[] {
-			"yes", "yeah", "true", "enabled", "y"
+			"yes", "yeah", "true", "enabled", "y", "enable", "on"
 	};
 	public static final String[] NO = new String[] {
-			"no", "nope", "false", "disabled", "n"
+			"no", "nope", "false", "disabled", "n", "disable", "off"
 	};
 	public static final String[] ALL = ArrayUtils.addAll(YES, NO);
 	

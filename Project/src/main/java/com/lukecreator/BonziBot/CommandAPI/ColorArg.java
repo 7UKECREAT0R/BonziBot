@@ -22,7 +22,8 @@ public class ColorArg extends CommandArg {
 			"pink",
 			"red",
 			"white",
-			"yellow"
+			"yellow",
+			"purple"
 	};
 	public static final Color[] colors = new Color[] {
 			Color.BLACK,
@@ -38,6 +39,7 @@ public class ColorArg extends CommandArg {
 			Color.RED,
 			new Color(254, 254, 254),
 			Color.YELLOW,
+			new Color(143, 0, 209)
 	};
 	
 	public ColorArg(String name) {
@@ -72,9 +74,9 @@ public class ColorArg extends CommandArg {
 			if(parts.length < 3)
 				return false;
 			try {
-				Integer.parseInt(parts[0]);
-				Integer.parseInt(parts[1]);
-				Integer.parseInt(parts[2]);
+				Integer.parseInt(parts[0].trim());
+				Integer.parseInt(parts[1].trim());
+				Integer.parseInt(parts[2].trim());
 				return true;
 			} catch(NumberFormatException nfe) {
 				return false;
@@ -120,9 +122,9 @@ public class ColorArg extends CommandArg {
 				this.object = null;
 				return;
 			}
-			String _p1 = parts[0];
-			String _p2 = parts[1];
-			String _p3 = parts[2];
+			String _p1 = parts[0].trim();
+			String _p2 = parts[1].trim();
+			String _p3 = parts[2].trim();
 			int p1 = Integer.parseInt(_p1);
 			int p2 = Integer.parseInt(_p2);
 			int p3 = Integer.parseInt(_p3);

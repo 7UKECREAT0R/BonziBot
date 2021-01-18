@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
+import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.Permission;
@@ -18,7 +19,7 @@ public abstract class Command {
 	public CommandCategory category = CommandCategory._TOPLEVEL; // The help category the command shows in.
 	public boolean worksInDms = true; // Does this command work in private messages?
 	public boolean moderatorOnly = false; // Does this command only work for moderators?
-	public boolean adminOnly = false;
+	public boolean adminOnly = false; // Does this command only work for the BIG BOYS?
 	
 	/*
 	 * Strip special characters for
@@ -36,6 +37,13 @@ public abstract class Command {
 	}
 	public boolean hasCooldown;
 	public long cooldownMs;
+	
+	public boolean isPremiumItem = false; // is premium item on the shop
+	public PremiumItem premiumItem = null; // the premium item if so
+	protected void setPremiumItem(PremiumItem item) {
+		this.isPremiumItem = true;
+		this.premiumItem = item;
+	}
 	
 	public Permission[] neededPermissions = new Permission[] { Permission.UNKNOWN };
 	
