@@ -3,15 +3,19 @@ package com.lukecreator.BonziBot;
 import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.login.LoginException;
 
+import org.reflections.Reflections;
+
 import com.lukecreator.BonziBot.InternalLogger.Severity;
+import com.lukecreator.BonziBot.Async.AutoRepeat;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.Data.EmojiCache;
+import com.lukecreator.BonziBot.Data.GenericReactionEvent;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Data.JokeProvider;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
@@ -69,12 +73,14 @@ public class BonziBot extends ListenerAdapter {
 	public UpgradeManager upgrades = new UpgradeManager();
 	public LotteryManager lottery = new LotteryManager();
 	public PrefixManager prefixes = new PrefixManager();
-	public CommandSystem commands = new CommandSystem();
 	public RewardManager rewards = new RewardManager();
 	public RedditClient reddit = new RedditClient();
 	public JokeProvider jokes = new JokeProvider();
 	public GuiManager guis = new GuiManager();
 	public TagManager tags = new TagManager();
+	
+	Reflections reflectionsInstance = new Reflections("com.lukecreator.BonziBot");
+	public CommandSystem commands = new CommandSystem(reflectionsInstance);
 	
 	public BonziBot(boolean test) {
 		builder = JDABuilder.create(
@@ -113,25 +119,47 @@ public class BonziBot extends ListenerAdapter {
 		storableData.add(rewards);
 		
 		int len = storableData.size();
-		InternalLogger.print("Populated storable data with " + len + " element(s)");
+		InternalLogger.print("[SD] Populated storable data with " + len + " element(s)");
 	}
 	JDA setupBot() throws InterruptedException, LoginException {
 		JDA bot = builder.build();
-		InternalLogger.print("Starting bot...");
+		InternalLogger.print("[STATUS] Starting bot...");
 		bot.awaitReady();
-		InternalLogger.print("Bot is ready!");
+		InternalLogger.print("[STATUS] Bot is ready!");
 		return bot;
 	}
 	void setupExecutors() {
-		// Autosaving.
-		threadPool.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				saveData();
-			}
-		}, 1, 5, TimeUnit.MINUTES);
 		
-		InternalLogger.print("Executors set up.");
+		Set<Class<? extends AutoRepeat>> toBeExecuted =
+			reflectionsInstance.getSubTypesOf(AutoRepeat.class);
+		
+		int count = toBeExecuted.size(), i = 0;
+		InternalLogger.print("[EXE] Located " + count + " executors. Starting...");
+		
+		boolean error = false;
+		try {
+			for(Class<? extends AutoRepeat> execute: toBeExecuted) {
+				String name = execute.getName();
+				String status = "[" + (++i) + "/" + count +"]";
+				InternalLogger.print("[EXE] Starting " + name + " " + status);
+				
+				AutoRepeat info = execute.newInstance();
+				info.botInstance = this;
+				this.threadPool.scheduleAtFixedRate(info,
+					info.getInitial(), info.getDelay(), info.getUnit());
+			}
+		} catch(InstantiationException ie) {
+			ie.printStackTrace();
+			error = true;
+		} catch(IllegalAccessException iae) {
+			iae.printStackTrace();
+			error = true;
+		} finally {
+			if(error)
+				InternalLogger.print("[EXE/ERROR] Could not start all executors.");
+			else
+				InternalLogger.print("[EXE] All executors started.");
+		}
 	}
 	void postSetup(JDA jda) {
 		// Anything else that needs to be done.
@@ -140,30 +168,32 @@ public class BonziBot extends ListenerAdapter {
 		Guild bonziGuild = BonziUtils.getBonziGuild(jda);
 		EmojiCache.appendGuildEmotes(bonziGuild);
 		
+		// for debug purposes
 		this.prefixes.setPrefix(674436740446158879l, "btemp:");
 		this.prefixes.setPrefix(529089349762023436l, "btemp:");
-		InternalLogger.print("Set Test Prefixes");
+		this.prefixes.setPrefix(740775774528733236l, "btemp:");
+		InternalLogger.print("[TEST] Set Test Prefixes");
 	}
-	void saveData() {
-		InternalLogger.print("Saving data...");
+	public void saveData() {
+		InternalLogger.print("[IO] Saving data...");
 		for(IStorableData data: storableData) {
 			data.saveData();
 		}
-		InternalLogger.print("Saved data!");
+		InternalLogger.print("[IO] Saved data!");
 	}
-	void loadData() {
+	public void loadData() {
 		int progress = 0;
 		int total = storableData.size();
 		for(IStorableData data: storableData) {
 			progress++;
-			InternalLogger.print("Loading " + data.getClass().getName() + "... [" + progress + "/" + total + "]");
+			InternalLogger.print("[IO] Loading " + data.getClass().getName() + "... [" + progress + "/" + total + "]");
 			try {
 				data.loadData();
 			} catch(EOFException exc) {
-				InternalLogger.printError("Could not load file into: " + data.getClass().getName(), Severity.FATAL);
+				InternalLogger.printError("[IO/ERROR] Could not load file into: " + data.getClass().getName(), Severity.FATAL);
 			}
 		}
-		InternalLogger.print("Loaded all data!");
+		InternalLogger.print("[IO] Loaded all data!");
 	}
 	
 	// Events
@@ -200,6 +230,7 @@ public class BonziBot extends ListenerAdapter {
 	public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent e) {
 		guis.onReactionAdd(e);
 		reactions.reactionAddGuild(e);
+		eventWaiter.onReaction(new GenericReactionEvent(e));
 	}
 	public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent e) {
 		guis.onReactionRemove(e);
@@ -208,6 +239,7 @@ public class BonziBot extends ListenerAdapter {
 	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent e) {
 		guis.onReactionAdd(e);
 		reactions.reactionAddPrivate(e);
+		eventWaiter.onReaction(new GenericReactionEvent(e));
 	}
 	public void onPrivateMessageReactionRemove(PrivateMessageReactionRemoveEvent e) {
 		guis.onReactionRemove(e);

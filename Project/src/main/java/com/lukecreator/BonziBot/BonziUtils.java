@@ -74,7 +74,7 @@ public class BonziUtils {
 		return s.chars().allMatch(Character::isWhitespace);
 	}
 	/*
-	 * Strip text of all non-standard characters.
+	 *  Strip text of all non-standard characters.
 	 * "Hi, boys! Im stupid?" -> "Hi boys Im stupid"
 	 */
 	public static String stripText(String s) {
@@ -464,9 +464,9 @@ public class BonziUtils {
 		info.channel.sendMessage(eb.build());
 	}
 	public static void sendAdminOnly(Command cmd, CommandExecutionInfo info) {
-		EmbedBuilder eb = quickEmbed
-			("This command is reserved for admins.", "Admins are usually developers"
-					+ "of BonziBot or very well known contributors.",
+		EmbedBuilder eb = quickEmbed(
+			"This command is reserved for admins.",
+			"Admins are usually developers of BonziBot or very well known contributors.",
 			Color.orange);
 		info.channel.sendMessage(eb.build());
 				
@@ -489,6 +489,13 @@ public class BonziUtils {
 	public static void sendDoesntWorkDms(Command cmd, CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed("This command doesn't work in DMs!",
 				"Try running the command in a server instead!", Color.orange);
+		info.channel.sendMessage(eb.build()).queue();
+	}
+	public static void sendAwaitingConfirmation(CommandExecutionInfo info) {
+		EmbedBuilder eb = quickEmbed(
+			"A command is still waiting for your confirmation!",
+			"React with any reaction to cancel it, or react with the appropriate reaction to continue the command.",
+			Color.orange);
 		info.channel.sendMessage(eb.build()).queue();
 	}
 	
