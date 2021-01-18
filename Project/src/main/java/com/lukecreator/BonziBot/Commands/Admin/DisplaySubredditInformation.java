@@ -38,6 +38,7 @@ public class DisplaySubredditInformation extends Command {
 				.setColor(subreddit.color)
 				.setTitle(subreddit.name)
 				.setDescription(subreddit.description_trimmed);
+		eb.setAuthor(subreddit.name, subreddit.url, subreddit.iconUrl);
 		
 		eb.addField("Visibility", subreddit.visibility, true);
 		eb.addField("Is NSFW?", String.valueOf(subreddit.nsfw), true);

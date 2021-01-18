@@ -3,7 +3,7 @@ package com.lukecreator.BonziBot.Commands.Admin;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
-import com.lukecreator.BonziBot.Managers.RewardManager;
+import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 
 public class TestCommand extends Command {
 
@@ -16,10 +16,12 @@ public class TestCommand extends Command {
 	
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
-		RewardManager rw = e.bonzi.rewards;
-		rw.setLastCollectionTime(e.executor.getIdLong(),
-			System.currentTimeMillis() - RewardManager.ONE_DAY);
-		e.channel.sendMessage("set last collection time to 24 hours ago").queue();
+		EventWaiterManager waiter = e.bonzi.eventWaiter;
+		waiter.getConfirmation(e.executor, e.channel, "Are you sure you want to release Big Chungus?", b -> {
+			if(b)
+				e.channel.sendMessage("**HE HAS BEEN RELEASED.**").queue();
+			else
+				e.channel.sendMessage("*The world is safe for now.*").queue();
+		});
 	}
-	
 }
