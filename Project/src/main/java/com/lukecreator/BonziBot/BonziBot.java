@@ -18,10 +18,13 @@ import com.lukecreator.BonziBot.Data.EmojiCache;
 import com.lukecreator.BonziBot.Data.GenericReactionEvent;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Data.JokeProvider;
+import com.lukecreator.BonziBot.Data.Modifier;
+import com.lukecreator.BonziBot.Data.UsernameGenerator;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.GuiManager;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
+import com.lukecreator.BonziBot.Managers.LoggingManager;
 import com.lukecreator.BonziBot.Managers.LotteryManager;
 import com.lukecreator.BonziBot.Managers.ModeratorManager;
 import com.lukecreator.BonziBot.Managers.PrefixManager;
@@ -36,9 +39,22 @@ import com.lukecreator.BonziBot.Wrappers.RedditClient;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.audit.ActionType;
+import net.dv8tion.jda.api.audit.AuditLogChange;
+import net.dv8tion.jda.api.audit.AuditLogEntry;
+import net.dv8tion.jda.api.audit.AuditLogKey;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
+import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
+import net.dv8tion.jda.api.events.channel.text.update.TextChannelUpdateTopicEvent;
+import net.dv8tion.jda.api.events.channel.voice.VoiceChannelCreateEvent;
+import net.dv8tion.jda.api.events.channel.voice.VoiceChannelDeleteEvent;
+import net.dv8tion.jda.api.events.guild.GuildBanEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
@@ -72,6 +88,7 @@ public class BonziBot extends ListenerAdapter {
 	public CooldownManager cooldowns = new CooldownManager();
 	public UpgradeManager upgrades = new UpgradeManager();
 	public LotteryManager lottery = new LotteryManager();
+	public LoggingManager logging = new LoggingManager();
 	public PrefixManager prefixes = new PrefixManager();
 	public RewardManager rewards = new RewardManager();
 	public RedditClient reddit = new RedditClient();
@@ -117,9 +134,10 @@ public class BonziBot extends ListenerAdapter {
 		storableData.add(upgrades);
 		storableData.add(lottery);
 		storableData.add(rewards);
+		storableData.add(logging);
 		
 		int len = storableData.size();
-		InternalLogger.print("[SD] Populated storable data with " + len + " element(s)");
+		InternalLogger.print("[SD] Populated storable data with " + len + " elements.");
 	}
 	JDA setupBot() throws InterruptedException, LoginException {
 		JDA bot = builder.build();
@@ -165,6 +183,8 @@ public class BonziBot extends ListenerAdapter {
 		// Anything else that needs to be done.
 		cooldowns.initialize(commands);
 		
+		UsernameGenerator.init();
+		
 		Guild bonziGuild = BonziUtils.getBonziGuild(jda);
 		EmojiCache.appendGuildEmotes(bonziGuild);
 		
@@ -204,6 +224,7 @@ public class BonziBot extends ListenerAdapter {
 		eventWaiter.onMessage(e.getMessage());
 		CommandExecutionInfo info = new CommandExecutionInfo(e);
 		commands.onInput(info.setBonziBot(this));
+		logging.addMessageToHistory(e.getMessage(), e.getGuild());
 	}
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
 		if(e.getAuthor().isBot()) return;
@@ -248,13 +269,72 @@ public class BonziBot extends ListenerAdapter {
 	public void onGenericGuildVoice(GenericGuildVoiceEvent e) {
 		// Used to leave the voice channel if nobody is left.
 	}
+	public void onTextChannelUpdateTopic(TextChannelUpdateTopicEvent e) {
+		String topic = e.getNewTopic();
+		Modifier[] mods = BonziUtils.getModifiers(topic);
+		
+		for(Modifier mod: mods) {
+			if(mod == Modifier.LOGGING) {
+				TextChannel tc = e.getChannel();
+				
+				// retrieve the audit for the change
+				//   to get the user in question.
+				tc.getGuild().retrieveAuditLogs().type(ActionType.CHANNEL_UPDATE).limit(1).queue(logs -> {
+					if(logs.isEmpty()) {
+						InternalLogger.printError("No audit logs fetched.", Severity.ERROR);
+						return;
+					}
+					AuditLogEntry ale = logs.get(0);
+					AuditLogChange alc = ale.getChangeByKey(AuditLogKey.CHANNEL_TOPIC);
+					if(alc == null) {
+						InternalLogger.printError("Updated text channel topic, but couldn't fetch the change.", Severity.ERROR);
+						return;
+					}
+					User user = ale.getUser();
+					this.logging.changeLogChannel(tc, this, user);
+				});
+			}
+		}
+	}
+	
+	// Logging Events
+	public void onGuildBan(GuildBanEvent e) {
+		
+	}
+	public void onGuildUnban(GuildUnbanEvent e) {
+		
+	}
 	public void onGuildMessageDelete(GuildMessageDeleteEvent e) {
-		// For logging and the expose command.
+		
+		Message fetched = this.logging.getMessageById
+			(e.getMessageIdLong(), e.getGuild());
+		if(fetched != null && !fetched.getAuthor().isBot()) {
+			String topic = e.getChannel().getTopic();
+			Modifier[] modifiers = BonziUtils.getModifiers(topic);
+			boolean noExpose = false;
+			for(Modifier m: modifiers) {
+				if(m == Modifier.NO_EXPOSE) {
+					noExpose = true;
+					break;
+				}
+			}
+			if(!noExpose)
+				this.logging.setExposeData(fetched, e.getGuild());
+		}
 	}
 	public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent e) {
-		// For logging.
+		
 	}
 	public void onTextChannelCreate(TextChannelCreateEvent e) {
-		// For logging.
+		
+	}
+	public void onTextChannelDelete(TextChannelDeleteEvent e) {
+		
+	}
+	public void onVoiceChannelCreate(VoiceChannelCreateEvent e) {
+		
+	}
+	public void onVoiceChannelDelete(VoiceChannelDeleteEvent e) {
+		
 	}
 }

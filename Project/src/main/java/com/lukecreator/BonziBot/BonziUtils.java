@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 
@@ -48,7 +49,12 @@ public class BonziUtils {
 	// Format: <User ID, Private Channel ID>
 	public static HashMap<Long, Long> userPrivateChannels = new HashMap<Long, Long>();
 	public static final char[] STANDARD_CHARS = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM".toCharArray();
+	public static final char[] STANDARD_CHARS_ALL = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*()_+:\"',./<>?`~".toCharArray();
 	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36 Edg/86.0.622.69";
+	private static Random randomInstance = new Random(System.currentTimeMillis());
+	
+	// Colors
+	public static final Color COLOR_BONZI_PURPLE = new Color(161, 86, 184);
 	
 	/*
 	 * Append an S to the end of a word if the
@@ -86,6 +92,24 @@ public class BonziUtils {
 					break;
 				}
 		return sb.toString();
+	}
+	/*
+	 * Return if a string contains un-type-able
+	 * characters making the name unmentionable.
+	 */
+	public static boolean isUnpingable(String s) {
+		for(char c: s.toCharArray()) {
+			boolean any = false;
+			for(char std: STANDARD_CHARS_ALL) {
+				if(c == std) {
+					any = true;
+					break;
+				}
+			}
+			if(any == false)
+				return true;
+		}
+		return false;
 	}
 	/*
 	 * CONVERTS_CODE_NAMING -> Converts Code Naming
@@ -174,6 +198,18 @@ public class BonziUtils {
 		
 		return thPlace + huPlace + tePlace + onPlace;
 	}
+	/*
+	 * does this really need an explanation 
+	 */
+	public static String uwu(String in) {
+		return in.replace('l', 'w').replace('r', 'w');
+	}
+	/*
+	 * Generate a pseudo-random long that represents a unique ID.
+	 */
+	public static long generateId() {
+		return randomInstance.nextLong();
+	}
 	public static int countChars(String search, char c) {
 		char[] chars = search.toCharArray();
 		int i = 0;
@@ -187,6 +223,9 @@ public class BonziUtils {
 		} else {
 			return Constants.DEFAULT_PREFIX;
 		}
+	}
+	public static String getPrefixOrDefault(Guild guild, BonziBot bb) {
+		return bb.prefixes.getPrefix(guild);
 	}
 	public static String getPrefixOrDefault(GuildMessageReceivedEvent info, BonziBot bonzi) {
 		return bonzi.prefixes.getPrefix(info.getGuild());
@@ -460,15 +499,20 @@ public class BonziUtils {
 	}
 	public static void sendModOnly(Command cmd, CommandExecutionInfo info, String prefix) {
 		EmbedBuilder eb = quickEmbed("This command is reserved for moderators/admins.",
-				"Use " + prefix + "modrole to see the current moderator role.", Color.orange);
-		info.channel.sendMessage(eb.build());
+				"Use `" + prefix + "modrole` to see the current moderator role.", Color.orange);
+		info.channel.sendMessage(eb.build()).queue();
+	}
+	public static void sendNotPurchased(Command cmd, CommandExecutionInfo info, String prefix) {
+		EmbedBuilder eb = quickEmbed("You don't own this command yet!",
+				"Check out the `" + prefix + "shop` to buy it.", Color.red);
+		info.channel.sendMessage(eb.build()).queue();
 	}
 	public static void sendAdminOnly(Command cmd, CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed(
 			"This command is reserved for admins.",
 			"Admins are usually developers of BonziBot or very well known contributors.",
 			Color.orange);
-		info.channel.sendMessage(eb.build());
+		info.channel.sendMessage(eb.build()).queue();
 				
 	}
 	public static void sendOnCooldown(Command cmd, CommandExecutionInfo info, CooldownManager cdm) {
@@ -499,9 +543,9 @@ public class BonziUtils {
 		info.channel.sendMessage(eb.build()).queue();
 	}
 	
-	public static Modifier[] getChannelModifiers(TextChannel tc) {
-		String _topic = tc.getTopic();
+	public static Modifier[] getModifiers(String _topic) {
 		if(_topic == null) return new Modifier[0];
+		if(_topic.length() < 2) return new Modifier[0];
 		String topic = _topic
 			.replaceAll(Constants.WHITESPACE_REGEX, "")
 			.toUpperCase();
@@ -513,6 +557,9 @@ public class BonziUtils {
 		}
 		return ((Modifier[])list.toArray
 			(new Modifier[list.size()]));
+	}
+	public static Modifier[] getChannelModifiers(TextChannel tc) {
+		return getModifiers(tc.getTopic());
 	}
 	public static Modifier[] getChannelModifiers(MessageChannel mc) {
 		if(mc.getType() == ChannelType.TEXT)
