@@ -13,14 +13,17 @@ public abstract class Command {
 	public int subCategory = 0; // For categorizing commands in the sub-help menus.
 	
 	public String unicodeIcon = "❓"; // The icon that shows in the help menu.
-	public String name = "NULLCOMMAND"; // The name of the command. Used in execution. (b:name)
+	public String name = "literally nothing"; // The name of the command. Used in execution. (b:name)
 	public CommandArgCollection args = null; // The arguments this command takes.
-	public String description = "Does nothing. This command hasn't been programmed yet."; // Description for the help menu.
-	public CommandCategory category = CommandCategory._TOPLEVEL; // The help category the command shows in.
+	public String description = "does nothing. this command hasn't been programmed yet."; // Description for the help menu.
+	public CommandCategory category = CommandCategory._HIDDEN; // The help category the command shows in.
 	public boolean worksInDms = true; // Does this command work in private messages?
 	public boolean moderatorOnly = false; // Does this command only work for moderators?
 	public boolean adminOnly = false; // Does this command only work for the BIG BOYS?
 	
+	public void resetCooldown(CommandExecutionInfo e) {
+		e.bonzi.cooldowns.resetCooldown(this, e.executor.getIdLong());
+	}
 	/*
 	 * Strip special characters for
 	 *  comparison, such as spaces.

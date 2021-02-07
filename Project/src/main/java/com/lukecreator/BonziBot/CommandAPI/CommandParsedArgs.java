@@ -31,7 +31,11 @@ public class CommandParsedArgs {
 		return this.underpopulated;
 	}
 	public boolean argSpecified(String name) {
-		return data.get(name) != null;
+		if(!data.containsKey(name))
+			return false;
+		
+		Object o = data.get(name);
+		return o != null;
 	}
 	
 	// Getters (ft. poop casts)

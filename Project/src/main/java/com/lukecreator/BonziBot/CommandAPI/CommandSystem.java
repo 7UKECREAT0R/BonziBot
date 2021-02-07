@@ -10,10 +10,13 @@ import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Data.Modifier;
+import com.lukecreator.BonziBot.Data.PremiumItem;
+import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.ModeratorManager;
 import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
+import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.Permission;
@@ -146,7 +149,20 @@ public class CommandSystem {
 	}
 	boolean checkQualifications(Command cmd, CommandExecutionInfo info) {
 		
-		// Is Bonzi awaiting confirmation via eventwaiter?
+		// If this is a shop item, check if the user owns it.
+		if(cmd.isPremiumItem) {
+			PremiumItem item = cmd.premiumItem;
+			User user = info.executor;
+			UserAccountManager uam = info.bonzi.accounts;
+			UserAccount account = uam.getUserAccount(user);
+			if(!account.hasItem(item)) {
+				String prefix = BonziUtils.getPrefixOrDefault(info);
+				BonziUtils.sendNotPurchased(cmd, info, prefix);
+				return false;
+			}
+		}
+		
+		// Is bonzi awaiting confirmation via eventwaiter?
 		EventWaiterManager ewm = info.bonzi.eventWaiter;
 		if(ewm.isWaitingForReaction(info.executor)) {
 			BonziUtils.sendAwaitingConfirmation(info);
@@ -178,8 +194,7 @@ public class CommandSystem {
 				String word = info.inputArgs[i];
 				boolean able = arg.isWordParsable(word);
 				if(!able) {
-					BonziUtils.sendUsage(cmd,
-						info, false, arg);
+					BonziUtils.sendUsage(cmd, info, false, arg);
 					return false;
 				}
 			}

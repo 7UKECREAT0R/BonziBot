@@ -2,11 +2,8 @@ package com.lukecreator.BonziBot.CommandAPI;
 
 public enum CommandCategory {
 	
-	//   Will always show at the
-	// top level of the help menu.
-	_TOPLEVEL("Top Level Commands"),
-	
-	// Hidden from the help menu.
+	// Both hidden from the help menu.
+	_SHOP_COMMAND("Shop Commands for Purchase"),
 	_HIDDEN("Hidden Commands"),
 	
 	FUN("Fun Commands"),
