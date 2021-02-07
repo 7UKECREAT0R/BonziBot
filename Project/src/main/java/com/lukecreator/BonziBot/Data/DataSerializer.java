@@ -8,15 +8,22 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import com.lukecreator.BonziBot.InternalLogger;
+import com.lukecreator.BonziBot.InternalLogger.Severity;
 
 public class DataSerializer {
 	
 	public static final String baseDataPath = "/home/pi/";
 	public static String currentPath = baseDataPath;
+	public static boolean backup = false;
 	
 	static String ensureSuffix(String path) {
 		if(path.endsWith(".ser")) return path;
 		else return path + ".ser";
+	}
+	static String applyFlags(String path) {
+		if(backup)
+			return "BACKUP_" + path;
+		else return path;
 	}
 	static void safelyCloseStreams(FileInputStream a, ObjectInputStream b) {
 		try {
@@ -54,12 +61,12 @@ public class DataSerializer {
 		FileOutputStream fileOut = null;
 		ObjectOutputStream objectOut = null;
     	try {
-    		fileName = ensureSuffix(fileName);
+    		fileName = applyFlags(ensureSuffix(fileName));
     		fileOut = new FileOutputStream(currentPath + fileName);
     		objectOut = new ObjectOutputStream(fileOut);
     		objectOut.writeObject(obj);
     	} catch(IOException exc) {
-    		InternalLogger.printError(exc);
+    		InternalLogger.printError("Failed to write file \"" + fileName + "\".", Severity.ERROR);
     	} finally {
     		safelyCloseStreams(fileOut, objectOut);
     	}
@@ -69,7 +76,7 @@ public class DataSerializer {
 	 */
 	public static Object retrieveObject(String fileName) {
 		
-		fileName = ensureSuffix(fileName);
+		fileName = applyFlags(ensureSuffix(fileName));
 		String fullPath = currentPath + fileName;
 		File f = new File(fullPath);
 		if(!f.exists()) return null;
@@ -82,9 +89,9 @@ public class DataSerializer {
     		objectIn = new ObjectInputStream(fileIn);
     		toReturn = objectIn.readObject();
     	} catch(IOException exc) {
-    		InternalLogger.printError(exc);
+    		InternalLogger.printError("Failed to read file \"" + fileName + "\". Most likely doesn't exist.", Severity.ERROR);
     	} catch (ClassNotFoundException exc) {
-    		InternalLogger.printError(exc);
+    		InternalLogger.printError("Failed to read file \"" + fileName + "\". Class not found?", Severity.FATAL);
 		} finally {
 			safelyCloseStreams(fileIn, objectIn);
 		}

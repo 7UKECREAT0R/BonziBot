@@ -5,11 +5,11 @@ import java.util.List;
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
-import com.lukecreator.BonziBot.Commands.CoinflipCommand;
+import com.lukecreator.BonziBot.Commands.ExposeCommand;
 import com.lukecreator.BonziBot.Commands.GuildSettingsCommand;
 import com.lukecreator.BonziBot.Commands.JokeCommand;
 import com.lukecreator.BonziBot.Commands.LotteryCommand;
-import com.lukecreator.BonziBot.Commands.PollCommand;
+import com.lukecreator.BonziBot.Commands.NickAllCommand;
 import com.lukecreator.BonziBot.Commands.SlotsCommand;
 import com.lukecreator.BonziBot.Commands.TagInfoCommand;
 
@@ -22,10 +22,10 @@ import com.lukecreator.BonziBot.Commands.TagInfoCommand;
 public enum PremiumItem {
 	
 	// TODO link the actual premium commands.
-	NICK_ALL(		CoinflipCommand.class, 	2000, 	true),
+	NICK_ALL(		NickAllCommand.class, 	2000, 	true),
 	RAINBOW_ROLE(	JokeCommand.class, 		5000, 	false), // disabled due to TOS
 	SUPER_PLAY(		LotteryCommand.class, 	3000, 	true),
-	EXPOSE(			PollCommand.class, 		500, 	true),
+	EXPOSE(			ExposeCommand.class, 	500,	true),
 	PROFILE_PIC(	TagInfoCommand.class, 	500, 	true),
 	TROLL(			SlotsCommand.class, 	10000, 	true),
 	COMMENT(	GuildSettingsCommand.class, 1500, 	true);

@@ -19,6 +19,8 @@ public class JokeProvider {
 		List<String> loader = new ArrayList<String>();
 		random = new Random();
 		
+		InternalLogger.print("Downloading jokes...");
+		
 		try {
 			String downloaded = BonziUtils.getStringFrom(JOKES_LOCATION);
 			String[] j = downloaded.split("\n");

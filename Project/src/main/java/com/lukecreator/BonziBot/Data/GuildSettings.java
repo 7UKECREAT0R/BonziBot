@@ -42,6 +42,8 @@ public class GuildSettings implements Serializable {
 	
 	// Bot Commands (for the botcommands modifier)
 	public boolean botCommandsEnabled = true;
+	public boolean loggingEnabled = false;
+	public long loggingChannelCached = -1l;
 	
 	// ----------
 	// FIELDS
