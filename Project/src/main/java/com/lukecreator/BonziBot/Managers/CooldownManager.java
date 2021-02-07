@@ -76,7 +76,7 @@ public class CooldownManager {
 	}
 	
 	/*
-	 * Starts a cooldown for this user.
+	 * Starts a cooldown for this user/command combo.
 	 */
 	public void applyCooldown(Command command, long userId) {
 		if(!command.hasCooldown) return;
@@ -91,5 +91,18 @@ public class CooldownManager {
 		cooldown.put(userId, time);
 		cooldowns.put(command.id, cooldown);
 		return;
+	}
+	/*
+	 * Remove the cooldown for this user/command combo.
+	 */
+	public void resetCooldown(Command command, long userId) {
+		if(!command.hasCooldown) return;
+		if(command.cooldownMs < 1) return;
+		
+		HashMap<Long, Long> cooldown = getCooldownsForCommand(command);
+		if(cooldown == null) return;
+		
+		cooldown.remove(userId);
+		cooldowns.put(command.id, cooldown);
 	}
 }

@@ -67,16 +67,16 @@ public class EventWaiterManager {
 	public void waitForReaction(User user, Message msg, GenericEmoji[] emoji, Consumer<Integer> consumer) {
 		waitForReaction(user.getIdLong(), msg, emoji, consumer);
 	}
-	public void waitForReaction(long id, Message msg, GenericEmoji[] emoji, Consumer<Integer> consumer) {
-		this.reactionWaiters.put(id, new Tuple<GenericEmoji[], Consumer<Integer>>(emoji, consumer));
+	public void waitForReaction(long userId, Message msg, GenericEmoji[] emoji, Consumer<Integer> consumer) {
+		this.reactionWaiters.put(userId, new Tuple<GenericEmoji[], Consumer<Integer>>(emoji, consumer));
 		for(GenericEmoji e: emoji)
 			e.react(msg);
 	}
 	public void stopWaitingForReaction(User user) {
 		this.reactionWaiters.remove(user.getIdLong());
 	}
-	public void stopWaitingForReaction(long id) {
-		this.reactionWaiters.remove(id);
+	public void stopWaitingForReaction(long userId) {
+		this.reactionWaiters.remove(userId);
 	}
 	
 	// Allows a boolean response. Confirms something.
@@ -96,6 +96,22 @@ public class EventWaiterManager {
 			"<@" + id + ">, react with yes or no to confirm.")
 			.setColor(Color.orange);
 		channel.sendMessage(eb.build()).queue(msg -> {
+			this.waitForReaction(id, msg, emoji, wrapper);
+		});
+	}
+	public void getConfirmation(User user, MessageChannel channel, MessageEmbed me, Consumer<Boolean> consumer) {
+		getConfirmation(user.getIdLong(), channel, me, consumer);
+	}
+	public void getConfirmation(long id, MessageChannel channel,  MessageEmbed me, Consumer<Boolean> consumer) {
+		Consumer<Integer> wrapper = (i -> {
+			consumer.accept(i == 0);
+		});
+		
+		GenericEmoji[] emoji = new GenericEmoji[2];
+		emoji[0] = GenericEmoji.fromEmoji("🟩");
+		emoji[1] = GenericEmoji.fromEmoji("🟥");
+		
+		channel.sendMessage(me).queue(msg -> {
 			this.waitForReaction(id, msg, emoji, wrapper);
 		});
 	}
