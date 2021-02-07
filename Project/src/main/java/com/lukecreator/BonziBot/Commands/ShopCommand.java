@@ -20,7 +20,7 @@ public class ShopCommand extends Command {
 		this.subCategory = 2;
 		this.name = "Shop";
 		this.unicodeIcon = "🛒";
-		this.description = "Buy extra commands that normal users can't use!";
+		this.description = "Buy extra fancy commands that normal users can't use!";
 		this.args = null;
 		this.category = CommandCategory.COINS;
 		this.setCooldown(5000);
@@ -47,7 +47,7 @@ public class ShopCommand extends Command {
 		BonziBot bb = e.bonzi;
 		
 		if(premium) {
-			eb.addField("👑 Premium User", "You have all the commands! Check `" + prefix + "help paid` to see all of your commands.", false);
+			eb.addField("👑 Premium User", "You have all the commands! Check `" + prefix + "purchases` to see all of your commands.", false);
 		} else {
 			for(PremiumItem item: items) {
 				if(!item.enabled) continue;
