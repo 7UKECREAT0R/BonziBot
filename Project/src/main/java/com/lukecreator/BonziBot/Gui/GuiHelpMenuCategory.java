@@ -80,7 +80,8 @@ public class GuiHelpMenuCategory extends GuiPaging {
 			String desc = current.description;
 			String cmdName = current.getFilteredCommandName();
 			String[] usages = (current.args != null) ?
-				current.args.buildUsage(prefix, cmdName) : new String[] { prefix + cmdName };
+				current.args.buildUsage(prefix, cmdName) :
+				new String[] { '`' + prefix + cmdName + '`' };
 			String usage = String.join("\n", usages);
 				
 			int subCatOfCmd = current.subCategory;
