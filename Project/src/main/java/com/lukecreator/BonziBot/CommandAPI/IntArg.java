@@ -3,6 +3,7 @@ package com.lukecreator.BonziBot.CommandAPI;
 import java.util.regex.Pattern;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
 public class IntArg extends CommandArg {
@@ -22,7 +23,7 @@ public class IntArg extends CommandArg {
 	}
 	
 	@Override
-	public void parseWord(String word, JDA jda, User user) {
+	public void parseWord(String word, JDA jda, User user, Guild theGuild) {
 		word = word.trim();
 		this.object = Integer.parseInt(word);
 		return;

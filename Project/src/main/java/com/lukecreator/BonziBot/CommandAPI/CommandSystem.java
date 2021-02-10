@@ -125,8 +125,10 @@ public class CommandSystem {
 				continue;
 			
 			CommandParsedArgs cpa = null;
-			if(cmd.args != null)
-				cpa = cmd.args.parse(inputArgs, info.bot, info.executor);
+			if(cmd.args != null) {
+				Guild inputGuild = info.isGuildMessage ? info.guild : null;
+				cpa = cmd.args.parse(inputArgs, info.bot, info.executor, inputGuild);
+			}
 			info.setCommandData(commandName, inputArgs, cpa);
 			
 			if(!checkQualifications(cmd, info))

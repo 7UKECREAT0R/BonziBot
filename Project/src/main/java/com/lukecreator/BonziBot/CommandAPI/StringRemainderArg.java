@@ -1,6 +1,7 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
 public class StringRemainderArg extends CommandArg {
@@ -17,5 +18,5 @@ public class StringRemainderArg extends CommandArg {
 	
 	// This should work since StringRemainder is a special argument type.
 	@Override
-	public void parseWord(String word, JDA jda, User user) {}
+	public void parseWord(String word, JDA jda, User user, Guild theGuild) {}
 }

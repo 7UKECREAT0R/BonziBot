@@ -1,6 +1,7 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
 public class UserArg extends CommandArg {
@@ -43,7 +44,7 @@ public class UserArg extends CommandArg {
 		return false;
 	}
 	@Override
-	public void parseWord(String word, JDA jda, User user) {
+	public void parseWord(String word, JDA jda, User user, Guild theGuild) {
 		
 		// Self case.
 		if(word.equalsIgnoreCase("me")) {

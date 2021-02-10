@@ -5,6 +5,7 @@ import java.util.List;
 import com.lukecreator.BonziBot.CommandAPI.CommandArg.ArgType;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
 /*
@@ -106,7 +107,7 @@ public class CommandArgCollection {
 	 * Parses an array of words. Ensure the words array does
 	 *  not contain the prefix part of the command message.
 	 */
-	public CommandParsedArgs parse(String[] words, JDA jda, User exec) {
+	public CommandParsedArgs parse(String[] words, JDA jda, User exec, Guild g) {
 		
 		int argCount = args.length;
 		for(CommandArg a: args)
@@ -135,7 +136,7 @@ public class CommandArgCollection {
 				clone[i] = cmd;
 				break;
 			} else if(cmd.isWordParsable(word)) {
-				cmd.parseWord(word, jda, exec);
+				cmd.parseWord(word, jda, exec, g);
 				clone[i] = cmd;
 			} else clone[i] = null;
 		}

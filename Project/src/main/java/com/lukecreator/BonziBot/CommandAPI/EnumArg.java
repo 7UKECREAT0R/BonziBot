@@ -7,6 +7,7 @@ import java.util.List;
 import com.lukecreator.BonziBot.BonziUtils;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
 /*
@@ -46,7 +47,7 @@ public class EnumArg extends CommandArg {
 	}
 	
 	@Override
-	public void parseWord(String word, JDA jda, User user) {
+	public void parseWord(String word, JDA jda, User user, Guild theGuild) {
 		word = word.toUpperCase().replace(' ', '_');
 		for(Enum e: enumType) {
 			if(e.name().toUpperCase().contains(word)

@@ -1,6 +1,7 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
 /*
@@ -9,7 +10,7 @@ import net.dv8tion.jda.api.entities.User;
 public abstract class CommandArg {
 	
 	public enum ArgType {
-		Int, Float, String, StringRem, Boolean, User, Role, TimeSpan, Color, Enum
+		Int, Float, String, StringRem, Boolean, User, Role, TimeSpan, Color, Enum, Channel
 	}
 	
 	public CommandArg(String name) {
@@ -43,7 +44,7 @@ public abstract class CommandArg {
 	 * 
 	 * Expect guildId to be -1l.
 	 */
-	public void parseWord(String word, JDA jda, User user) {
+	public void parseWord(String word, JDA jda, User user, Guild theGuild) {
 		object = word;
 	}
 	

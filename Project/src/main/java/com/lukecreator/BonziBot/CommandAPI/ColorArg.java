@@ -5,6 +5,7 @@ import java.awt.Color;
 import com.lukecreator.BonziBot.BonziUtils;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
 public class ColorArg extends CommandArg {
@@ -87,7 +88,7 @@ public class ColorArg extends CommandArg {
 	}
 	
 	@Override
-	public void parseWord(String word, JDA jda, User user) {
+	public void parseWord(String word, JDA jda, User user, Guild theGuild) {
 		word = word.replace("_", "").replace(" ", "");
 		for(int i = 0; i < colors.length; i++) {
 			String cWord = colorWords[i];
