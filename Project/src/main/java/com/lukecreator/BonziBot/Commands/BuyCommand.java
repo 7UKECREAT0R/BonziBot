@@ -49,7 +49,7 @@ public class BuyCommand extends Command {
 		if(gift) {
 			int len = lastArg.length() + 1;
 			itemName = itemName.substring(0, itemName.length() - len);
-			userParser.parseWord(lastArg, e.bot, e.executor);
+			userParser.parseWord(lastArg, e.bot, e.executor, null);
 		}
 		User giftReceiver = gift ? (User)userParser.object : null;
 		boolean validReceiver = giftReceiver != null;
@@ -57,7 +57,7 @@ public class BuyCommand extends Command {
 		UserAccount giftAccount = validReceiver ? uam.getUserAccount(giftReceiver) : null;
 		
 		if(parser.isWordParsable(itemName)) {
-			parser.parseWord(itemName, e.bot, e.executor);
+			parser.parseWord(itemName, e.bot, e.executor, null);
 			PremiumItem item = (PremiumItem)parser.object;
 			
 			if(!item.enabled) {

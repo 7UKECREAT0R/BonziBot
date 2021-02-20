@@ -4,6 +4,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.ModernWarn;
 import com.lukecreator.BonziBot.Data.UserAccount;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -27,8 +28,9 @@ public class DisplayUserInfoCommand extends Command {
 		eb.addField("coins", self.getCoins() + "", false);
 		eb.addField("xp", self.getXP() + "", false);
 		eb.addField("premium", self.isPremium + "", false);
-		if(!self.warns.isEmpty())
-			eb.addField("warn 0:", self.warns.get(0).toString(), false);
+		ModernWarn[] warns = self.getGlobalWarns();
+		if(warns.length > 0)
+			eb.addField("warn 0:", warns[0].toString(), false);
 		e.channel.sendMessage(eb.build()).queue();
 	}
 }

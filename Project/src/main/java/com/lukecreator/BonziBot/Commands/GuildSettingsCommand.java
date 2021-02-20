@@ -20,7 +20,7 @@ public class GuildSettingsCommand extends Command {
 		this.worksInDms = false;
 		this.moderatorOnly = true;
 		
-		this.setCooldown(5000);
+		this.setCooldown(20000);
 	}
 	
 	@Override

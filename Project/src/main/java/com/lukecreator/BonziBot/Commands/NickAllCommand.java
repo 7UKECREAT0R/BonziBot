@@ -162,7 +162,7 @@ public class NickAllCommand extends Command {
 							return;
 						}
 						CommandArg a = c.getArg();
-						a.parseWord(conditionData, msg.getJDA(), e.executor);
+						a.parseWord(conditionData, msg.getJDA(), e.executor, null);
 						c.setArg(a);
 					} else if(conditionName.equalsIgnoreCase("contains")) {
 						c = new ContainsCondition();
