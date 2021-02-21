@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * Danger zone lmao (I have no idea what I'm doing here)
  * Masks out any enum values which begin with an underscore.
  */

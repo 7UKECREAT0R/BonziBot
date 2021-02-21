@@ -8,7 +8,7 @@ import com.lukecreator.BonziBot.TimeSpan;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  *   A wrapper for parsed arguments.
  * Used like a HashMap<String, Object>.
  */

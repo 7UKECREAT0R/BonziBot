@@ -61,7 +61,15 @@ public class TextChannelArg extends CommandArg {
 		
 		TextChannel byId = theGuild.getTextChannelById(id);
 		this.object = byId;
-		
+		return;
+	}
+	
+	@Override
+	public String getUsageTerm() {
+		if(this.optional)
+			return "[#" + argName + "]";
+		else
+			return "<#" + argName + ">";
 	}
 	
 	@Override

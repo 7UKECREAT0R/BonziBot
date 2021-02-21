@@ -24,7 +24,7 @@ public abstract class Command {
 	public void resetCooldown(CommandExecutionInfo e) {
 		e.bonzi.cooldowns.resetCooldown(this, e.executor.getIdLong());
 	}
-	/*
+	/**
 	 * Strip special characters for
 	 *  comparison, such as spaces.
 	 */

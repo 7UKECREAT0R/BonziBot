@@ -31,6 +31,6 @@ public class IntArg extends CommandArg {
 	
 	@Override
 	public String getErrorDescription() {
-		return "Here you can specify any whole number. (2, -10, 146, etc...)";
+		return "Here you can specify any whole number. (2, 11, 146, etc...)";
 	}
 }

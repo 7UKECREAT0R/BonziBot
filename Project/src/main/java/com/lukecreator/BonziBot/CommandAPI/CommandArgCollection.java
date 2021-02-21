@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * Wraps a CommandArg[]. Does all the parsing via #parse(String[], JDA)
  */
 public class CommandArgCollection {
@@ -35,14 +35,14 @@ public class CommandArgCollection {
 		CommandArgCollection cac = new CommandArgCollection(args);
 		return cac;
 	}
-	/*
+	/**
 	 * Construct a CommandArgCollection which only takes a remainder.
 	 */
 	public static CommandArgCollection single(String argName) {
 		return new CommandArgCollection(new StringRemainderArg(argName));
 	}
 	
-	/*
+	/**
 	 * Tests if optional arguments are fine.
 	 */
 	public void testValidity() throws IllegalArgumentException {
@@ -60,7 +60,7 @@ public class CommandArgCollection {
 		return args.length;
 	}
 	
-	/*
+	/**
 	 * Builds a usage string[] based off of this CommandArgCollection.
 	 *       The array is incase multiple combinations exist.
 	 */
@@ -103,7 +103,7 @@ public class CommandArgCollection {
 		
 		return allUsages;
 	}
-	/*
+	/**
 	 * Parses an array of words. Ensure the words array does
 	 *  not contain the prefix part of the command message.
 	 */

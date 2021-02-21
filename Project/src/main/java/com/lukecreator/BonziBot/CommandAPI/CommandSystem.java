@@ -26,7 +26,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * Manages the loading of commands, argument
  * parsing, and execution.
  */
@@ -51,7 +51,7 @@ public class CommandSystem {
 		InternalLogger.print("Registered " + commands.size() + " commands.");
 	}
 	
-	/*
+	/**
 	 * Parse the input and direct it to a command.
 	 */
 	public void onInput(CommandExecutionInfo info) {

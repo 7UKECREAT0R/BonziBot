@@ -49,6 +49,7 @@ public class RoleArg extends CommandArg {
 			long id = getMentionId(word);
 			Role r = jda.getRoleById(id);
 			this.object = r;
+			return;
 		}
 		
 		// ID Case
@@ -57,6 +58,7 @@ public class RoleArg extends CommandArg {
 			long id = Long.parseLong(word);
 			Role r = jda.getRoleById(id);
 			this.object = r;
+			return;
 		}
 	}
 	

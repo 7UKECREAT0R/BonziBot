@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * A single argument for a command.
  */
 public abstract class CommandArg {
@@ -21,7 +21,7 @@ public abstract class CommandArg {
 		return this;
 	}
 	
-	/*
+	/**
 	 * If optional, you can expect the argument to sometimes be null.
 	 */
 	boolean optional;
@@ -30,7 +30,7 @@ public abstract class CommandArg {
 	public ArgType type;
 	public Object object = null;
 	
-	/*
+	/**
 	 * Return if the string should be
 	 *   parsed by this CommandArg.
 	 */
@@ -38,7 +38,7 @@ public abstract class CommandArg {
 		return false;
 	}
 	
-	/*
+	/**
 	 * Actually parse the string and
 	 * store it into an Object value.
 	 * 
@@ -48,7 +48,7 @@ public abstract class CommandArg {
 		object = word;
 	}
 	
-	/*
+	/**
 	 *  You generally don't need to override this.
 	 * This is how the argument shows up in a string.
 	 */
@@ -57,7 +57,7 @@ public abstract class CommandArg {
 		char b = this.optional ? ']' : '>';
 		return a + argName + b;
 	}
-	/*
+	/**
 	 * Same goes for this. Put an example or something.
 	 */
 	public String getErrorDescription() {
