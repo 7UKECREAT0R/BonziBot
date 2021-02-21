@@ -12,12 +12,12 @@ import com.lukecreator.BonziBot.Data.ModernWarn;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Data.UserAccount;
 
-/*
+/**
  * Load legacy data files into the new structure.
  */
 public class UserAccountLegacyLoader {
 	
-	/*
+	/**
 	 * Quick and dirty code for loading and converting legacy files.
 	 */
 	@SuppressWarnings("unchecked")
@@ -55,7 +55,7 @@ public class UserAccountLegacyLoader {
 					accts.put(uid, new UserAccount());
 				UserAccount acc = accts.get(uid);
 				for(Warn w: p.warns)
-					acc.warns.add(new ModernWarn(w, guildId));
+					acc.addWarn(new ModernWarn(w, guildId));
 				accts.put(uid, acc);
 			}
 		}
