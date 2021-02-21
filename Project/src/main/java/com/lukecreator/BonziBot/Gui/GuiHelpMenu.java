@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * The base menu, can redirect to all of the categories.
  */
 public class GuiHelpMenu extends Gui {

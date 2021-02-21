@@ -27,7 +27,7 @@ public class GuiUserTags extends GuiPaging {
 	long privateGuildId;
 	TagData[] contents;
 	
-	/*
+	/**
 	 * Create a new TagLeaderboard. If privateId == -1
 	 * then it is considered a public tag leaderboard.
 	 */
