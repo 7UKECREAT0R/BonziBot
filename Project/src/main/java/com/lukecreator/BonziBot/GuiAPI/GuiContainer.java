@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * Base Gui class. Represents a message containing a Gui.
  */
 public class GuiContainer {
@@ -38,6 +38,7 @@ public class GuiContainer {
 	// If Guild:
 	public long guildId = -1;
 	public long channelId = -1;
+	
 	// If User:
 	public long userDmId = -1;
 	
@@ -67,7 +68,7 @@ public class GuiContainer {
 		this.ownerId = pc.getUser().getIdLong();
 	}
 	
-	/*
+	/**
 	 * This is BY FAR the most PAINFUL function
 	 *  I will ever write in BonziBot I swear
 	 */
@@ -191,7 +192,7 @@ public class GuiContainer {
 			}
 		}
 	}
-	/*
+	/**
 	 * im sorry for cursing your eyes
 	 */
 	public void resetAllReactions(JDA jda) {
@@ -331,7 +332,7 @@ public class GuiContainer {
 		enabled = false;
 	}
 	
-	/*
+	/**
 	 * Pretty heavy method, sends a poop
 	 *   ton of requests so use wisely!
 	 */

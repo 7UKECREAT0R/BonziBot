@@ -6,7 +6,7 @@ import java.util.List;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * Limit one per Entity, represents a imited
  *  size list which removes the element at
  *    index 0 when the capacity is hit.
