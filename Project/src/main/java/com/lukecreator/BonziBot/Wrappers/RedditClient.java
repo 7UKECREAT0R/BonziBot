@@ -16,7 +16,7 @@ import com.github.jreddit.utils.restclient.HttpRestClient;
 import com.github.jreddit.utils.restclient.RestClient;
 import com.lukecreator.BonziBot.BonziUtils;
 
-/*
+/**
  * Wrapper for interacting with the reddit API.
  */
 public class RedditClient {
@@ -57,6 +57,7 @@ public class RedditClient {
 	}
 	public Submission getRandomSubmission(String subreddit, int sampleSize) {
 		Submission[] subms = getSubmissions(subreddit, sampleSize);
+		if(subms.length < 1) return null;
 		int rng = random.nextInt(subms.length);
 		Submission pick = subms[rng];
 		return pick;

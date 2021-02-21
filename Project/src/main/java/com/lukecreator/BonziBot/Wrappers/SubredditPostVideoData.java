@@ -3,7 +3,7 @@ package com.lukecreator.BonziBot.Wrappers;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-/*
+/**
  * *sigh* guess im making this too...
  */
 public class SubredditPostVideoData {

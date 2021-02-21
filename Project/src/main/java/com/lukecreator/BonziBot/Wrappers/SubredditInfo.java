@@ -5,7 +5,7 @@ import java.util.Date;
 
 import org.json.simple.JSONObject;
 
-/*
+/**
  * minimal implementation of subreddit info
  */
 public class SubredditInfo {
@@ -20,7 +20,6 @@ public class SubredditInfo {
 	public String description;
 	public String description_trimmed;
 	public String url;
-	public String iconUrlRaw; // throws 403
 	public String iconUrl;
 	public String visibility;
 	public boolean nsfw;
@@ -42,8 +41,7 @@ public class SubredditInfo {
 			this.createdMs = (long)Math.round(this.createdMs_d);
 			this.created = new Date(this.createdMs);
 			this.url = "https://www.reddit.com/" + (String)data.get("display_name_prefixed");
-			this.iconUrlRaw = (String)data.get("community_icon");
-			this.iconUrl = this.iconUrlRaw.split("\\.png\\?")[0] + ".png";
+			this.iconUrl = (String)data.get("icon_img");
 			
 			if(this.colorHex.length() == 0) {
 				this.color = Color.gray;
