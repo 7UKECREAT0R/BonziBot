@@ -4,7 +4,7 @@ import javax.security.auth.login.LoginException;
 
 public class App {
 	
-	/*
+	/**
 	 * This is only here for legacy data conversion.
 	 *    It has no real use in the actual bot.
 	 */

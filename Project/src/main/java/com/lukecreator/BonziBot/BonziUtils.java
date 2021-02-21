@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,7 +42,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 
-/*
+/**
  * The all heavenly class which does everything lmao
  */
 public class BonziUtils {
@@ -48,15 +50,16 @@ public class BonziUtils {
 	// Tracks opened private channels and their ids.
 	// Format: <User ID, Private Channel ID>
 	public static HashMap<Long, Long> userPrivateChannels = new HashMap<Long, Long>();
-	public static final char[] STANDARD_CHARS = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM".toCharArray();
+	public static final char[] STANDARD_CHARS = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890$@".toCharArray(); // for filtering
 	public static final char[] STANDARD_CHARS_ALL = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*()_+:\"',./<>?`~".toCharArray();
 	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36 Edg/86.0.622.69";
 	private static Random randomInstance = new Random(System.currentTimeMillis());
+	private static DateTimeFormatter MMddyy = DateTimeFormatter.ofPattern("MM/dd/yy");
 	
 	// Colors
 	public static final Color COLOR_BONZI_PURPLE = new Color(161, 86, 184);
 	
-	/*
+	/**
 	 * Append an S to the end of a word if the
 	 * count is higher than 1. English is weird.
 	 */
@@ -65,21 +68,21 @@ public class BonziUtils {
 			s += "s";
 		return s;
 	}
-	/*
+	/**
 	 * Similar to String.valueOf(int) but
 	 *    places commas where needed.
 	 */
 	public static String comma(int num) {
 		return NumberFormat.getInstance().format(num);
 	}
-	/*
+	/**
 	 * Checks if a string is complete whitespace.
 	 */
 	public static boolean isWhitespace(String s) {
 		if(s.isEmpty()) return true;
 		return s.chars().allMatch(Character::isWhitespace);
 	}
-	/*
+	/**
 	 *  Strip text of all non-standard characters.
 	 * "Hi, boys! Im stupid?" -> "Hi boys Im stupid"
 	 */
@@ -93,7 +96,7 @@ public class BonziUtils {
 				}
 		return sb.toString();
 	}
-	/*
+	/**
 	 * Return if a string contains un-type-able
 	 * characters making the name unmentionable.
 	 */
@@ -111,7 +114,7 @@ public class BonziUtils {
 		}
 		return false;
 	}
-	/*
+	/**
 	 * CONVERTS_CODE_NAMING -> Converts Code Naming
 	 */
 	public static String titleString(String input) {
@@ -135,15 +138,15 @@ public class BonziUtils {
 		}
 		return new String(changed);
 	}
-	/*
+	/**
 	 * Cuts off string if it gets too l...
 	 */
 	public static String cutOffString(String s, int maxLength) {
 		if(s.length() <= maxLength) return s;
-		String part = s.substring(0, maxLength);
+		String part = s.substring(0, maxLength - 3);
 		return part + "...";
 	}
-	/*
+	/**
 	 * Joins strings together and appends "or" to the delimiter for the last element
 	 * (a, b, c, or d)
 	 */
@@ -157,7 +160,7 @@ public class BonziUtils {
 		}
 		return joiner.toString();
 	}
-	/*
+	/**
 	 * Joins strings together and appends "and" to the delimiter for the last element
 	 * (a, b, c, and d)
 	 */
@@ -171,13 +174,13 @@ public class BonziUtils {
 		}
 		return joiner.toString();
 	}
-	/*
+	/**
 	 * Returns the user's name and discriminator formatted.
 	 */
 	public static String fullName(User u) {
 		return u.getName() + "#" + u.getDiscriminator();
 	}
-	/*
+	/**
 	 * Returns the roman numeral representation of a number.
 	 */
 	public static String numeral(int number) {
@@ -198,18 +201,44 @@ public class BonziUtils {
 		
 		return thPlace + huPlace + tePlace + onPlace;
 	}
-	/*
+	/**
 	 * does this really need an explanation 
 	 */
 	public static String uwu(String in) {
 		return in.replace('l', 'w').replace('r', 'w');
 	}
-	/*
+	/**
+	 * Set the variables for join/leave messages.
+	 */
+	public static String joinLeaveVariables(String in, User u, Guild g) {
+		String user = u.getName();
+		String tag = u.getAsTag();
+		String server = g.getName();
+		String members = BonziUtils.comma(g.getMemberCount());
+		String date = LocalDateTime.now().format(MMddyy);
+		String created = u.getTimeCreated().format(MMddyy);
+		
+		return in
+			.replaceAll("(?i)\\(user\\)", user)
+			.replaceAll("(?i)\\(tag\\)", tag)
+			.replaceAll("(?i)\\(server\\)", server)
+			.replaceAll("(?i)\\(members\\)", members)
+			.replaceAll("(?i)\\(date\\)", date)
+			.replaceAll("(?i)\\(created\\)", created);
+			
+	}
+	/**
 	 * Generate a pseudo-random long that represents a unique ID.
 	 */
 	public static long generateId() {
 		return randomInstance.nextLong();
 	}
+	/**
+	 * Count the amount of a certain character in a string.
+	 * @param search
+	 * @param c
+	 * @return The amount of times <b>c</b> occurs in <b>search</b>.
+	 */
 	public static int countChars(String search, char c) {
 		char[] chars = search.toCharArray();
 		int i = 0;
@@ -345,7 +374,13 @@ public class BonziUtils {
 		return days * 86400000l;
 	}
 	public static int calculateLevel(int xp) {
+		// (floor) sqrt(xp * 0.1)
 		return (int)Math.floor(Math.sqrt(((double)xp)*0.1));
+	}
+	public static int calculateXpForLevel(int level) {
+		// finally, algebra has a use for once!!
+		// (floor) xp^2 / (1/10) = xp^2 * 10
+		return (int)Math.floor(10 * (double)(level*level));
 	}
 	public static int clamp(int i, int min, int max) {
 		return Math.min(max, Math.max(i, min));

@@ -14,7 +14,7 @@ public class TimeSpan implements Serializable {
 		this.ms = ms;
 	}
 	
-	/*
+	/**
 	 * Parse a timespan from a short string.
 	 * 34s, 5m, 2d, 8h, 3mins, 2secs, 4days
 	 * 

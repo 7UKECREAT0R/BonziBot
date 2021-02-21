@@ -6,7 +6,7 @@ import java.util.List;
 
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * 
  * 
  * 
@@ -52,7 +52,7 @@ public class UserProfile implements Serializable {
 	public boolean removeWarn(Warn w) {
 		return warns.remove(w);
 	}
-	/**
+	/***
 	 * Returns the amount of warns removed.
 	 * @param reason
 	 * @return

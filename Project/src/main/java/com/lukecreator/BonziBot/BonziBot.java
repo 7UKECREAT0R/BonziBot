@@ -16,10 +16,13 @@ import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.Data.EmojiCache;
 import com.lukecreator.BonziBot.Data.GenericReactionEvent;
+import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Data.JokeProvider;
 import com.lukecreator.BonziBot.Data.Modifier;
+import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Data.UsernameGenerator;
+import com.lukecreator.BonziBot.Graphics.FontLoader;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.GuiManager;
@@ -70,7 +73,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
-/*
+/**
  * The main bot class. Handles just about everything.
  */
 public class BonziBot extends ListenerAdapter {
@@ -121,6 +124,7 @@ public class BonziBot extends ListenerAdapter {
 		loadData();
 		JDA bot = setupBot();
 		setupExecutors();
+		loadFonts();
 		postSetup(bot);
 	}
 	
@@ -179,10 +183,15 @@ public class BonziBot extends ListenerAdapter {
 				InternalLogger.print("[EXE] All executors started.");
 		}
 	}
+	void loadFonts() {
+		FontLoader.registerFont(FontLoader.THE_BOLD_FONT_FILE);
+		FontLoader.registerFont(FontLoader.BEBAS_FONT_FILE);
+	}
 	void postSetup(JDA jda) {
-		// Anything else that needs to be done.
-		cooldowns.initialize(commands);
 		
+		// Anything else that needs to be done.
+		Constants.compileRegex();
+		cooldowns.initialize(commands);
 		UsernameGenerator.init();
 		
 		Guild bonziGuild = BonziUtils.getBonziGuild(jda);
@@ -222,6 +231,14 @@ public class BonziBot extends ListenerAdapter {
 		if(e.getAuthor().isBot()) return;
 		if(tags.receiveMessage(e, this)) return;
 		eventWaiter.onMessage(e.getMessage());
+		GuildSettings settings = this.guildSettings.getSettings(e.getGuild());
+		if(!settings.testMessageInFilter(e.getMessage())) {
+			logging.addMessageToHistory(e.getMessage(), e.getGuild());
+			e.getMessage().delete().queue();
+			e.getChannel().sendMessage(BonziUtils.failureEmbed(
+				"You can't say that, " + e.getAuthor().getName() + "!")).queue();
+			return;
+		}
 		CommandExecutionInfo info = new CommandExecutionInfo(e);
 		commands.onInput(info.setBonziBot(this));
 		logging.addMessageToHistory(e.getMessage(), e.getGuild());
@@ -318,8 +335,12 @@ public class BonziBot extends ListenerAdapter {
 					break;
 				}
 			}
-			if(!noExpose)
-				this.logging.setExposeData(fetched, e.getGuild());
+			if(!noExpose) {
+				long author = fetched.getAuthor().getIdLong();
+				UserAccount account = this.accounts.getUserAccount(author);
+				if(!account.optOutExpose)
+					this.logging.setExposeData(fetched, e.getGuild());
+			}
 		}
 	}
 	public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent e) {
