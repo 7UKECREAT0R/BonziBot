@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.lukecreator.BonziBot.BonziBot;
 
-/*
+/**
  * Any classes which extend this will automatically
  * 		be scheduled for repeated execution.
  */
