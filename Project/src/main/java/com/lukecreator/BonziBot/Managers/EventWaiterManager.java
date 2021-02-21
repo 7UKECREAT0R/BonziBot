@@ -13,6 +13,7 @@ import com.lukecreator.BonziBot.Data.GenericReactionEvent;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -160,12 +161,15 @@ public class EventWaiterManager {
 		}
 		
 		argWaiters.remove(id);
-		arg.parseWord(content, jda, msg.getAuthor());
+		Guild guild = msg.isFromGuild() ? msg.getGuild() : null;
+		arg.parseWord(content, jda, msg.getAuthor(), guild);
 		Object parsed = arg.object;
+		
+		msg.delete().queue();
 		
 		if(parsed == null) {
 			MessageEmbed me = BonziUtils.failureEmbed
-				("An error occurred. Cancelled command.");
+				("An error occurred. Cancelled waiting.");
 			channel.sendMessage(me).queue();
 			return;
 		}

@@ -9,7 +9,7 @@ import com.lukecreator.BonziBot.Data.IStorableData;
 
 import net.dv8tion.jda.api.entities.Guild;
 
-/*
+/**
  * Manages GuildSettings objects.
  */
 public class GuildSettingsManager implements IStorableData {

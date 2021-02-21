@@ -28,7 +28,7 @@ public class GuiManager {
 		userGuis = new HashMap<Long, AllocGuiList>();
 	}
 	
-	/*
+	/**
 	 * Initialize the GUI if it was not on constructor.
 	 */
 	Gui initGuiIfNot(Gui gui, JDA jda, TextChannel tc, BonziBot bonzi) {

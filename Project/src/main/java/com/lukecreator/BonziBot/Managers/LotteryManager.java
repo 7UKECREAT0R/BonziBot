@@ -31,7 +31,7 @@ public class LotteryManager implements IStorableData {
 	public void incrementLottery() {
 		
 	}
-	/*
+	/**
 	 * Buy a lottery ticket for this user. Automatically
 	 * sets their coins, and returns if they won or not.
 	 * Also returns the winnings or losses. (pos or neg)

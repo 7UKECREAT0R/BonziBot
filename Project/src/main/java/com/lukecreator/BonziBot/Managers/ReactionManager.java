@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemove
 import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionRemoveEvent;
 
-/*
+/**
  * Just handles all things related to reactions.
  */
 public class ReactionManager {

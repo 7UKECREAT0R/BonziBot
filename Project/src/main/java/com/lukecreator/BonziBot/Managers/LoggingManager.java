@@ -19,7 +19,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * Manages the logs for all guilds including
  *   the storage, reactions, and messages.
  */
@@ -32,7 +32,7 @@ public class LoggingManager implements IStorableData {
 	HashMap<Long, AllocationList<Message>> messages = new HashMap<Long, AllocationList<Message>>();
 	HashMap<Long, AllocationList<LogEntry>> entries = new HashMap<Long, AllocationList<LogEntry>>();
 	
-	/*
+	/**
 	 * Locate a logging channel in this guild.
 	 * Might be slow I dunno, just remember to cache.
 	 */
@@ -45,7 +45,7 @@ public class LoggingManager implements IStorableData {
 		}
 		return -1l;
 	}
-	/*
+	/**
 	 * Returns the cached channel ID of this guild.
 	 * Returns -1 if no channel has been cached.
 	 */
@@ -63,7 +63,7 @@ public class LoggingManager implements IStorableData {
 		}
 		else return -1l;
 	}
-	/*
+	/**
 	 * Returns the cached channel of this guild.
 	 * Returns null if deleted, uncached, or disabled.
 	 */

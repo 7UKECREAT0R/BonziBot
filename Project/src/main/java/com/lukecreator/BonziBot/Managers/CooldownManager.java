@@ -27,7 +27,7 @@ public class CooldownManager {
 		isInit = true;
 	}
 	
-	/*
+	/**
 	 * Get cooldown entries for a command.
 	 */
 	public HashMap<Long, Long> getCooldownsForCommand(Command command) {
@@ -37,7 +37,7 @@ public class CooldownManager {
 			return null;
 		return cooldowns.get(command.id);
 	}
-	/*
+	/**
 	 * Get cooldown entries for command with a specific id.
 	 */
 	public HashMap<Long, Long> getCooldownsForCommand(int id) {
@@ -45,7 +45,7 @@ public class CooldownManager {
 			return null;
 		return cooldowns.get(id);
 	}
-	/*
+	/**
 	 *  Gets the duration left on cooldown for a user on a command.
 	 *  Returns -1 if there is no cooldown remaining or command doesn't have a cooldown..
 	 */
@@ -67,7 +67,7 @@ public class CooldownManager {
 		}
 		return diff;
 	}
-	/*
+	/**
 	 * Gets if the user is on cooldown for this command. 
 	 */
 	public boolean userOnCooldown(Command command, long userId) {
@@ -75,7 +75,7 @@ public class CooldownManager {
 		return cooldown != -1;
 	}
 	
-	/*
+	/**
 	 * Starts a cooldown for this user/command combo.
 	 */
 	public void applyCooldown(Command command, long userId) {
@@ -92,7 +92,7 @@ public class CooldownManager {
 		cooldowns.put(command.id, cooldown);
 		return;
 	}
-	/*
+	/**
 	 * Remove the cooldown for this user/command combo.
 	 */
 	public void resetCooldown(Command command, long userId) {

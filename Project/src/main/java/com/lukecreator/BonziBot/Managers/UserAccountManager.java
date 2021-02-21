@@ -11,7 +11,7 @@ import com.lukecreator.BonziBot.Legacy.UserAccountLegacyLoader;
 
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * Handles all of the user accounts.
  */
 public class UserAccountManager implements IStorableData {

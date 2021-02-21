@@ -10,7 +10,7 @@ import com.lukecreator.BonziBot.Data.UserAccount;
 
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * Manages daily rewards and streaks.
  */
 public class RewardManager implements IStorableData {
@@ -59,14 +59,14 @@ public class RewardManager implements IStorableData {
 		return timeUntilCanClaim(id) <= 0;
 	}
 
-	/*
+	/**
 	 *   Claim a daily reward as a user.
 	 * Returns the amount of coins earned.
 	 */
 	public int claimAs(User u, BonziBot bb) {
 		return claimAs(u.getIdLong(), bb);
 	}
-	/*
+	/**
 	 *   Claim a daily reward as a user.
 	 * Returns the amount of coins earned.
 	 */

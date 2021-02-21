@@ -3,7 +3,7 @@ package com.lukecreator.BonziBot.Managers;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * Very basic class for handling BonziBot administrators.
  */
 public class SpecialPeopleManager {

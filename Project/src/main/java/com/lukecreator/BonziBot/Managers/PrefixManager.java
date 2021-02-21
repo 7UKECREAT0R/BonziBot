@@ -9,7 +9,7 @@ import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.entities.Guild;
 
-/*
+/**
  * Middleman for interacting with server prefixes.
  */
 public class PrefixManager implements IStorableData {

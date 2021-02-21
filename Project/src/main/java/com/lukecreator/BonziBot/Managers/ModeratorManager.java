@@ -38,7 +38,7 @@ public class ModeratorManager implements IStorableData {
 		return self.hasPermission(Permission.MANAGE_ROLES);
 	}
 	
-	/*
+	/**
 	 *   Similar to getModRoleAsync but is
 	 * synchronous. It doesn't create the role.
 	 */
@@ -56,7 +56,7 @@ public class ModeratorManager implements IStorableData {
 		long roleId = modRoles.get(gid);
 		return guild.getRoleById(roleId);
 	}
-	/*
+	/**
 	 *  Asynchronous method to get the moderator role.
 	 * If it doesn't exist it will be searched for, and
 	 *   then created and accepted into the consumer.

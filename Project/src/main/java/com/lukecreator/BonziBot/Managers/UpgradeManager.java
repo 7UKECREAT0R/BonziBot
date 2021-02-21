@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.entities.Invite.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * Manages everything related to upgrades.
  */
 public class UpgradeManager implements IStorableData {
