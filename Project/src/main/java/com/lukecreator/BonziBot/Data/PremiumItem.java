@@ -13,7 +13,7 @@ import com.lukecreator.BonziBot.Commands.NickAllCommand;
 import com.lukecreator.BonziBot.Commands.SlotsCommand;
 import com.lukecreator.BonziBot.Commands.TagInfoCommand;
 
-/*
+/**
  * Items that show up in the BonziBot shop.
  * 
  * If a command definition begins with an

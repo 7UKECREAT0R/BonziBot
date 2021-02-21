@@ -66,7 +66,7 @@ public class LogEntry {
 	public long extLong;
 	public long extLong2;
 	
-	/*
+	/**
 	 * WHOA this constructor is CRAZY
 	 */
 	public LogEntry(Type type, long reactionFlags, long initiator, long target, @Nullable String reason, @Nullable String extString, @Nullable String extString2, long extLong, long extLong2) {
@@ -87,7 +87,7 @@ public class LogEntry {
 	// consult audits now so it has to be
 	// async!!! :cryig:
 	
-	/*
+	/**
 	 * Executor: The user who created the channel.
 	 * Target: The channel ID.
 	 * Reason: none
@@ -117,7 +117,7 @@ public class LogEntry {
 		});
 	}
 	
-	/*
+	/**
 	 * Executor: The user who created the channel.
 	 * Target: The channel ID.
 	 * Reason: none
@@ -148,7 +148,7 @@ public class LogEntry {
 		});
 	}
 	
-	/*
+	/**
 	 * Executor: The user who was nicknamed.
 	 * Target: The user who was nicknamed.
 	 * Reason: none
@@ -165,7 +165,7 @@ public class LogEntry {
 			userId, userId, null, event.getOldNickname(), event.getNewNickname(), 0l, 0l));
 	}
 	
-	/*
+	/**
 	 * Executor: none
 	 * Target: The ID of the deleted message.
 	 * Reason: Sent a message: "content"
@@ -187,7 +187,7 @@ public class LogEntry {
 			cached.getAttachments().size(), cached.getAuthor().getIdLong()));
 	}
 	
-	/*
+	/**
 	 * Executor: The user who performed the ban.
 	 * Target: The user who was nicknamed.
 	 * Reason: The reason.
@@ -235,7 +235,7 @@ public class LogEntry {
 			return;
 		});
 	}
-	/*
+	/**
 	 * Executor: none
 	 * Target: The user who was unbanned.
 	 * Reason: none

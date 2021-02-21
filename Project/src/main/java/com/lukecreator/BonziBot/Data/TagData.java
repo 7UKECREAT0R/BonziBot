@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.User;
 
-/*
+/**
  * Represents a tag. (b:tag)
  */
 public class TagData implements Serializable {
@@ -30,7 +30,7 @@ public class TagData implements Serializable {
 	public String name;
 	public String response;
 	
-	/*
+	/**
 	 * Create a Tag in a guild.
 	 */
 	public TagData(String in, String out, @Nonnull Member creator) {
@@ -43,7 +43,7 @@ public class TagData implements Serializable {
 		this.created = LocalDate.now();
 		uses = 0;
 	}
-	/*
+	/**
 	 * Create a Tag in dms.
 	 */
 	public TagData(String in, String out, @Nonnull User dmsUser) {
@@ -55,7 +55,7 @@ public class TagData implements Serializable {
 		this.created = LocalDate.now();
 		uses = 0;
 	}
-	/*
+	/**
 	 * Port tag data over to new format.
 	 */
 	public TagData(CustomCommand cc) {

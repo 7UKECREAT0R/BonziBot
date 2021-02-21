@@ -6,13 +6,13 @@ import java.util.List;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
 
-/*
+/**
  * Cache of BonziBot's emotes.
  */
 public class EmojiCache {
 	
 	// Persistent collection of stale objects
-	public static List<Emote> collection = new ArrayList<Emote>();
+	private static List<Emote> collection = new ArrayList<Emote>();
 	
 	public static void appendGuildEmotes(Guild g) {
 		List<Emote> emotes = g.getEmotes();

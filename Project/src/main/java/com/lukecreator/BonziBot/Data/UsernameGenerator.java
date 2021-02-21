@@ -8,7 +8,7 @@ import java.util.Random;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
 
-/*
+/**
  * Generates crappy usernames.
  */
 public class UsernameGenerator {

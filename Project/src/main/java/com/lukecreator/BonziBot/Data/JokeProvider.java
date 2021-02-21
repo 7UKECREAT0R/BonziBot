@@ -8,7 +8,7 @@ import java.util.Random;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
 
-/*
+/**
  * Need jokes? Come here!
  */
 public class JokeProvider {

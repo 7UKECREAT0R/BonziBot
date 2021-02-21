@@ -3,25 +3,29 @@ package com.lukecreator.BonziBot.Data;
 import java.io.Serializable;
 import java.time.ZoneOffset;
 
+import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Warn;
 
-/*
+/**
  * Represents a warning which can be dished
  * out by moderators for breaking a rule.
  */
 public class ModernWarn implements Serializable {
 	
-	private static final long serialVersionUID = -4940401247561864965L;
+	private static final long serialVersionUID = 2l;
 	
 	public long acquiredGuild;
+	public long id;
 	public String reason;
 	public long timestamp;
 	
 	public ModernWarn(String reason) {
+		this.id = BonziUtils.generateId();
 		this.reason = reason;
-		timestamp = System.currentTimeMillis();
+		this.timestamp = System.currentTimeMillis();
 	}
 	public ModernWarn(Warn old, long acquiredGuild) {
+		this.id = BonziUtils.generateId();
 		this.reason = old.reason;
 		this.timestamp = old.date
 			.atStartOfDay(ZoneOffset.UTC)
@@ -31,6 +35,6 @@ public class ModernWarn implements Serializable {
 	}
 	@Override
 	public String toString() {
-		return "\"" + reason + "\", at " + timestamp + " in the guild " + acquiredGuild;
+		return id + ": \"" + reason + "\", at " + timestamp + " in the guild " + acquiredGuild;
 	}
 }

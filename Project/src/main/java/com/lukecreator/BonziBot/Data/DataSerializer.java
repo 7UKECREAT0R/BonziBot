@@ -54,7 +54,7 @@ public class DataSerializer {
 		}
 	}
 	
-	/*
+	/**
 	 * Write an object to a file.
 	 */
 	public static void writeObject(Object obj, String fileName) {
@@ -71,7 +71,7 @@ public class DataSerializer {
     		safelyCloseStreams(fileOut, objectOut);
     	}
 	}
-	/*
+	/**
 	 * Retrieve a written file.
 	 */
 	public static Object retrieveObject(String fileName) {

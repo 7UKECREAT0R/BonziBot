@@ -45,11 +45,23 @@ public class GuildSettings implements Serializable {
 	public boolean loggingEnabled = false;
 	public long loggingChannelCached = -1l;
 	
+	// Join / Leave Messages. Be aware that these won't necessarily be good values even if enabled.
+	public boolean joinMessages = false;
+	public long joinMessageChannel = 0l;
+	public String joinMessage = null;
+	
+	public boolean leaveMessages = false;
+	public long leaveMessageChannel = 0l;
+	public String leaveMessage = null;
+	
+	// Join Role
+	public boolean joinRole = false;
+	public long joinRoleId = 0l;
 	// ----------
 	// FIELDS
 	// ----------
 	
-	/*
+	/**
 	 * Cycles the filter option. Returns the new value.
 	 */
 	public FilterLevel cycleFilter() {
@@ -71,82 +83,82 @@ public class GuildSettings implements Serializable {
 		}
 		return filter;
 	}
-	/*
+	/**
 	 * Tests the message in the filter. Returns if it's good.
 	 */
 	public boolean testMessageInFilter(Message msg) {
 		if(msg.getChannelType() == ChannelType.PRIVATE)
 			return true;
 		
+		String text = msg.getContentStripped();
+		text = BonziUtils.stripText(text);
+		
+		if(!customFilter.isEmpty()) {
+			String upper = text.toUpperCase();
+			String attach = null;
+			if(!msg.getAttachments().isEmpty()) {
+				attach = BonziUtils.stripText(msg
+					.getAttachments().get(0)
+					.getFileName());
+			}
+			
+			for(String _item: customFilter) {
+				String item = _item.toUpperCase();
+				if(upper.contains(item))
+					return false; // NOT GOOD
+				if(attach != null && attach.contains(item))
+					return false; // BAD FILE ewroujhlujkhskl
+			}
+		}
+		
 		switch(filter) {
 		case NONE:
 			return true;
 		case SLURS:
-			return testMessageSlurs(msg);
+			return testMessageSlurs(text);
 		case SWEARS:
-			return testMessageSwears(msg);
+			return testMessageSwears(text);
 		case SENSITIVE:
-			return testMessageSensitive(msg);
+			return testMessageSensitive(msg, text);
 		default:
 			return true;
 		}
 	}
-	/*
-	 * Tests the message in the custom filter. Returns false if the message contains a bad word.
-	 */
-	public boolean testMessageInCustomFilter(Message msg) {
-		String text = msg.getContentStripped();
-		String strip = BonziUtils.stripText(text);
-		String[] words = strip.split(Constants.WHITESPACE_REGEX);
-		for(String word: words)
-		for(String filter: customFilter)
-			if(word.equalsIgnoreCase(filter))
-				return false;
-		return true;
-	}
-	public boolean testMessageSlurs(Message msg) {
-		String[] slurs = Constants.SLUR_WORDS;
-		String content = BonziUtils.stripText(msg.getContentStripped());
-		String[] words = content.split(Constants.WHITESPACE_REGEX);
-		
-		for(String slur: slurs)
-		for(String word: words)
-		if(slur.equalsIgnoreCase(word))
-			return false;
+	public boolean testMessageSlurs(String strip) {
+		for(Pattern slurRegex: Constants.SLUR_REGEX_COMPILED) {
+			boolean match = slurRegex.matcher(strip).find();
+			if(match) return false;
+		}
 		
 		return true;
 	}
-	public boolean testMessageSwears(Message msg) {
-		if(!testMessageSlurs(msg)) return false;
-		String content = BonziUtils.stripText(msg.getContentStripped());
-		for(String swearRegex: Constants.SWEAR_REGEX) {
-			boolean match = Pattern.matches(swearRegex, content);
-			if(match)
-				return false;
+	public boolean testMessageSwears(String strip) {
+		for(Pattern swearRegex: Constants.SWEAR_REGEX_COMPILED) {
+			boolean match = swearRegex.matcher(strip).find();
+			if(match) return false;
 		}
 		return true;
 	}
-	public boolean testMessageSensitive(Message msg) {
-		if(!testMessageSwears(msg)) return false;
+	public boolean testMessageSensitive(Message msg, String strip) {
+		
+		for(Pattern sensitiveRegex: Constants.SENSITIVE_REGEX_COMPILED) {
+			boolean match = sensitiveRegex.matcher(strip).find();
+			if(match) return false;
+		}
 		
 		if(!msg.getAttachments().isEmpty()) {
 			Attachment a = msg.getAttachments().get(0);
 			String fileName = a.getFileName();
-			for(String filePtrn: Constants.BAD_FILE_NAMES_REGEX) {
-				if(Pattern.matches(filePtrn, fileName))
+			for(Pattern filePtrn: Constants.BAD_FILE_NAMES_REGEX_COMPILED) {
+				if(filePtrn.matcher(fileName).find())
 					return false;
 			}
 		}
-		String content = BonziUtils.stripText(msg.getContentStripped());
-		for(String swearRegex: Constants.SENSITIVE_SWEARS) {
-			boolean match = Pattern.matches(swearRegex, content);
-			if(match)
-				return false;
-		}
+		
 		return true;
 	}
 	
-	/*
+	/**
 	 * Returns false if the element is already in the filter.
 	 */
 	public boolean addCustomFilter(String word) {
@@ -156,7 +168,7 @@ public class GuildSettings implements Serializable {
 		customFilter.add(s);
 		return true;
 	}
-	/*
+	/**
 	 * Returns false if the element does not exist.
 	 */
 	public boolean removeCustomFilter(String word) {

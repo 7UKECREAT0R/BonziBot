@@ -1,13 +1,17 @@
 package com.lukecreator.BonziBot.Data;
 
+import java.io.Serializable;
+
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 
-/*
+/**
  * Used in GuiButton for generalizing emotes.
  */
-public class GenericEmoji {
+public class GenericEmoji implements Serializable {
+	
+	private static final long serialVersionUID = -7411094721697374442L;
 	
 	boolean isGeneric = false, isGuild = false;
 	String genericEmoji = null;

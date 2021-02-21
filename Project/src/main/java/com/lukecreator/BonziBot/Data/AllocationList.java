@@ -3,7 +3,7 @@ package com.lukecreator.BonziBot.Data;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-/*
+/**
  * A list with a limited size and will eliminate
  * the earliest item whenever it is filled.
  */
@@ -19,19 +19,19 @@ public class AllocationList<T> implements Serializable {
 		this.size = size;
 	}
 	
-	/*
+	/**
 	 * Get the max size of this AllocationList.
 	 */
 	public int getSize() {
 		return size;
 	}
-	/*
+	/**
 	 * The current data.
 	 */
 	public ArrayList<T> getArrayList() {
 		return list;
 	}
-	/*
+	/**
 	 * Gets if the list is empty.
 	 */
 	public boolean isEmpty() {
