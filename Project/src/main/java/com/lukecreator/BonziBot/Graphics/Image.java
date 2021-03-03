@@ -7,6 +7,10 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineBreakMeasurer;
+import java.awt.font.TextAttribute;
+import java.awt.font.TextLayout;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
@@ -15,6 +19,9 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.AttributedCharacterIterator;
+import java.text.AttributedString;
+import java.util.Map;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -30,6 +37,8 @@ import com.lukecreator.BonziBot.Data.DataSerializer;
  * wrapper for all this graphicz stuf
  */
 public class Image {
+	
+	static final double MAX_FILE_SIZE = 8.0; // MB
 	
 	int width, height;
 	int imageFormat;
@@ -65,21 +74,31 @@ public class Image {
 		this.bounds = Rect.fromDimensions(0, 0, width, height);
 		this.setupRenderingHints();
 	}
+	public static String downloadMessage = "";
 	public static Image download(String url) {
 		try {
 			URL urlObject = new URL(url);
+			double size = BonziUtils.getFileSizeMb(urlObject);
+			System.out.println("size (mb): " + size);
+			if(size > MAX_FILE_SIZE) {
+				downloadMessage = "Your file can't be over " + MAX_FILE_SIZE + "mb.";
+				return null;
+			}
 			HttpURLConnection connection = (HttpURLConnection)urlObject.openConnection();
 			connection.setRequestProperty("User-Agent", BonziUtils.USER_AGENT);
 			BufferedImage image = ImageIO.read(connection.getInputStream());
 			connection.disconnect();
-			if(image == null)
-				throw new IOException("Downloaded image was null.");
+			if(image == null) {
+				downloadMessage = "Downloaded image doesn't exist anymore.";
+				return null;
+			}
+			downloadMessage = "Successful.";
 			return new Image(image);
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			downloadMessage = "Malformed URL. Try setting the image again?";
 			return null;
 		} catch (IOException e) {
-			e.printStackTrace();
+			downloadMessage = e.getMessage();
 			return null;
 		}
 	}
@@ -292,6 +311,46 @@ public class Image {
 		this.graphics.drawString(string, x, y);
 		return this;
 	}
+	public Image drawStringWrapping(String string, Color color, Rect bounds) {
+		
+		char[] characters = string.toCharArray();
+		
+		int x = bounds.left;
+		int y = bounds.top;
+		int width = bounds.width;
+		this.graphics.setColor(color);
+		
+		Map<TextAttribute, ?> attributes = this.font.getAttributes();
+		AttributedString str = new AttributedString(string, attributes);
+		AttributedCharacterIterator aci = str.getIterator();
+		int strStart = aci.getBeginIndex();
+		int strEnd = aci.getEndIndex();
+		FontRenderContext context = this.graphics.getFontRenderContext();
+		LineBreakMeasurer measure = new LineBreakMeasurer(aci, context);
+		
+		int position = strStart;
+		measure.setPosition(position);
+		while((position = measure.getPosition()) < strEnd) {
+			int endIndex = measure.nextOffset(width);
+			
+			TextLayout layout = null;
+			for(int i = position; i < endIndex; i++)
+				if(characters[i] == '\n') {
+					layout = measure.nextLayout(width, i + 1, false);
+					break;
+				}
+			
+			if(layout == null)
+				layout = measure.nextLayout(width);
+			
+			y += layout.getAscent();
+			layout.draw(this.graphics, x, y);
+			y += layout.getDescent() - layout.getLeading();
+			if(y >= bounds.bottom)
+				break;
+		}
+		return this;
+	}
 	public Image drawCenteredString(String string, Color color, float x, float y) {
 		this.graphics.setColor(color);
 		int width = this.fontMetrics.stringWidth(string);
@@ -375,7 +434,10 @@ public class Image {
 	}
 	
 	public Image fillImage(Image other) {
-		return this.drawImage(other, 0, 0, width, height);
+		return this.drawImage(other, 0, 0, this.width, this.height);
+	}
+	public Image fillImageKeepAspect(Image other) {
+		return this.drawImageKeepAspect(other, 0, 0, this.width, this.height);
 	}
 	public Image drawImage(Image other, int x, int y) {
 		this.graphics.drawImage(other.image, null, x, y);
@@ -384,5 +446,25 @@ public class Image {
 	public Image drawImage(Image other, int x, int y, int newWidth, int newHeight) {
 		this.graphics.drawImage(other.image, x, y, newWidth, newHeight, null);
 		return this;
+	}
+	public Image drawImageKeepAspect(Image other, int x, int y, float targetWidth, float targetHeight) {
+		float otherWidth = other.width;
+		float otherHeight = other.height;
+		
+		float srcSmallest = Math.min(otherWidth, otherHeight);
+		float trgLargest = Math.max(targetWidth, targetHeight);
+		float scaleFactor = trgLargest / srcSmallest;
+		
+		float _newWidth = otherWidth * scaleFactor;
+		float _newHeight = otherHeight * scaleFactor;
+		int newWidth = ((int)_newWidth) + 1;
+		int newHeight = ((int)_newHeight) + 1;
+		
+		int roomX = newWidth - (int)targetWidth;
+		int roomY = newHeight - (int)targetHeight;
+		x -= roomX >> 1;
+		y -= roomY >> 1;
+		
+		return this.drawImage(other, x, y, newWidth, newHeight);
 	}
 }

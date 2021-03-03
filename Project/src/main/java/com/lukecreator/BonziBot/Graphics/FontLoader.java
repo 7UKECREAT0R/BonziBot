@@ -17,6 +17,10 @@ public class FontLoader {
 	public static final String THE_BOLD_FONT = "The Bold Font";
 	public static final String BEBAS_FONT_FILE = "fonts/bebas.ttf";
 	public static final String BEBAS_FONT = "Bebas";
+	public static final String EMOJI_FONT_FILE = "fonts/emoji.ttf";
+	public static final String EMOJI_FONT = "OpenSansEmoji";
+	public static final String SEGOE_FONT_FILE = "fonts/segoeui.ttf";
+	public static final String SEGOE_FONT = "Segoe UI";
 	
 	private static InputStream getResource(String path) {
 		ClassLoader loader = FontLoader.class.getClassLoader();
