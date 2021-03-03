@@ -24,10 +24,10 @@ public class HelpCommand extends Command {
 		if(e.args.argSpecified("category")) {
 			CommandCategory c = (CommandCategory)e.args.get("category");
 			GuiHelpMenuCategory menu = new GuiHelpMenuCategory(c, e.bonzi);
-			BonziUtils.sendGuiFromExecutionInfo(e, menu);
+			BonziUtils.sendGui(e, menu);
 		} else {
 			GuiHelpMenu menu = new GuiHelpMenu(false);
-			BonziUtils.sendGuiFromExecutionInfo(e, menu);
+			BonziUtils.sendGui(e, menu);
 		}
 	}
 	

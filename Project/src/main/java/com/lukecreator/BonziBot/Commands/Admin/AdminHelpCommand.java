@@ -19,7 +19,7 @@ public class AdminHelpCommand extends Command {
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
 		GuiHelpMenu menu = new GuiHelpMenu(true);
-		BonziUtils.sendGuiFromExecutionInfo(e, menu);
+		BonziUtils.sendGui(e, menu);
 	}
 	
 }

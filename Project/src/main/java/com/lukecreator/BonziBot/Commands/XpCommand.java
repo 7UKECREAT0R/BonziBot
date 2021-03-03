@@ -22,13 +22,13 @@ import net.dv8tion.jda.api.entities.User;
 
 public class XpCommand extends Command {
 	
-	public static final Color BACK_COLOR = new Color(24, 24, 24);
-	public static final Color EMPTY_COLOR = new Color(32, 32, 32);
-	public static final int IMG_WIDTH = 480;
-	public static final int IMG_HEIGHT = 240;
-	public static final int EDGE_DIST = 24;
-	public static final int BAR_ROUND = 16;
-	public static final int BAR_HEIGHT = 48;
+	static final Color BACK_COLOR = new Color(24, 24, 24);
+	static final Color EMPTY_COLOR = new Color(32, 32, 32);
+	static final int IMG_WIDTH = 480;
+	static final int IMG_HEIGHT = 240;
+	static final int EDGE_DIST = 24;
+	static final int BAR_ROUND = 16;
+	static final int BAR_HEIGHT = 48;
 	
 	public XpCommand() {
 		this.subCategory = 2;
@@ -63,11 +63,17 @@ public class XpCommand extends Command {
 		
 		Image image = new Image(IMG_WIDTH, IMG_HEIGHT, true);
 		Image background = null;
-		if(acc.backgroundImage != null)
+		if(acc.backgroundImage != null) {
 			background = Image.download(acc.backgroundImage);
+			if(background == null) {
+				image.dispose();
+				e.channel.sendMessage(BonziUtils.failureEmbed("something went super wrong:", Image.downloadMessage)).queue();
+				return;
+			}
+		}
 		
 		if(background != null)
-			image.fillImage(background);
+			image.fillImageKeepAspect(background);
 		else
 			image.fill(BACK_COLOR);
 		
@@ -115,7 +121,7 @@ public class XpCommand extends Command {
 		image.drawCenteredString(xpString + " XP", Color.white, bar);
 		
 		try {
-			File saved = image.save("xpImages/xp_" + target.getIdLong() + ".png", true);
+			File saved = image.save("xpImages/xp_" + target.getId() + ".png", true);
 			e.channel.sendFile(saved).queue(finished -> {
 				saved.delete();
 			}, fail -> {
@@ -124,7 +130,7 @@ public class XpCommand extends Command {
 		}
 		catch(IOException exc) {
 			exc.printStackTrace();
-			e.channel.sendMessage("error occurred saving/uploading maybe try again? `" + exc.getLocalizedMessage() + "`").queue();
+			e.channel.sendMessage("error occurred saving/uploading... maybe try again in a few seconds?\n\n`" + exc.getLocalizedMessage() + "`").queue();
 		}
 	}
 	

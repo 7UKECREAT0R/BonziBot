@@ -84,7 +84,7 @@ public class TagInfoCommand extends Command {
 		if(isEditing) {
 			GuiTagEditing edit = new GuiTagEditing
 				(eb, tagName, isPrivate, g.getIdLong());
-			BonziUtils.sendGuiFromExecutionInfo(e, edit);
+			BonziUtils.sendGui(e, edit);
 		} else {
 			e.channel.sendMessage(eb.build()).queue();
 		}

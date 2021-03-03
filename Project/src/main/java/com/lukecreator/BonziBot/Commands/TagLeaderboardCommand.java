@@ -2,29 +2,25 @@ package com.lukecreator.BonziBot.Commands;
 
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
-import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
-import com.lukecreator.BonziBot.CommandAPI.UserArg;
 import com.lukecreator.BonziBot.Data.GuildSettings;
-import com.lukecreator.BonziBot.Gui.GuiUserTags;
+import com.lukecreator.BonziBot.Gui.GuiTagLeaderboard;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
 
-public class TagInfoUserCommand extends Command {
+public class TagLeaderboardCommand extends Command {
 
-	public TagInfoUserCommand() {
+	public TagLeaderboardCommand() {
 		this.subCategory = 1;
-		this.name = "User Tag Info";
-		this.unicodeIcon = "🥸";
-		this.description = "See a user's most popular tags.";
-		this.args = new CommandArgCollection(new UserArg("user"));
+		this.name = "Tag Leaderboard";
+		this.unicodeIcon = "📜🏆";
+		this.description = "Check out the most popular tags!";
 		this.category = CommandCategory.FUN;
 		this.setCooldown(5000);
 	}
-
+	
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
 		Guild g = e.guild;
@@ -37,9 +33,8 @@ public class TagInfoUserCommand extends Command {
 			return;
 		}
 		
-		User target = e.args.getUser("user");
 		long gId = isPrivate ? g.getIdLong() : -1l;
-		GuiUserTags tags = new GuiUserTags(e.bonzi, target, gId);
-		BonziUtils.sendGui(e, tags);
+		GuiTagLeaderboard lb = new GuiTagLeaderboard(e.bonzi, gId);
+		BonziUtils.sendGui(e, lb);
 	}
 }

@@ -19,7 +19,7 @@ public class XpLeaderboardCommand extends Command {
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
 		GuiXpLeaderboard lb = new GuiXpLeaderboard(e.bonzi, e.bot);
-		BonziUtils.sendGuiFromExecutionInfo(e, lb);
+		BonziUtils.sendGui(e, lb);
 	}
 
 }

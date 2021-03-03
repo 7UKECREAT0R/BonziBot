@@ -30,7 +30,7 @@ public class GuildSettingsCommand extends Command {
 		String guildName = guild.getName();
 		GuiGuildSettings gui = new GuiGuildSettings
 				(guildId, guildName);
-		BonziUtils.sendGuiFromExecutionInfo(e, gui);
+		BonziUtils.sendGui(e, gui);
 	}
 	
 }
