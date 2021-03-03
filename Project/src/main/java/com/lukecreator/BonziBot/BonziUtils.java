@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.NumberFormat;
@@ -53,8 +55,8 @@ public class BonziUtils {
 	public static final char[] STANDARD_CHARS = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890$@".toCharArray(); // for filtering
 	public static final char[] STANDARD_CHARS_ALL = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*()_+:\"',./<>?`~".toCharArray();
 	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36 Edg/86.0.622.69";
+	public static DateTimeFormatter MMddyy = DateTimeFormatter.ofPattern("MM/dd/yy");
 	private static Random randomInstance = new Random(System.currentTimeMillis());
-	private static DateTimeFormatter MMddyy = DateTimeFormatter.ofPattern("MM/dd/yy");
 	
 	// Colors
 	public static final Color COLOR_BONZI_PURPLE = new Color(161, 86, 184);
@@ -473,7 +475,7 @@ public class BonziUtils {
 			.setColor(authorWithColor.getColor());
 	}
 	
-	public static void sendGuiFromExecutionInfo(CommandExecutionInfo info, Gui gui) {
+	public static void sendGui(CommandExecutionInfo info, Gui gui) {
 		if(info.isGuildMessage)
 			info.bonzi.guis.sendAndCreateGui(info.tChannel, info.executor, gui, info.bonzi);
 		else info.bonzi.guis.sendAndCreateGui(info.pChannel, gui, info.bonzi);
@@ -654,6 +656,7 @@ public class BonziUtils {
 		// Not cached.
 		return null;
 	}
+	
 	// Networking
 	public static String getStringFrom(String url) throws FileNotFoundException {
 		StringBuilder output = new StringBuilder();
@@ -683,5 +686,30 @@ public class BonziUtils {
 		}
 		// Remove trailing newline character.
 		return output.deleteCharAt(output.length() - 1).toString();
+	}
+	public static long getFileSizeBytes(String url) throws MalformedURLException {
+		return getFileSizeBytes(new URL(url));
+	}
+	public static long getFileSizeBytes(URL url) {
+		HttpURLConnection connection = null;
+		try {
+			connection = (HttpURLConnection)url.openConnection();
+			connection.addRequestProperty("user-agent", BonziUtils.USER_AGENT);
+			connection.setRequestMethod("HEAD");
+			long bytes = connection.getContentLengthLong();
+			return bytes;
+		} catch(IOException exc) {
+			exc.printStackTrace();
+			return -1;
+		} finally {
+			if(connection != null)
+				connection.disconnect();
+		}
+	}
+	public static double getFileSizeMb(String url) throws MalformedURLException {
+		return ((double)getFileSizeBytes(url)) / 1000000.0;
+	}
+	public static double getFileSizeMb(URL url) {
+		return ((double)getFileSizeBytes(url)) / 1000000.0;
 	}
 }

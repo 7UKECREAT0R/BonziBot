@@ -186,6 +186,8 @@ public class BonziBot extends ListenerAdapter {
 	void loadFonts() {
 		FontLoader.registerFont(FontLoader.THE_BOLD_FONT_FILE);
 		FontLoader.registerFont(FontLoader.BEBAS_FONT_FILE);
+		FontLoader.registerFont(FontLoader.EMOJI_FONT_FILE);
+		FontLoader.registerFont(FontLoader.SEGOE_FONT_FILE);
 	}
 	void postSetup(JDA jda) {
 		
