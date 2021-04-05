@@ -359,8 +359,8 @@ public class TagManager implements IStorableData {
 		User u = msg.getAuthor();
 		
 		boolean fromGuild = msg.isFromGuild();
-		String prefix = fromGuild ? instance.prefixes.getPrefix
-				(msg.getGuild()) : Constants.DEFAULT_PREFIX;
+		String prefix = fromGuild ? instance.guildSettings.getSettings
+			(msg.getGuild()).getPrefix() : Constants.DEFAULT_PREFIX;
 		
 		if(isPrivate) {
 			TagData tag = TagData.constructFromMessage(tagName, msg);

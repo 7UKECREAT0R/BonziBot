@@ -14,7 +14,6 @@ import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
-import com.lukecreator.BonziBot.Managers.ModeratorManager;
 import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
@@ -22,7 +21,6 @@ import com.lukecreator.BonziBot.NoUpload.Constants;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -53,17 +51,18 @@ public class CommandSystem {
 	
 	/**
 	 * Parse the input and direct it to a command.
+	 * Returns if a command was run successfully.
 	 */
-	public void onInput(CommandExecutionInfo info) {
+	public boolean onInput(CommandExecutionInfo info) {
 		
 		String text = info.fullText;
-		if(BonziUtils.isWhitespace(text)) return;
+		if(BonziUtils.isWhitespace(text)) return false;
 		
 		String prefix = BonziUtils.getPrefixOrDefault(info);
 		
 		String[] parts = text.split
 			(Constants.WHITESPACE_REGEX);
-		if(parts.length == 0) return;
+		if(parts.length == 0) return false;
 		
 		// Assign modifiers for the current channel.
 		if(info.isGuildMessage) {
@@ -78,19 +77,44 @@ public class CommandSystem {
 		String puc = prefix.toUpperCase();
 		String cuc = commandName.toUpperCase();
 		if(!cuc.startsWith(puc))
-			return;
+			return false;
 		commandName = commandName
 			.substring(prefix.length());
 		
 		// Not counting the first word.
 		int argsLength = parts.length - 1;
 		String[] finalArgs = new String[argsLength];
+		int written = 0;
 		for(int i = 1; i < parts.length; i++) {
-			finalArgs[i - 1] = parts[i];
+			String part = parts[i];
+			
+			// Combine all arguments surrounded with
+			//   parenthesis as a whole argument.
+			if(part.startsWith("\"")) {
+				if(part.endsWith("\"")) {
+					part = part.substring(1, part.length() - 1);
+				} else {
+					List<String> combine = new
+						ArrayList<String>();
+					combine.add(part);
+					while(++i < parts.length) {
+						String concat = parts[i];
+						combine.add(concat);
+						if(concat.endsWith("\""))
+							break;
+					}
+					part = String.join(" ", combine).substring(1);
+					part = part.substring(0, part.length() - 1);
+				}
+			}
+			
+			finalArgs[written++] = part;
 		}
+		String[] resizedArgs = new String[written];
+		System.arraycopy(finalArgs, 0, resizedArgs, 0, written);
 		
 		// Send it to the right command.
-		directCommand(info, commandName, finalArgs);
+		return directCommand(info, commandName, resizedArgs);
 	}
 	public List<Command> getRegisteredCommands() {
 		return commands;
@@ -118,7 +142,7 @@ public class CommandSystem {
 		return find;
 	}
 	
-	void directCommand(CommandExecutionInfo info, String commandName, String[] inputArgs) {
+	boolean directCommand(CommandExecutionInfo info, String commandName, String[] inputArgs) {
 		for(Command cmd: commands) {
 			String cmdName = cmd.getFilteredCommandName();
 			if(!commandName.equalsIgnoreCase(cmdName))
@@ -132,7 +156,7 @@ public class CommandSystem {
 			info.setCommandData(commandName, inputArgs, cpa);
 			
 			if(!checkQualifications(cmd, info))
-				return;
+				return false;
 			
 			// Set cooldown.
 			if(cmd.hasCooldown) {
@@ -143,11 +167,9 @@ public class CommandSystem {
 			
 			// Should be good to execute.
 			cmd.executeCommand(info);
-			
-			// End
-			break;
+			return true;
 		}
-		return;
+		return false;
 	}
 	boolean checkQualifications(Command cmd, CommandExecutionInfo info) {
 		
@@ -175,7 +197,8 @@ public class CommandSystem {
 		User ex = info.executor;
 		BonziBot bot = info.bonzi;
 		SpecialPeopleManager am = bot.special;
-		if(cmd.adminOnly && !am.getIsAdmin(ex)) {
+		boolean admin = am.getIsAdmin(ex);
+		if(cmd.adminOnly && !admin) {
 			BonziUtils.sendAdminOnly(cmd, info);
 			return false;
 		}
@@ -194,7 +217,8 @@ public class CommandSystem {
 				if(arg.optional && i >= info.inputArgs.length)
 					break;
 				String word = info.inputArgs[i];
-				boolean able = arg.isWordParsable(word);
+				Guild g = info.isGuildMessage ? info.guild : null;
+				boolean able = arg.isWordParsable(word, g);
 				if(!able) {
 					BonziUtils.sendUsage(cmd, info, false, arg);
 					return false;
@@ -213,39 +237,22 @@ public class CommandSystem {
 			}
 		}
 		
-		// Check moderator.
-		if(cmd.moderatorOnly) {
-			if(info.isDirectMessage) {
-				BonziUtils.sendDoesntWorkDms(cmd, info);
-				return false;
-			}
-			Guild guild = info.guild;
-			String prefix = bot.prefixes.getPrefix(guild);
-			ModeratorManager mods = bot.moderators;
-			if(!mods.canCreateModRole(guild)) {
-				BonziUtils.sendNeededPermsForModRole(cmd, info, prefix);
-				return false;
-			}
-			Role modRole = mods.getModRole(guild);
-			Member member = info.member;
-			List<Role> roles = member.getRoles();
-			boolean isMod = false;
-			
-			if(member.hasPermission(Permission.ADMINISTRATOR) || member.isOwner())
-				isMod = true;
-			
-			if(!isMod) {
-				for(Role r: roles) {
-					if(r.getIdLong() == modRole.getIdLong()) {
-						isMod = true;
+		// Check user permissions.
+		if(info.isGuildMessage && cmd.userRequiredPermissions != null) {
+			if(!(info.bonzi.adminBypassing && admin)) {
+				Member executor = info.member;
+				boolean good = true;
+				for(Permission p: cmd.userRequiredPermissions) {
+					if(!executor.hasPermission(p)) {
+						good = false;
 						break;
 					}
 				}
-			}
-			
-			if(!isMod) {
-				BonziUtils.sendModOnly(cmd, info, prefix);
-				return true;
+				
+				if(!good) {
+					BonziUtils.sendUserNeedsPerms(cmd, info);
+					return false;
+				}
 			}
 		}
 		

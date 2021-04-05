@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.User;
 public abstract class CommandArg {
 	
 	public enum ArgType {
-		Int, Float, String, StringRem, Boolean, User, Role, TimeSpan, Color, Enum, Channel
+		Int, Float, String, StringRem, Boolean, User, Role, TimeSpan, Color, Enum, Channel, Array
 	}
 	
 	public CommandArg(String name) {
@@ -33,8 +33,11 @@ public abstract class CommandArg {
 	/**
 	 * Return if the string should be
 	 *   parsed by this CommandArg.
+	 *  
+	 * Expect theGuild to be null.
+	 * @param theGuild TODO
 	 */
-	public boolean isWordParsable(String word ) {
+	public boolean isWordParsable(String word, Guild theGuild) {
 		return false;
 	}
 	
@@ -42,7 +45,7 @@ public abstract class CommandArg {
 	 * Actually parse the string and
 	 * store it into an Object value.
 	 * 
-	 * Expect guildId to be -1l.
+	 * Expect theGuild to be null.
 	 */
 	public void parseWord(String word, JDA jda, User user, Guild theGuild) {
 		object = word;

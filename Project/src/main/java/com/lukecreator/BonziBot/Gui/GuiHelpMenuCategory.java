@@ -16,7 +16,6 @@ import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
 public class GuiHelpMenuCategory extends GuiPaging {
@@ -51,7 +50,7 @@ public class GuiHelpMenuCategory extends GuiPaging {
 	}
 	
 	@Override
-	public MessageEmbed draw(JDA jda) {
+	public Object draw(JDA jda) {
 		
 		String catName = category.name;
 		User u = jda.getUserById(this.parent.ownerId);

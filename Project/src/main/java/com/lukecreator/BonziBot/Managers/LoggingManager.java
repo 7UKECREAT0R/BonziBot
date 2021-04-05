@@ -160,7 +160,7 @@ public class LoggingManager implements IStorableData {
 				potential.sendMessage(BonziUtils.failureEmbed("Alright, cancelled.")).queue();
 				return;
 			} else {
-				String prefix = bb.prefixes.getPrefix(guild);
+				String prefix = bb.guildSettings.getSettings(guild).getPrefix();
 				GuildSettings gs = bb.guildSettings.getSettings(guild);
 				gs.loggingEnabled = true;
 				gs.loggingChannelCached = potential.getIdLong();

@@ -34,7 +34,7 @@ public class RoleArg extends CommandArg {
 	}
 	
 	@Override
-	public boolean isWordParsable(String word) {
+	public boolean isWordParsable(String word, Guild theGuild) {
 		if(isMention(word))
 			return true;
 		if(isValidId(word))

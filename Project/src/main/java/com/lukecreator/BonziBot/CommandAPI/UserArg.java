@@ -1,7 +1,10 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
+import java.util.List;
+
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 
 public class UserArg extends CommandArg {
@@ -34,13 +37,20 @@ public class UserArg extends CommandArg {
 	}
 	
 	@Override
-	public boolean isWordParsable(String word) {
+	public boolean isWordParsable(String word, Guild theGuild) {
 		if(word.equalsIgnoreCase("me"))
 			return true;
 		if(isMention(word))
 			return true;
 		if(isValidId(word))
 			return true;
+		
+		if(theGuild != null) {
+			List<Member> members = theGuild.getMembersByEffectiveName(word, true);
+			if(!members.isEmpty())
+				return true;
+		}
+		
 		return false;
 	}
 	@Override
@@ -69,6 +79,15 @@ public class UserArg extends CommandArg {
 			this.object = u;
 			return;
 		}
+		
+		// Search guild for user.
+		if(theGuild != null) {
+			List<Member> members = theGuild.getMembersByEffectiveName(word, true);
+			if(!members.isEmpty()) {
+				this.object = members.get(0).getUser();
+				return;
+			}
+		}
 	}
 	
 	@Override
@@ -81,6 +100,6 @@ public class UserArg extends CommandArg {
 	
 	@Override
 	public String getErrorDescription() {
-		return "You can either mention a user use their ID here. (You can also say \"me\"!)";
+		return "You can either mention a user, type their name, or use their ID here. (You can also say \"me\"!)";
 	}
 }

@@ -45,17 +45,17 @@ public class CommandParsedArgs {
 	public int getInt(String name) {
 		Object o = data.get(name);
 		if(o == null) return 0;
-		return (int)(Integer)o;
+		return ((Integer)o).intValue();
 	}
 	public float getFloat(String name) {
 		Object o = data.get(name);
 		if(o == null) return 0.0F;
-		return (float)(Float)o;
+		return ((Float)o).floatValue();
 	}
 	public boolean getBoolean(String name) {
 		Object o = data.get(name);
 		if(o == null) return false;
-		return (boolean)(Boolean)o;
+		return ((Boolean)o).booleanValue();
 	}
 	public String getString(String name) {
 		Object o = data.get(name);
@@ -81,5 +81,10 @@ public class CommandParsedArgs {
 		Object o = data.get(name);
 		if(o == null) return null;
 		return (Color)o;
+	}
+	public Object[] getArray(String name) {
+		Object o = data.get(name);
+		if(o == null) return null;
+		return (Object[])o;
 	}
 }

@@ -18,7 +18,7 @@ public abstract class Command {
 	public String description = "does nothing. this command hasn't been programmed yet."; // Description for the help menu.
 	public CommandCategory category = CommandCategory._HIDDEN; // The help category the command shows in.
 	public boolean worksInDms = true; // Does this command work in private messages?
-	public boolean moderatorOnly = false; // Does this command only work for moderators?
+	public Permission[] userRequiredPermissions = null; // The permissions the user needs to actually run the command.
 	public boolean adminOnly = false; // Does this command only work for the BIG BOYS?
 	
 	public void resetCooldown(CommandExecutionInfo e) {
@@ -48,6 +48,7 @@ public abstract class Command {
 		this.premiumItem = item;
 	}
 	
+	// The permissions the BOT needs to run this command.
 	public Permission[] neededPermissions = new Permission[] { Permission.UNKNOWN };
 	
 	public void executeCommand(CommandExecutionInfo e) {}

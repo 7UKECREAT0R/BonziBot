@@ -49,7 +49,7 @@ public class ColorArg extends CommandArg {
 	}
 	
 	@Override
-	public boolean isWordParsable(String word) {
+	public boolean isWordParsable(String word, Guild theGuild) {
 		
 		// Enum value case.
 		word = word.replace("_", "").replace(" ", "");

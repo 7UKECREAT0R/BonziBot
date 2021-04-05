@@ -27,18 +27,18 @@ public abstract class Gui {
 		if(buttons == null) {
 			buttons = new ArrayList<GuiButton>();
 		}
-		this.initialize(jda);
-		this.prefixOfLocation = b.prefixes.getPrefix(g);
+		this.prefixOfLocation = b.guildSettings.getSettings(g).getPrefix();
 		this.bonziReference = b;
+		this.initialize(jda);
 		this.initialized = true;
 	}
 	public void hiddenInit(JDA jda, User u, BonziBot b) {
 		if(buttons == null) {
 			buttons = new ArrayList<GuiButton>();
 		}
-		this.initialize(jda);
 		this.prefixOfLocation = Constants.DEFAULT_PREFIX;
 		this.bonziReference = b;
+		this.initialize(jda);
 		this.initialized = true;
 	}
 	
@@ -77,6 +77,6 @@ public abstract class Gui {
 	public void onAction(int buttonId, JDA jda) {}
 	public void postAction(int buttonId, JDA jda) {}
 	
-	public MessageEmbed draw(JDA jda) { return EMPTY; }
+	public Object draw(JDA jda) { return EMPTY; }
 	
 }

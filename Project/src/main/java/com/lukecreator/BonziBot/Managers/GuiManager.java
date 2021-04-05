@@ -86,18 +86,22 @@ public class GuiManager {
 		if(!guildGuis.containsKey(gId))
 			return;
 		
+		AllocGuiList guiList = guildGuis.get(gId);
+		long mId = e.getMessageIdLong();
+		if(!guiList.hasMessageId(mId)) {
+			return;
+		}
+		
 		// Remove the newly added reaction.
 		// This can't be done in private channels.
 		ReactionEmote re = e.getReactionEmote();
 		e.retrieveMessage().queue(msg -> {
 			if(re.isEmoji())
-				 msg.removeReaction(re.getEmoji(), reactor).queue();
+				 msg.removeReaction(re.getEmoji(), reactor).queue(null, fail -> { /* deleted */ });
 			else
-				msg.removeReaction(re.getEmote(), reactor).queue();
-		});
+				msg.removeReaction(re.getEmote(), reactor).queue(null, fail -> { /* deleted */ });
+		}, fail -> { /* deleted */ });
 		
-		long mId = e.getMessageIdLong();
-		AllocGuiList guiList = guildGuis.get(gId);
 		guiList.onReactionAdd(e.getReactionEmote(), mId, e.getUser());
 		guildGuis.put(gId, guiList);
 	}
@@ -111,8 +115,12 @@ public class GuiManager {
 		if(!userGuis.containsKey(uId))
 			return;
 		
-		long mId = e.getMessageIdLong();
 		AllocGuiList guiList = userGuis.get(uId);
+		long mId = e.getMessageIdLong();
+		if(!guiList.hasMessageId(mId)) {
+			return;
+		}
+		
 		guiList.onReactionAdd(e.getReactionEmote(), mId, e.getUser());
 		userGuis.put(uId, guiList);
 	}

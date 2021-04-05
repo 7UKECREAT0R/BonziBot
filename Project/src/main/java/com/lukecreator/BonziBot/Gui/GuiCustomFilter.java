@@ -40,7 +40,7 @@ public class GuiCustomFilter extends Gui {
 	}
 	
 	@Override
-	public MessageEmbed draw(JDA jda) {
+	public Object draw(JDA jda) {
 		BonziBot bb = this.bonziReference;
 		GuildSettings settings = bb
 			.guildSettings.getSettings(guildId);
@@ -78,7 +78,7 @@ public class GuiCustomFilter extends Gui {
 		
 		if(buttonId == 0) {
 			// Back
-			Gui back = new GuiGuildSettings(guildId, guildName);
+			Gui back = new GuiGuildSettingsPage1(guildId, guildName);
 			this.parent.setActiveGui(back, jda);
 			return;
 		}

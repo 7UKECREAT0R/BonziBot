@@ -11,7 +11,6 @@ import com.lukecreator.BonziBot.GuiAPI.GuiPaging;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
 public class GuiUserTags extends GuiPaging {
@@ -58,7 +57,7 @@ public class GuiUserTags extends GuiPaging {
 	}
 	
 	@Override
-	public MessageEmbed draw(JDA jda) {
+	public Object draw(JDA jda) {
 		
 		// Fill the current page information.
 		TagData[] currentPage = new TagData[PER_PAGE];

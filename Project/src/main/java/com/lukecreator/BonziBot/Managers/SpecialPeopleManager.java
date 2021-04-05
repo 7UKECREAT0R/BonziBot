@@ -15,17 +15,17 @@ public class SpecialPeopleManager {
 	};
 	final long[] bros = new long[] {
 			239526347972673537l, // Yucky
-			537735335300562975l, // Cwaky
-			292755668623163399l, // Salter
-			348136128932610058l, // Chekn
-			624752943127592976l, // Materw
-			401913626195263509l, // Zerni
-			358068430349271040l,  // Onix
-			473375262973624333l, // Palsma
-			258702715943780352l, // Cooba
-			302881384400289792l, // Goaldy
-			633411509560541245l,  // fEZ
-			250381056904003585l  // Bist
+			537735335300562975l, // Cwxzy
+			292755668623163399l, // Salty
+			348136128932610058l, // Checken
+			624752943127592976l, // HypixL
+			401913626195263509l, // Zeni
+			358068430349271040l, // Onyx2D
+			473375262973624333l, // Plasma
+			258702715943780352l, // Curoa
+			302881384400289792l, // Goldy
+			633411509560541245l, // Fez
+			250381056904003585l  // Bisticeaty
 	};
 	
 	public boolean getIsAdmin(long id) {
@@ -41,6 +41,9 @@ public class SpecialPeopleManager {
 	public boolean getIsAdmin(Member m) {
 		return getIsAdmin(m.getUser().getIdLong());
 	}
+	public long[] getAdmins() {
+		return admins;
+	}
 	
 	public boolean getIsBro(long id) {
 		for(long bro: bros) {
@@ -54,5 +57,8 @@ public class SpecialPeopleManager {
 	}
 	public boolean getIsBro(Member m) {
 		return getIsBro(m.getUser().getIdLong());
+	}
+	public long[] getBros() {
+		return bros;
 	}
 }

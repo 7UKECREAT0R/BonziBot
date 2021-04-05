@@ -11,6 +11,15 @@ public class Achievement implements Serializable {
 	public final GenericEmoji icon;
 	public final int rarity;
 	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Achievement) {
+			Achievement comp = (Achievement)obj;
+			return this.name.equalsIgnoreCase(comp.name);
+		}
+		return false;
+	}
+	
 	private Achievement(String name, String desc, GenericEmoji icon, int rarity) {
 		this.name = name;
 		this.desc = desc;
@@ -19,23 +28,23 @@ public class Achievement implements Serializable {
 	}
 	
 	public static final Achievement GENEROUS = new Achievement(
-		"Generous", "Upgrade someone's server.", GenericEmoji.fromEmoji("😇"), 1);
+		"Generous", "Upgrade someone's server.", GenericEmoji.fromEmoji("😇"), 1); // TODO
 	public static final Achievement MILESTONER = new Achievement(
-		"Milestoner", "Count a thousandth number in counting game.", GenericEmoji.fromEmoji("⌨️"), 3);
+		"Milestoner", "Count a thousandth number in counting game.", GenericEmoji.fromEmoji("⌨️"), 3); // TODO
 	public static final Achievement LUCKY = new Achievement(
 		"Lucky", "Win a chance command with 1,000 coins or more.", GenericEmoji.fromEmoji("🪙"), 3);
 	public static final Achievement LUCK_MASTER = new Achievement(
 		"Luck Master", "Win a chance command with 10,000 coins or more!", GenericEmoji.fromEmoji("⌨️"), 4);
 	public static final Achievement GOOD_ADMIN = new Achievement(
-		"Good Admin", "Backup a server.", GenericEmoji.fromEmoji("👮"), 1);
+		"Good Admin", "Backup a server.", GenericEmoji.fromEmoji("👮"), 1); // TODO
 	public static final Achievement SNAZZY = new Achievement(
 		"Snazzy", "Update your profile!", GenericEmoji.fromEmoji("🤩"), 1);
 	public static final Achievement RPG_PLAYER = new Achievement(
-		"RPG Player", "Start your adventure in BonziBot RPG.", GenericEmoji.fromEmoji("👶"), 1);
+		"RPG Player", "Start your adventure in BonziBot RPG.", GenericEmoji.fromEmoji("👶"), 1); // TODO
 	public static final Achievement BLOODTHIRSTY = new Achievement(
-		"Bloodthirsty", "Kill fifty players in RPG.", GenericEmoji.fromEmoji("🩸"), 2);
+		"Bloodthirsty", "Kill fifty players in RPG.", GenericEmoji.fromEmoji("🩸"), 2); // TODO
 	public static final Achievement OVERPOWERED = new Achievement(
-		"Overpowered", "Deal over a hundred damage in a single hit in RPG!", GenericEmoji.fromEmoji("⚔️"), 3);
+		"Overpowered", "Deal over a hundred damage in a single hit in RPG!", GenericEmoji.fromEmoji("⚔️"), 3); // TODO
 	public static final Achievement SPY = new Achievement(
 		"The Spy", "Expose a message.", GenericEmoji.fromEmoji("🕵️"), 1);
 }

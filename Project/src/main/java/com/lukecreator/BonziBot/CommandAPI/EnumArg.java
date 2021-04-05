@@ -33,7 +33,7 @@ public class EnumArg extends CommandArg {
 	}
 	
 	@Override
-	public boolean isWordParsable(String word) {
+	public boolean isWordParsable(String word, Guild theGuild) {
 		word = word.toUpperCase().replace(' ', '_');
 		for(Enum e: enumType) {
 			if(e.name().toUpperCase().contains(word)

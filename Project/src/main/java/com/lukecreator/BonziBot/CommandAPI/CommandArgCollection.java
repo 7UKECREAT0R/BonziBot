@@ -106,6 +106,8 @@ public class CommandArgCollection {
 	/**
 	 * Parses an array of words. Ensure the words array does
 	 *  not contain the prefix part of the command message.
+	 *  
+	 *  g can be null sometimes if it's in a DM.
 	 */
 	public CommandParsedArgs parse(String[] words, JDA jda, User exec, Guild g) {
 		
@@ -135,7 +137,7 @@ public class CommandArgCollection {
 				cmd.object = s;
 				clone[i] = cmd;
 				break;
-			} else if(cmd.isWordParsable(word)) {
+			} else if(cmd.isWordParsable(word, g)) {
 				cmd.parseWord(word, jda, exec, g);
 				clone[i] = cmd;
 			} else clone[i] = null;

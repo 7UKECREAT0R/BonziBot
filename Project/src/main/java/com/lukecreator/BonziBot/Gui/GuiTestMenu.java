@@ -9,7 +9,6 @@ import com.lukecreator.BonziBot.GuiAPI.GuiPaging;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 
 public class GuiTestMenu extends GuiPaging {
 	
@@ -31,7 +30,7 @@ public class GuiTestMenu extends GuiPaging {
 	}
 	
 	@Override
-	public MessageEmbed draw(JDA jda) {
+	public Object draw(JDA jda) {
 		String sel = set[this.currentPage - 1].toString();
 		EmbedBuilder eb = new EmbedBuilder()
 			.setColor(Color.magenta)

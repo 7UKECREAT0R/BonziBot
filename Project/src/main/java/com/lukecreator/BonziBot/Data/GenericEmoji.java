@@ -48,6 +48,16 @@ public class GenericEmoji implements Serializable {
 		}
 	}
 	
+	@Override
+	public String toString() {
+		if(this.isGeneric)
+			return this.genericEmoji;
+		else {
+			Emote e = EmojiCache.getEmoteById(this.guildEmojiId);
+			return (e == null) ? "invalid" : e.getName();
+		}
+	}
+	
 	private GenericEmoji(String genericEmoji) {
 		this.isGeneric = true;
 		this.genericEmoji = genericEmoji;
@@ -69,5 +79,9 @@ public class GenericEmoji implements Serializable {
 	}
 	public static GenericEmoji fromEmoji(String emoji) {
 		return new GenericEmoji(emoji);
+	}
+	public static GenericEmoji fromEmoji(int unicode) {
+		char c = (char) unicode;
+		return new GenericEmoji(String.valueOf(c));
 	}
 }

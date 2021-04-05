@@ -123,20 +123,29 @@ public class EventWaiterManager {
 		return this.reactionWaiters.containsKey(id);
 	}
 	
-	public void onMessage(Message msg) {
+	/**
+	 * Receive a message and pass it through
+	 * a series of tests to check if it should
+	 * be received by a waiting event.
+	 * @param msg
+	 * @return <code>true</code> if the event shouldn't be passed through to the command system. (cancel)
+	 */
+	public boolean onMessage(Message msg) {
 		User u = msg.getAuthor();
 		long id = u.getIdLong();
 		
 		if(waiters.containsKey(id)) {
 			Consumer<? super Message> event = waiters.remove(id);
 			event.accept(msg);
-			return;
+			return true;
 		}
 		
 		if(argWaiters.containsKey(id)) {
 			onArgMessage(msg, id);
-			return;
+			return true;
 		}
+		
+		return false;
 	}
 	public void onArgMessage(Message msg, long id) {
 		
@@ -147,9 +156,10 @@ public class EventWaiterManager {
 		Consumer<Object> event = obj.getB();
 		String content = msg.getContentRaw();
 		MessageChannel channel = msg.getChannel();
+		Guild guild = msg.isFromGuild() ? msg.getGuild() : null;
 		JDA jda = msg.getJDA();
 		
-		if(!arg.isWordParsable(content)) {
+		if(!arg.isWordParsable(content, guild)) {
 			msg.delete().queue();
 			EmbedBuilder eb = BonziUtils.quickEmbed(
 				"Incorrect type of response.",
@@ -161,7 +171,6 @@ public class EventWaiterManager {
 		}
 		
 		argWaiters.remove(id);
-		Guild guild = msg.isFromGuild() ? msg.getGuild() : null;
 		arg.parseWord(content, jda, msg.getAuthor(), guild);
 		Object parsed = arg.object;
 		

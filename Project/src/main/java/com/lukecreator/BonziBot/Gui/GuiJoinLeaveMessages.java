@@ -17,7 +17,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -44,10 +43,11 @@ public class GuiJoinLeaveMessages extends Gui {
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🖱️"), 1));
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🗨️"), 2));
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("#️⃣"), 3));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📰"), 4));
 	}
 	
 	@Override
-	public MessageEmbed draw(JDA jda) {
+	public Object draw(JDA jda) {
 		
 		EmbedBuilder menu = BonziUtils.quickEmbed
 			(this.guildName, "Server Settings - " + keyword
@@ -56,6 +56,7 @@ public class GuiJoinLeaveMessages extends Gui {
 		GuildSettingsManager mgr = this.bonziReference.guildSettings;
 		GuildSettings settings = mgr.getSettings(guildId);
 		boolean enabled = leave ? settings.leaveMessages : settings.joinMessages;
+		boolean isEmbed = leave ? settings.leaveMessageIsEmbed : settings.joinMessageIsEmbed;
 		String msg = enabled ? leave ? settings.leaveMessage : settings.joinMessage : null;
 		long channelId = enabled ? leave ? settings.leaveMessageChannel : settings.joinMessageChannel : 0l;
 		TextChannel tc = jda.getTextChannelById(channelId);
@@ -79,6 +80,8 @@ public class GuiJoinLeaveMessages extends Gui {
 		if(enabled) {
 			menu.addField("🗨️ Message", msg, false);
 			menu.addField("#️⃣ Channel", channelMnt, false);
+			menu.addField("📰 Use Embed? `" + (isEmbed?"🟩 YES`":"🟥 NO`"),
+				"Whether the " + keywordl + " messages should be placed in an embed or not.", false);
 		}
 		
 		return menu.build();
@@ -101,7 +104,7 @@ public class GuiJoinLeaveMessages extends Gui {
 				return;
 			}
 			
-			this.parent.setActiveGui(new GuiGuildSettings(guildId, guildName), jda);
+			this.parent.setActiveGui(new GuiGuildSettingsPage1(guildId, guildName), jda);
 			return;
 		}
 		
@@ -149,8 +152,8 @@ public class GuiJoinLeaveMessages extends Gui {
 					"What should the " + keywordl + " message be?",
 					"Feel free to attach an image too!", Color.orange);
 			eb.addField("Use these variables to spruce it up!",
-				  "`(user)` - *The user's name without numbers.\n"
-				+ "`(tag)` - *The user's name and numbers.\n"
+				  "`(user)` - The user's name without numbers.\n"
+				+ "`(tag)` - The user's name and numbers.\n"
 				+ "`(server)` - The server's name.\n"
 				+ "`(members)` - The member count.\n"
 				+ "`(date)` - The current date.\n"
@@ -210,6 +213,24 @@ public class GuiJoinLeaveMessages extends Gui {
 			});
 			
 			return;
+		}
+		
+		if(buttonId == 4) {
+			
+			MessageChannel channel = this.parent.getChannel(jda);
+			
+			if(!(leave ? settings.leaveMessages : settings.joinMessages)) {
+				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("Enable " + keywordl + " messages first!"), 3);
+				return;
+			}
+			
+			if(leave)
+				settings.leaveMessageIsEmbed = !settings.leaveMessageIsEmbed;
+			else
+				settings.joinMessageIsEmbed = !settings.joinMessageIsEmbed;
+			
+			mgr.setSettings(guildId, settings);
+			this.parent.redrawMessage(jda);
 		}
 	}
 }

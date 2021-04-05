@@ -79,7 +79,6 @@ public class Image {
 		try {
 			URL urlObject = new URL(url);
 			double size = BonziUtils.getFileSizeMb(urlObject);
-			System.out.println("size (mb): " + size);
 			if(size > MAX_FILE_SIZE) {
 				downloadMessage = "Your file can't be over " + MAX_FILE_SIZE + "mb.";
 				return null;
@@ -89,7 +88,7 @@ public class Image {
 			BufferedImage image = ImageIO.read(connection.getInputStream());
 			connection.disconnect();
 			if(image == null) {
-				downloadMessage = "Downloaded image doesn't exist anymore.";
+				downloadMessage = "There's no valid image at that URL. Try setting it again and make sure it's an actual image!";
 				return null;
 			}
 			downloadMessage = "Successful.";
@@ -192,10 +191,6 @@ public class Image {
 		return this;
 	}
 	
-	/**
-	 * Returns a new image as a circle. Disposes the current object.
-	 * @return
-	 */
 	public Image circular() {
 		Image copy = new Image(this.width, this.height, this.isPng);
 		copy.graphics.setClip(new Ellipse2D.Float(0, 0, width, height));
@@ -448,6 +443,8 @@ public class Image {
 		return this;
 	}
 	public Image drawImageKeepAspect(Image other, int x, int y, float targetWidth, float targetHeight) {
+		
+		// Draw an image to fill an area, but keep its aspect ratio.
 		float otherWidth = other.width;
 		float otherHeight = other.height;
 		
@@ -462,6 +459,7 @@ public class Image {
 		
 		int roomX = newWidth - (int)targetWidth;
 		int roomY = newHeight - (int)targetHeight;
+		
 		x -= roomX >> 1;
 		y -= roomY >> 1;
 		

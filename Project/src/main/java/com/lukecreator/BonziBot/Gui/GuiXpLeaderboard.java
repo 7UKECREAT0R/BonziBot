@@ -18,7 +18,6 @@ import com.lukecreator.BonziBot.GuiAPI.GuiPaging;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
 public class GuiXpLeaderboard extends GuiPaging {
@@ -72,7 +71,7 @@ public class GuiXpLeaderboard extends GuiPaging {
 	}
 	
 	@Override
-	public MessageEmbed draw(JDA jda) {
+	public Object draw(JDA jda) {
 		
 		// Fill the current page information.
 		LbEntry[] currentPage = new LbEntry[PER_PAGE];
@@ -115,7 +114,8 @@ public class GuiXpLeaderboard extends GuiPaging {
 				icon = "| ❤️ Admin Friend";
 			if(this.bonziReference.special.getIsAdmin(entry.userId))
 				icon = "| 💻 Admin";
-			name += " " + icon;
+			if(icon != null)
+				name += " " + icon;
 			
 			String xp = BonziUtils.comma(acc.getXP()) + " XP";
 			String lvl = "Level " + acc.getLevel();

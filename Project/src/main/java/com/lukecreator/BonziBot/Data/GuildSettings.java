@@ -17,14 +17,23 @@ public class GuildSettings implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public enum FilterLevel {
-		NONE("No filter on anything. Does not scan messages."),
-		SLURS("Filter slurs which could offend a certain group. Suits most servers that allow swearing."),
-		SWEARS("Filter just swear words and slurs. For actively moderated family friendly servers."),
-		SENSITIVE("Aggresive Filtering: Filter media names, urls, and text. For strict family friendly servers.");
 		
-		public final String desc;
-		private FilterLevel(String string) {
-			this.desc = string;
+		NONE("No filter on anything. Does not scan messages.",
+			"This server has no auto-filtering."),
+		
+		SLURS("Filter slurs which could offend a certain group. Suits most servers that allow swearing.",
+			"This server auto-filters slurs, but swearing is permitted."),
+		
+		SWEARS("Filter just swear words and slurs. For actively moderated family friendly servers.",
+			"This server is auto-filtering swear words."),
+		
+		SENSITIVE("Aggresive Filtering: Filter media names, urls, and text. For strict family friendly servers.",
+			"This server is strictly family-friendly.");
+		
+		public final String desc, footer; // rules footer
+		private FilterLevel(String desc, String footer) {
+			this.desc = desc;
+			this.footer = footer;
 		}
 	}
 	
@@ -47,16 +56,25 @@ public class GuildSettings implements Serializable {
 	
 	// Join / Leave Messages. Be aware that these won't necessarily be good values even if enabled.
 	public boolean joinMessages = false;
+	public boolean joinMessageIsEmbed = false;
 	public long joinMessageChannel = 0l;
 	public String joinMessage = null;
 	
 	public boolean leaveMessages = false;
+	public boolean leaveMessageIsEmbed = false;
 	public long leaveMessageChannel = 0l;
 	public String leaveMessage = null;
 	
 	// Join Role
 	public boolean joinRole = false;
 	public long joinRoleId = 0l;
+	
+	// Prefix
+	private String prefix = Constants.DEFAULT_PREFIX;
+	
+	// Rules
+	private Rules rules = new Rules();
+	
 	// ----------
 	// FIELDS
 	// ----------
@@ -181,5 +199,25 @@ public class GuildSettings implements Serializable {
 	}
 	public void clearCustomFilter() {
 		customFilter.clear();
+	}
+	
+	public String getPrefix() {
+		if(this.prefix == null)
+			this.prefix = Constants.DEFAULT_PREFIX;
+		return this.prefix;
+	}
+	public void setPrefix(String newPrefix) {
+		if(newPrefix.length() > Constants.MAX_PREFIX_LENGTH)
+			newPrefix = newPrefix.substring(0, Constants.MAX_PREFIX_LENGTH);
+		this.prefix = newPrefix;
+	}
+	public Rules getRules() {
+		if(this.rules == null) {
+			this.rules = new Rules();
+		}
+		return this.rules;
+	}
+	public void setRules(Rules rules) {
+		this.rules = rules;
 	}
 }

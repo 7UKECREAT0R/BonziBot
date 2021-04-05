@@ -17,7 +17,7 @@ public class FloatArg extends CommandArg {
 	public static final Pattern PATTERN = Pattern.compile(REGEX);
 	
 	@Override
-	public boolean isWordParsable(String word) {
+	public boolean isWordParsable(String word, Guild theGuild) {
 		word = word.trim();
 		return PATTERN.matcher(word).matches();
 	}

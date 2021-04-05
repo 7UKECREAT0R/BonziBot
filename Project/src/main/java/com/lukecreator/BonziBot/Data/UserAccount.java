@@ -2,11 +2,14 @@ package com.lukecreator.BonziBot.Data;
 
 import java.awt.Color;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
 import com.lukecreator.BonziBot.BonziUtils;
+import com.lukecreator.BonziBot.TimeSpan;
 
 import net.dv8tion.jda.api.entities.Invite.Guild;
 
@@ -17,6 +20,7 @@ public class UserAccount implements Serializable {
 	
 	private static final long serialVersionUID = 2l;
 	private static final String NO_BIO = "No bio set yet!";
+	public static final int MAX_BIO_LEN = 500;
 	
 	private int coins = 0;
 	private int xp = 0;
@@ -30,8 +34,14 @@ public class UserAccount implements Serializable {
 	public Color favoriteColor = BonziUtils.COLOR_BONZI_PURPLE; // heck yeah
 	public String backgroundImage = null;
 	public TimeZone timeZone = null;
-	public final List<Achievement> achievements = new ArrayList<Achievement>();
-	public final List<Badge> badges = new ArrayList<Badge>();
+	public LocalDate birthday = null;
+	public AfkData afkData = new AfkData();
+	private final List<Achievement> achievements = new ArrayList<Achievement>();
+	private final List<Badge> badges = new ArrayList<Badge>();
+	
+	public static final long REP_DELAY = 24 * 60 * 60 * 1000;
+	private int reputation; // Given by other users every 24 hours.
+	private long nextAllowedRep = 0l; // Time when this user can next rep a profile.
 	
 	// Opting stuff. Required for a lot of botlists.
 	public boolean optOutDms = false;
@@ -128,5 +138,101 @@ public class UserAccount implements Serializable {
 				return warns.remove(i);
 		}
 		return null;
+	}
+	
+	public boolean hasAchievement(Achievement a) {
+		return achievements.contains(a);
+	}
+	public boolean hasBadge(Badge badge) {
+		return badges.contains(badge);
+	}
+	public void awardAchievement(Achievement a) {
+		if(!achievements.contains(a))
+			achievements.add(a);
+	}
+	public void awardBadge(Badge badge) {
+		if(!badges.contains(badge))
+			badges.add(badge);
+	}
+	public void clearBadges() {
+		badges.clear();
+	}
+	public List<Badge> getBadges() {
+		return this.badges;
+	}
+	public List<Achievement> getAchievements() {
+		return this.achievements;
+	}
+	
+	public int getRep() {
+		return this.reputation;
+	}
+	public int addRep() {
+		return ++this.reputation;
+	}
+	public int subRep() {
+		return --this.reputation;
+	}
+	public boolean canRepSomeone() {
+		return this.canRepSomeone(System.currentTimeMillis());
+	}
+	public boolean canRepSomeone(long time) {
+		return time > this.nextAllowedRep;
+	}
+	public TimeSpan timeUntilCanRep() {
+		return this.timeUntilCanRep(System.currentTimeMillis());
+	}
+	public TimeSpan timeUntilCanRep(long time) {
+		if(time > this.nextAllowedRep) {
+			return TimeSpan.fromMillis(time - this.nextAllowedRep);
+		} else return TimeSpan.ZERO;
+	}
+	public void setRepDelay() {
+		long now = System.currentTimeMillis();
+		this.nextAllowedRep = now + REP_DELAY;
+	}
+	public void setRep(int rep) {
+		this.reputation = rep;
+	}
+	
+	public boolean hasBirthday() {
+		return this.birthday != null;
+	}
+	public LocalDate getBirthday() {
+		return this.birthday;
+	}
+	public void setBirthday(LocalDate birthday) {
+		this.birthday = birthday;
+	}
+	public boolean isTodayBirthday() {
+		if(this.birthday == null)
+			return false;
+		LocalDate now = LocalDate.now();
+		this.birthday = this.birthday.withYear(now.getYear());
+		Month aMonth = this.birthday.getMonth();
+		Month bMonth = now.getMonth();
+		int aDay = this.birthday.getDayOfMonth();
+		int bDay = now.getDayOfMonth();
+		return aDay == bDay && aMonth == bMonth;
+	}
+	public int daysUntilBirthday() {
+		if(this.birthday == null)
+			return -1;
+		
+		LocalDate now = LocalDate.now();
+		this.birthday = this.birthday.withYear(now.getYear());
+		int dayOfYear = this.birthday.getDayOfYear();
+		int yearLength = now.lengthOfYear();
+		int currentDay = now.getDayOfYear();
+		
+		if(currentDay == dayOfYear)
+			return 0;
+		else if(currentDay < dayOfYear)
+			return dayOfYear - currentDay;
+		else
+			return yearLength - currentDay + dayOfYear;
+	}
+	public void disableBirthday() {
+		this.birthday = null;
 	}
 }

@@ -1,9 +1,13 @@
 package com.lukecreator.BonziBot.Managers;
 
 import java.awt.Color;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import com.lukecreator.BonziBot.Commands.PollCommand;
+import com.lukecreator.BonziBot.Commands.TimedPollCommand;
 import com.lukecreator.BonziBot.Data.GenericReactionEvent;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
@@ -42,6 +46,8 @@ public class ReactionManager {
 		checkPolls(e);
 	}
 	void checkPolls(GenericReactionEvent e) {
+		
+		// pre-check as much information as humanly possible
 		boolean isPrivate = e.guild == null;
 		boolean isEmoji = e.reactionEmote.isEmoji();
 		String emoji = isEmoji?e.reactionEmote.getEmoji():"";
@@ -49,7 +55,7 @@ public class ReactionManager {
 		boolean isDownEmoji = emoji.equals("👎");
 		boolean pollEmoji = isUpEmoji | isDownEmoji;
 		
-		if(!isPrivate && isEmoji && pollEmoji) {
+		if(!isPrivate && pollEmoji) {
 			// Fetch the message so the poll can be updated.
 			e.retrieveMessage().queue(pollMsg -> {
 				if(pollMsg.getEmbeds().isEmpty())
@@ -74,10 +80,31 @@ public class ReactionManager {
 				}
 				
 				MessageEmbed embed = pollMsg.getEmbeds().get(0);
-				if(!embed.getTitle().equals(PollCommand.EMBED_TITLE))
+				
+				String oldTitle = embed.getTitle();
+				if(!oldTitle.equals(PollCommand.G_EMBED_TITLE) &&
+					!oldTitle.equals(PollCommand.P_EMBED_TITLE))
 					return;
+				
+				// Cancel if TimedPoll and time is expired.
+				if(embed.getTimestamp() != null) {
+					OffsetDateTime dt = embed.getTimestamp();
+					OffsetDateTime now = Instant.now().atOffset(ZoneOffset.UTC);
+					if(now.isAfter(dt)) {
+						String desc = embed.getDescription();
+						if(!desc.startsWith(TimedPollCommand.POLL_ENDED)) {
+							desc = TimedPollCommand.POLL_ENDED + "\n" + desc;
+							EmbedBuilder eb = new EmbedBuilder(embed);
+							eb.setDescription(desc);
+							pollMsg.editMessage(eb.build()).queue();
+						}
+						return;
+					}
+				}
+				
 				EmbedBuilder eb = new EmbedBuilder(embed);
-				eb.setColor(up>down?Color.green : down > up ? Color.red : Color.gray);
+				eb.setColor(up > down ? Color.green :
+					down > up ? Color.red : Color.gray);
 				eb.setFooter(PollCommand.generateFooter(up, down));
 				pollMsg.editMessage(eb.build()).queue();
 			});

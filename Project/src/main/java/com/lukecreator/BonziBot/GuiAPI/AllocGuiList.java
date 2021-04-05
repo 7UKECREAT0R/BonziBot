@@ -21,6 +21,13 @@ public class AllocGuiList {
 		guis = new ArrayList<GuiContainer>(GLOBAL_LIMIT);
 	}
 	
+	public boolean hasMessageId(long mid) {
+		for(GuiContainer gui: guis) {
+			if(gui.hasSentMessage && gui.messageId == mid)
+				return true;
+		}
+		return false;
+	}
 	public int size() {
 		return guis.size();
 	}

@@ -22,7 +22,7 @@ public class BooleanArg extends CommandArg {
 	}
 	
 	@Override
-	public boolean isWordParsable(String word) {
+	public boolean isWordParsable(String word, Guild theGuild) {
 		for(String s: ALL) {
 			if(word.equalsIgnoreCase(s))
 				return true;

@@ -10,7 +10,6 @@ import com.lukecreator.BonziBot.GuiAPI.GuiButton;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
 /**
@@ -55,7 +54,7 @@ public class GuiHelpMenu extends Gui {
 	}
 	
 	@Override
-	public MessageEmbed draw(JDA jda) {
+	public Object draw(JDA jda) {
 		User u = jda.getUserById(this.parent.ownerId);
 		
 		EmbedBuilder eb;

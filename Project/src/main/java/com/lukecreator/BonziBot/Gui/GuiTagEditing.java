@@ -14,7 +14,6 @@ import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 
 public class GuiTagEditing extends Gui {
 	
@@ -44,7 +43,7 @@ public class GuiTagEditing extends Gui {
 	}
 	
 	@Override
-	public MessageEmbed draw(JDA jda) {
+	public Object draw(JDA jda) {
 		return startEmbed.build();
 	}
 	

@@ -37,7 +37,7 @@ public class TextChannelArg extends CommandArg {
 	}
 	
 	@Override
-	public boolean isWordParsable(String word) {
+	public boolean isWordParsable(String word, Guild theGuild) {
 		if(isValidId(word))
 			return true;
 		if(isMention(word))

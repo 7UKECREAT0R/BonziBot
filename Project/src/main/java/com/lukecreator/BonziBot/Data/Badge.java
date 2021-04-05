@@ -13,6 +13,15 @@ public class Badge implements Serializable {
 	public final String desc;
 	public final GenericEmoji icon;
 	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Badge) {
+			Badge comp = (Badge)obj;
+			return this.name.equalsIgnoreCase(comp.name);
+		}
+		return false;
+	}
+	
 	private Badge(String name, String desc, GenericEmoji icon) {
 		this.name = name;
 		this.desc = desc;
@@ -20,15 +29,15 @@ public class Badge implements Serializable {
 	}
 	
 	public static final Badge FRIEND = new Badge(
-		"Friend", "Friend of the developers!", GenericEmoji.fromEmoji("❤️"));
+		"Friend", "Friend of the developers!", GenericEmoji.fromEmoji(0x2665)); // ❤️
 	public static final Badge DEVELOPER = new Badge(
 		"Developer", "Contributed/helped make BonziBot!", GenericEmoji.fromEmoji("💻"));
 	public static final Badge ACHIEVEMENT_MASTER = new Badge(
-		"Achievement Master", "Collected All Achievements!", GenericEmoji.fromEmoji("🎖️"));
+		"Achievement Master", "Collected All Achievements!", GenericEmoji.fromEmoji("🏆"));
 	public static final Badge LOTTERY_WINNER = new Badge(
-		"Lottery Winner", "Won the lottery!", GenericEmoji.fromEmoji("🤑"));
+		"Lottery Winner", "Won the lottery!", GenericEmoji.fromEmoji("💸"));
 	public static final Badge BUG_HUNTER = new Badge(
-		"Bug Hunter", "Submitted a valid bug report!", GenericEmoji.fromEmoji("🪲"));
+		"Bug Hunter", "Submitted a valid bug report!", GenericEmoji.fromEmoji("💣"));
 	public static final Badge CREATIVE = new Badge(
-		"Creative", "Submitted an awesome idea that got accepted!", GenericEmoji.fromEmoji("🧠"));
+		"Creative", "Submitted an awesome idea that got accepted!", GenericEmoji.fromEmoji("📨"));
 }
