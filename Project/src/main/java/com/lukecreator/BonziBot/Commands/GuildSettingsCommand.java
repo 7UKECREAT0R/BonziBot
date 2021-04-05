@@ -4,8 +4,9 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
-import com.lukecreator.BonziBot.Gui.GuiGuildSettings;
+import com.lukecreator.BonziBot.Gui.GuiGuildSettingsPage1;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 
 public class GuildSettingsCommand extends Command {
@@ -18,7 +19,7 @@ public class GuildSettingsCommand extends Command {
 		this.category = CommandCategory.UTILITIES;
 		this.unicodeIcon = "⚙️";
 		this.worksInDms = false;
-		this.moderatorOnly = true;
+		this.userRequiredPermissions = new Permission[] { Permission.MANAGE_SERVER };
 		
 		this.setCooldown(20000);
 	}
@@ -28,7 +29,7 @@ public class GuildSettingsCommand extends Command {
 		Guild guild = e.guild;
 		long guildId = guild.getIdLong();
 		String guildName = guild.getName();
-		GuiGuildSettings gui = new GuiGuildSettings
+		GuiGuildSettingsPage1 gui = new GuiGuildSettingsPage1
 				(guildId, guildName);
 		BonziUtils.sendGui(e, gui);
 	}

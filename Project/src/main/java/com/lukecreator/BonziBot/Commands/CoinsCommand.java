@@ -51,7 +51,7 @@ public class CoinsCommand extends Command {
 			prefix = "🤯 Super Ballin";
 		else if(coins < 1000000)
 			prefix = "☄️ ULTRA BALLER";
-		else prefix = "👑 COIN KING";
+		else prefix = "👑 TRANSCENDENT";
 		
 		String sCoins = BonziUtils.comma(acc.getCoins()) + " coins";
 		

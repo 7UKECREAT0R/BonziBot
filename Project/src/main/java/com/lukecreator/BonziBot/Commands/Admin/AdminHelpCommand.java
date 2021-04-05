@@ -4,7 +4,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
-import com.lukecreator.BonziBot.Gui.GuiHelpMenu;
+import com.lukecreator.BonziBot.Gui.GuiHelpMenuCategory;
 
 public class AdminHelpCommand extends Command {
 	
@@ -18,7 +18,8 @@ public class AdminHelpCommand extends Command {
 	
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
-		GuiHelpMenu menu = new GuiHelpMenu(true);
+		GuiHelpMenuCategory menu = new GuiHelpMenuCategory
+			(CommandCategory._HIDDEN, e.bonzi);
 		BonziUtils.sendGui(e, menu);
 	}
 	

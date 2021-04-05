@@ -18,6 +18,7 @@ import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
@@ -100,7 +101,7 @@ public class NickAllCommand extends Command {
 		this.unicodeIcon = "🖋️";
 		this.description = "Rename everyone in the server! You can also specify a condition to select the users to rename.";
 		this.args = null;
-		this.moderatorOnly = true;
+		this.userRequiredPermissions = new Permission[] { Permission.NICKNAME_MANAGE };
 		this.category = CommandCategory._SHOP_COMMAND;
 		this.worksInDms = false;
 		this.neededPermissions = new Permission[] { Permission.NICKNAME_MANAGE, Permission.NICKNAME_CHANGE };
@@ -156,7 +157,8 @@ public class NickAllCommand extends Command {
 					String conditionData = halves[1].trim();
 					if(conditionName.equalsIgnoreCase("role")) {
 						c = new RoleCondition();
-						if(!c.getArg().isWordParsable(conditionData)) {
+						Guild g = e.isGuildMessage ? e.guild : null;
+						if(!c.getArg().isWordParsable(conditionData, g)) {
 							e.channel.sendMessage(BonziUtils.failureEmbed("Invalid role specified.")).queue();
 							this.resetCooldown(e);
 							return;

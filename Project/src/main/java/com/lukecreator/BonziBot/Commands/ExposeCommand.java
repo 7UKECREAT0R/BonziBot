@@ -6,6 +6,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.Achievement;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Managers.LoggingManager;
 
@@ -54,6 +55,7 @@ public class ExposeCommand extends Command {
 			String last = BonziUtils.plural("attachment", c);
 			eb.setFooter("With " + c + " " + last + ".");
 		}
+		BonziUtils.tryAwardAchievement(e.channel, e.bonzi, e.executor, Achievement.SPY);
 		e.channel.sendMessage(eb.build()).queue();
 		return;
 	}

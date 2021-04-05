@@ -9,6 +9,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
+import com.lukecreator.BonziBot.Data.Achievement;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
@@ -63,6 +64,12 @@ public class ChanceCommand extends Command {
 		int newCoins = balance;
 		if(win) {
 			newCoins += amount;
+			
+			if(amount >= 1000)
+				BonziUtils.tryAwardAchievement(e.channel, e.bonzi, e.executor, Achievement.LUCKY);
+			if(amount >= 10000)
+				BonziUtils.tryAwardAchievement(e.channel, e.bonzi, e.executor, Achievement.LUCK_MASTER);
+			
 			EmbedBuilder eb = BonziUtils.quickEmbed(
 				"💸 YOU WON 💸", "+" + amountString + " COINS!\n"
 				+ "Current balance: " + BonziUtils.comma(newCoins), Color.yellow);

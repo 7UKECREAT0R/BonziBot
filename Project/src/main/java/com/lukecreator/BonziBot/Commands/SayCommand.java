@@ -20,6 +20,8 @@ public class SayCommand extends Command {
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
 		String toSay = e.args.getString("text");
+		toSay = toSay.replace("@everyone", "`everyone ping`");
+		toSay = toSay.replace("@here", "`here ping`");
 		e.channel.sendMessage(toSay).queue();
 	}
 }

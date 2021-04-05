@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot.Commands.Admin;
 
+import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
@@ -11,29 +12,27 @@ import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
 import net.dv8tion.jda.api.entities.User;
 
-public class SetCoinsCommand extends Command {
+public class SetRepCommand extends Command {
 
-	public SetCoinsCommand() {
-		this.subCategory = 1;
-		this.name = "Set Coins";
-		this.unicodeIcon = "🟡";
-		this.description = "Set your current coins amount.";
-		this.args = new CommandArgCollection(new IntArg("amount"), new UserArg("target").optional());
+	public SetRepCommand() {
+		this.subCategory = 0;
+		this.name = "Set Rep";
+		this.unicodeIcon = "♾️";
+		this.description = "set reputation of user";
+		this.args = new CommandArgCollection(new UserArg("target"), new IntArg("new rep"));
 		this.category = CommandCategory._HIDDEN;
-		this.adminOnly = true;
 	}
 
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
-		int amount = e.args.getInt("amount");
-		User target = e.args.argSpecified("target") ? e.args.getUser("target") : e.executor;
+		User target = e.args.getUser("target");
+		int newRep = e.args.getInt("new rep");
 		
 		UserAccountManager uam = e.bonzi.accounts;
-		UserAccount ua = uam.getUserAccount(target);
-		int before = ua.getCoins();
-		ua.setCoins(amount);
-		uam.setUserAccount(target, ua);
-		e.channel.sendMessage("completed. " + target.getName() + "'s balance: " + before + " -> " + amount).queue();
-		return;
+		UserAccount account = uam.getUserAccount(target);
+		account.setRep(newRep);
+		uam.setUserAccount(target, account);
+		
+		e.channel.sendMessage(BonziUtils.successEmbed("Successfully set reputation to " + newRep + ".")).queue();
 	}
 }

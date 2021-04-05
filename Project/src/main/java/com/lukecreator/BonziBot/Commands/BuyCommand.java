@@ -37,7 +37,7 @@ public class BuyCommand extends Command {
 		EnumArg parser = new EnumArg("", PremiumItem.class);
 		UserArg userParser = new UserArg("");
 		String lastArg = e.inputArgs[e.inputArgs.length-1];
-		boolean gift = userParser.isWordParsable(lastArg);
+		boolean gift = userParser.isWordParsable(lastArg, null);
 		
 		String prefix = BonziUtils.getPrefixOrDefault(e);
 		String redirToShopT = "Not a valid item in the BonziBot shop!";
@@ -56,7 +56,7 @@ public class BuyCommand extends Command {
 		long giftId = validReceiver ? giftReceiver.getIdLong() : 0l;
 		UserAccount giftAccount = validReceiver ? uam.getUserAccount(giftReceiver) : null;
 		
-		if(parser.isWordParsable(itemName)) {
+		if(parser.isWordParsable(itemName, null)) {
 			parser.parseWord(itemName, e.bot, e.executor, null);
 			PremiumItem item = (PremiumItem)parser.object;
 			
