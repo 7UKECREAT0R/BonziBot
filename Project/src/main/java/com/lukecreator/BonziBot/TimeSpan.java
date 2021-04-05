@@ -8,6 +8,7 @@ public class TimeSpan implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public transient static final String REGEX_SINGLE_LETTER = "[0-9]+[A-z]";
 	public transient static final Pattern SINGLE_LETTER = Pattern.compile(REGEX_SINGLE_LETTER);
+	public transient static final TimeSpan ZERO = new TimeSpan(0);
 	
 	public final long ms;
 	private TimeSpan(long ms) {

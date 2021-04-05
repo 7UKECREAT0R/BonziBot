@@ -24,9 +24,16 @@ import java.util.concurrent.TimeUnit;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArg;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.Achievement;
+import com.lukecreator.BonziBot.Data.AfkData;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
+import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.Modifier;
+import com.lukecreator.BonziBot.Data.Rules;
+import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
+import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -52,11 +59,37 @@ public class BonziUtils {
 	// Tracks opened private channels and their ids.
 	// Format: <User ID, Private Channel ID>
 	public static HashMap<Long, Long> userPrivateChannels = new HashMap<Long, Long>();
-	public static final char[] STANDARD_CHARS = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890$@".toCharArray(); // for filtering
+	public static final char[] FILTER_CHARS_STD = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890$@!".toCharArray(); // for filtering
 	public static final char[] STANDARD_CHARS_ALL = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*()_+:\"',./<>?`~".toCharArray();
 	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36 Edg/86.0.622.69";
 	public static DateTimeFormatter MMddyy = DateTimeFormatter.ofPattern("MM/dd/yy");
+	public static DateTimeFormatter MMdd = DateTimeFormatter.ofPattern("MM/dd");
 	private static Random randomInstance = new Random(System.currentTimeMillis());
+	
+	private static final String[] birthdayMessages = new String[] {
+		"oh yeah! it's {user}'s birthday today!",
+		"by the way, make sure to wish {user} a happy birthday!",
+		"{user} is also eating cake! just kidding, but it is their birthday",
+		"{user} is one year older today!!",
+		"oh yeah i almost forgot, it's {user}'s birthday today!",
+		"hey, it's {user}'s birthday today!"
+	};
+	public static String getBirthdayMessage() {
+		return birthdayMessages[randomInstance.nextInt(birthdayMessages.length)];
+	}
+	
+	private static final String[] welcomeBackMessages = new String[] {
+		"welcome back, {user}!",
+		"hey, welcome back {user}!",
+		"{user} is back!",
+		"{user} has returned!",
+		"{user} is back and ready to game",
+		"whoa look {user} came back!",
+		"alright guys {user} is back!"
+	};
+	public static String getWelcomeBackMessage() {
+		return welcomeBackMessages[randomInstance.nextInt(welcomeBackMessages.length)];
+	}
 	
 	// Colors
 	public static final Color COLOR_BONZI_PURPLE = new Color(161, 86, 184);
@@ -91,7 +124,7 @@ public class BonziUtils {
 	public static String stripText(String s) {
 		StringBuilder sb = new StringBuilder();
 		for(char c: s.toCharArray())
-			for(char std: STANDARD_CHARS)
+			for(char std: FILTER_CHARS_STD)
 				if(c == std) {
 					sb.append(c);
 					break;
@@ -152,7 +185,7 @@ public class BonziUtils {
 	 * Joins strings together and appends "or" to the delimiter for the last element
 	 * (a, b, c, or d)
 	 */
-	public static String stringJoinOr(String delimiter, Iterable<? extends CharSequence> collection) {
+	public static String stringJoinOr(CharSequence delimiter, Iterable<? extends CharSequence> collection) {
 		StringJoiner joiner = new StringJoiner(delimiter);
 		Iterator<? extends CharSequence> iter = collection.iterator();
 		while(iter.hasNext()) {
@@ -166,7 +199,7 @@ public class BonziUtils {
 	 * Joins strings together and appends "and" to the delimiter for the last element
 	 * (a, b, c, and d)
 	 */
-	public static String stringJoinAnd(String delimiter, Iterable<? extends CharSequence> collection) {
+	public static String stringJoinAnd(CharSequence delimiter, Iterable<? extends CharSequence> collection) {
 		StringJoiner joiner = new StringJoiner(delimiter);
 		Iterator<? extends CharSequence> iter = collection.iterator();
 		while(iter.hasNext()) {
@@ -175,6 +208,18 @@ public class BonziUtils {
 				joiner.add((last?"and ":"")+chars);
 		}
 		return joiner.toString();
+	}
+	/**
+	 * String-join a set of some arbitrary object that isn't a CharSequence.
+	 * @param delimiter
+	 * @param items
+	 * @return
+	 */
+	public static String stringJoinArbitrary(CharSequence delimiter, Object[] items) {
+		String[] convert = new String[items.length];
+		for(int i = 0; i < items.length; i++)
+			convert[i] = items[i].toString();
+		return String.join(delimiter, convert);
 	}
 	/**
 	 * Returns the user's name and discriminator formatted.
@@ -190,6 +235,7 @@ public class BonziUtils {
 		if(number == 0) return "0";
 		if(number < 0) return "-" + numeral(-number);
 		
+		// Define the table of roman numerals to use.
 		String[] M = new String[]{"", "M", "MM", "MMM"};
 		String[] C = new String[]{"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
 		String[] X = new String[]{"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
@@ -236,6 +282,131 @@ public class BonziUtils {
 		return randomInstance.nextLong();
 	}
 	/**
+	 * Get the generic emoji for a specific integer.
+	 * Guaranteed that <code>isGeneric == true</code>
+	 * @param number
+	 * @return
+	 */
+	public static GenericEmoji getEmojiForNumberG(int number) {
+		String emoji = getEmojiForNumber(number);
+		return GenericEmoji.fromEmoji(emoji);
+	}
+	/**
+	 * Get the generic emoji for a specific character.
+	 * Guaranteed that <code>isGeneric == true</code>
+	 * @param number
+	 * @return
+	 */
+	public static GenericEmoji getEmojiForCharacterG(char c) {
+		String emoji = getEmojiForCharacter(c);
+		return GenericEmoji.fromEmoji(emoji);
+	}
+	/**
+	 * Get the emoji for a specific integer.
+	 * @param number
+	 * @return
+	 */
+	public static String getEmojiForNumber(int number) {
+		switch(number) {
+		case 0:
+			return "0️⃣";
+		case 1:
+			return "1️⃣";
+		case 2:
+			return "2️⃣";
+		case 3:
+			return "3️⃣";
+		case 4:
+			return "4️⃣";
+		case 5:
+			return "5️⃣";
+		case 6:
+			return "6️⃣";
+		case 7:
+			return "7️⃣";
+		case 8:
+			return "8️⃣";
+		case 9:
+			return "9️⃣";
+		case 10:
+			return "🔟";
+		}
+		return "❓";
+	}
+	/**
+	 * Get the emoji for a specific character. Returns '❓' if invalid.
+	 * @param c
+	 * @return
+	 */
+	public static String getEmojiForCharacter(char c) {
+		c = Character.toLowerCase(c);
+		switch(c) {
+		case 'a':
+			return "🇦";
+		case 'b':
+			return "🇧";
+		case 'c':
+			return "🇨";
+		case 'd':
+			return "🇩";
+		case 'e':
+			return "🇪";
+		case 'f':
+			return "🇫";
+		case 'g':
+			return "🇬";
+		case 'h':
+			return "🇭";
+		case 'i':
+			return "🇮";
+		case 'j':
+			return "🇯";
+		case 'k':
+			return "🇰";
+		case 'l':
+			return "🇱";
+		case 'm':
+			return "🇲";
+		case 'n':
+			return "🇳";
+		case 'o':
+			return "🇴";
+		case 'p':
+			return "🇵";
+		case 'q':
+			return "🇶";
+		case 'r':
+			return "🇷";
+		case 's':
+			return "🇸";
+		case 't':
+			return "🇹";
+		case 'u':
+			return "🇺";
+		case 'v':
+			return "🇻";
+		case 'w':
+			return "🇼";
+		case 'x':
+			return "🇽";
+		case 'y':
+			return "🇾";
+		case 'z':
+			return "🇿";
+		case '!':
+			return "❗";
+		case '?':
+			return "❓";
+		case '#':
+			return "#️⃣";
+		case '*':
+			return "*️⃣";
+		case ' ':
+			return "🟦";
+		}
+		return "❓";
+	}
+	/**
 	 * Count the amount of a certain character in a string.
 	 * @param search
 	 * @param c
@@ -249,17 +420,15 @@ public class BonziUtils {
 		return i;
 	}
 	public static String getPrefixOrDefault(CommandExecutionInfo info) {
-		if(info.isGuildMessage) {
-			return info.bonzi.prefixes.getPrefix(info.guild);
-		} else {
-			return Constants.DEFAULT_PREFIX;
-		}
+		if(info.isGuildMessage)
+			return info.bonzi.guildSettings.getSettings(info.guild).getPrefix();
+		else return Constants.DEFAULT_PREFIX;
 	}
 	public static String getPrefixOrDefault(Guild guild, BonziBot bb) {
-		return bb.prefixes.getPrefix(guild);
+		return bb.guildSettings.getSettings(guild).getPrefix();
 	}
 	public static String getPrefixOrDefault(GuildMessageReceivedEvent info, BonziBot bonzi) {
-		return bonzi.prefixes.getPrefix(info.getGuild());
+		return bonzi.guildSettings.getSettings(info.getGuild()).getPrefix();
 	}
 	public static String getPrefixOrDefault(PrivateMessageReceivedEvent info, BonziBot bonzi) {
 		return Constants.DEFAULT_PREFIX;
@@ -474,6 +643,58 @@ public class BonziUtils {
 				authorWithColor.getUser().getEffectiveAvatarUrl())
 			.setColor(authorWithColor.getColor());
 	}
+	public static EmbedBuilder generateRules(Guild g, BonziBot bb) {
+		GuildSettings settings = bb.guildSettings.getSettings(g);
+		Rules rules = settings.getRules();
+		Rules.Formatting format = rules.getFormatting();
+		String[] lines = rules.getRules();
+		
+		EmbedBuilder eb = new EmbedBuilder()
+			.setTitle(g.getName() + " Rules")
+			.setColor(Color.LIGHT_GRAY)
+			.setFooter(settings.filter.footer);
+		
+		final int max = MessageEmbed.VALUE_MAX_LENGTH;
+		StringBuilder buffer = new StringBuilder();
+		int count = 0;
+		for(String line: lines) {
+			count++;
+			int len = line.length();
+			String prepend;
+			switch(format) {
+			case NUMBERED:
+				prepend = count + ". ";
+				break;
+			case DOTTED:
+				prepend = "• ";
+				break;
+			case PLAIN:
+				prepend = "";
+				break;
+			default:
+				prepend = "";
+				break;
+			}
+			len += prepend.length() + 1;
+			if(len <= max) {
+				buffer.append(prepend);
+				buffer.append(line);
+				buffer.append('\n');
+			} else {
+				String str = buffer.toString();
+				str = str.substring(0, str.length() - 1);
+				eb.addField(EmbedBuilder.ZERO_WIDTH_SPACE, str, false);
+				buffer = new StringBuilder();
+				buffer.append(prepend);
+				buffer.append(line);
+				buffer.append('\n');
+			}
+		}
+		String str = buffer.toString();
+		str = str.substring(0, str.length() - 1);
+		eb.addField(EmbedBuilder.ZERO_WIDTH_SPACE, str, false);
+		return eb;
+	}
 	
 	public static void sendGui(CommandExecutionInfo info, Gui gui) {
 		if(info.isGuildMessage)
@@ -528,10 +749,20 @@ public class BonziUtils {
 		EmbedBuilder send = quickEmbed(msg, desc, Color.orange);
 		info.channel.sendMessage(send.build()).queue();
 	}
-	public static void sendNeededPermsForModRole(Command cmd, CommandExecutionInfo info, String prefix) {
-		EmbedBuilder send = quickEmbed("Hey! This command requires moderator role!",
-				"Problem: I need the \"Manage Roles\" permission to make one for you! "
-				+ "You can also use " + prefix + "modrole to set one manually.", Color.red);
+	public static void sendUserNeedsPerms(Command cmd, CommandExecutionInfo info) {
+		Permission[] perms = cmd.userRequiredPermissions;
+		String msg = perms.length > 1 ?
+			"You need the following permissions to execute this command:":
+			"You need the following permission to execute this command:";
+		StringBuilder sb = new StringBuilder();
+		for(Permission perm: cmd.userRequiredPermissions) {
+			String ps = perm.getName();
+			sb.append(ps + "\n");
+		}
+		sb = sb.deleteCharAt(sb.length() - 1);
+		String desc = sb.toString();
+		
+		EmbedBuilder send = quickEmbed(msg, desc, Color.orange);
 		info.channel.sendMessage(send.build()).queue();
 	}
 	public static void sendModOnly(Command cmd, CommandExecutionInfo info, String prefix) {
@@ -579,7 +810,84 @@ public class BonziUtils {
 			Color.orange);
 		info.channel.sendMessage(eb.build()).queue();
 	}
+	public static void sendMentionMessage(GuildMessageReceivedEvent e, BonziBot bb) {
+		if(!e.getMessage().getContentRaw().contains("<@"))
+			return;
+		
+		List<User> mentioned = e.getMessage().getMentionedUsers();
+		long executor = e.getAuthor().getIdLong();
+		UserAccountManager uam = bb.accounts;
+		
+		List<String> content = new ArrayList<String>();
+		for(User mention: mentioned) {
+			if(mention.getIdLong() == executor)
+				continue;
+			content.clear();
+			String name = mention.getName();
+			UserAccount account = uam.getUserAccount(mention);
+			if(account.afkData != null) {
+				AfkData afk = account.afkData;
+				if(account.afkData.isAfk()) {
+					String reason = afk.getReasonAfk();
+					TimeSpan backAt = afk.timeUntilBack();
+					content.add(name + " is AFK right now. `" + reason.replace("`", "") +
+						"`\nThey will probably be back in " + backAt.toLongString());
+				}
+			} else {
+				account.afkData = new AfkData();
+			}
+			
+			if(account.isTodayBirthday()) {
+				content.add(getBirthdayMessage().replace("{user}", name));
+			}
+			
+			if(content.isEmpty())
+				continue;
+			String msg = String.join("\n\n", content);
+			e.getChannel().sendMessage(msg).queue();
+		}
+	}
+	public static void disableAfk(User user, TextChannel tc, BonziBot bb) {
+		UserAccountManager uam = bb.accounts;
+		UserAccount account = uam.getUserAccount(user);
+		if(account.afkData == null)
+			account.afkData = new AfkData();
+		else if(account.afkData.isAfk()) {
+			account.afkData.noLongerAfk();
+			uam.setUserAccount(user, account);
+			String name = user.getName();
+			tc.sendMessage(BonziUtils.successEmbed(getWelcomeBackMessage().replace("{user}", name))).queue();
+			return;
+		}
+	}
 	
+	public static void tryAwardAchievement(MessageChannel channel, BonziBot bb, User u, Achievement a) {
+		UserAccountManager uam = bb.accounts;
+		UserAccount account = uam.getUserAccount(u);
+		boolean hasAlready = account.hasAchievement(a);
+		
+		if(!hasAlready) {
+			// wtf
+			String prefix = (channel.getType() == ChannelType.TEXT)?
+				bb.guildSettings.getSettings(((TextChannel)channel).getGuild()).getPrefix() :
+				Constants.DEFAULT_PREFIX;
+				
+			account.awardAchievement(a);
+			uam.setUserAccount(u, account);
+			EmbedBuilder builder = new EmbedBuilder();
+			builder.setColor(Color.yellow);
+			builder.setAuthor("Achievement Unlocked!", null, u.getEffectiveAvatarUrl());
+			builder.setTitle(a.icon.toString() + " " + a.name);
+			builder.setDescription(a.desc);
+			builder.setFooter("You can see your achievements with `" + prefix + "achievements`");
+			channel.sendMessage(builder.build()).queue();
+		}
+	}
+	public static void tryAwardAchievement(MessageChannel channel, BonziBot bb, long uid, Achievement a) {
+		JDA jda = channel.getJDA();
+		User user = jda.getUserById(uid);
+		tryAwardAchievement(channel, bb, user, a);
+	}
 	public static Modifier[] getModifiers(String _topic) {
 		if(_topic == null) return new Modifier[0];
 		if(_topic.length() < 2) return new Modifier[0];

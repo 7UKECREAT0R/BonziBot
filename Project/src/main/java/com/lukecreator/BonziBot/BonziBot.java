@@ -29,8 +29,6 @@ import com.lukecreator.BonziBot.Managers.GuiManager;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 import com.lukecreator.BonziBot.Managers.LoggingManager;
 import com.lukecreator.BonziBot.Managers.LotteryManager;
-import com.lukecreator.BonziBot.Managers.ModeratorManager;
-import com.lukecreator.BonziBot.Managers.PrefixManager;
 import com.lukecreator.BonziBot.Managers.ReactionManager;
 import com.lukecreator.BonziBot.Managers.RewardManager;
 import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
@@ -40,6 +38,7 @@ import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 import com.lukecreator.BonziBot.Wrappers.RedditClient;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.audit.ActionType;
@@ -48,6 +47,7 @@ import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.audit.AuditLogKey;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
@@ -61,6 +61,7 @@ import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
+import net.dv8tion.jda.api.events.guild.update.GuildUpdateNameEvent;
 import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -79,6 +80,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 public class BonziBot extends ListenerAdapter {
 	
 	JDABuilder builder = null;
+	public boolean adminBypassing = false;
 	
 	List<IStorableData> storableData = new ArrayList<IStorableData>();
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
@@ -86,13 +88,11 @@ public class BonziBot extends ListenerAdapter {
 	public EventWaiterManager eventWaiter = new EventWaiterManager();
 	public SpecialPeopleManager special = new SpecialPeopleManager();
 	public UserAccountManager accounts = new UserAccountManager();
-	public ModeratorManager moderators = new ModeratorManager();
 	public ReactionManager reactions = new ReactionManager();
 	public CooldownManager cooldowns = new CooldownManager();
 	public UpgradeManager upgrades = new UpgradeManager();
 	public LotteryManager lottery = new LotteryManager();
 	public LoggingManager logging = new LoggingManager();
-	public PrefixManager prefixes = new PrefixManager();
 	public RewardManager rewards = new RewardManager();
 	public RedditClient reddit = new RedditClient();
 	public JokeProvider jokes = new JokeProvider();
@@ -130,11 +130,9 @@ public class BonziBot extends ListenerAdapter {
 	
 	void setupStorableData() {
 		storableData.clear();
-		storableData.add(prefixes);
 		storableData.add(accounts);
 		storableData.add(guildSettings);
 		storableData.add(tags);
-		storableData.add(moderators);
 		storableData.add(upgrades);
 		storableData.add(lottery);
 		storableData.add(rewards);
@@ -198,12 +196,6 @@ public class BonziBot extends ListenerAdapter {
 		
 		Guild bonziGuild = BonziUtils.getBonziGuild(jda);
 		EmojiCache.appendGuildEmotes(bonziGuild);
-		
-		// for debug purposes
-		this.prefixes.setPrefix(674436740446158879l, "btemp:");
-		this.prefixes.setPrefix(529089349762023436l, "btemp:");
-		this.prefixes.setPrefix(740775774528733236l, "btemp:");
-		InternalLogger.print("[TEST] Set Test Prefixes");
 	}
 	public void saveData() {
 		InternalLogger.print("[IO] Saving data...");
@@ -232,23 +224,30 @@ public class BonziBot extends ListenerAdapter {
 		// Execute commands and chat-related things.
 		if(e.getAuthor().isBot()) return;
 		if(tags.receiveMessage(e, this)) return;
-		eventWaiter.onMessage(e.getMessage());
+		if(eventWaiter.onMessage(e.getMessage())) return;
 		GuildSettings settings = this.guildSettings.getSettings(e.getGuild());
 		if(!settings.testMessageInFilter(e.getMessage())) {
 			logging.addMessageToHistory(e.getMessage(), e.getGuild());
-			e.getMessage().delete().queue();
+			e.getMessage().delete().queue(null, fail -> {});
 			e.getChannel().sendMessage(BonziUtils.failureEmbed(
 				"You can't say that, " + e.getAuthor().getName() + "!")).queue();
 			return;
 		}
-		CommandExecutionInfo info = new CommandExecutionInfo(e);
-		commands.onInput(info.setBonziBot(this));
 		logging.addMessageToHistory(e.getMessage(), e.getGuild());
+		CommandExecutionInfo info = new CommandExecutionInfo(e);
+		if(commands.onInput(info.setBonziBot(this)))
+			return;
+		
+		// Everything from here on is not a command.
+		
+		// These are intentionally guild-only.
+		BonziUtils.sendMentionMessage(e, this);
+		BonziUtils.disableAfk(e.getAuthor(), e.getChannel(), this);
 	}
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
 		if(e.getAuthor().isBot()) return;
 		if(tags.receiveMessage(e)) return;
-		eventWaiter.onMessage(e.getMessage());
+		if(eventWaiter.onMessage(e.getMessage())) return;
 		CommandExecutionInfo info = new CommandExecutionInfo(e);
 		commands.onInput(info.setBonziBot(this));
 		
@@ -262,27 +261,45 @@ public class BonziBot extends ListenerAdapter {
 		// Give off the opening speech.
 	}
 	public void onGuildMemberJoin(GuildMemberJoinEvent e) {
-		// Send a join message and give roles.
+		// Give join role and join message (if any).
+		this.guildSettings.memberJoined(this, e);
 	}
 	public void onGuildMemberRemove(GuildMemberRemoveEvent e) {
 		// Send a leave message.
+		this.guildSettings.memberLeft(this, e);
 	}
 	public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent e) {
+		// Send a message to and update GUIs.
 		guis.onReactionAdd(e);
+		
+		// General reaction manager. (polls, etc...)
 		reactions.reactionAddGuild(e);
+		
+		// Continue any reaction event waiters.
 		eventWaiter.onReaction(new GenericReactionEvent(e));
 	}
 	public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent e) {
+		// Send a message to and update GUIs. (UNUSED)
 		guis.onReactionRemove(e);
+		
+		// General reaction manager. (polls, etc...)
 		reactions.reactionRemoveGuild(e);
 	}
 	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent e) {
+		// Send a message to and update GUIs.
 		guis.onReactionAdd(e);
+		
+		// General reaction manager.
 		reactions.reactionAddPrivate(e);
+		
+		// Continue any reaction event waiters.
 		eventWaiter.onReaction(new GenericReactionEvent(e));
 	}
 	public void onPrivateMessageReactionRemove(PrivateMessageReactionRemoveEvent e) {
+		// Send a message to and update GUIs. (UNUSED)
 		guis.onReactionRemove(e);
+		
+		// General reaction manager.
 		reactions.reactionRemovePrivate(e);
 	}
 	public void onGenericGuildVoice(GenericGuildVoiceEvent e) {
@@ -314,6 +331,20 @@ public class BonziBot extends ListenerAdapter {
 				});
 			}
 		}
+	}
+	public void onGuildUpdateName(GuildUpdateNameEvent e) {
+		// Update the rule message, if any.
+		String name = e.getNewName();
+		Guild guild = e.getGuild();
+		
+		GuildSettings settings =
+			this.guildSettings
+			.getSettings(guild);
+		settings.getRules().retrieveRulesMessage(guild, edit -> {
+			MessageEmbed newRules = new EmbedBuilder(edit.getEmbeds().get(0))
+				.setTitle(name + " Rules").build();
+			edit.editMessage(newRules).queue();
+		}, null);
 	}
 	
 	// Logging Events

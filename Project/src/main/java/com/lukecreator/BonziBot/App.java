@@ -15,13 +15,14 @@ public class App {
 		Expose, // Exposes the last deleted message!
 		Profilepic, // Gets the user's profile picture.
 		Troll, // Troll a user with a random troll.
-		Comment,
+		Comment, // "Comment" on a video.
 		
 		Premium // Gives all special commands in a single package + all bonzibot premium perks. Can be bought with irl money, or coins.
 	}
 	
+	public static boolean DEBUG = true;
 	
 	public static void main(String[] args) throws LoginException, InterruptedException {
-		new BonziBot(true).start();
+		new BonziBot(DEBUG).start();
 	}
 }
