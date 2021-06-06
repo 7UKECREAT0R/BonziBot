@@ -52,14 +52,18 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 
 /**
- * The all heavenly class which does everything lmao
+ * utility methods for just about everything. this
+ * class is really nice to have with just about any
+ * bot because it has many missing things in java/jda
  */
 public class BonziUtils {
 	
 	// Tracks opened private channels and their ids.
 	// Format: <User ID, Private Channel ID>
 	public static HashMap<Long, Long> userPrivateChannels = new HashMap<Long, Long>();
+	
 	public static final char[] FILTER_CHARS_STD = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890$@!".toCharArray(); // for filtering
+	public static final char[] STANDARD_CHARS = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890".toCharArray(); // for filtering
 	public static final char[] STANDARD_CHARS_ALL = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*()_+:\"',./<>?`~".toCharArray();
 	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36 Edg/86.0.622.69";
 	public static DateTimeFormatter MMddyy = DateTimeFormatter.ofPattern("MM/dd/yy");
@@ -74,19 +78,18 @@ public class BonziUtils {
 		"oh yeah i almost forgot, it's {user}'s birthday today!",
 		"hey, it's {user}'s birthday today!"
 	};
+	private static final String[] welcomeBackMessages = new String[] {
+			"welcome back, {user}!",
+			"hey, welcome back {user}!",
+			"{user} is back!",
+			"{user} has returned!",
+			"{user} is back and ready to game",
+			"whoa look {user} came back!",
+			"alright guys {user} is back!"
+		};
 	public static String getBirthdayMessage() {
 		return birthdayMessages[randomInstance.nextInt(birthdayMessages.length)];
 	}
-	
-	private static final String[] welcomeBackMessages = new String[] {
-		"welcome back, {user}!",
-		"hey, welcome back {user}!",
-		"{user} is back!",
-		"{user} has returned!",
-		"{user} is back and ready to game",
-		"whoa look {user} came back!",
-		"alright guys {user} is back!"
-	};
 	public static String getWelcomeBackMessage() {
 		return welcomeBackMessages[randomInstance.nextInt(welcomeBackMessages.length)];
 	}
@@ -111,6 +114,13 @@ public class BonziUtils {
 		return NumberFormat.getInstance().format(num);
 	}
 	/**
+	 * Similar to String.valueOf(int) but
+	 *    places commas where needed.
+	 */
+	public static String comma(long num) {
+		return NumberFormat.getInstance().format(num);
+	}
+	/**
 	 * Checks if a string is complete whitespace.
 	 */
 	public static boolean isWhitespace(String s) {
@@ -122,9 +132,11 @@ public class BonziUtils {
 	 * "Hi, boys! Im stupid?" -> "Hi boys Im stupid"
 	 */
 	public static String stripText(String s) {
+		if(s == null)
+			return null;
 		StringBuilder sb = new StringBuilder();
 		for(char c: s.toCharArray())
-			for(char std: FILTER_CHARS_STD)
+			for(char std: STANDARD_CHARS)
 				if(c == std) {
 					sb.append(c);
 					break;
@@ -254,6 +266,12 @@ public class BonziUtils {
 	 */
 	public static String uwu(String in) {
 		return in.replace('l', 'w').replace('r', 'w');
+	}
+	/*
+	 * Remove role, everyone, and here pings.
+	 */
+	public static String sanitizeGuildInput(String in) {
+		return in.replaceAll(Constants.PING_REGEX, "<ping>");
 	}
 	/**
 	 * Set the variables for join/leave messages.
@@ -403,6 +421,26 @@ public class BonziUtils {
 			return "*️⃣";
 		case ' ':
 			return "🟦";
+		case '0':
+			return "0️⃣";
+		case '1':
+			return "1️⃣";
+		case '2':
+			return "2️⃣";
+		case '3':
+			return "3️⃣";
+		case '4':
+			return "4️⃣";
+		case '5':
+			return "5️⃣";
+		case '6':
+			return "6️⃣";
+		case '7':
+			return "7️⃣";
+		case '8':
+			return "8️⃣";
+		case '9':
+			return "9️⃣";
 		}
 		return "❓";
 	}

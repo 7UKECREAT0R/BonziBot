@@ -2,6 +2,7 @@ package com.lukecreator.BonziBot;
 
 import java.io.EOFException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -12,8 +13,12 @@ import org.reflections.Reflections;
 
 import com.lukecreator.BonziBot.InternalLogger.Severity;
 import com.lukecreator.BonziBot.Async.AutoRepeat;
+import com.lukecreator.BonziBot.CommandAPI.Command;
+import com.lukecreator.BonziBot.CommandAPI.CommandArg;
+import com.lukecreator.BonziBot.CommandAPI.CommandArg.ArgType;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
+import com.lukecreator.BonziBot.CommandAPI.EnumArg;
 import com.lukecreator.BonziBot.Data.EmojiCache;
 import com.lukecreator.BonziBot.Data.GenericReactionEvent;
 import com.lukecreator.BonziBot.Data.GuildSettings;
@@ -25,11 +30,13 @@ import com.lukecreator.BonziBot.Data.UsernameGenerator;
 import com.lukecreator.BonziBot.Graphics.FontLoader;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
+import com.lukecreator.BonziBot.Managers.FunnyChannelManager;
 import com.lukecreator.BonziBot.Managers.GuiManager;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 import com.lukecreator.BonziBot.Managers.LoggingManager;
 import com.lukecreator.BonziBot.Managers.LotteryManager;
 import com.lukecreator.BonziBot.Managers.ReactionManager;
+import com.lukecreator.BonziBot.Managers.RepManager;
 import com.lukecreator.BonziBot.Managers.RewardManager;
 import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
 import com.lukecreator.BonziBot.Managers.TagManager;
@@ -62,7 +69,8 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.events.guild.update.GuildUpdateNameEvent;
-import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
@@ -71,7 +79,11 @@ import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.Command.Choice;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 /**
@@ -95,6 +107,7 @@ public class BonziBot extends ListenerAdapter {
 	public LoggingManager logging = new LoggingManager();
 	public RewardManager rewards = new RewardManager();
 	public RedditClient reddit = new RedditClient();
+	public RepManager reputation = new RepManager();
 	public JokeProvider jokes = new JokeProvider();
 	public GuiManager guis = new GuiManager();
 	public TagManager tags = new TagManager();
@@ -125,6 +138,7 @@ public class BonziBot extends ListenerAdapter {
 		JDA bot = setupBot();
 		setupExecutors();
 		loadFonts();
+		slashCommands(bot);
 		postSetup(bot);
 	}
 	
@@ -137,6 +151,7 @@ public class BonziBot extends ListenerAdapter {
 		storableData.add(lottery);
 		storableData.add(rewards);
 		storableData.add(logging);
+		storableData.add(reputation);
 		
 		int len = storableData.size();
 		InternalLogger.print("[SD] Populated storable data with " + len + " elements.");
@@ -187,6 +202,41 @@ public class BonziBot extends ListenerAdapter {
 		FontLoader.registerFont(FontLoader.EMOJI_FONT_FILE);
 		FontLoader.registerFont(FontLoader.SEGOE_FONT_FILE);
 	}
+	void slashCommands(JDA jda) {
+		CommandListUpdateAction action = jda.updateCommands();
+		List<Command> allCommands = commands.getRegisteredCommands();
+		for(Command command: allCommands) {
+			if(!command.isRegisterable())
+				continue;
+			CommandData data = new CommandData(command
+				.getFilteredCommandName(), command.description);
+			List<OptionData> allArgs = new ArrayList<OptionData>(allCommands.size());
+			for(CommandArg arg: command.args.getArgs()) {
+				OptionData option = new OptionData(arg.type.nativeOption,
+					arg.argName.toLowerCase(), arg.isOptional() ?
+					"Optional argument." : "Required argument.");
+				if(arg.type == ArgType.Enum) {
+					EnumArg e = (EnumArg)arg;
+					@SuppressWarnings("rawtypes")
+					Enum[] values = e.getValues();
+					Choice[] choices = new Choice[e.validTypes];
+					int accessor = 0;
+					for(int i = 0; i < values.length; i++) {
+						@SuppressWarnings("rawtypes")
+						Enum value = values[i];
+						if(value.name().startsWith("_"))
+							continue;
+						choices[accessor++] = new Choice
+							(value.name().toLowerCase(), i);
+					}
+				}
+				
+				allArgs.add(option);
+			}
+			action = action.addCommands(data.addOptions(allArgs));
+		}
+		action.queue();
+	}
 	void postSetup(JDA jda) {
 		
 		// Anything else that needs to be done.
@@ -220,6 +270,10 @@ public class BonziBot extends ListenerAdapter {
 	}
 	
 	// Events
+	@Override
+	public void onSlashCommand(SlashCommandEvent event) {
+		// TODO implement slash commands.
+	}
 	public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
 		// Execute commands and chat-related things.
 		if(e.getAuthor().isBot()) return;
@@ -233,8 +287,10 @@ public class BonziBot extends ListenerAdapter {
 				"You can't say that, " + e.getAuthor().getName() + "!")).queue();
 			return;
 		}
+		
 		logging.addMessageToHistory(e.getMessage(), e.getGuild());
 		CommandExecutionInfo info = new CommandExecutionInfo(e);
+		
 		if(commands.onInput(info.setBonziBot(this)))
 			return;
 		
@@ -243,13 +299,14 @@ public class BonziBot extends ListenerAdapter {
 		// These are intentionally guild-only.
 		BonziUtils.sendMentionMessage(e, this);
 		BonziUtils.disableAfk(e.getAuthor(), e.getChannel(), this);
+		reputation.checkMessage(e.getMessage(), this); // ok this is kinda a command
 	}
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
 		if(e.getAuthor().isBot()) return;
 		if(tags.receiveMessage(e)) return;
 		if(eventWaiter.onMessage(e.getMessage())) return;
 		CommandExecutionInfo info = new CommandExecutionInfo(e);
-		commands.onInput(info.setBonziBot(this));
+		commands.onInput(info.setBonziBot(this)); // dont return
 		
 		// Cache the channel for future use.
 		// (used in BonziUtils.messageUser)
@@ -302,8 +359,11 @@ public class BonziBot extends ListenerAdapter {
 		// General reaction manager.
 		reactions.reactionRemovePrivate(e);
 	}
-	public void onGenericGuildVoice(GenericGuildVoiceEvent e) {
-		// Used to leave the voice channel if nobody is left.
+	public void onGuildVoiceUpdate(GuildVoiceUpdateEvent e) {
+		FunnyChannelManager.funnyChannels(this, e);
+		
+		// Leave the music channel if no more users are in it.
+		
 	}
 	public void onTextChannelUpdateTopic(TextChannelUpdateTopicEvent e) {
 		String topic = e.getNewTopic();
@@ -348,16 +408,32 @@ public class BonziBot extends ListenerAdapter {
 	}
 	
 	// Logging Events
+	public static HashMap<Long, List<Long>> banCache = new HashMap<Long, List<Long>>();
 	public void onGuildBan(GuildBanEvent e) {
-		
+		long id = e.getGuild().getIdLong();
+		if(banCache.containsKey(id)) {
+			List<Long> bans = banCache.get(id);
+			bans.add(e.getUser().getIdLong());
+			banCache.put(id, bans);
+		} else {
+			List<Long> bans = new ArrayList<Long>();
+			bans.add(e.getUser().getIdLong());
+			banCache.put(id, bans);
+		}
 	}
 	public void onGuildUnban(GuildUnbanEvent e) {
-		
+		long id = e.getGuild().getIdLong();
+		if(banCache.containsKey(id)) {
+			List<Long> bans = banCache.get(id);
+			bans.remove(e.getUser().getIdLong());
+			banCache.put(id, bans);
+		}
 	}
 	public void onGuildMessageDelete(GuildMessageDeleteEvent e) {
 		
 		Message fetched = this.logging.getMessageById
 			(e.getMessageIdLong(), e.getGuild());
+		
 		if(fetched != null && !fetched.getAuthor().isBot()) {
 			String topic = e.getChannel().getTopic();
 			Modifier[] modifiers = BonziUtils.getModifiers(topic);
@@ -377,7 +453,13 @@ public class BonziBot extends ListenerAdapter {
 		}
 	}
 	public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent e) {
-		
+		String nick = e.getNewNickname();
+		GuildSettings gc = this.guildSettings
+			.getSettings(e.getGuild());
+		if(!gc.testMessageInFilter(nick)) {
+			String old = e.getOldNickname();
+			e.getMember().modifyNickname(old).queue();
+		}
 	}
 	public void onTextChannelCreate(TextChannelCreateEvent e) {
 		
