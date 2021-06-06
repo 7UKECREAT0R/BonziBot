@@ -115,7 +115,7 @@ public class ColorArg extends CommandArg {
 			}
 			return;
 		}
-
+		
 		if(hasParenthesis(word)) {
 			String strip = stripParenthesis(word);
 			String[] parts = strip.split(",");

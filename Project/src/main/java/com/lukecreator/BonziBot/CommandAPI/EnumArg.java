@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.entities.User;
 public class EnumArg extends CommandArg {
 	
 	Class<? extends Enum> baseClass;
+	public final int validTypes;
 	Enum[] enumType;
 	
 	@SuppressWarnings("unchecked")
@@ -30,6 +31,13 @@ public class EnumArg extends CommandArg {
 		
 		baseClass = (Class<? extends Enum>)inClass;
 		enumType = (Enum[])inClass.getEnumConstants();
+		
+		int vt = 0;
+		for(Enum type: this.enumType) {
+			if(!type.name().startsWith("_"))
+				vt++;
+		}
+		this.validTypes = vt;
 	}
 	
 	@Override
@@ -72,5 +80,9 @@ public class EnumArg extends CommandArg {
 			names.add(enumType[i].name().toLowerCase());
 		}
 		return "This can be any of the following values (or shortened):\n" + BonziUtils.stringJoinOr(", ", names);
+	}
+	
+	public Enum[] getValues() {
+		return this.enumType;
 	}
 }

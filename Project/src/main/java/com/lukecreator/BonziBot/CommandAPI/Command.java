@@ -4,6 +4,7 @@ import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 public abstract class Command {
 
@@ -23,6 +24,17 @@ public abstract class Command {
 	
 	public void resetCooldown(CommandExecutionInfo e) {
 		e.bonzi.cooldowns.resetCooldown(this, e.executor.getIdLong());
+	}
+	public boolean isRegisterable() {
+		if(this.adminOnly)
+			return false;
+		if(this.category == CommandCategory._HIDDEN || this.category == CommandCategory._SHOP_COMMAND)
+			return false;
+		for(CommandArg arg: args.args) {
+			if(arg.type.nativeOption == OptionType.UNKNOWN)
+				return false;
+		}
+		return true;
 	}
 	/**
 	 * Strip special characters for
@@ -49,7 +61,7 @@ public abstract class Command {
 	}
 	
 	// The permissions the BOT needs to run this command.
-	public Permission[] neededPermissions = new Permission[] { Permission.UNKNOWN };
+	public Permission[] neededPermissions = new Permission[] {};
 	
 	public void executeCommand(CommandExecutionInfo e) {}
 }

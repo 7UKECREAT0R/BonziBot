@@ -15,16 +15,23 @@ public class UserArg extends CommandArg {
 	}
 
 	boolean isMention(String s) {
-		if(s.startsWith("<@!") && s.endsWith(">") &&
-			(s.length() == 21 || s.length() == 22)) {
+		if(s.startsWith("<@") && s.endsWith(">") &&
+			(s.length() >= 20 && s.length() <= 22)) {
 			return true;
 		}
 		else return false;
 	}
 	long getMentionId(String mention) {
-		String s = mention.substring(3);
-		s = s.substring(0, s.length() - 1);
-		return Long.parseLong(s);
+		if(mention.startsWith("<@!")) {
+			String s = mention.substring(3);
+			s = s.substring(0, s.length() - 1);
+			return Long.parseLong(s);
+		} else {
+			String s = mention.substring(2);
+			s = s.substring(0, s.length() - 1);
+			return Long.parseLong(s);
+		}
+		
 	}
 	boolean isValidId(String s) {
 		try {
@@ -47,6 +54,9 @@ public class UserArg extends CommandArg {
 		
 		if(theGuild != null) {
 			List<Member> members = theGuild.getMembersByEffectiveName(word, true);
+			if(!members.isEmpty())
+				return true;
+			members = theGuild.getMembersByName(word, true);
 			if(!members.isEmpty())
 				return true;
 		}
@@ -83,6 +93,11 @@ public class UserArg extends CommandArg {
 		// Search guild for user.
 		if(theGuild != null) {
 			List<Member> members = theGuild.getMembersByEffectiveName(word, true);
+			if(!members.isEmpty()) {
+				this.object = members.get(0).getUser();
+				return;
+			}
+			members = theGuild.getMembersByName(word, true);
 			if(!members.isEmpty()) {
 				this.object = members.get(0).getUser();
 				return;

@@ -11,8 +11,10 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 
 /**
  * Everything you need to execute a command.
@@ -39,6 +41,20 @@ public class CommandExecutionInfo {
 		message = e.getMessage();
 		fullText = message.getContentRaw();
 	}
+	public CommandExecutionInfo(SlashCommandEvent e) {
+		isSlashCommand = true;
+		slashCommandHook = e.getHook();
+		bot = e.getJDA();
+		isGuildMessage = e.isFromGuild();
+		executor = e.getUser();
+		channel = e.getChannel();
+		tChannel = e.getTextChannel();
+		pChannel = e.getPrivateChannel();
+		guild = e.getGuild();
+		member = e.getMember();
+		message = null; // beware
+		
+	}
 	public CommandExecutionInfo setCommandData(String commandName, String[] inputArgs, CommandParsedArgs args) {
 		this.commandName = commandName;
 		this.inputArgs = inputArgs;
@@ -54,6 +70,9 @@ public class CommandExecutionInfo {
 		return this;
 	}
 	
+	public boolean isSlashCommand = false;
+	public InteractionHook slashCommandHook = null;
+	
 	public boolean isGuildMessage = false;
 	public boolean isDirectMessage = false;
 	public String fullText = null;
@@ -66,7 +85,7 @@ public class CommandExecutionInfo {
 	public JDA bot = null;
 	public BonziBot bonzi = null;
 	public User executor = null;
-	public Message message = null;
+	public Message message = null; // if isSlashCommand, this is null. be careful.
 	public MessageChannel channel = null;
 	
 	// Null if isDirectMessage

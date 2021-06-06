@@ -23,6 +23,9 @@ public class CommandArgCollection {
 		this.usageOverride = lines;
 		return this;
 	}
+	public CommandArg[] getArgs() {
+		return this.args;
+	}
 	public static CommandArgCollection fromList(List<CommandArg> list) {
 		CommandArgCollection cac = new CommandArgCollection();
 		cac.args = new CommandArg[list.size()];

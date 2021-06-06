@@ -3,6 +3,7 @@ package com.lukecreator.BonziBot.CommandAPI;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 /**
  * A single argument for a command.
@@ -10,7 +11,23 @@ import net.dv8tion.jda.api.entities.User;
 public abstract class CommandArg {
 	
 	public enum ArgType {
-		Int, Float, String, StringRem, Boolean, User, Role, TimeSpan, Color, Enum, Channel, Array
+		Int(OptionType.INTEGER),
+		Float(OptionType.INTEGER),
+		String(OptionType.STRING),
+		StringRem(OptionType.STRING),
+		Boolean(OptionType.BOOLEAN),
+		User(OptionType.USER),
+		Role(OptionType.ROLE),
+		TimeSpan(OptionType.UNKNOWN),
+		Color(OptionType.UNKNOWN),
+		Enum(OptionType.STRING),
+		Channel(OptionType.CHANNEL),
+		Array(OptionType.UNKNOWN);
+		
+		public OptionType nativeOption;
+		private ArgType(OptionType nativeOption) {
+			this.nativeOption = nativeOption;
+		}
 	}
 	
 	public CommandArg(String name) {
@@ -20,15 +37,18 @@ public abstract class CommandArg {
 		this.optional = true;
 		return this;
 	}
+	public boolean isOptional() {
+		return this.optional;
+	}
 	
 	/**
 	 * If optional, you can expect the argument to sometimes be null.
 	 */
 	boolean optional;
 	
-	public String argName;
-	public ArgType type;
-	public Object object = null;
+	public String argName; // The name of this argument.
+	public ArgType type; // The BonziBot type of this argument.
+	public Object object = null; // The object held in this argument after being parsed.
 	
 	/**
 	 * Return if the string should be
