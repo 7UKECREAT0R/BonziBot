@@ -735,6 +735,8 @@ public class BonziUtils {
 	}
 	
 	public static void sendGui(CommandExecutionInfo info, Gui gui) {
+		if(info.isSlashCommand)
+			info.slashCommand.reply(":envelope_with_arrow: `Opening GUI...`").queue();
 		if(info.isGuildMessage)
 			info.bonzi.guis.sendAndCreateGui(info.tChannel, info.executor, gui, info.bonzi);
 		else info.bonzi.guis.sendAndCreateGui(info.pChannel, gui, info.bonzi);
@@ -769,7 +771,10 @@ public class BonziUtils {
 		String[] usages = cmd.args.buildUsage(prefix, cmd.getFilteredCommandName());
 		String fieldTitle = BonziUtils.plural("Correct Usage", usages.length) + ": ";
 		usage.addField(fieldTitle, String.join("\n", usages), false);
-		channel.sendMessage(usage.build()).queue();
+		if(info.isSlashCommand)
+			info.slashCommand.replyEmbeds(usage.build()).queue();
+		else
+			channel.sendMessage(usage.build()).queue();
 	}
 	public static void sendNeededPerms(Command cmd, CommandExecutionInfo info) {
 		Permission[] perms = cmd.neededPermissions;
@@ -785,7 +790,10 @@ public class BonziUtils {
 		String desc = sb.toString();
 		
 		EmbedBuilder send = quickEmbed(msg, desc, Color.orange);
-		info.channel.sendMessage(send.build()).queue();
+		if(info.isSlashCommand)
+			info.slashCommand.replyEmbeds(send.build()).queue();
+		else
+			info.channel.sendMessage(send.build()).queue();
 	}
 	public static void sendUserNeedsPerms(Command cmd, CommandExecutionInfo info) {
 		Permission[] perms = cmd.userRequiredPermissions;
@@ -801,24 +809,36 @@ public class BonziUtils {
 		String desc = sb.toString();
 		
 		EmbedBuilder send = quickEmbed(msg, desc, Color.orange);
-		info.channel.sendMessage(send.build()).queue();
+		if(info.isSlashCommand)
+			info.slashCommand.replyEmbeds(send.build()).queue();
+		else
+			info.channel.sendMessage(send.build()).queue();
 	}
 	public static void sendModOnly(Command cmd, CommandExecutionInfo info, String prefix) {
 		EmbedBuilder eb = quickEmbed("This command is reserved for moderators/admins.",
 				"Use `" + prefix + "modrole` to see the current moderator role.", Color.orange);
-		info.channel.sendMessage(eb.build()).queue();
+		if(info.isSlashCommand)
+			info.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			info.channel.sendMessage(eb.build()).queue();
 	}
 	public static void sendNotPurchased(Command cmd, CommandExecutionInfo info, String prefix) {
 		EmbedBuilder eb = quickEmbed("You don't own this command yet!",
 				"Check out the `" + prefix + "shop` to buy it.", Color.red);
-		info.channel.sendMessage(eb.build()).queue();
+		if(info.isSlashCommand)
+			info.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			info.channel.sendMessage(eb.build()).queue();
 	}
 	public static void sendAdminOnly(Command cmd, CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed(
 			"This command is reserved for admins.",
 			"Admins are usually developers of BonziBot or very well known contributors.",
 			Color.orange);
-		info.channel.sendMessage(eb.build()).queue();
+		if(info.isSlashCommand)
+			info.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			info.channel.sendMessage(eb.build()).queue();
 				
 	}
 	public static void sendOnCooldown(Command cmd, CommandExecutionInfo info, CooldownManager cdm) {
@@ -833,20 +853,29 @@ public class BonziUtils {
 		String ts = getShortTimeStringMs(timeLeftMs);
 		String desc = ts + " Remaining";
 		EmbedBuilder embed = quickEmbed(msg, desc, Color.yellow);
-		info.channel.sendMessage(embed.build()).queue();
+		if(info.isSlashCommand)
+			info.slashCommand.replyEmbeds(embed.build()).queue();
+		else
+			info.channel.sendMessage(embed.build()).queue();
 		return;
 	}
 	public static void sendDoesntWorkDms(Command cmd, CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed("This command doesn't work in DMs!",
 				"Try running the command in a server instead!", Color.orange);
-		info.channel.sendMessage(eb.build()).queue();
+		if(info.isSlashCommand)
+			info.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			info.channel.sendMessage(eb.build()).queue();
 	}
 	public static void sendAwaitingConfirmation(CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed(
 			"A command is still waiting for your confirmation!",
 			"React with any reaction to cancel it, or react with the appropriate reaction to continue the command.",
 			Color.orange);
-		info.channel.sendMessage(eb.build()).queue();
+		if(info.isSlashCommand)
+			info.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			info.channel.sendMessage(eb.build()).queue();
 	}
 	public static void sendMentionMessage(GuildMessageReceivedEvent e, BonziBot bb) {
 		if(!e.getMessage().getContentRaw().contains("<@"))

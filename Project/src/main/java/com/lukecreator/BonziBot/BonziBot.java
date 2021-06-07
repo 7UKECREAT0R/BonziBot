@@ -70,6 +70,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.events.guild.update.GuildUpdateNameEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -209,29 +210,34 @@ public class BonziBot extends ListenerAdapter {
 			if(!command.isRegisterable())
 				continue;
 			CommandData data = new CommandData(command
-				.getFilteredCommandName(), command.description);
+				.getSlashCommandName(), command.description);
 			List<OptionData> allArgs = new ArrayList<OptionData>(allCommands.size());
-			for(CommandArg arg: command.args.getArgs()) {
-				OptionData option = new OptionData(arg.type.nativeOption,
-					arg.argName.toLowerCase(), arg.isOptional() ?
-					"Optional argument." : "Required argument.");
-				if(arg.type == ArgType.Enum) {
-					EnumArg e = (EnumArg)arg;
-					@SuppressWarnings("rawtypes")
-					Enum[] values = e.getValues();
-					Choice[] choices = new Choice[e.validTypes];
-					int accessor = 0;
-					for(int i = 0; i < values.length; i++) {
+			
+			if(command.args != null && command.args.getArgs() != null) {
+				for(CommandArg arg: command.args.getArgs()) {
+					OptionData option = new OptionData(arg.type.nativeOption,
+						arg.argName.replaceAll(Constants.WHITESPACE_REGEX, "")
+						.toLowerCase(), arg.isOptional() ?
+						"Optional argument." : "Required argument.",
+						!arg.isOptional());
+					
+					if(arg.type == ArgType.Enum) {
+						EnumArg e = (EnumArg)arg;
 						@SuppressWarnings("rawtypes")
-						Enum value = values[i];
-						if(value.name().startsWith("_"))
-							continue;
-						choices[accessor++] = new Choice
-							(value.name().toLowerCase(), i);
+						Enum[] values = e.getValues();
+						Choice[] choices = new Choice[e.validTypes];
+						int accessor = 0;
+						for(int i = 0; i < values.length; i++) {
+							@SuppressWarnings("rawtypes")
+							Enum value = values[i];
+							if(value.name().startsWith("_"))
+								continue;
+							choices[accessor++] = new Choice
+								(value.name().toLowerCase(), i);
+						}
 					}
+					allArgs.add(option);
 				}
-				
-				allArgs.add(option);
 			}
 			action = action.addCommands(data.addOptions(allArgs));
 		}
@@ -272,7 +278,19 @@ public class BonziBot extends ListenerAdapter {
 	// Events
 	@Override
 	public void onSlashCommand(SlashCommandEvent event) {
-		// TODO implement slash commands.
+		commands.onInput(event, this);
+	}
+	@Override
+	public void onButtonClick(ButtonClickEvent event) {
+		String id = event.getComponentId();
+		
+		if(id.equals("_clicker")) {
+			String msg = event.getMessage().getContentRaw();
+			int number = Integer.parseInt(msg.substring(18)) + 1;
+			event.editMessage("`Cookie Clicker!` " + number).queue();
+		}
+		
+		
 	}
 	public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
 		// Execute commands and chat-related things.
