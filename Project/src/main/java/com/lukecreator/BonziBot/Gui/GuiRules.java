@@ -69,7 +69,7 @@ public class GuiRules extends Gui {
 	}
 	
 	@Override
-	public void onAction(int buttonId, JDA jda) {
+	public void onAction(String actionId, JDA jda) {
 		MessageChannel channel = this.parent.getChannel(jda);
 		GuildSettingsManager gsm = this.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);
@@ -77,7 +77,7 @@ public class GuiRules extends Gui {
 		if(channel == null)
 			return;
 		
-		if(buttonId == 0) {
+		if(actionId == 0) {
 			// New
 			MessageEmbed msge = BonziUtils.quickEmbed("Creating New Rule...",
 				"Send the new rule you want to add here...", Color.orange).build();
@@ -108,7 +108,7 @@ public class GuiRules extends Gui {
 			});
 			return;
 		}
-		if(buttonId == 1) {
+		if(actionId == 1) {
 			// Delete
 			int rCount = rules.getRulesCount();
 			if(rCount < 1) {
@@ -162,7 +162,7 @@ public class GuiRules extends Gui {
 			}
 			return;
 		}
-		if(buttonId == 2) {
+		if(actionId == 2) {
 			int rCount = rules.getRulesCount();
 			
 			if(rCount < 1) {
@@ -214,7 +214,7 @@ public class GuiRules extends Gui {
 			});
 			return;
 		}
-		if(buttonId == 3) {
+		if(actionId == 3) {
 			// Formatting
 			rules.scrollFormatting();
 			settings.setRules(rules);

@@ -70,14 +70,14 @@ public class GuiEditProfile extends Gui {
 	}
 	
 	@Override
-	public void onAction(int buttonId, JDA jda) {
+	public void onAction(String actionId, JDA jda) {
 		
 		UserAccountManager uam = this.bonziReference.accounts;
 		EventWaiterManager ewm = this.bonziReference.eventWaiter;
 		UserAccount account = uam.getUserAccount(userId);
 		MessageChannel channel = this.parent.getChannel(jda);
 		
-		if(buttonId == 0) {
+		if(actionId == 0) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🖊️ Send your bio in chat.");
 			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
 				ewm.waitForResponse(userId, message -> {
@@ -93,7 +93,7 @@ public class GuiEditProfile extends Gui {
 			return;
 		}
 		
-		if(buttonId == 1) {
+		if(actionId == 1) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🏳️‍🌈 Send your favorite color!");
 			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
 				ewm.waitForArgument(userId, new ColorArg(""), object -> {
@@ -108,7 +108,7 @@ public class GuiEditProfile extends Gui {
 			return;
 		}
 		
-		if(buttonId == 2) {
+		if(actionId == 2) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("⏰ Send the timezone you're in.",
 					"Type 'none' to set no timezone.");
 			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
@@ -147,7 +147,7 @@ public class GuiEditProfile extends Gui {
 			});
 		}
 		
-		if(buttonId == 3) {
+		if(actionId == 3) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🖼️ Attach or link an image to set as your background.",
 					"Type 'none' to set no background");
 			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
@@ -193,7 +193,7 @@ public class GuiEditProfile extends Gui {
 			});
 		}
 		
-		if(buttonId == 4) {
+		if(actionId == 4) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🍰 Send the date of your birthday!",
 					"Format: `<month>/<day>`\nType 'none' to disable this feature.");
 			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {

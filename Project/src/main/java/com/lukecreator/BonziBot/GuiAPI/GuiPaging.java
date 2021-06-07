@@ -36,13 +36,13 @@ public class GuiPaging extends Gui {
 	}
 	
 	@Override
-	public void onAction(int buttonId, JDA jda) {
-		if(buttonId == 0 && pagingEnabled) {
+	public void onAction(String actionId, JDA jda) {
+		if(actionId == 0 && pagingEnabled) {
 			if(--currentPage < minPage)
 				currentPage = minPage;
 			else parent.redrawMessage(jda);
 		}
-		if(buttonId == 1 && pagingEnabled) {
+		if(actionId == 1 && pagingEnabled) {
 			if(++currentPage > maxPage)
 				currentPage = maxPage;
 			else parent.redrawMessage(jda);

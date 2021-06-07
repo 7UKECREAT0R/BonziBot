@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.User;
 
 public abstract class Gui {
@@ -63,19 +62,27 @@ public abstract class Gui {
 	protected GuiContainer parent;
 	public List<GuiButton> buttons;
 	
-	public void receiveReaction(ReactionEmote react) {
+	/*public void receiveReaction(ReactionEmote react) {
 		for(GuiButton button: buttons) {
 			if(!button.wasClicked(react)) continue;
 			int action = button.actionId;
 			this.onAction(action, react.getJDA());
 			this.postAction(action, react.getJDA());
 		}
+	}*/
+	public void receiveAction(String actionId, JDA jda) {
+		for(GuiButton button: this.buttons) {
+			if(button.actionId.equals(actionId)) {
+				this.onAction(actionId, jda);
+				this.postAction(actionId, jda);
+			}
+		}
 	}
 	
 	// Overridable
 	public void initialize(JDA jda) {}
-	public void onAction(int buttonId, JDA jda) {}
-	public void postAction(int buttonId, JDA jda) {}
+	public void onAction(String actionId, JDA jda) {}
+	public void postAction(String actionId, JDA jda) {}
 	
 	public Object draw(JDA jda) { return EMPTY; }
 	

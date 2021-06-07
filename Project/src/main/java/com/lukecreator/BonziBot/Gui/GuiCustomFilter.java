@@ -70,19 +70,19 @@ public class GuiCustomFilter extends Gui {
 	}
 	
 	@Override
-	public void onAction(int buttonId, JDA jda) {
+	public void onAction(String actionId, JDA jda) {
 		GuildSettingsManager gsm = this.bonziReference.guildSettings;
 		EventWaiterManager waiter = this.bonziReference.eventWaiter;
 		GuildSettings settings = gsm.getSettings(guildId);
 		List<String> customFilter = settings.customFilter;
 		
-		if(buttonId == 0) {
+		if(actionId == 0) {
 			// Back
 			Gui back = new GuiGuildSettingsPage1(guildId, guildName);
 			this.parent.setActiveGui(back, jda);
 			return;
 		}
-		if(buttonId == 1) {
+		if(actionId == 1) {
 			// Add
 			MessageChannel ch = this.parent.getChannel(jda);
 			if(customFilter.size() > MAX_FILTER_COUNT) {
@@ -112,7 +112,7 @@ public class GuiCustomFilter extends Gui {
 				});
 			});
 		}
-		if(buttonId == 2) {
+		if(actionId == 2) {
 			// Remove
 			MessageChannel ch = this.parent.getChannel(jda);
 			ch.sendMessage(BonziUtils.quickEmbed("Type number of the word/phrase you want to remove.", null, Color.orange).build()).queue(sent -> {

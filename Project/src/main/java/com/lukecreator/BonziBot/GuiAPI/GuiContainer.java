@@ -15,10 +15,10 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 
 /**
  * Base Gui class. Represents a message containing a Gui.
@@ -82,9 +82,9 @@ public class GuiContainer {
 		Object drawn = gui.draw(jda);
 		
 		Consumer<? super Message> success = mmm -> {
-			for(GuiButton gb: gui.buttons) {
-				gb.icon.react(mmm);
-			}
+			/*for(GuiButton gb: gui.buttons) {
+				gb.icon.react(mmm);					Legacy; This is handled in the send method now.
+			}*/
 			this.setMessage(mmm.getIdLong());
 			agl.addNew(this);
 			if(isGuild)
@@ -93,9 +93,9 @@ public class GuiContainer {
 		};
 		Consumer<? super Message> fileSuccess = mmm -> {
 			((File)drawn).delete();
-			for(GuiButton gb: gui.buttons) {
-				gb.icon.react(mmm);
-			}
+			/*for(GuiButton gb: gui.buttons) {
+				gb.icon.react(mmm);					Legacy; This is handled in the send method now.
+			}*/
 			this.setMessage(mmm.getIdLong());
 			agl.addNew(this);
 			if(isGuild)
@@ -402,11 +402,19 @@ public class GuiContainer {
 		redrawMessage(jda);
 		resetAllReactions(jda);
 	}
+	/*
 	public void onReaction(ReactionEmote emote, User executor) {
 		if(!this.enabled)
 			return;
 		if(this.ownerId != executor.getIdLong())
 			return;
 		gui.receiveReaction(emote);
+	}*/
+	public void onAction(ButtonClickEvent event) {
+		if(!this.enabled)
+			return;
+		if(this.ownerId != event.getUser().getIdLong())
+			return;
+		this.gui.receiveAction(event.getComponentId(), event.getJDA());
 	}
 }

@@ -205,8 +205,8 @@ public class GuiProfile extends Gui {
 	}
 	
 	@Override
-	public void onAction(int buttonId, JDA jda) {
-		if(buttonId == 0) {
+	public void onAction(String actionId, JDA jda) {
+		if(actionId == 0) {
 			Gui theGui = new GuiEditProfile(userId);
 			BonziBot bb = this.bonziReference;
 			GuiManager guis = bb.guis;

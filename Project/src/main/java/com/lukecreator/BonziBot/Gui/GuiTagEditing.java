@@ -48,10 +48,10 @@ public class GuiTagEditing extends Gui {
 	}
 	
 	@Override
-	public void onAction(int buttonId, JDA jda) {
+	public void onAction(String actionId, JDA jda) {
 		
 		// Edit
-		if(buttonId == 0) {
+		if(actionId == 0) {
 			BonziBot ref = this.bonziReference;
 			EventWaiterManager waiter = ref.eventWaiter;
 			MessageChannel channel = this.parent.getChannel(jda);
@@ -87,7 +87,7 @@ public class GuiTagEditing extends Gui {
 		}
 		
 		// Delete
-		if(buttonId == 1) {
+		if(actionId == 1) {
 			
 			if(isPrivate)
 				this.bonziReference.tags.removePrivateTagByName(tagName, guildId);

@@ -58,12 +58,12 @@ public class GuiGuildSettingsPage2 extends Gui {
 	}
 	
 	@Override
-	public void onAction(int buttonId, JDA jda) {
+	public void onAction(String actionId, JDA jda) {
 		GuildSettingsManager gsm = this
 			.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);
 		
-		if(buttonId == 0) {
+		if(actionId == 0) {
 			// Prefix
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
 			MessageChannel mc = this.parent.getChannel(jda);
@@ -84,7 +84,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 							.setFooter("Forget the prefix? Type b:stuck!").build()).queue();
 					});
 				});
-		} else if(buttonId == 1) {
+		} else if(actionId == 1) {
 			// Rules
 			GuiRules gui = new GuiRules(this.guildId, this.guildName);
 			this.parent.setActiveGui(gui, jda);

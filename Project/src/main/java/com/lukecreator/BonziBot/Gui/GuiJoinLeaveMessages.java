@@ -88,12 +88,12 @@ public class GuiJoinLeaveMessages extends Gui {
 	}
 	
 	@Override
-	public void onAction(int buttonId, JDA jda) {
+	public void onAction(String actionId, JDA jda) {
 		
 		GuildSettingsManager mgr = this.bonziReference.guildSettings;
 		GuildSettings settings = mgr.getSettings(guildId);
 		
-		if(buttonId == 0) {
+		if(actionId == 0) {
 			// Back button.
 			
 			if(this.didEnable && (!this.setChannel || !this.setMessage)) {
@@ -108,7 +108,7 @@ public class GuiJoinLeaveMessages extends Gui {
 			return;
 		}
 		
-		if(buttonId == 1) {
+		if(actionId == 1) {
 			// Enable/Disable
 			if(leave) {
 				settings.leaveMessages = !settings.leaveMessages;
@@ -135,7 +135,7 @@ public class GuiJoinLeaveMessages extends Gui {
 			return;
 		}
 		
-		if(buttonId == 2) {
+		if(actionId == 2) {
 			
 			MessageChannel channel = this.parent.getChannel(jda);
 			
@@ -183,7 +183,7 @@ public class GuiJoinLeaveMessages extends Gui {
 			return;
 		}
 		
-		if(buttonId == 3) {
+		if(actionId == 3) {
 			
 			MessageChannel channel = this.parent.getChannel(jda);
 			
@@ -215,7 +215,7 @@ public class GuiJoinLeaveMessages extends Gui {
 			return;
 		}
 		
-		if(buttonId == 4) {
+		if(actionId == 4) {
 			
 			MessageChannel channel = this.parent.getChannel(jda);
 			

@@ -102,9 +102,9 @@ public class GuiHelpMenuCategory extends GuiPaging {
 	}
 	
 	@Override
-	public void onAction(int buttonId, JDA jda) {
-		super.onAction(buttonId, jda);
-		if(buttonId == 2) {
+	public void onAction(String actionId, JDA jda) {
+		super.onAction(actionId, jda);
+		if(actionId == 2) {
 			GuiHelpMenu menu = new GuiHelpMenu(this.category == CommandCategory._HIDDEN);
 			this.parent.setActiveGui(menu, jda);
 		}

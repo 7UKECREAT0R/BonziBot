@@ -41,10 +41,10 @@ public class GuiTestMenu extends GuiPaging {
 	}
 	
 	@Override
-	public void onAction(int buttonId, JDA jda) {
-		super.onAction(buttonId, jda);
+	public void onAction(String actionId, JDA jda) {
+		super.onAction(actionId, jda);
 		
-		if(buttonId == 2) {
+		if(actionId == 2) {
 			this.pagingEnabled = false;
 			String sel = set[this.currentPage - 1].toString();
 			MessageChannel channel = parent.getChannel(jda);

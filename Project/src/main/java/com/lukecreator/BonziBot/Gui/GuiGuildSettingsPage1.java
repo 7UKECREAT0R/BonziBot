@@ -123,12 +123,12 @@ public class GuiGuildSettingsPage1 extends Gui {
 	}
 	
 	@Override
-	public void onAction(int buttonId, JDA jda) {
+	public void onAction(String actionId, JDA jda) {
 		GuildSettingsManager gsm = this
 			.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);
 		
-		if(buttonId == 0) {
+		if(actionId == 0) {
 			// Filtering setting
 			settings.cycleFilter();
 			gsm.setSettings(guildId, settings);
@@ -145,26 +145,26 @@ public class GuiGuildSettingsPage1 extends Gui {
 			this.parent.redrawMessage(jda);
 			return;
 		}
-		if(buttonId == 1) {
+		if(actionId == 1) {
 			// Custom filter
 			Gui next = new GuiCustomFilter(guildId, guildName);
 			this.parent.setActiveGui(next, jda);
 		}
-		if(buttonId == 2) {
+		if(actionId == 2) {
 			// Tags enabled
 			settings.enableTags = !settings.enableTags;
 			gsm.setSettings(guildId, settings);
 			this.parent.redrawMessage(jda);
 			return;
 		}
-		if(buttonId == 3) {
+		if(actionId == 3) {
 			// Tag privacy
 			settings.privateTags = !settings.privateTags;
 			gsm.setSettings(guildId, settings);
 			this.parent.redrawMessage(jda);
 			return;
 		}
-		if(buttonId == 4) {
+		if(actionId == 4) {
 			// Logging
 			if(settings.loggingEnabled) {
 				settings.loggingEnabled = false;
@@ -190,26 +190,26 @@ public class GuiGuildSettingsPage1 extends Gui {
 			}
 			return;
 		}
-		if(buttonId == 5) {
+		if(actionId == 5) {
 			// Bot commands
 			settings.botCommandsEnabled = !settings.botCommandsEnabled;
 			gsm.setSettings(guildId, settings);
 			this.parent.redrawMessage(jda);
 			return;
 		}
-		if(buttonId == 6) {
+		if(actionId == 6) {
 			// Join messages
 			GuiJoinLeaveMessages gui = new GuiJoinLeaveMessages(guildId, guildName, false);
 			this.parent.setActiveGui(gui, jda);
 			return;
 		}
-		if(buttonId == 7) {
+		if(actionId == 7) {
 			// Leave messages
 			GuiJoinLeaveMessages gui = new GuiJoinLeaveMessages(guildId, guildName, true);
 			this.parent.setActiveGui(gui, jda);
 			return;
 		}
-		if(buttonId == 8) {
+		if(actionId == 8) {
 			// Join role
 			if(settings.joinRole) {
 				settings.joinRole = false;
@@ -254,7 +254,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 			}
 			return;
 		}
-		if(buttonId == 9) {
+		if(actionId == 9) {
 			// Next Page
 			Gui next = new GuiGuildSettingsPage2(this.guildId, this.guildName);
 			this.parent.setActiveGui(next, jda);
