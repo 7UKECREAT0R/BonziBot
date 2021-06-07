@@ -142,6 +142,38 @@ public class GuildSettings implements Serializable {
 			return true;
 		}
 	}
+	/**
+	 * Test text in the filter. Returns true if it's good.
+	 * @param msg
+	 * @return
+	 */
+	public boolean testMessageInFilter(String msg) {
+		
+		msg = BonziUtils.stripText(msg);
+		
+		if(!customFilter.isEmpty()) {
+			String upper = msg.toUpperCase();
+			
+			for(String _item: customFilter) {
+				String item = _item.toUpperCase();
+				if(upper.contains(item))
+					return false; // NOT GOOD
+			}
+		}
+		
+		switch(filter) {
+		case NONE:
+			return true;
+		case SLURS:
+			return testMessageSlurs(msg);
+		case SWEARS:
+			return testMessageSwears(msg);
+		case SENSITIVE:
+			return testMessageSwears(msg);
+		default:
+			return true;
+		}
+	}
 	public boolean testMessageSlurs(String strip) {
 		for(Pattern slurRegex: Constants.SLUR_REGEX_COMPILED) {
 			boolean match = slurRegex.matcher(strip).find();

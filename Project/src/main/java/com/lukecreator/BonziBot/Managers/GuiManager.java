@@ -75,6 +75,7 @@ public class GuiManager {
 		container.sendMessage(jda, uId, main, agl); // Applies automatically.
 	}
 	
+	
 	// Outdated as of 6/6/2021.
 	// These should be ported to buttons.
 	public void onReactionAdd(GuildMessageReactionAddEvent e) {
@@ -90,9 +91,8 @@ public class GuiManager {
 		
 		AllocGuiList guiList = guildGuis.get(gId);
 		long mId = e.getMessageIdLong();
-		if(!guiList.hasMessageId(mId)) {
+		if(!guiList.hasMessageId(mId))
 			return;
-		}
 		
 		// Remove the newly added reaction.
 		// This can't be done in private channels.

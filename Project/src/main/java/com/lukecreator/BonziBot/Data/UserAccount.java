@@ -22,7 +22,7 @@ public class UserAccount implements Serializable {
 	private static final String NO_BIO = "No bio set yet!";
 	public static final int MAX_BIO_LEN = 500;
 	
-	private int coins = 0;
+	private long coins = 0;
 	private int xp = 0;
 	
 	private List<ModernWarn> warns = new ArrayList<ModernWarn>();
@@ -75,16 +75,16 @@ public class UserAccount implements Serializable {
 		}
 	}
 	
-	public int getCoins() {
+	public long getCoins() {
 		return this.coins;
 	}
-	public void addCoins(int amount) {
+	public void addCoins(long amount) {
 		this.coins += amount;
 	}
-	public void subCoins(int amount) {
+	public void subCoins(long amount) {
 		this.coins -= amount;
 	}
-	public void setCoins(int coins) {
+	public void setCoins(long coins) {
 		this.coins = coins;
 	}
 	

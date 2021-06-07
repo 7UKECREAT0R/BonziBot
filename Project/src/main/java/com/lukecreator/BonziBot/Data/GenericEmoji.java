@@ -2,6 +2,7 @@ package com.lukecreator.BonziBot.Data;
 
 import java.io.Serializable;
 
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
@@ -56,6 +57,11 @@ public class GenericEmoji implements Serializable {
 			Emote e = EmojiCache.getEmoteById(this.guildEmojiId);
 			return (e == null) ? "invalid" : e.getName();
 		}
+	}
+	public Emoji toEmoji() {
+		if(this.isGeneric)
+			return Emoji.fromUnicode(this.genericEmoji);
+		else return Emoji.fromEmote(EmojiCache.getEmoteById(guildEmojiId));
 	}
 	
 	private GenericEmoji(String genericEmoji) {

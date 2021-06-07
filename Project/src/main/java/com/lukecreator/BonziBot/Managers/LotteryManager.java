@@ -38,7 +38,7 @@ public class LotteryManager implements IStorableData {
 	 */
 	public Tuple<Boolean, Integer> doLottery(User buyer, BonziBot bonzi) {
 		UserAccount ua = bonzi.accounts.getUserAccount(buyer);
-		int coins = ua.getCoins();
+		long coins = ua.getCoins();
 		
 		boolean win = rand.nextInt(WIN_CHANCE) == 0;
 		int winnings = win ? lottery : -10;

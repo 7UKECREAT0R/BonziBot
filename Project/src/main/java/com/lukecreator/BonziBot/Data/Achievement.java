@@ -47,4 +47,10 @@ public class Achievement implements Serializable {
 		"Overpowered", "Deal over a hundred damage in a single hit in RPG!", GenericEmoji.fromEmoji("⚔️"), 3); // TODO
 	public static final Achievement SPY = new Achievement(
 		"The Spy", "Expose a message.", GenericEmoji.fromEmoji("🕵️"), 1);
+	public static final Achievement THIEF = new Achievement(
+			"THIEF!", "Try to steal from someone...?", GenericEmoji.fromEmoji("🥷"), 2);
+	public static final Achievement POPULAR = new Achievement(
+			"Popular", "Reach 10 reputation!", GenericEmoji.fromEmoji("🥰"), 2);
+	public static final Achievement FAMOUS = new Achievement(
+			"Famous", "Reach a whopping 100 reputation!", GenericEmoji.fromEmoji("❤️"), 3);
 }
