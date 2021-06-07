@@ -48,6 +48,9 @@ public class AfkCommand extends Command {
 		
 		if(e.isGuildMessage)
 			e.message.delete().queue(null, ignore -> {});
-		e.channel.sendMessage(msg).queue();
+		if(e.isSlashCommand)
+			e.slashCommand.replyEmbeds(msg).queue();
+		else
+			e.channel.sendMessage(msg).queue();
 	}
 }

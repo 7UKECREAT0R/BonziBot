@@ -33,5 +33,4 @@ public class GuildSettingsCommand extends Command {
 				(guildId, guildName);
 		BonziUtils.sendGui(e, gui);
 	}
-	
 }

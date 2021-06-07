@@ -31,11 +31,15 @@ public class LotteryCommand extends Command {
 		User u = e.executor;
 		UserAccountManager uam = e.bonzi.accounts;
 		UserAccount account = uam.getUserAccount(u);
-		int currentCoins = account.getCoins();
+		long currentCoins = account.getCoins();
 		
 		if(currentCoins < LotteryManager.TICKET_COST) {
-			e.channel.sendMessage(BonziUtils.failureEmbed("You need " + LotteryManager.S_TICKET_COST + 
-				" coins to buy a lottery ticket!", "You currently have " + BonziUtils.comma(currentCoins) + " coins.")).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("You need " + LotteryManager.S_TICKET_COST + 
+					" coins to buy a lottery ticket!", "You currently have " + BonziUtils.comma(currentCoins) + " coins.")).queue();
+			else
+				e.channel.sendMessage(BonziUtils.failureEmbed("You need " + LotteryManager.S_TICKET_COST + 
+					" coins to buy a lottery ticket!", "You currently have " + BonziUtils.comma(currentCoins) + " coins.")).queue();
 			return;
 		}
 		
@@ -51,12 +55,18 @@ public class LotteryCommand extends Command {
 			String winningsString = BonziUtils.comma(winnings);
 			EmbedBuilder eb = BonziUtils.quickEmbed("💰 IT'S A WINNER! 💰", "You just won " +
 				winningsString + " coins!\nYou went from " + oldCoins + " to " + newCoins + " coins!", Color.yellow);
-			e.channel.sendMessage(eb.build()).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(eb.build()).queue();
+			else
+				e.channel.sendMessage(eb.build()).queue();
 			return;
 		} else {
 			MessageEmbed me = BonziUtils.failureEmbed("You didn't win this time...  -" + LotteryManager.S_TICKET_COST + " coins.",
 					"The lottery now has " + BonziUtils.comma(e.bonzi.lottery.getLottery()) + " coins in it!");
-			e.channel.sendMessage(me).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(me).queue();
+			else
+				e.channel.sendMessage(me).queue();
 			return;
 		}
 	}

@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot.Commands;
 
+import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
@@ -20,8 +21,9 @@ public class SayCommand extends Command {
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
 		String toSay = e.args.getString("text");
-		toSay = toSay.replace("@everyone", "`everyone ping`");
-		toSay = toSay.replace("@here", "`here ping`");
-		e.channel.sendMessage(toSay).queue();
+		if(e.isSlashCommand)
+			e.slashCommand.reply(BonziUtils.sanitizeGuildInput(toSay)).queue();
+		else
+			e.channel.sendMessage(BonziUtils.sanitizeGuildInput(toSay)).queue();
 	}
 }

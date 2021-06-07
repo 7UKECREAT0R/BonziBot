@@ -127,7 +127,11 @@ public class NickAllCommand extends Command {
 		eb.addField("unpingable", "Select users with unpingable names.", true);
 		eb.addField("contains: <text>", "Select all users where their names contain certain text.", true);
 		
-		e.channel.sendMessage(eb.build()).queue();
+		if(e.isSlashCommand) {
+			e.slashCommand.replyEmbeds(eb.build()).setEphemeral(true).queue();
+		} else {
+			e.channel.sendMessage(eb.build()).queue();
+		}
 		e.channel.sendMessage(BonziUtils.successEmbedIncomplete("Send the condition to apply.").setFooter("Type 'all' to pick all members.\nType 'cancel' to cancel this action.").build()).queue();
 		
 		EventWaiterManager ewm = e.bonzi.eventWaiter;

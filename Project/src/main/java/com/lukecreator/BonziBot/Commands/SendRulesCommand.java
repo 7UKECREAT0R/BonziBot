@@ -35,6 +35,10 @@ public class SendRulesCommand extends Command {
 		GuildSettingsManager gsm = e.bonzi.guildSettings;
 		GuildSettings settings = gsm.getSettings(e.guild);
 		Rules rules = settings.getRules();
+		
+		if(e.isSlashCommand)
+			e.slashCommand.reply(":white_check_mark: `Sent rules message.`").setEphemeral(true).queue();
+		
 		e.channel.sendMessage(msg).queue(sent -> {
 			rules.setRulesMessage(sent);
 			gsm.setSettings(e.guild, settings);

@@ -7,6 +7,8 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArg.ArgType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 /**
  * Wraps a CommandArg[]. Does all the parsing via #parse(String[], JDA)
@@ -105,6 +107,39 @@ public class CommandArgCollection {
 		}
 		
 		return allUsages;
+	}
+	/**
+	 * Parses slash-command options input into a CommandArg[]
+	 */
+	public CommandParsedArgs parse(OptionMapping[] options, JDA jda, User exec, Guild g) {
+		
+		CommandArg[] clone = args.clone();
+		for(int i = 0; i < clone.length; i++) {
+			CommandArg cmd = clone[i];
+			OptionType goalType = cmd.type.nativeOption;
+			switch(goalType) {
+			case BOOLEAN:
+				cmd.object = options[i].getAsBoolean();
+				break;
+			case CHANNEL:
+				cmd.object = options[i].getAsGuildChannel();
+				break;
+			case INTEGER:
+				cmd.object = options[i].getAsLong();
+				break;
+			case ROLE:
+				cmd.object = options[i].getAsRole();
+				break;
+			case USER:
+				cmd.object = options[i].getAsUser();
+				break;
+			default:
+				cmd.object = options[i].getAsString();
+			}
+			clone[i] = cmd;
+		}
+		
+		return new CommandParsedArgs(clone, false);
 	}
 	/**
 	 * Parses an array of words. Ensure the words array does

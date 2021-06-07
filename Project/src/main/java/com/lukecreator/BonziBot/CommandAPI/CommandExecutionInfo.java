@@ -4,6 +4,7 @@ import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.Data.Modifier;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -14,7 +15,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
 
 /**
  * Everything you need to execute a command.
@@ -43,13 +43,14 @@ public class CommandExecutionInfo {
 	}
 	public CommandExecutionInfo(SlashCommandEvent e) {
 		isSlashCommand = true;
-		slashCommandHook = e.getHook();
+		slashCommand = e;
 		bot = e.getJDA();
 		isGuildMessage = e.isFromGuild();
 		executor = e.getUser();
 		channel = e.getChannel();
-		tChannel = e.getTextChannel();
-		pChannel = e.getPrivateChannel();
+		if(e.getChannelType() == ChannelType.TEXT)
+			tChannel = e.getTextChannel();
+		else pChannel = e.getPrivateChannel();
 		guild = e.getGuild();
 		member = e.getMember();
 		message = null; // beware
@@ -71,7 +72,7 @@ public class CommandExecutionInfo {
 	}
 	
 	public boolean isSlashCommand = false;
-	public InteractionHook slashCommandHook = null;
+	public SlashCommandEvent slashCommand = null;
 	
 	public boolean isGuildMessage = false;
 	public boolean isDirectMessage = false;

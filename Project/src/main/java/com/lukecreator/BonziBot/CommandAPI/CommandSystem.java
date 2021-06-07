@@ -23,6 +23,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 /**
  * Manages the loading of commands, argument
@@ -116,6 +118,52 @@ public class CommandSystem {
 		// Send it to the right command.
 		return directCommand(info, commandName, resizedArgs);
 	}
+	/**
+	 * Parse slash-command input and redirect it to the right command.
+	 * @param event
+	 * @return
+	 */
+	public boolean onInput(SlashCommandEvent event, BonziBot bb) {
+		String name = event.getName();
+		List<OptionMapping> _args = event.getOptions();
+		OptionMapping[] args = new OptionMapping[_args.size()];
+		_args.toArray(args);
+		CommandExecutionInfo info = new CommandExecutionInfo(event).setBonziBot(bb);
+		
+		if(info.isGuildMessage) {
+			TextChannel tc = info.tChannel;
+			Modifier[] mods = BonziUtils.getChannelModifiers(tc);
+			info.setModifiers(mods);
+		} else {
+			info.setModifiers();
+		}
+		
+		for(Command cmd: commands) {
+			if(!cmd.getSlashCommandName().equals(name))
+				continue;
+			CommandParsedArgs cpa = null;
+			if(cmd.args != null) {
+				Guild inputGuild = info.isGuildMessage ? info.guild : null;
+				cpa = cmd.args.parse(args, info.bot, info.executor, inputGuild);
+			}
+			info.setCommandData(cmd.getFilteredCommandName(), new String[args.length], cpa);
+			
+			if(!checkQualifications(cmd, info))
+				return false;
+			
+			// Set cooldown.
+			if(cmd.hasCooldown) {
+				CooldownManager cm = info.bonzi.cooldowns;
+				long userId = info.executor.getIdLong();
+				cm.applyCooldown(cmd, userId);
+			}
+			
+			// Should be good to execute.
+			cmd.executeCommand(info);
+			return true;
+		}
+		return false;
+	}
 	public List<Command> getRegisteredCommands() {
 		return commands;
 	}
@@ -204,7 +252,7 @@ public class CommandSystem {
 		}
 		
 		// Check arguments.
-		if(cmd.args != null) {
+		if(cmd.args != null && !info.isSlashCommand) {
 			// Check if illegal optional argument exists.
 			cmd.args.testValidity();
 			

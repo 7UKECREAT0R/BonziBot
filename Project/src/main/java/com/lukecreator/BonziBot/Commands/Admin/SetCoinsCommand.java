@@ -30,7 +30,7 @@ public class SetCoinsCommand extends Command {
 		
 		UserAccountManager uam = e.bonzi.accounts;
 		UserAccount ua = uam.getUserAccount(target);
-		int before = ua.getCoins();
+		long before = ua.getCoins();
 		ua.setCoins(amount);
 		uam.setUserAccount(target, ua);
 		e.channel.sendMessage("completed. " + target.getName() + "'s balance: " + before + " -> " + amount).queue();

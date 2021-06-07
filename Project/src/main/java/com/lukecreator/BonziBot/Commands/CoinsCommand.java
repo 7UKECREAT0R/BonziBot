@@ -35,7 +35,7 @@ public class CoinsCommand extends Command {
 		
 		String title = target.getName();
 		
-		int coins = acc.getCoins();
+		long coins = acc.getCoins();
 		String prefix = "";
 		if(coins < 10)
 			prefix = "🏚️ Poor Boi";
@@ -60,7 +60,10 @@ public class CoinsCommand extends Command {
 			.setColor(Color.yellow)
 			.addField(prefix, sCoins, false);
 		
-		e.channel.sendMessage(eb.build()).queue();
+		if(e.isSlashCommand)
+			e.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			e.channel.sendMessage(eb.build()).queue();
 	}
 	
 }

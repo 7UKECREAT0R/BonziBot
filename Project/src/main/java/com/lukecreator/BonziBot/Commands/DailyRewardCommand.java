@@ -34,7 +34,10 @@ public class DailyRewardCommand extends Command {
 			String timeString = time.toLongString();
 			MessageEmbed me = BonziUtils.failureEmbed
 				("You can't claim your reward yet!", "Time left: " + timeString);
-			e.channel.sendMessage(me).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(me).queue();
+			else
+				e.channel.sendMessage(me).queue();
 			return;
 		}
 		
@@ -49,7 +52,10 @@ public class DailyRewardCommand extends Command {
 		String re = "Received " + earnString + " coins!";
 		eb.addField(sl, re, false);
 		
-		e.channel.sendMessage(eb.build()).queue();
+		if(e.isSlashCommand)
+			e.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			e.channel.sendMessage(eb.build()).queue();
 		return;
 	}
 }

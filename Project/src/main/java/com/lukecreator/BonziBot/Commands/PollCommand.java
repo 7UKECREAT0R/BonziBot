@@ -41,6 +41,9 @@ public class PollCommand extends Command {
 		eb.setColor(Color.gray);
 		eb.setFooter(generateFooter(0, 0));
 		
+		if(e.isSlashCommand)
+			e.slashCommand.reply(":white_check_mark: `Created poll!`").setEphemeral(true).queue();
+		
 		e.channel.sendMessage(eb.build()).queue(msg -> {
 			msg.addReaction("👍").queue();
 			msg.addReaction("👎").queue();

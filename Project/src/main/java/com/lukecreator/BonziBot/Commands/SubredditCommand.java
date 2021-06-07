@@ -37,23 +37,38 @@ public class SubredditCommand extends Command {
 		SubredditInfo sub = client.getSubredditInfo(subName);
 		
 		if(sub == null || !sub.subredditExists) {
-			e.channel.sendMessage(BonziUtils.failureEmbed("Subreddit '" + subName + "' doesn't exist!")).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("Subreddit '" + subName + "' doesn't exist!")).queue();
+			else
+				e.channel.sendMessage(BonziUtils.failureEmbed("Subreddit '" + subName + "' doesn't exist!")).queue();
 			return;
 		}
+		
+		if(e.isSlashCommand)
+			e.slashCommand.reply(":small_red_triangle_down:` Sent message...`").setEphemeral(true).queue();
 		
 		e.channel.sendMessage("Downloading a fresh post...").queue(msg -> {
 			Submission post = client.getRandomSubmission(subName);
 			if(post == null) {
-				e.channel.sendMessage(BonziUtils.failureEmbed("There's nothing on that subreddit!")).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("There's nothing on that subreddit!")).queue();
+				else
+					e.channel.sendMessage(BonziUtils.failureEmbed("There's nothing on that subreddit!")).queue();
 				return;
 			}
 			if(e.isGuildMessage && !e.tChannel.isNSFW()) {
 				if(sub.nsfw) {
-					e.channel.sendMessage(BonziUtils.failureEmbed("This subreddit is NSFW.", "Please use an NSFW channel for this subreddit specifically!")).queue();
+					if(e.isSlashCommand)
+						e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("This subreddit is NSFW.", "Please use an NSFW channel for this subreddit specifically!")).queue();
+					else
+						e.channel.sendMessage(BonziUtils.failureEmbed("This subreddit is NSFW.", "Please use an NSFW channel for this subreddit specifically!")).queue();
 					return;
 				}
 				if(post.isNSFW()) {
-					e.channel.sendMessage(BonziUtils.failureEmbed("The post that was gotten was NSFW. Can't post it here!")).queue();
+					if(e.isSlashCommand)
+						e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("The post that was gotten was NSFW. Can't post it here!")).queue();
+					else
+						e.channel.sendMessage(BonziUtils.failureEmbed("The post that was gotten was NSFW. Can't post it here!")).queue();
 					return;
 				}
 			}

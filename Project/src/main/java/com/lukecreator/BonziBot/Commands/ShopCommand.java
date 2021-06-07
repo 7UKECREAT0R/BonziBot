@@ -75,6 +75,9 @@ public class ShopCommand extends Command {
 			"If you put '-np' at the end of the command it will display all of the commands anyway.":
 			("You can purchase any of these commands with " + prefix + "buy <item>"));
 		
-		e.channel.sendMessage(eb.build()).queue();
+		if(e.isSlashCommand)
+			e.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			e.channel.sendMessage(eb.build()).queue();
 	}
 }

@@ -33,7 +33,10 @@ public class TagInfoUserCommand extends Command {
 		
 		if(gs != null && !gs.enableTags) {
 			MessageEmbed msg = BonziUtils.failureEmbed("Tags are disabled in this server.");
-			e.channel.sendMessage(msg).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(msg).queue();
+			else
+				e.channel.sendMessage(msg).queue();
 			return;
 		}
 		

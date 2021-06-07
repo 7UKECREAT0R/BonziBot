@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 public class BuyCommand extends Command {
 
@@ -63,12 +64,15 @@ public class BuyCommand extends Command {
 			if(!item.enabled) {
 				MessageEmbed me = BonziUtils.failureEmbed
 					("This item is disabled right now.");
-				e.channel.sendMessage(me).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.replyEmbeds(me).queue();
+				else
+					e.channel.sendMessage(me).queue();
 				return;
 			}
 			
-			int cost = item.price;
-			int bal = account.getCoins();
+			long cost = item.price;
+			long bal = account.getCoins();
 			
 			if(cost > bal) {
 				String sCost = BonziUtils.comma(cost);
@@ -76,7 +80,10 @@ public class BuyCommand extends Command {
 				MessageEmbed me = BonziUtils.failureEmbed(
 					"You can't afford that item yet!",
 					"Needed `" + sCost + "` coins, balance is `" + sBal + "`.");
-				e.channel.sendMessage(me).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.replyEmbeds(me).queue();
+				else
+					e.channel.sendMessage(me).queue();
 				return;
 			}
 			
@@ -84,14 +91,20 @@ public class BuyCommand extends Command {
 				MessageEmbed me = BonziUtils.failureEmbed(
 					"You already have that item!",
 					"You can mention someone at the end of the command to gift them this item.");
-				e.channel.sendMessage(me).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.replyEmbeds(me).queue();
+				else
+					e.channel.sendMessage(me).queue();
 				return;
 			}
 			
 			if(gift && (giftAccount.isPremium || giftAccount.hasItem(item))) {
 				MessageEmbed me = BonziUtils.failureEmbed(
 					giftReceiver.getName() + " already has that item!");
-				e.channel.sendMessage(me).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.replyEmbeds(me).queue();
+				else
+					e.channel.sendMessage(me).queue();
 				return;
 			}
 			
@@ -100,11 +113,16 @@ public class BuyCommand extends Command {
 			String title = gift ?
 				"Gifting " + itemDisplay + " to " + giftReceiver.getAsTag() + "...":
 				"Buying " + itemDisplay + "...";
+			if(e.isSlashCommand)
+				e.slashCommand.deferReply(false);
 			waiter.getConfirmation(e.executor, e.channel, title, confirm -> {
 				if(!confirm) {
 					MessageEmbed me = BonziUtils.failureEmbedIncomplete
 						("Cancelled purchase.").setColor(Color.orange).build();
-					e.channel.sendMessage(me).queue();
+					if(e.isSlashCommand)
+						e.slashCommand.getHook().editOriginalEmbeds(me).queue();
+					else
+						e.channel.sendMessage(me).queue();
 					return;
 				}
 				if(gift) {
@@ -112,8 +130,13 @@ public class BuyCommand extends Command {
 					giftAccount.items.add(item);
 					uam.setUserAccount(e.executor, account);
 					uam.setUserAccount(giftId, giftAccount);
-					sendGiftSuccess(e.channel, giftReceiver.getName());
-					sendGiftDM(e.executor, giftReceiver, itemDisplay);
+					if(e.isSlashCommand) {
+						sendGiftSuccess(e.slashCommand, giftReceiver.getName());
+						sendGiftDM(e.executor, giftReceiver, itemDisplay);
+					} else {
+						sendGiftSuccess(e.channel, giftReceiver.getName());
+						sendGiftDM(e.executor, giftReceiver, itemDisplay);
+					}
 					return;
 				}
 				account.subCoins(cost);
@@ -122,20 +145,26 @@ public class BuyCommand extends Command {
 				
 				MessageEmbed me = BonziUtils.quickEmbed("You've successfully bought " + itemDisplay + "!",
 					"Check out `" + prefix + "purchases` to check out the command.", Color.magenta).build();
-				e.channel.sendMessage(me).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.getHook().editOriginalEmbeds(me).queue();
+				else
+					e.channel.sendMessage(me).queue();
 				return;
 			});
 		} else {
 			itemName = itemName.toUpperCase();
 			if(!itemName.contains("PREMIUM")) {
 				MessageEmbed me = BonziUtils.failureEmbed(redirToShopT, redirToShopD);
-				e.channel.sendMessage(me).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.replyEmbeds(me).queue();
+				else
+					e.channel.sendMessage(me).queue();
 				return;
 			}
 			
 			// yeah they want premium
-			int cost = PremiumItem.getPremiumPrice();
-			int bal = account.getCoins();
+			long cost = PremiumItem.getPremiumPrice();
+			long bal = account.getCoins();
 			
 			if(cost > bal) {
 				String sCost = BonziUtils.comma(cost);
@@ -143,19 +172,28 @@ public class BuyCommand extends Command {
 				MessageEmbed me = BonziUtils.failureEmbed(
 					"You can't afford Premium yet!",
 					"Needed `" + sCost + "` coins, balance is `" + sBal + "`.");
-				e.channel.sendMessage(me).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.replyEmbeds(me).queue();
+				else
+					e.channel.sendMessage(me).queue();
 				return;
 			}
 			
 			if(!gift && account.isPremium) {
 				MessageEmbed me = BonziUtils.failureEmbed("You already have Premium!");
-				e.channel.sendMessage(me).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.replyEmbeds(me).queue();
+				else
+					e.channel.sendMessage(me).queue();
 				return;
 			}
 			
 			if(gift && giftAccount.isPremium) {
 				MessageEmbed me = BonziUtils.failureEmbed("That user already has Premium on their account!");
-				e.channel.sendMessage(me).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.replyEmbeds(me).queue();
+				else
+					e.channel.sendMessage(me).queue();
 				return;
 			}
 			
@@ -163,11 +201,16 @@ public class BuyCommand extends Command {
 			String title = gift ?
 				"Gifting BonziBot Premium to " + giftReceiver.getAsTag() + "...":
 				"Buying BonziBot Premium...";
+			if(e.isSlashCommand)
+				e.slashCommand.deferReply(false);
 			waiter.getConfirmation(e.executor, e.channel, title, confirm -> {
 				if(!confirm) {
 					MessageEmbed me = BonziUtils.failureEmbedIncomplete
 						("Cancelled purchase.").setColor(Color.orange).build();
-					e.channel.sendMessage(me).queue();
+					if(e.isSlashCommand)
+						e.slashCommand.getHook().editOriginalEmbeds(me).queue();
+					else
+						e.channel.sendMessage(me).queue();
 					return;
 				}
 				if(gift) {
@@ -175,8 +218,13 @@ public class BuyCommand extends Command {
 					giftAccount.isPremium = true;
 					uam.setUserAccount(e.executor, account);
 					uam.setUserAccount(giftId, giftAccount);
-					sendGiftSuccess(e.channel, giftReceiver.getName());
-					sendGiftDM(e.executor, giftReceiver, "BonziBot Premium 👑");
+					if(e.isSlashCommand) {
+						sendGiftSuccess(e.slashCommand, giftReceiver.getName());
+						sendGiftDM(e.executor, giftReceiver, "BonziBot Premium 👑");
+					} else {
+						sendGiftSuccess(e.channel, giftReceiver.getName());
+						sendGiftDM(e.executor, giftReceiver, "BonziBot Premium 👑");
+					}
 					return;
 				}
 				account.subCoins(cost);
@@ -185,7 +233,10 @@ public class BuyCommand extends Command {
 				
 				MessageEmbed me = BonziUtils.quickEmbed("You've successfully bought BonziBot Premium 👑!",
 					"Check out `" + prefix + "purchases` to check out all your fancy new commands!", Color.magenta).build();
-				e.channel.sendMessage(me).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.getHook().editOriginalEmbeds(me).queue();
+				else
+					e.channel.sendMessage(me).queue();
 				return;
 			});
 		}
@@ -203,5 +254,10 @@ public class BuyCommand extends Command {
 			.setDescription(sender.getName() + " has gifted you " + item + "!")
 			.setColor(Color.magenta);
 		BonziUtils.messageUser(user, eb.build());
+	}
+	void sendGiftSuccess(SlashCommandEvent command, String receiverName) {
+		MessageEmbed me = BonziUtils.successEmbed
+				("Success! Your gift to " + receiverName + " is on its way!");
+		command.getHook().editOriginalEmbeds(me).queue();
 	}
 }

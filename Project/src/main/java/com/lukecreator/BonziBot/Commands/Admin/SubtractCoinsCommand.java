@@ -30,9 +30,9 @@ public class SubtractCoinsCommand extends Command {
 		
 		UserAccountManager uam = e.bonzi.accounts;
 		UserAccount ua = uam.getUserAccount(target);
-		int before = ua.getCoins();
+		long before = ua.getCoins();
 		ua.subCoins(amount);
-		int now = ua.getCoins();
+		long now = ua.getCoins();
 		uam.setUserAccount(target, ua);
 		e.channel.sendMessage("completed. " + target.getName() + "'s balance: " + before + " -> " + now).queue();
 		return;

@@ -45,6 +45,8 @@ public class CommandParsedArgs {
 	public int getInt(String name) {
 		Object o = data.get(name);
 		if(o == null) return 0;
+		if(o instanceof Long)
+			return ((Long)o).intValue();
 		return ((Integer)o).intValue();
 	}
 	public float getFloat(String name) {

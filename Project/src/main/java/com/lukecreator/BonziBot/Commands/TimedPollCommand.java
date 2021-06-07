@@ -49,6 +49,9 @@ public class TimedPollCommand extends Command {
 		eb.setFooter(PollCommand.generateFooter(0, 0));
 		eb.setTimestamp(Instant.now().plusMillis(time.ms));
 		
+		if(e.isSlashCommand)
+			e.slashCommand.reply(":white_check_mark: `Created poll for " + BonziUtils.getLongTimeStringMs(time.ms) + "!`").setEphemeral(true).queue();
+		
 		e.channel.sendMessage(eb.build()).queue(msg -> {
 			msg.addReaction("👍").queue();
 			msg.addReaction("👎").queue();

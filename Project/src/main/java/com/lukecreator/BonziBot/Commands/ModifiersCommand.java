@@ -16,7 +16,7 @@ public class ModifiersCommand extends Command {
 		this.subCategory = 0;
 		this.name = "Modifiers";
 		this.unicodeIcon = "🧩";
-		this.description = "List of words you can insert into your channel topics to make me act differently! Minigames, mod tools, and more!";
+		this.description = "List of words you can insert into your channel topics to make me act differently!";
 		this.category = CommandCategory.UTILITIES;
 	}
 	
@@ -34,6 +34,9 @@ public class ModifiersCommand extends Command {
 			eb.addField(icon + " " + name, desc, false);
 		}
 		
-		e.channel.sendMessage(eb.build()).queue();
+		if(e.isSlashCommand)
+			e.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			e.channel.sendMessage(eb.build()).queue();
 	}
 }

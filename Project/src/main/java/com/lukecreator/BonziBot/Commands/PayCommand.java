@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.Achievement;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
@@ -38,25 +39,39 @@ public class PayCommand extends Command {
 		// Validation
 		if(target.isBot()) {
 			MessageEmbed msg = BonziUtils.failureEmbed("bro iunno if you want to gift a bot coins...");
-			e.channel.sendMessage(msg).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(msg).queue();
+			else
+				e.channel.sendMessage(msg).queue();
 			return;
 		}
 		if(amount < 0) {
 			MessageEmbed msg = BonziUtils.failureEmbed("nice try STEALER");
-			e.channel.sendMessage(msg).queue();
+			BonziUtils.tryAwardAchievement(e.channel, e.bonzi, e.executor, Achievement.THIEF);
+			uam.setUserAccount(e.executor, senderAccount);
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(msg).queue();
+			else
+				e.channel.sendMessage(msg).queue();
 			return;
 		} else if(amount == 0) {
 			MessageEmbed msg = BonziUtils.failureEmbed("you need to put a number that's not 0 lol");
-			e.channel.sendMessage(msg).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(msg).queue();
+			else
+				e.channel.sendMessage(msg).queue();
 			return;
 		}
 		
 		// Check account balance.
-		int current = senderAccount.getCoins();
+		long current = senderAccount.getCoins();
 		String currentString = BonziUtils.comma(current);
 		if(amount > current) {
 			MessageEmbed msg = BonziUtils.failureEmbed("You don't have enough in your balance to pay that much! Current amount: " + currentString);
-			e.channel.sendMessage(msg).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(msg).queue();
+			else
+				e.channel.sendMessage(msg).queue();
 			return;
 		}
 		
@@ -67,9 +82,12 @@ public class PayCommand extends Command {
 		uam.setUserAccount(target, receiveAccount);
 		
 		EmbedBuilder eb = BonziUtils.successEmbedIncomplete
-				("Successfully paid " + target.getName() + " " + BonziUtils.comma(amount) + " " + BonziUtils.plural("word", amount) + "!");
+				("Successfully paid " + target.getName() + " " + BonziUtils.comma(amount) + " " + BonziUtils.plural("coin", amount) + "!");
 		eb.setDescription("Your current balance now: " + BonziUtils.comma(current - amount));
-		e.channel.sendMessage(eb.build()).queue();
+		if(e.isSlashCommand)
+			e.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			e.channel.sendMessage(eb.build()).queue();
 	}
 	
 }

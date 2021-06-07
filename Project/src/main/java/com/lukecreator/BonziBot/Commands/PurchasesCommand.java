@@ -40,9 +40,14 @@ public class PurchasesCommand extends Command {
 				eb = BonziUtils.quickEmbed("Owned Commands", "Here's all the commands you own on your account!", e.member);
 			else eb = BonziUtils.quickEmbed("Owned Commands", "Here's all the commands you own on your account!", e.executor, Color.orange);
 		} else {
-			e.channel.sendMessage(BonziUtils.failureEmbed(
-				"You don't have any commands yet on your account!",
-				"Use `" + prefix + "shop` to take a look at some of the things you can buy.")).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(BonziUtils.failureEmbed(
+					"You don't have any commands yet on your account!",
+					"Use `" + prefix + "shop` to take a look at some of the things you can buy.")).queue();
+			else
+				e.channel.sendMessage(BonziUtils.failureEmbed(
+					"You don't have any commands yet on your account!",
+					"Use `" + prefix + "shop` to take a look at some of the things you can buy.")).queue();
 			return;
 		}
 		
@@ -65,7 +70,10 @@ public class PurchasesCommand extends Command {
 		}
 		
 		MessageEmbed me = eb.build();
-		e.channel.sendMessage(me).queue();
+		if(e.isSlashCommand)
+			e.slashCommand.replyEmbeds(me).queue();
+		else
+			e.channel.sendMessage(me).queue();
 		return;
 	}
 }

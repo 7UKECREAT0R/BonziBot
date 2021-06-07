@@ -18,6 +18,8 @@ public class JokeCommand extends Command {
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
 		String joke = e.bonzi.jokes.getJoke();
+		if(e.isSlashCommand)
+			e.slashCommand.reply(joke).queue();
 		e.channel.sendMessage(joke).queue();
 	}
 }

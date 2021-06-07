@@ -45,20 +45,29 @@ public class SlotsCommand extends Command {
 		int amount = e.args.getInt("amount");
 		if(amount == 0) {
 			MessageEmbed me = BonziUtils.failureEmbed("no 0 is allowd");
-			e.channel.sendMessage(me).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(me).queue();
+			else
+				e.channel.sendMessage(me).queue();
 			return;
 		} else if(amount < 0) {
 			MessageEmbed me = BonziUtils.failureEmbed("bro what r u DOING");
-			e.channel.sendMessage(me).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(me).queue();
+			else
+				e.channel.sendMessage(me).queue();
 			return;
 		}
 		
 		UserAccountManager uam = e.bonzi.accounts;
 		UserAccount acc = uam.getUserAccount(e.executor);
-		int balance = acc.getCoins();
+		long balance = acc.getCoins();
 		if(amount > balance) {
 			MessageEmbed me = BonziUtils.failureEmbed("You can't afford that!");
-			e.channel.sendMessage(me).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(me).queue();
+			else
+				e.channel.sendMessage(me).queue();
 			return;
 		}
 		
@@ -122,7 +131,11 @@ public class SlotsCommand extends Command {
 			Slot s = picks[i];
 			eb.addField(s.icon, "", true);
 		}
-		e.channel.sendMessage(eb.build()).queue();
+		
+		if(e.isSlashCommand)
+			e.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			e.channel.sendMessage(eb.build()).queue();
 	}
 	
 	public int getWins(Slot[] slots) {

@@ -30,17 +30,23 @@ public abstract class Command {
 			return false;
 		if(this.category == CommandCategory._HIDDEN || this.category == CommandCategory._SHOP_COMMAND)
 			return false;
-		for(CommandArg arg: args.args) {
-			if(arg.type.nativeOption == OptionType.UNKNOWN)
-				return false;
-		}
+		if(args != null && args.args != null)
+			for(CommandArg arg: args.args)
+				if(arg.type.nativeOption == OptionType.UNKNOWN)
+					return false;
 		return true;
 	}
 	/**
-	 * Strip special characters for
-	 *  comparison, such as spaces.
+	 * Strip special characters for comparison, such as spaces.
 	 */
 	public String getFilteredCommandName() {
+		return name.replaceAll(Constants.WHITESPACE_REGEX, "").toLowerCase();
+	}
+	/**
+	 * same as getFilteredCommandName idk why this exists
+	 * @return
+	 */
+	public String getSlashCommandName() {
 		return name.replaceAll(Constants.WHITESPACE_REGEX, "").toLowerCase();
 	}
 	protected void setCooldown(long ms) {
@@ -61,7 +67,7 @@ public abstract class Command {
 	}
 	
 	// The permissions the BOT needs to run this command.
-	public Permission[] neededPermissions = new Permission[] {};
+	public Permission[] neededPermissions = new Permission[] { Permission.UNKNOWN };
 	
 	public void executeCommand(CommandExecutionInfo e) {}
 }

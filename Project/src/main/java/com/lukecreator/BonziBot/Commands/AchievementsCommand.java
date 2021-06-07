@@ -42,6 +42,9 @@ public class AchievementsCommand extends Command {
 			desc, target, BonziUtils.COLOR_BONZI_PURPLE);
 		for(Achievement a: achievements)
 			eb.addField(a.icon.toString() + " " + a.name, a.desc, true);
-		e.channel.sendMessage(eb.build()).queue();
+		if(e.isSlashCommand)
+			e.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			e.channel.sendMessage(eb.build()).queue();
 	}
 }

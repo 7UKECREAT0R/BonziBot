@@ -20,9 +20,11 @@ public class HowToIdCommand extends Command {
 
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
-		if(e.isGuildMessage) {
+		if(e.isSlashCommand) 
+			e.slashCommand.replyEmbeds(BonziUtils.successEmbed("Check DMs (if they're open)!")).queue();
+		else if(e.isGuildMessage)
 			e.channel.sendMessage(BonziUtils.successEmbed("Check DMs (if they're open)!")).queue();
-		}
+		
 		BonziUtils.messageUser(e.executor,
 			  "How to get something's ID.\n\n"
 			+ "1) *Hit 'User Settings'*\n"
@@ -30,6 +32,5 @@ public class HowToIdCommand extends Command {
 			+ "3) *Scroll to the bottom and enable 'Developer Mode'*\n"
 			+ "**Now you can right click a role or user and press 'copy id'!**\n\n"
 			+ Constants.ID_TUTORIAL);
-		
 	}
 }

@@ -54,8 +54,7 @@ public class XpCommand extends Command {
 		int nextLevel = level + 1;
 		int startXp = BonziUtils.calculateXpForLevel(level);
 		int nextXp = BonziUtils.calculateXpForLevel(nextLevel);
-		float percent = xp - startXp;
-		percent /= (float)(nextXp - startXp);
+		float percent = (xp - startXp) / (float)(nextXp - startXp);
 		
 		String xpString = BonziUtils.comma(xp);
 		String levelString = BonziUtils.comma(level);
@@ -67,9 +66,80 @@ public class XpCommand extends Command {
 			background = Image.download(acc.backgroundImage);
 			if(background == null) {
 				image.dispose();
-				e.channel.sendMessage(BonziUtils.failureEmbed("something went super wrong:", Image.downloadMessage)).queue();
+				if(e.isSlashCommand)
+					e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("something went super wrong:", Image.downloadMessage)).queue();
+				else
+					e.channel.sendMessage(BonziUtils.failureEmbed("something went super wrong:", Image.downloadMessage)).queue();
 				return;
 			}
+		}
+		
+		if(e.isSlashCommand) {
+			final Image bgScope = background;
+			e.slashCommand.deferReply(false).queue(r -> {
+				if(bgScope != null)
+					image.fillImageKeepAspect(bgScope);
+				else
+					image.fill(BACK_COLOR);
+				
+				if(bgScope != null)
+					bgScope.dispose();
+				
+				int barLeft = EDGE_DIST;
+				int barRight = IMG_WIDTH - EDGE_DIST;
+				int barBottom = IMG_HEIGHT - EDGE_DIST;
+				int barTop = barBottom - BAR_HEIGHT;
+				float barWidth = barRight - barLeft;
+				float fillWidth = barWidth * percent;
+				
+				Image avatarImage = Image.download(avatar);
+				int avTop = EDGE_DIST;
+				int avLeft = EDGE_DIST;
+				int avSize = (barTop - EDGE_DIST) - avTop;
+				
+				if(avatarImage != null) {
+					image.drawImage(avatarImage.round(BAR_ROUND),
+						avLeft, avTop, avSize, avSize);
+					avatarImage.dispose();
+				}
+				
+				image.setFont(FontLoader.BEBAS_FONT, FontStyle.NORMAL, 42);
+				FontMetrics metrics = image.getFontMetrics();
+				int ascent = metrics.getAscent();
+				int textX = avLeft + avSize + EDGE_DIST;
+				int textY = ascent + (ascent >> 1);
+				Color textColor = Color.white;
+				image.drawString(name, textColor, textX, textY);
+				metrics = image.setFontSize(18);
+				textY += metrics.getAscent() + 2;
+				textColor = acc.favoriteColor;
+				image.drawString("LVL " + levelString, textColor, textX, textY);
+				
+				Rect bar = Rect.fromSides(barLeft, barRight, barTop, barBottom);
+				Rect partBar = Rect.fromSides(barLeft, barLeft + (int)fillWidth, barTop, barBottom);
+				Rect stBar = Rect.fromSides(partBar.right - BAR_ROUND, partBar.right, partBar.top, partBar.bottom);
+				
+				image.drawRoundedRect(bar, BAR_ROUND, EMPTY_COLOR);
+				image.drawRoundedRect(partBar, BAR_ROUND, acc.favoriteColor);
+				image.drawRect(stBar, acc.favoriteColor);
+				image.setFontSize(24);
+				image.drawCenteredString(xpString + " XP", Color.white, bar);
+				
+				try {
+					File saved = image.save("xpImages/xp_" + target.getId() + ".png", true);
+					r.editOriginal(saved, "xp_" + target.getId() + ".png").queue(finished -> {
+						saved.delete();
+					}, fail -> {
+						saved.delete();
+					});
+				}
+				catch(IOException exc) {
+					exc.printStackTrace();
+					e.channel.sendMessage("error occurred saving/uploading... maybe try again in a few seconds?\n\n`" + exc.getLocalizedMessage() + "`").queue();
+				}
+				return;
+			});
+			return;
 		}
 		
 		if(background != null)

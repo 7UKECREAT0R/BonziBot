@@ -21,6 +21,7 @@ public class SetRepCommand extends Command {
 		this.description = "set reputation of user";
 		this.args = new CommandArgCollection(new UserArg("target"), new IntArg("new rep"));
 		this.category = CommandCategory._HIDDEN;
+		this.adminOnly = true;
 	}
 
 	@Override

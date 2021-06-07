@@ -37,7 +37,7 @@ public class ChanceCommand extends Command {
 		UserAccount account = uam.getUserAccount(u);
 		
 		int amount = e.args.getInt("amount");
-		int balance = account.getCoins();
+		long balance = account.getCoins();
 		String amountString = BonziUtils.comma(amount);
 		String balanceString = BonziUtils.comma(balance);
 		
@@ -45,23 +45,34 @@ public class ChanceCommand extends Command {
 			EmbedBuilder eb = BonziUtils.quickEmbed(
 				"💸 YOU WON 💸", amountString + " COINS!\n"
 				+ "Current balance: " + BonziUtils.comma(balance + amount), Color.yellow);
-			e.channel.sendMessage(eb.build()).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(eb.build()).queue();
+			else
+				e.channel.sendMessage(eb.build()).queue();
 			return;
 		} else if(amount == 0) {
-			e.channel.sendMessage(BonziUtils.successEmbed("🥳 CONGRATULATIONS! You won a 1000x coins multiplier! (+0 COINS!) 🥳")).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(BonziUtils.successEmbed("🥳 CONGRATULATIONS! You won a 1000x coins multiplier! (+0 COINS!) 🥳")).queue();
+			else
+				e.channel.sendMessage(BonziUtils.successEmbed("🥳 CONGRATULATIONS! You won a 1000x coins multiplier! (+0 COINS!) 🥳")).queue();
 			return;
 		}
 		
 		if(amount > balance) {
-			e.channel.sendMessage(BonziUtils.failureEmbedIncomplete
-				("You can't afford that chance bro!").setDescription
-				("Current balance: " + balanceString).build()).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(BonziUtils.failureEmbedIncomplete
+					("You can't afford that chance bro!").setDescription
+					("Current balance: " + balanceString).build()).queue();
+			else
+				e.channel.sendMessage(BonziUtils.failureEmbedIncomplete
+					("You can't afford that chance bro!").setDescription
+					("Current balance: " + balanceString).build()).queue();
 			return;
 		}
 		
 		boolean win = random.nextBoolean();
 		
-		int newCoins = balance;
+		long newCoins = balance;
 		if(win) {
 			newCoins += amount;
 			
@@ -73,13 +84,19 @@ public class ChanceCommand extends Command {
 			EmbedBuilder eb = BonziUtils.quickEmbed(
 				"💸 YOU WON 💸", "+" + amountString + " COINS!\n"
 				+ "Current balance: " + BonziUtils.comma(newCoins), Color.yellow);
-			e.channel.sendMessage(eb.build()).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(eb.build()).queue();
+			else
+				e.channel.sendMessage(eb.build()).queue();
 		} else {
 			newCoins -= amount;
 			EmbedBuilder eb = BonziUtils.quickEmbed(
 				"❌ YOU LOST... ❌", "-" + amountString + " COINS\n"
 				+ "Current balance: " + BonziUtils.comma(newCoins), Color.red);
-			e.channel.sendMessage(eb.build()).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(eb.build()).queue();
+			else
+				e.channel.sendMessage(eb.build()).queue();
 		}
 		account.setCoins(newCoins);
 		uam.setUserAccount(u, account);

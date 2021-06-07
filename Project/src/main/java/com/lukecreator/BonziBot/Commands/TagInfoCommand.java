@@ -37,7 +37,10 @@ public class TagInfoCommand extends Command {
 		
 		if(gs != null && !gs.enableTags) {
 			MessageEmbed msg = BonziUtils.failureEmbed("Tags are disabled in this server.");
-			e.channel.sendMessage(msg).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(msg).queue();
+			else
+				e.channel.sendMessage(msg).queue();
 			return;
 		}
 		
@@ -52,7 +55,10 @@ public class TagInfoCommand extends Command {
 		
 		if(tag == null) {
 			MessageEmbed msg = BonziUtils.failureEmbed("That tag doesn't exist!");
-			e.channel.sendMessage(msg).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(msg).queue();
+			else
+				e.channel.sendMessage(msg).queue();
 			return;
 		}
 		
@@ -86,7 +92,10 @@ public class TagInfoCommand extends Command {
 				(eb, tagName, isPrivate, g.getIdLong());
 			BonziUtils.sendGui(e, edit);
 		} else {
-			e.channel.sendMessage(eb.build()).queue();
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(eb.build()).queue();
+			else
+				e.channel.sendMessage(eb.build()).queue();
 		}
 	}
 }

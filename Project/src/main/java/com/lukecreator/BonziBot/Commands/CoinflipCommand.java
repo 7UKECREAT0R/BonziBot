@@ -26,6 +26,9 @@ public class CoinflipCommand extends Command {
 		String msg = (side == 0) ?
 			Constants.COINFLIP_H:
 			Constants.COINFLIP_T;
-		e.channel.sendMessage(msg).queue();
+		if(e.isSlashCommand)
+			e.slashCommand.reply(msg).queue();
+		else
+			e.channel.sendMessage(msg).queue();
 	}
 }
