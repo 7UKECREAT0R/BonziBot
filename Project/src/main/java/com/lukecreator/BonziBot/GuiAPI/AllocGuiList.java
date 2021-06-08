@@ -3,8 +3,8 @@ package com.lukecreator.BonziBot.GuiAPI;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 
 /**
  * Limit one per Entity, represents a imited
@@ -40,7 +40,7 @@ public class AllocGuiList {
 		guis.clear();
 	}
 	
-	public void onReactionAdd(ReactionEmote react, long messageId, User executor) {
+	/*public void onReactionAdd(ReactionEmote react, long messageId, User executor) {
 		for(GuiContainer guiContainer: guis) {
 			if(!guiContainer.hasSentMessage)
 				continue;
@@ -49,6 +49,17 @@ public class AllocGuiList {
 			if(guiContainer.messageId != messageId)
 				continue;
 			guiContainer.onReaction(react, executor);
+		}
+	}*/
+	public void onButtonClick(ButtonClickEvent event, long messageId, User executor) {
+		for(GuiContainer gui: guis) {
+			if(!gui.hasSentMessage)
+				continue;
+			if(gui.messageId == -1)
+				continue;
+			if(gui.messageId != messageId)
+				continue;
+			gui.onAction(event);
 		}
 	}
 }

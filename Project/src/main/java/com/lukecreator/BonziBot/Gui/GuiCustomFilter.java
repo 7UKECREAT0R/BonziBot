@@ -34,9 +34,9 @@ public class GuiCustomFilter extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("⬅️"), 0));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🆕"), 1));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("❌"), 2));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🆕"), "New Word", GuiButton.Color.GREEN, "new"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("❌"), "Remove Word", GuiButton.Color.RED, "remove"));
 	}
 	
 	@Override
@@ -76,13 +76,13 @@ public class GuiCustomFilter extends Gui {
 		GuildSettings settings = gsm.getSettings(guildId);
 		List<String> customFilter = settings.customFilter;
 		
-		if(actionId == 0) {
+		if(actionId.equals("return")) {
 			// Back
 			Gui back = new GuiGuildSettingsPage1(guildId, guildName);
 			this.parent.setActiveGui(back, jda);
 			return;
 		}
-		if(actionId == 1) {
+		if(actionId.equals("new")) {
 			// Add
 			MessageChannel ch = this.parent.getChannel(jda);
 			if(customFilter.size() > MAX_FILTER_COUNT) {
@@ -112,7 +112,7 @@ public class GuiCustomFilter extends Gui {
 				});
 			});
 		}
-		if(actionId == 2) {
+		if(actionId.equals("remove")) {
 			// Remove
 			MessageChannel ch = this.parent.getChannel(jda);
 			ch.sendMessage(BonziUtils.quickEmbed("Type number of the word/phrase you want to remove.", null, Color.orange).build()).queue(sent -> {

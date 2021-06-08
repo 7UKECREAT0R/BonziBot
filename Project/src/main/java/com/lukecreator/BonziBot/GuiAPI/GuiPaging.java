@@ -31,18 +31,18 @@ public class GuiPaging extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("⬅️"), 0));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("➡️"), 1));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "pageleft"));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➡️"), "pageright"));
 	}
 	
 	@Override
 	public void onAction(String actionId, JDA jda) {
-		if(actionId == 0 && pagingEnabled) {
+		if(actionId.equals("pageleft") && pagingEnabled) {
 			if(--currentPage < minPage)
 				currentPage = minPage;
 			else parent.redrawMessage(jda);
 		}
-		if(actionId == 1 && pagingEnabled) {
+		if(actionId.equals("pageright") && pagingEnabled) {
 			if(++currentPage > maxPage)
 				currentPage = maxPage;
 			else parent.redrawMessage(jda);

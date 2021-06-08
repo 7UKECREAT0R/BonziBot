@@ -36,10 +36,11 @@ public class GuiRules extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🆕"), 0));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmojiCache.getEmoteByName("b_trash")), 1));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), 2));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📋"), 3));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🆕"), "Add", GuiButton.Color.BLUE, "new"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmojiCache.getEmoteByName("b_trash")), "Delete", GuiButton.Color.RED,  "delete"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), "Edit", GuiButton.Color.BLUE, "edit"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📋"), "Format", GuiButton.Color.GRAY, "format"));
 		this.rules = this.bonziReference.guildSettings.getSettings(guildId).getRules();
 	}
 	
@@ -77,7 +78,13 @@ public class GuiRules extends Gui {
 		if(channel == null)
 			return;
 		
-		if(actionId == 0) {
+		if(actionId.equals("return")) {
+			// Back button.
+			this.parent.setActiveGui(new GuiGuildSettingsPage2(guildId, guildName), jda);
+			return;
+		}
+		
+		if(actionId.equals("new")) {
 			// New
 			MessageEmbed msge = BonziUtils.quickEmbed("Creating New Rule...",
 				"Send the new rule you want to add here...", Color.orange).build();
@@ -108,7 +115,7 @@ public class GuiRules extends Gui {
 			});
 			return;
 		}
-		if(actionId == 1) {
+		if(actionId.equals("delete")) {
 			// Delete
 			int rCount = rules.getRulesCount();
 			if(rCount < 1) {
@@ -162,7 +169,7 @@ public class GuiRules extends Gui {
 			}
 			return;
 		}
-		if(actionId == 2) {
+		if(actionId.equals("edit")) {
 			int rCount = rules.getRulesCount();
 			
 			if(rCount < 1) {
@@ -214,7 +221,7 @@ public class GuiRules extends Gui {
 			});
 			return;
 		}
-		if(actionId == 3) {
+		if(actionId.equals("format")) {
 			// Formatting
 			rules.scrollFormatting();
 			settings.setRules(rules);

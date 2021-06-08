@@ -33,8 +33,9 @@ public class GuiGuildSettingsPage2 extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("↪️"), 0));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📖"), 1));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "lastpage"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("↪️"), "Prefix", GuiButton.Color.BLUE, "prefix"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📖"), "Rules", GuiButton.Color.BLUE,  "rules"));
 	}
 	
 	@Override
@@ -63,7 +64,14 @@ public class GuiGuildSettingsPage2 extends Gui {
 			.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);
 		
-		if(actionId == 0) {
+		if(actionId.equals("lastpage")) {
+			// Next Page
+			Gui next = new GuiGuildSettingsPage1(this.guildId, this.guildName);
+			this.parent.setActiveGui(next, jda);
+			return;
+		}
+		
+		if(actionId.equals("prefix")) {
 			// Prefix
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
 			MessageChannel mc = this.parent.getChannel(jda);
@@ -84,7 +92,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 							.setFooter("Forget the prefix? Type b:stuck!").build()).queue();
 					});
 				});
-		} else if(actionId == 1) {
+		} else if(actionId.equals("rules")) {
 			// Rules
 			GuiRules gui = new GuiRules(this.guildId, this.guildName);
 			this.parent.setActiveGui(gui, jda);

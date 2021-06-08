@@ -38,8 +38,8 @@ public class GuiTagEditing extends Gui {
 	@Override
 	public void initialize(JDA jda) {
 		super.initialize(jda);
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), 0));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmojiCache.getEmoteByName("b_trash")), 1));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), "Edit Tag", GuiButton.Color.BLUE, "edit"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmojiCache.getEmoteByName("b_trash")), "Delete Tag", GuiButton.Color.RED, "delete"));
 	}
 	
 	@Override
@@ -51,7 +51,7 @@ public class GuiTagEditing extends Gui {
 	public void onAction(String actionId, JDA jda) {
 		
 		// Edit
-		if(actionId == 0) {
+		if(actionId.equals("edit")) {
 			BonziBot ref = this.bonziReference;
 			EventWaiterManager waiter = ref.eventWaiter;
 			MessageChannel channel = this.parent.getChannel(jda);
@@ -87,7 +87,7 @@ public class GuiTagEditing extends Gui {
 		}
 		
 		// Delete
-		if(actionId == 1) {
+		if(actionId.equals("delete")) {
 			
 			if(isPrivate)
 				this.bonziReference.tags.removePrivateTagByName(tagName, guildId);

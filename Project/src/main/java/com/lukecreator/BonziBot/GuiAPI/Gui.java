@@ -71,7 +71,11 @@ public abstract class Gui {
 		}
 	}*/
 	public void receiveAction(String actionId, JDA jda) {
-		for(GuiButton button: this.buttons) {
+		int size = this.buttons.size();
+		for(int i = 0; i < size; i++) {
+			GuiButton button = this.buttons.get(i);
+			if(button.isNewline())
+				continue;
 			if(button.actionId.equals(actionId)) {
 				this.onAction(actionId, jda);
 				this.postAction(actionId, jda);

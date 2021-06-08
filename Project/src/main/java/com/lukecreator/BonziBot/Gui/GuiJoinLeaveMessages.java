@@ -37,13 +37,27 @@ public class GuiJoinLeaveMessages extends Gui {
 		keywordl = keyword.toLowerCase();
 	}
 	
+	GuiButton bOn = new GuiButton(GenericEmoji.fromEmoji("🖱️"), "Enable", GuiButton.Color.GREEN, "toggle");
+	GuiButton bOff = new GuiButton(GenericEmoji.fromEmoji("🖱️"), "Disable", GuiButton.Color.RED, "toggle");
+	GuiButton eOn = new GuiButton(GenericEmoji.fromEmoji("📰"), "Enable Embed", GuiButton.Color.GREEN, "embed");
+	GuiButton eOff = new GuiButton(GenericEmoji.fromEmoji("📰"), "Disable Embed", GuiButton.Color.RED, "embed");
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("⬅️"), 0));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🖱️"), 1));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🗨️"), 2));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("#️⃣"), 3));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📰"), 4));
+		
+		GuildSettingsManager mgr = this.bonziReference.guildSettings;
+		GuildSettings settings = mgr.getSettings(guildId);
+		this.reinitialize(settings);
+	}
+	public void reinitialize(GuildSettings settings) {
+		boolean enabled = leave ? settings.leaveMessages : settings.joinMessages;
+		boolean embeds = leave ? settings.leaveMessageIsEmbed : settings.joinMessageIsEmbed;
+		this.buttons.clear();
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
+		this.buttons.add(enabled ? bOff : bOn);
+		this.buttons.add(GuiButton.newline());
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🗨️"), "Set Message...", GuiButton.Color.BLUE, "message").asEnabled(enabled));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("#️⃣"), "Set Channel...", GuiButton.Color.BLUE,  "channel").asEnabled(enabled));
+		this.buttons.add(embeds ? eOff.asEnabled(enabled) : eOn.asEnabled(enabled));
 	}
 	
 	@Override
@@ -93,7 +107,7 @@ public class GuiJoinLeaveMessages extends Gui {
 		GuildSettingsManager mgr = this.bonziReference.guildSettings;
 		GuildSettings settings = mgr.getSettings(guildId);
 		
-		if(actionId == 0) {
+		if(actionId.equals("return")) {
 			// Back button.
 			
 			if(this.didEnable && (!this.setChannel || !this.setMessage)) {
@@ -108,7 +122,7 @@ public class GuiJoinLeaveMessages extends Gui {
 			return;
 		}
 		
-		if(actionId == 1) {
+		if(actionId.equals("toggle")) {
 			// Enable/Disable
 			if(leave) {
 				settings.leaveMessages = !settings.leaveMessages;
@@ -119,6 +133,7 @@ public class GuiJoinLeaveMessages extends Gui {
 					settings.leaveMessageChannel = 0l;
 					settings.leaveMessage = null;
 				}
+				
 			} else {
 				settings.joinMessages = !settings.joinMessages;
 				if(settings.joinMessages)
@@ -130,12 +145,13 @@ public class GuiJoinLeaveMessages extends Gui {
 				}
 			}
 			
+			this.reinitialize(settings);
 			mgr.setSettings(guildId, settings);
 			this.parent.redrawMessage(jda);
 			return;
 		}
 		
-		if(actionId == 2) {
+		if(actionId.equals("message")) {
 			
 			MessageChannel channel = this.parent.getChannel(jda);
 			
@@ -183,7 +199,7 @@ public class GuiJoinLeaveMessages extends Gui {
 			return;
 		}
 		
-		if(actionId == 3) {
+		if(actionId.equals("channel")) {
 			
 			MessageChannel channel = this.parent.getChannel(jda);
 			
@@ -215,7 +231,7 @@ public class GuiJoinLeaveMessages extends Gui {
 			return;
 		}
 		
-		if(actionId == 4) {
+		if(actionId.equals("embed")) {
 			
 			MessageChannel channel = this.parent.getChannel(jda);
 			
@@ -229,6 +245,7 @@ public class GuiJoinLeaveMessages extends Gui {
 			else
 				settings.joinMessageIsEmbed = !settings.joinMessageIsEmbed;
 			
+			this.reinitialize(settings);
 			mgr.setSettings(guildId, settings);
 			this.parent.redrawMessage(jda);
 		}

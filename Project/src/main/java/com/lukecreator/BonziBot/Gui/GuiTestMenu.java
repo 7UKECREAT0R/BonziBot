@@ -25,7 +25,7 @@ public class GuiTestMenu extends GuiPaging {
 	@Override
 	public void initialize(JDA jda) {
 		super.initialize(jda);
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🔵"), 2));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🔵"), "Choose!", GuiButton.Color.GREEN, "pick"));
 		this.maxPage = set.length;
 	}
 	
@@ -44,7 +44,7 @@ public class GuiTestMenu extends GuiPaging {
 	public void onAction(String actionId, JDA jda) {
 		super.onAction(actionId, jda);
 		
-		if(actionId == 2) {
+		if(actionId.equals("pick")) {
 			this.pagingEnabled = false;
 			String sel = set[this.currentPage - 1].toString();
 			MessageChannel channel = parent.getChannel(jda);

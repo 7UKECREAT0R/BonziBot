@@ -31,11 +31,11 @@ public class GuiEditProfile extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🖊️"), 0));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🏳️‍🌈"), 1));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("⏰"), 2));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🖼️"), 3));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🍰"), 4));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🖊️"), "Bio", GuiButton.Color.BLUE, "bio"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🏳️‍🌈"), "Favorite Color", GuiButton.Color.BLUE, "color"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("⏰"), "Timezone", GuiButton.Color.BLUE, "timezone"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🖼️"), "Background", GuiButton.Color.BLUE, "background"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🍰"), "Birthday", GuiButton.Color.BLUE, "birthday"));
 	}
 	
 	@Override
@@ -77,7 +77,7 @@ public class GuiEditProfile extends Gui {
 		UserAccount account = uam.getUserAccount(userId);
 		MessageChannel channel = this.parent.getChannel(jda);
 		
-		if(actionId == 0) {
+		if(actionId.equals("bio")) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🖊️ Send your bio in chat.");
 			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
 				ewm.waitForResponse(userId, message -> {
@@ -93,7 +93,7 @@ public class GuiEditProfile extends Gui {
 			return;
 		}
 		
-		if(actionId == 1) {
+		if(actionId.equals("color")) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🏳️‍🌈 Send your favorite color!");
 			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
 				ewm.waitForArgument(userId, new ColorArg(""), object -> {
@@ -108,7 +108,7 @@ public class GuiEditProfile extends Gui {
 			return;
 		}
 		
-		if(actionId == 2) {
+		if(actionId.equals("timezone")) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("⏰ Send the timezone you're in.",
 					"Type 'none' to set no timezone.");
 			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
@@ -147,7 +147,7 @@ public class GuiEditProfile extends Gui {
 			});
 		}
 		
-		if(actionId == 3) {
+		if(actionId.equals("background")) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🖼️ Attach or link an image to set as your background.",
 					"Type 'none' to set no background");
 			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
@@ -193,7 +193,7 @@ public class GuiEditProfile extends Gui {
 			});
 		}
 		
-		if(actionId == 4) {
+		if(actionId.equals("birthday")) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🍰 Send the date of your birthday!",
 					"Format: `<month>/<day>`\nType 'none' to disable this feature.");
 			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {

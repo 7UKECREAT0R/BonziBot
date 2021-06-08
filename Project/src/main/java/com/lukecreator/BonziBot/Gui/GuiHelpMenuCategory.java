@@ -46,7 +46,7 @@ public class GuiHelpMenuCategory extends GuiPaging {
 	@Override
 	public void initialize(JDA jda) {
 		super.initialize(jda);
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📁"), 2));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("📁"), "return").withColor(GuiButton.Color.GRAY));
 	}
 	
 	@Override
@@ -104,7 +104,7 @@ public class GuiHelpMenuCategory extends GuiPaging {
 	@Override
 	public void onAction(String actionId, JDA jda) {
 		super.onAction(actionId, jda);
-		if(actionId == 2) {
+		if(actionId.equals("return")) {
 			GuiHelpMenu menu = new GuiHelpMenu(this.category == CommandCategory._HIDDEN);
 			this.parent.setActiveGui(menu, jda);
 		}

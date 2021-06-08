@@ -26,15 +26,15 @@ public class GuiHelpMenu extends Gui {
 		this.adminMode = adminMode;
 	}
 	
-	public CommandCategory fromButtonId(int id) {
+	public CommandCategory fromButtonId(String id) {
 		switch(id) {
-		case 0: return CommandCategory.FUN;
-		case 1: return CommandCategory.COINS;
-		case 2: return CommandCategory.MODERATION;
-		case 3: return CommandCategory.UTILITIES;
-		case 4: return CommandCategory.MUSIC;
-		case 5: return CommandCategory.UPGRADE;
-		case 6: return CommandCategory._HIDDEN;
+		case "c0": return CommandCategory.FUN;
+		case "c1": return CommandCategory.COINS;
+		case "c2": return CommandCategory.MODERATION;
+		case "c3": return CommandCategory.UTILITIES;
+		case "c4": return CommandCategory.MUSIC;
+		case "c5": return CommandCategory.UPGRADE;
+		case "c6": return CommandCategory._HIDDEN;
 		// should NEVER happen since it's
 		// undefined to be anything else.
 		default: return CommandCategory.FUN;
@@ -43,14 +43,15 @@ public class GuiHelpMenu extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🎊"), 0));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🟡"), 1));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("👮"), 2));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🛠️"), 3));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🎵"), 4));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🚀"), 5));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🎊"), "c0"));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🟡"), "c1"));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("👮"), "c2"));
+		this.buttons.add(GuiButton.newline());
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🛠️"), "c3"));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🎵"), "c4"));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🚀"), "c5"));
 		if(this.adminMode)
-			this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🛡️"), 6));
+			this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🛡️"), "c6"));
 	}
 	
 	@Override
@@ -68,7 +69,7 @@ public class GuiHelpMenu extends Gui {
 		eb.addField("🛠️ Utilities", "Other commands that you can spruce up your server with.", true);
 		eb.addField("🎵 Music", "Blast music with your friends at 2AM or set the mood.", true);
 		eb.addField("🚀 Upgrades", "Let your members upgrade the server to unlock extra-cool features!", true);
-		eb.setFooter("React with the page you want to view.");
+		eb.setFooter("Click the page you want to view.");
 		if(this.adminMode) eb.addField("🛡 Admin (Hidden)", "Admin commands.", true);
 		return eb.build();
 	}

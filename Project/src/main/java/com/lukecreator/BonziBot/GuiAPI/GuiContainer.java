@@ -2,6 +2,7 @@ package com.lukecreator.BonziBot.GuiAPI;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.lukecreator.BonziBot.BonziBot;
@@ -14,11 +15,13 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 /**
  * Base Gui class. Represents a message containing a Gui.
@@ -72,6 +75,37 @@ public class GuiContainer {
 		this.userDmId = pc.getUser().getIdLong();
 		this.ownerId = pc.getUser().getIdLong();
 	}
+	private MessageAction buttons(MessageAction in) {
+		if(gui == null)
+			return in;
+		if(gui.buttons == null)
+			return in;
+		GuiButton[] buttons = (GuiButton[]) gui.buttons.toArray(new GuiButton[gui.buttons.size()]);
+		
+		if(buttons.length < 1)
+			return in;
+		
+		List<ActionRow> rows = new ArrayList<ActionRow>();
+		List<Button> row = new ArrayList<Button>();
+		for(int i = 0; i < buttons.length; i++) {
+			GuiButton button = buttons[i];
+			if(button.isNewline()) {
+				rows.add(ActionRow.of(row));
+				row.clear();
+				continue;
+			}
+			row.add(button.toDiscord());
+			if(row.size() >= 5) {
+				rows.add(ActionRow.of(row));
+				row.clear();
+				continue;
+			}
+		}
+		if(row.size() > 0)
+			rows.add(ActionRow.of(row));
+		
+		return in.setActionRows(rows);
+	}
 	
 	/**
 	 * This is BY FAR the most PAINFUL function
@@ -107,13 +141,13 @@ public class GuiContainer {
 			Guild g = jda.getGuildById(guildId);
 			TextChannel tc = g.getTextChannelById(channelId);
 			if(drawn instanceof MessageEmbed)
-				tc.sendMessage((MessageEmbed)drawn).queue(success);
+				buttons(tc.sendMessage((MessageEmbed)drawn)).queue(success);
 			if(drawn instanceof EmbedBuilder)
-				tc.sendMessage(((EmbedBuilder)drawn).build()).queue(success);
+				buttons(tc.sendMessage(((EmbedBuilder)drawn).build())).queue(success);
 			if(drawn instanceof String)
-				tc.sendMessage((MessageEmbed)drawn).queue(success);
+				buttons(tc.sendMessage((MessageEmbed)drawn)).queue(success);
 			if(drawn instanceof File)
-				tc.sendFile((File)drawn).queue(fileSuccess);
+				buttons(tc.sendFile((File)drawn).append("waddup guys")).queue(fileSuccess);
 		} else {
 			
 			User user = jda.getUserById(userDmId);
@@ -124,53 +158,53 @@ public class GuiContainer {
 						long cId = BonziUtils.userPrivateChannels.get(userDmId);
 						PrivateChannel pc = u.getJDA().getPrivateChannelById(cId);
 						if(drawn instanceof MessageEmbed)
-							pc.sendMessage((MessageEmbed)drawn).queue(success);
+							buttons(pc.sendMessage((MessageEmbed)drawn)).queue(success);
 						if(drawn instanceof EmbedBuilder)
-							pc.sendMessage(((EmbedBuilder)drawn).build()).queue(success);
+							buttons(pc.sendMessage(((EmbedBuilder)drawn).build())).queue(success);
 						if(drawn instanceof String)
-							pc.sendMessage((MessageEmbed)drawn).queue(success);
+							buttons(pc.sendMessage((MessageEmbed)drawn)).queue(success);
 						if(drawn instanceof File)
-							pc.sendFile((File)drawn).queue(fileSuccess);
+							buttons(pc.sendFile((File)drawn).append("waddup guys")).queue(fileSuccess);
 					} else {
 						u.openPrivateChannel().queue(p -> {
 							long privateChannelId = p.getIdLong();
 							BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
 							if(drawn instanceof MessageEmbed)
-								p.sendMessage((MessageEmbed)drawn).queue(success);
+								buttons(p.sendMessage((MessageEmbed)drawn)).queue(success);
 							if(drawn instanceof EmbedBuilder)
-								p.sendMessage(((EmbedBuilder)drawn).build()).queue(success);
+								buttons(p.sendMessage(((EmbedBuilder)drawn).build())).queue(success);
 							if(drawn instanceof String)
-								p.sendMessage((MessageEmbed)drawn).queue(success);
+								buttons(p.sendMessage((MessageEmbed)drawn)).queue(success);
 							if(drawn instanceof File)
-								p.sendFile((File)drawn).queue(fileSuccess);
+								buttons(p.sendFile((File)drawn).append("waddup guys")).queue(fileSuccess);
 						});
 					}
 				});
 			} else {
-				// copy of BonziUtils::messageUser
+				// copy of BonziUtils.messageUser
 				if(user.hasPrivateChannel() && BonziUtils.userPrivateChannels.containsKey(userDmId)) {
 					long cId = BonziUtils.userPrivateChannels.get(userDmId);
 					PrivateChannel pc = user.getJDA().getPrivateChannelById(cId);
 					if(drawn instanceof MessageEmbed)
-						pc.sendMessage((MessageEmbed)drawn).queue(success);
+						buttons(pc.sendMessage((MessageEmbed)drawn)).queue(success);
 					if(drawn instanceof EmbedBuilder)
-						pc.sendMessage(((EmbedBuilder)drawn).build()).queue(success);
+						buttons(pc.sendMessage(((EmbedBuilder)drawn).build())).queue(success);
 					if(drawn instanceof String)
-						pc.sendMessage((MessageEmbed)drawn).queue(success);
+						buttons(pc.sendMessage((MessageEmbed)drawn)).queue(success);
 					if(drawn instanceof File)
-						pc.sendFile((File)drawn).queue(fileSuccess);
+						buttons(pc.sendFile((File)drawn).append("waddup guys")).queue(fileSuccess);
 				} else {
 					user.openPrivateChannel().queue(p -> {
 						long privateChannelId = p.getIdLong();
 						BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
 						if(drawn instanceof MessageEmbed)
-							p.sendMessage((MessageEmbed)drawn).queue(success);
+							buttons(p.sendMessage((MessageEmbed)drawn)).queue(success);
 						if(drawn instanceof EmbedBuilder)
-							p.sendMessage(((EmbedBuilder)drawn).build()).queue(success);
+							buttons(p.sendMessage(((EmbedBuilder)drawn).build())).queue(success);
 						if(drawn instanceof String)
-							p.sendMessage((MessageEmbed)drawn).queue(success);
+							buttons(p.sendMessage((MessageEmbed)drawn)).queue(success);
 						if(drawn instanceof File)
-							p.sendFile((File)drawn).queue(fileSuccess);
+							buttons(p.sendFile((File)drawn).append("waddup guys")).queue(fileSuccess);
 					});
 				}
 			}
@@ -186,11 +220,11 @@ public class GuiContainer {
 			Guild g = jda.getGuildById(guildId);
 			TextChannel tc = g.getTextChannelById(channelId);
 			if(drawn instanceof MessageEmbed)
-				tc.editMessageById(messageId, (MessageEmbed)drawn).queue();
+				buttons(tc.editMessageById(messageId, (MessageEmbed)drawn)).queue();
 			if(drawn instanceof EmbedBuilder)
-				tc.editMessageById(messageId, ((EmbedBuilder)drawn).build()).queue();
+				buttons(tc.editMessageById(messageId, ((EmbedBuilder)drawn).build())).queue();
 			if(drawn instanceof String)
-				tc.editMessageById(messageId, (MessageEmbed)drawn).queue();
+				buttons(tc.editMessageById(messageId, (MessageEmbed)drawn)).queue();
 		} else {
 			User user = jda.getUserById(userDmId);
 			if(user == null) {
@@ -199,20 +233,20 @@ public class GuiContainer {
 					if(pc == null) {
 						u.openPrivateChannel().queue(p -> {
 							if(drawn instanceof MessageEmbed)
-								p.editMessageById(messageId, (MessageEmbed)drawn).queue();
+								buttons(p.editMessageById(messageId, (MessageEmbed)drawn)).queue();
 							if(drawn instanceof EmbedBuilder)
-								p.editMessageById(messageId, ((EmbedBuilder)drawn).build()).queue();
+								buttons(p.editMessageById(messageId, ((EmbedBuilder)drawn).build())).queue();
 							if(drawn instanceof String)
-								p.editMessageById(messageId, (MessageEmbed)drawn).queue();
+								buttons(p.editMessageById(messageId, (MessageEmbed)drawn)).queue();
 							BonziUtils.userPrivateChannels.put(u.getIdLong(), p.getIdLong());
 						});
 					} else {
 						if(drawn instanceof MessageEmbed)
-							pc.editMessageById(messageId, (MessageEmbed)drawn).queue();
+							buttons(pc.editMessageById(messageId, (MessageEmbed)drawn)).queue();
 						if(drawn instanceof EmbedBuilder)
-							pc.editMessageById(messageId, ((EmbedBuilder)drawn).build()).queue();
+							buttons(pc.editMessageById(messageId, ((EmbedBuilder)drawn).build())).queue();
 						if(drawn instanceof String)
-							pc.editMessageById(messageId, (MessageEmbed)drawn).queue();
+							buttons(pc.editMessageById(messageId, (MessageEmbed)drawn)).queue();
 					}
 				});
 			} else {
@@ -221,20 +255,20 @@ public class GuiContainer {
 				if(pc == null) {
 					user.openPrivateChannel().queue(p -> {
 						if(drawn instanceof MessageEmbed)
-							p.editMessageById(messageId, (MessageEmbed)drawn).queue();
+							buttons(p.editMessageById(messageId, (MessageEmbed)drawn)).queue();
 						if(drawn instanceof EmbedBuilder)
-							p.editMessageById(messageId, ((EmbedBuilder)drawn).build()).queue();
+							buttons(p.editMessageById(messageId, ((EmbedBuilder)drawn).build())).queue();
 						if(drawn instanceof String)
-							p.editMessageById(messageId, (MessageEmbed)drawn).queue();
+							buttons(p.editMessageById(messageId, (MessageEmbed)drawn)).queue();
 						BonziUtils.userPrivateChannels.put(user.getIdLong(), p.getIdLong());
 					});
 				} else {
 					if(drawn instanceof MessageEmbed)
-						pc.editMessageById(messageId, (MessageEmbed)drawn).queue();
+						buttons(pc.editMessageById(messageId, (MessageEmbed)drawn)).queue();
 					if(drawn instanceof EmbedBuilder)
-						pc.editMessageById(messageId, ((EmbedBuilder)drawn).build()).queue();
+						buttons(pc.editMessageById(messageId, ((EmbedBuilder)drawn).build())).queue();
 					if(drawn instanceof String)
-						pc.editMessageById(messageId, (MessageEmbed)drawn).queue();
+						buttons(pc.editMessageById(messageId, (MessageEmbed)drawn)).queue();
 				}
 			}
 		}
@@ -242,7 +276,7 @@ public class GuiContainer {
 	/**
 	 * im sorry for cursing your eyes
 	 */
-	public void resetAllReactions(JDA jda) {
+	/*public void resetAllReactions(JDA jda) {
 		if(!hasSentMessage) return;
 		if(messageId == -1) return;
 		
@@ -359,8 +393,8 @@ public class GuiContainer {
 				}
 			}
 		}
-	}
-
+	}*/
+	
 	public MessageChannel getChannel(JDA jda) {
 		if(this.isGuild) {
 			Guild g = jda.getGuildById(guildId);
@@ -375,7 +409,7 @@ public class GuiContainer {
 		return cached; // Rarely could be null.
 	}
 	public void disable(JDA jda) {
-		removeAllReactions(jda);
+		//resetAllReactions(jda);
 		enabled = false;
 	}
 	
@@ -400,7 +434,7 @@ public class GuiContainer {
 		}
 		this.gui = gui;
 		redrawMessage(jda);
-		resetAllReactions(jda);
+		//resetAllReactions(jda);
 	}
 	/*
 	public void onReaction(ReactionEmote emote, User executor) {
@@ -413,8 +447,11 @@ public class GuiContainer {
 	public void onAction(ButtonClickEvent event) {
 		if(!this.enabled)
 			return;
-		if(this.ownerId != event.getUser().getIdLong())
+		if(this.ownerId != event.getUser().getIdLong()) {
+			event.reply(":x: `This GUI was opened by someone else.`").setEphemeral(true).queue();
 			return;
+		}
+		event.deferEdit().queue();
 		this.gui.receiveAction(event.getComponentId(), event.getJDA());
 	}
 }

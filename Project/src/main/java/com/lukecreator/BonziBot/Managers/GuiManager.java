@@ -9,13 +9,11 @@ import com.lukecreator.BonziBot.GuiAPI.GuiContainer;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
-import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionRemoveEvent;
 
 public class GuiManager {
@@ -77,8 +75,8 @@ public class GuiManager {
 	
 	
 	// Outdated as of 6/6/2021.
-	// These should be ported to buttons.
-	public void onReactionAdd(GuildMessageReactionAddEvent e) {
+	// These were ported to buttons. (see GuiManager#onButtonClick)
+/*	public void onReactionAdd(GuildMessageReactionAddEvent e) {
 		
 		if(e.getUser().isBot()) return;
 		
@@ -99,10 +97,10 @@ public class GuiManager {
 		ReactionEmote re = e.getReactionEmote();
 		e.retrieveMessage().queue(msg -> {
 			if(re.isEmoji())
-				 msg.removeReaction(re.getEmoji(), reactor).queue(null, fail -> { /* deleted */ });
+				 msg.removeReaction(re.getEmoji(), reactor).queue(null, fail -> {});
 			else
-				msg.removeReaction(re.getEmote(), reactor).queue(null, fail -> { /* deleted */ });
-		}, fail -> { /* deleted */ });
+				msg.removeReaction(re.getEmote(), reactor).queue(null, fail -> {});
+		}, fail -> {});
 		
 		guiList.onReactionAdd(e.getReactionEmote(), mId, e.getUser());
 		guildGuis.put(gId, guiList);
@@ -125,7 +123,7 @@ public class GuiManager {
 		
 		guiList.onReactionAdd(e.getReactionEmote(), mId, e.getUser());
 		userGuis.put(uId, guiList);
-	}
+	}*/
 	
 	// Unused for right now.
 	public void onReactionRemove(GuildMessageReactionRemoveEvent e) {
@@ -135,5 +133,49 @@ public class GuiManager {
 	public void onReactionRemove(PrivateMessageReactionRemoveEvent e) {
 		if(e.getUser().isBot()) return;
 		// unused for now
+	}
+	
+	/**
+	 * The current event listener for gui-interactions.
+	 */
+	public void onButtonClick(ButtonClickEvent e) {
+		if(e.isFromGuild()) {
+			Guild g = e.getGuild();
+			long gId = g.getIdLong();
+			User clicker = e.getUser();
+			
+			if(!guildGuis.containsKey(gId)) {
+				e.reply(":warning: `The bot has restarted since this was sent. Please open the GUI again!`").setEphemeral(true).queue();
+				return;
+			}
+			
+			AllocGuiList guiList = guildGuis.get(gId);
+			long mId = e.getMessageIdLong();
+			if(!guiList.hasMessageId(mId)) {
+				e.reply(":warning: `This GUI has expired. Please open it again!`").setEphemeral(true).queue();
+				return;
+			}
+			
+			guiList.onButtonClick(e, mId, clicker);
+			guildGuis.put(gId, guiList);
+		} else {
+			User clicker = e.getUser();
+			long uId = clicker.getIdLong();
+			
+			if(!userGuis.containsKey(uId)) {
+				e.reply(":warning: `The bot has restarted since this was sent. Please open the GUI again!`").setEphemeral(true).queue();
+				return;
+			}
+			
+			AllocGuiList guiList = userGuis.get(uId);
+			long mId = e.getMessageIdLong();
+			if(!guiList.hasMessageId(mId)) {
+				e.reply(":warning: `This GUI has expired. Please open it again!`").setEphemeral(true).queue();
+				return;
+			}
+			
+			guiList.onButtonClick(e, mId, clicker);
+			userGuis.put(uId, guiList);
+		}
 	}
 }

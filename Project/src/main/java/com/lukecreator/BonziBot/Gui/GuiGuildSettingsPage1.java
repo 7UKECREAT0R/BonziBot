@@ -42,16 +42,29 @@ public class GuiGuildSettingsPage1 extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🤬"), 0));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🗒️"), 1));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📜"), 2));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🕵️"), 3));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), 4));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🤖"), 5));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("👋"), 6));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🚪"), 7));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("💥"), 8));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("➡️"), 9));
+		GuildSettingsManager mgr = this.bonziReference.guildSettings;
+		GuildSettings settings = mgr.getSettings(guildId);
+		this.reinitialize(settings);
+	}
+	public void reinitialize(GuildSettings settings) {
+		
+		boolean tags = settings.enableTags;
+		boolean ptags = settings.privateTags;
+		boolean logs = settings.loggingEnabled;
+		boolean botcmds = settings.botCommandsEnabled;
+		boolean jr = settings.joinRole;
+		
+		this.buttons.clear();
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🤬"), "Filter Level", GuiButton.Color.BLUE, "filter"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🗒️"), "Custom Filter", GuiButton.Color.BLUE, "customfilter"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📜"), tags?"Disable Tags":"Enable Tags", tags?GuiButton.Color.RED:GuiButton.Color.GREEN, "tag"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🕵️"), ptags?"Disable Private Tags":"Enable Private Tags", ptags?GuiButton.Color.RED:GuiButton.Color.GREEN, "tagprivacy"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), logs?"Disable Logging":"Enable Logging", logs?GuiButton.Color.RED:GuiButton.Color.GREEN, "logging"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🤖"), botcmds?"Disable Bot Commands":"Enable Bot Commands", botcmds?GuiButton.Color.RED:GuiButton.Color.GREEN, "botcommands"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("👋"), "Join Message", GuiButton.Color.BLUE, "joinmessage"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🚪"), "Leave Message", GuiButton.Color.BLUE, "leavemessage"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("💥"), jr?"Disable Join Role":"Enable Join Role", GuiButton.Color.BLUE, "joinrole"));
+		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➡️"), "nextpage"));
 	}
 	
 	@Override
@@ -128,7 +141,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 			.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);
 		
-		if(actionId == 0) {
+		if(actionId.equals("filter")) {
 			// Filtering setting
 			settings.cycleFilter();
 			gsm.setSettings(guildId, settings);
@@ -142,33 +155,37 @@ public class GuiGuildSettingsPage1 extends Gui {
 				settings.setRules(rules);
 				gsm.setSettings(guildId, settings);
 			});
+			this.reinitialize(settings);
 			this.parent.redrawMessage(jda);
 			return;
 		}
-		if(actionId == 1) {
+		if(actionId.equals("customfilter")) {
 			// Custom filter
 			Gui next = new GuiCustomFilter(guildId, guildName);
 			this.parent.setActiveGui(next, jda);
 		}
-		if(actionId == 2) {
+		if(actionId.equals("tag")) {
 			// Tags enabled
 			settings.enableTags = !settings.enableTags;
 			gsm.setSettings(guildId, settings);
+			this.reinitialize(settings);
 			this.parent.redrawMessage(jda);
 			return;
 		}
-		if(actionId == 3) {
+		if(actionId.equals("tagprivacy")) {
 			// Tag privacy
 			settings.privateTags = !settings.privateTags;
 			gsm.setSettings(guildId, settings);
+			this.reinitialize(settings);
 			this.parent.redrawMessage(jda);
 			return;
 		}
-		if(actionId == 4) {
+		if(actionId.equals("logging")) {
 			// Logging
 			if(settings.loggingEnabled) {
 				settings.loggingEnabled = false;
 				gsm.setSettings(guildId, settings);
+				this.reinitialize(settings);
 				this.parent.redrawMessage(jda);
 			} else {
 				CommandArg tca = new TextChannelArg("");
@@ -183,6 +200,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 							settings.loggingEnabled = true;
 							settings.loggingChannelCached = tc.getIdLong();
 							gsm.setSettings(guildId, settings);
+							this.reinitialize(settings);
 							this.parent.redrawMessage(jda);
 							BonziUtils.sendTempMessage(mc, BonziUtils.successEmbed("Logging is now enabled in #" + tc.getName() + "!"), 3);
 						});
@@ -190,30 +208,32 @@ public class GuiGuildSettingsPage1 extends Gui {
 			}
 			return;
 		}
-		if(actionId == 5) {
+		if(actionId.equals("botcommands")) {
 			// Bot commands
 			settings.botCommandsEnabled = !settings.botCommandsEnabled;
 			gsm.setSettings(guildId, settings);
+			this.reinitialize(settings);
 			this.parent.redrawMessage(jda);
 			return;
 		}
-		if(actionId == 6) {
+		if(actionId.equals("joinmessage")) {
 			// Join messages
 			GuiJoinLeaveMessages gui = new GuiJoinLeaveMessages(guildId, guildName, false);
 			this.parent.setActiveGui(gui, jda);
 			return;
 		}
-		if(actionId == 7) {
+		if(actionId.equals("leavemessage")) {
 			// Leave messages
 			GuiJoinLeaveMessages gui = new GuiJoinLeaveMessages(guildId, guildName, true);
 			this.parent.setActiveGui(gui, jda);
 			return;
 		}
-		if(actionId == 8) {
+		if(actionId.equals("joinrole")) {
 			// Join role
 			if(settings.joinRole) {
 				settings.joinRole = false;
 				gsm.setSettings(guildId, settings);
+				this.reinitialize(settings);
 				this.parent.redrawMessage(jda);
 			} else {
 				CommandArg tca = new RoleArg("");
@@ -239,7 +259,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 							if(self.getRoles().get(0).getPosition() <= role.getPosition())
 								concernH = true;
 						}
-						
+						this.reinitialize(settings);
 						this.parent.redrawMessage(jda);
 						if(concernH | concernP) {
 							String concerns =
@@ -254,7 +274,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 			}
 			return;
 		}
-		if(actionId == 9) {
+		if(actionId.equals("nextpage")) {
 			// Next Page
 			Gui next = new GuiGuildSettingsPage2(this.guildId, this.guildName);
 			this.parent.setActiveGui(next, jda);
