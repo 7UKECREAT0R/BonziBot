@@ -29,17 +29,26 @@ public class MemeCommand extends Command {
 	public void executeCommand(CommandExecutionInfo e) {
 		BonziBot bb = e.bonzi;
 		RedditClient client = bb.reddit;
-		Submission meme = client.getRandomSubmission(MEME_SUBS);
-		EmbedBuilder eb = new EmbedBuilder()
-			.setTitle(meme.getTitle())
-			.setColor(Color.magenta)
-			.setImage(meme.getURL())
-			.setFooter("From r/" + meme.getSubreddit());
 		
-		if(e.isSlashCommand)
-			e.slashCommand.replyEmbeds(eb.build()).queue();
-		else
+		if(e.isSlashCommand) {
+			e.slashCommand.deferReply().queue(waiting -> {
+				Submission meme = client.getRandomSubmission(MEME_SUBS);
+				EmbedBuilder eb = new EmbedBuilder()
+					.setTitle(meme.getTitle())
+					.setColor(Color.magenta)
+					.setImage(meme.getURL())
+					.setFooter("From r/" + meme.getSubreddit());
+				waiting.editOriginalEmbeds(eb.build()).queue();
+			});
+		} else {
+			Submission meme = client.getRandomSubmission(MEME_SUBS);
+			EmbedBuilder eb = new EmbedBuilder()
+				.setTitle(meme.getTitle())
+				.setColor(Color.magenta)
+				.setImage(meme.getURL())
+				.setFooter("From r/" + meme.getSubreddit());
 			e.channel.sendMessage(eb.build()).queue();
+		}
 	}
 	
 }

@@ -116,6 +116,11 @@ public class CommandArgCollection {
 		CommandArg[] clone = args.clone();
 		for(int i = 0; i < clone.length; i++) {
 			CommandArg cmd = clone[i];
+			if(i >= options.length) {
+				cmd.object = null;
+				clone[i] = cmd;
+				continue;
+			}
 			OptionType goalType = cmd.type.nativeOption;
 			switch(goalType) {
 			case BOOLEAN:

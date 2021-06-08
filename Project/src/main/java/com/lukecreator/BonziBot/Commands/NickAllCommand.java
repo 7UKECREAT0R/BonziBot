@@ -283,10 +283,15 @@ public class NickAllCommand extends Command {
 							vars = vars.substring(0, 32);
 						
 						if (i == matches) {
-							iteration.modifyNickname(vars).queue(_v -> {
+							try {
+								iteration.modifyNickname(vars).queue(_v -> {
+									NickAllCommand.STILL_NICKNAMING.remove(guildId);
+									e.channel.sendMessage(BonziUtils.successEmbed("Finished nicknaming!")).queue();
+								}, f -> {});
+							} catch(HierarchyException exc) {
 								NickAllCommand.STILL_NICKNAMING.remove(guildId);
 								e.channel.sendMessage(BonziUtils.successEmbed("Finished nicknaming!")).queue();
-							}, f -> {});
+							}
 						} else {
 							try {
 								iteration.modifyNickname(vars).queue();

@@ -45,7 +45,7 @@ public class SubredditCommand extends Command {
 		}
 		
 		if(e.isSlashCommand)
-			e.slashCommand.reply(":small_red_triangle_down:` Sent message...`").setEphemeral(true).queue();
+			e.slashCommand.reply(":small_red_triangle_down:` Sent message...`").setEphemeral(false).queue();
 		
 		e.channel.sendMessage("Downloading a fresh post...").queue(msg -> {
 			Submission post = client.getRandomSubmission(subName);

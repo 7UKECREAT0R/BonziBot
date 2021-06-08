@@ -1,12 +1,10 @@
 package com.lukecreator.BonziBot.Commands.Admin;
 
+import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
-import com.lukecreator.BonziBot.CommandAPI.UserArg;
-import com.lukecreator.BonziBot.Managers.EventWaiterManager;
-
-import net.dv8tion.jda.api.entities.User;
+import com.lukecreator.BonziBot.Gui.GuiTestMenu;
 
 public class TestCommand extends Command {
 
@@ -21,12 +19,8 @@ public class TestCommand extends Command {
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
 		
-		EventWaiterManager ewm = e.bonzi.eventWaiter;
-		e.channel.sendMessage("send a user").queue();
-		ewm.waitForArgument(e.executor, new UserArg(""), _user -> {
-			User user = (User)_user;
-			e.channel.sendMessage("tag: " + user.getAsTag() + "\navatar: " + user.getEffectiveAvatarUrl()).queue();
-		});
+		GuiTestMenu test = new GuiTestMenu();
+		BonziUtils.sendGui(e, test);
 		
 	}
 }
