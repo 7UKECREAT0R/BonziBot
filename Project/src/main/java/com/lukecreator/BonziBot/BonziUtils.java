@@ -736,7 +736,7 @@ public class BonziUtils {
 	
 	public static void sendGui(CommandExecutionInfo info, Gui gui) {
 		if(info.isSlashCommand)
-			info.slashCommand.reply(":envelope_with_arrow: `Opening GUI...`").queue();
+			info.slashCommand.reply(":envelope_with_arrow: `Opening GUI...`").setEphemeral(false).queue();
 		if(info.isGuildMessage)
 			info.bonzi.guis.sendAndCreateGui(info.tChannel, info.executor, gui, info.bonzi);
 		else info.bonzi.guis.sendAndCreateGui(info.pChannel, gui, info.bonzi);

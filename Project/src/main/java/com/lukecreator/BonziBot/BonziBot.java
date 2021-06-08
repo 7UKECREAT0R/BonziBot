@@ -288,9 +288,10 @@ public class BonziBot extends ListenerAdapter {
 			String msg = event.getMessage().getContentRaw();
 			int number = Integer.parseInt(msg.substring(18)) + 1;
 			event.editMessage("`Cookie Clicker!` " + number).queue();
+			return;
 		}
 		
-		
+		guis.onButtonClick(event);
 	}
 	public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
 		// Execute commands and chat-related things.
@@ -344,8 +345,8 @@ public class BonziBot extends ListenerAdapter {
 		this.guildSettings.memberLeft(this, e);
 	}
 	public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent e) {
-		// Send a message to and update GUIs.
-		guis.onReactionAdd(e);
+		// Send a message to and update GUIs. (outdated)
+		//guis.onReactionAdd(e);
 		
 		// General reaction manager. (polls, etc...)
 		reactions.reactionAddGuild(e);
@@ -361,8 +362,8 @@ public class BonziBot extends ListenerAdapter {
 		reactions.reactionRemoveGuild(e);
 	}
 	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent e) {
-		// Send a message to and update GUIs.
-		guis.onReactionAdd(e);
+		// Send a message to and update GUIs. (outdated)
+		//guis.onReactionAdd(e);
 		
 		// General reaction manager.
 		reactions.reactionAddPrivate(e);
