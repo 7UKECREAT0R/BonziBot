@@ -4,7 +4,7 @@ The most epicest epic bot for epic gamers! Now with open source code for you guy
 from scratch because the old codebase sucked major doo doo slab*
 
 ## Where can I get it?
-https://discordapp.com/oauth2/authorize?client_id=545806922209558537&permissions=8&scope=bot
+[RIGHT HERE!](https://discord.com/api/oauth2/authorize?client_id=545806922209558537&permissions=2150927424&scope=applications.commands%20bot)
 
 ## But can I steal the code...?
 yeah go for it but make sure you adhere to these terms:<br />
@@ -13,23 +13,4 @@ yeah go for it but make sure you adhere to these terms:<br />
 - Your bot must be open source. Self explanitory, release your source code.
 - You must have the same license on the bot source code. (GNU-GPL 3.0)
 
-## yoo how the commands work
-So essentially this project does rely on `org.reflections` but<br />
-to sum it up, I just pull all the classes in the project that<br />
-extend `Command` and I just smack em into a list. From there all<br />
-you gotta do it loop through and check which one the user wants.<br />
-*See: `CommandSystem.java`, `Command.java`, `SayCommand.java`*
-
-## what about those guis
-Kinda not so similar idea but it does use abstraction to get<br />
-things done! The bot keeps a limited list of `Gui`s according<br />
-to each server they're in. Then when you react it just loops<br />
-and sends the reaction through crazy pipes and into your eyes!<br />
-*See: `Gui.java`, `GuiManager.java`, `GuiTestMenu.java`, `GuiContainer.java`*
-
-## thicc arguments?
-Uh yeah the argument parser is pretty thicc if i do say so myself.<br />
-Argument types have their own `isWordParsable` and `parseWord`<br />
-methods which govern how arguments get parsed. This allows custom<br />
-argument types that can be directly supplied and used by `Commands`.<br />
-*See: `CommandArg.java`, `TimeSpanArg.java`, `IntArg.java`, `ColorArg.java`*
+enjoy using the custom gui library, graphics library, command system, argument parsers, event waiters, event manager, and executor system if so!
