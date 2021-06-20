@@ -1,14 +1,20 @@
 package com.lukecreator.BonziBot;
 
+import java.awt.Color;
 import java.io.EOFException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.regex.Matcher;
 
 import javax.security.auth.login.LoginException;
 
+import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
 import org.reflections.Reflections;
 
 import com.lukecreator.BonziBot.InternalLogger.Severity;
@@ -23,8 +29,8 @@ import com.lukecreator.BonziBot.Data.EmojiCache;
 import com.lukecreator.BonziBot.Data.GenericReactionEvent;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.IStorableData;
-import com.lukecreator.BonziBot.Data.JokeProvider;
 import com.lukecreator.BonziBot.Data.Modifier;
+import com.lukecreator.BonziBot.Data.StringProvider;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Data.UsernameGenerator;
 import com.lukecreator.BonziBot.Graphics.FontLoader;
@@ -35,6 +41,7 @@ import com.lukecreator.BonziBot.Managers.GuiManager;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 import com.lukecreator.BonziBot.Managers.LoggingManager;
 import com.lukecreator.BonziBot.Managers.LotteryManager;
+import com.lukecreator.BonziBot.Managers.QuickDrawManager;
 import com.lukecreator.BonziBot.Managers.ReactionManager;
 import com.lukecreator.BonziBot.Managers.RepManager;
 import com.lukecreator.BonziBot.Managers.RewardManager;
@@ -101,20 +108,22 @@ public class BonziBot extends ListenerAdapter {
 	public EventWaiterManager eventWaiter = new EventWaiterManager();
 	public SpecialPeopleManager special = new SpecialPeopleManager();
 	public UserAccountManager accounts = new UserAccountManager();
+	public QuickDrawManager quickDraw = new QuickDrawManager();
 	public ReactionManager reactions = new ReactionManager();
 	public CooldownManager cooldowns = new CooldownManager();
 	public UpgradeManager upgrades = new UpgradeManager();
+	public StringProvider strings = new StringProvider();
 	public LotteryManager lottery = new LotteryManager();
 	public LoggingManager logging = new LoggingManager();
 	public RewardManager rewards = new RewardManager();
 	public RedditClient reddit = new RedditClient();
 	public RepManager reputation = new RepManager();
-	public JokeProvider jokes = new JokeProvider();
 	public GuiManager guis = new GuiManager();
 	public TagManager tags = new TagManager();
 	
 	Reflections reflectionsInstance = new Reflections("com.lukecreator.BonziBot");
 	public CommandSystem commands = new CommandSystem(reflectionsInstance);
+	public GitHub github;
 	
 	public BonziBot(boolean test) {
 		builder = JDABuilder.create(
@@ -127,7 +136,8 @@ public class BonziBot extends ListenerAdapter {
 			GatewayIntent.DIRECT_MESSAGES,
 			GatewayIntent.DIRECT_MESSAGE_REACTIONS
 			).disableCache(CacheFlag.ACTIVITY,
-				CacheFlag.CLIENT_STATUS);
+				 CacheFlag.ONLINE_STATUS,
+				 CacheFlag.CLIENT_STATUS);
 		
 		String token = test ? Constants.BOT_TOKEN_TEST : Constants.BOT_TOKEN;
 		builder.setToken(token);
@@ -153,6 +163,7 @@ public class BonziBot extends ListenerAdapter {
 		storableData.add(rewards);
 		storableData.add(logging);
 		storableData.add(reputation);
+		storableData.add(quickDraw);
 		
 		int len = storableData.size();
 		InternalLogger.print("[SD] Populated storable data with " + len + " elements.");
@@ -246,12 +257,22 @@ public class BonziBot extends ListenerAdapter {
 	void postSetup(JDA jda) {
 		
 		// Anything else that needs to be done.
-		Constants.compileRegex();
-		cooldowns.initialize(commands);
-		UsernameGenerator.init();
-		
-		Guild bonziGuild = BonziUtils.getBonziGuild(jda);
-		EmojiCache.appendGuildEmotes(bonziGuild);
+
+		try {
+			Constants.compileRegex();
+			cooldowns.initialize(commands);
+			UsernameGenerator.init();
+			
+			Guild bonziGuild = BonziUtils.getBonziGuild(jda);
+			EmojiCache.appendGuildEmotes(bonziGuild);
+			
+			InternalLogger.print("[GIT] Connecting to GitHub...");
+			github = new GitHubBuilder().withOAuthToken(Constants.GITHUB_TOKEN).build();
+			InternalLogger.print("[GIT] Connected");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	public void saveData() {
 		InternalLogger.print("[IO] Saving data...");
@@ -291,14 +312,65 @@ public class BonziBot extends ListenerAdapter {
 			return;
 		}
 		
-		guis.onButtonClick(event);
+		if(this.eventWaiter.onClick(event))
+			return; // acknowledged already
+		this.guis.onButtonClick(event);
 	}
 	public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
 		// Execute commands and chat-related things.
 		if(e.getAuthor().isBot()) return;
 		if(tags.receiveMessage(e, this)) return;
+		Message msg = e.getMessage();
 		if(eventWaiter.onMessage(e.getMessage())) return;
 		GuildSettings settings = this.guildSettings.getSettings(e.getGuild());
+		
+		// Scan for tokens.
+		if(settings.tokenScanning) {
+			String content = msg.getContentRaw();
+			Matcher matcher = Constants.TOKEN_REGEX_COMPILED.matcher(content);
+			if(matcher.find()) {
+				String token = matcher.group();
+				try {
+					github.createGist().file("invalidate.txt", "Token was accidentally leaked: " + token).public_(true).create();
+					EmbedBuilder eb = BonziUtils.quickEmbed("Whoa, hold on!",
+						"I reset your bot token for you. Be more careful next time!", Color.red);
+					e.getChannel().sendMessage(eb.build()).queue();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					msg.delete().queue();
+					e.getChannel().sendMessage("Whoa, hold on! Your bot token was in that message.\nI couldn't invalidate it, but I deleted the message for you.\n\nDeveloper portal: https://discord.com/developers/applications").queue();
+				}
+				return;
+			}
+			matcher = Constants.PASTEBIN_REGEX_COMPILED.matcher(content);
+			if(matcher.find()) {
+				try {
+					String full = matcher.group(0);
+					String paste = matcher.group(2);
+					boolean haste = full.contains("hastebin");
+					paste = (haste ? "https://hastebin.com/raw/" : "https://pastebin.com/raw/") + paste;
+					String download = BonziUtils.getStringFrom(paste);
+					matcher = Constants.TOKEN_REGEX_COMPILED.matcher(download);
+					if(matcher.find()) {
+						String token = matcher.group();
+						github.createGist().file("invalidate.txt", "Token was accidentally leaked VIA " +
+							(haste ? "hastebin: " : "pastebin: ") + token).public_(true).create();
+						EmbedBuilder eb = BonziUtils.quickEmbed("Whoa, hold on!",
+							"I reset your bot token for you. Be more careful next time!", Color.red);
+						e.getChannel().sendMessage(eb.build()).queue();
+					}
+				} catch (FileNotFoundException e1) {
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					msg.delete().queue();
+					e.getChannel().sendMessage("**Reset your token AS SOON AS POSSIBLE!**\nYour bot token was in that pastebin.\nI couldn't invalidate it, but I deleted the message for you.\n\nDeveloper portal: https://discord.com/developers/applications").queue();
+				}
+				return;
+			}
+		}
+		
+		// Scan for BAD WORd
 		if(!settings.testMessageInFilter(e.getMessage())) {
 			logging.addMessageToHistory(e.getMessage(), e.getGuild());
 			e.getMessage().delete().queue(null, fail -> {});
@@ -318,7 +390,8 @@ public class BonziBot extends ListenerAdapter {
 		// These are intentionally guild-only.
 		BonziUtils.sendMentionMessage(e, this);
 		BonziUtils.disableAfk(e.getAuthor(), e.getChannel(), this);
-		reputation.checkMessage(e.getMessage(), this); // ok this is kinda a command
+		reputation.checkMessage(e.getMessage(), this); // ok i lied this is kinda a command
+		quickDraw.messageReceived(e.getAuthor(), e.getMessage(), this);
 	}
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
 		if(e.getAuthor().isBot()) return;
@@ -353,6 +426,9 @@ public class BonziBot extends ListenerAdapter {
 		
 		// Continue any reaction event waiters.
 		eventWaiter.onReaction(new GenericReactionEvent(e));
+		
+		// Quick draw minigame
+		quickDraw.reactionReceived(e.getUser(), e, this);
 	}
 	public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent e) {
 		// Send a message to and update GUIs. (UNUSED)
@@ -473,6 +549,8 @@ public class BonziBot extends ListenerAdapter {
 	}
 	public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent e) {
 		String nick = e.getNewNickname();
+		if(nick == null)
+			return;
 		GuildSettings gc = this.guildSettings
 			.getSettings(e.getGuild());
 		if(!gc.testMessageInFilter(nick)) {
