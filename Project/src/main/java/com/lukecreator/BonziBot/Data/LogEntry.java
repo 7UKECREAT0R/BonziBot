@@ -22,16 +22,31 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 
 public class LogEntry {
 	
-	public enum Reactions {
-		UNDO(1 << 0),
-		WARN(1 << 1),
-		MUTE(1 << 2),
-		KICK(1 << 3),
-		BAN (1 << 4);
+	public enum Buttons {
+		UNDO(1 << 0), // 00001
+		WARN(1 << 1), // 00010
+		MUTE(1 << 2), // 00100
+		KICK(1 << 3), // 01000
+		BAN (1 << 4); // 10000
 		
 		public final long flag;
-		Reactions(long flag) {
+		Buttons(long flag) {
 			this.flag = flag;
+		}
+		/**
+		 * Test if this button is included in the flags.
+		 */
+		boolean inFlags(long flags) {
+			return (flags & this.flag) > 0;
+		}
+		long merge(Buttons other) {
+			return this.flag | other.flag;
+		}
+		long merge(Buttons...buttons) {
+			long l = this.flag;
+			for(Buttons b: buttons)
+				l |= b.flag;
+			return l;
 		}
 	}
 	public enum Type {
@@ -55,7 +70,7 @@ public class LogEntry {
 	}
 	
 	public Type type; // The type of action performed.
-	public long reactionFlags; // The reactions to add.
+	public long buttonFlags; // The buttons to add.
 	public long initiator, target; // The executor and target.
 	public long id, timestamp;	// The unique ID of the entry and timestamp of creation.
 	public String reason; // The reason for the action.
@@ -69,9 +84,9 @@ public class LogEntry {
 	/**
 	 * WHOA this constructor is CRAZY
 	 */
-	public LogEntry(Type type, long reactionFlags, long initiator, long target, @Nullable String reason, @Nullable String extString, @Nullable String extString2, long extLong, long extLong2) {
+	public LogEntry(Type type, long buttonFlags, long initiator, long target, @Nullable String reason, @Nullable String extString, @Nullable String extString2, long extLong, long extLong2) {
 		this.type = type;
-		this.reactionFlags = reactionFlags;
+		this.buttonFlags = buttonFlags;
 		this.initiator = initiator;
 		this.target = target;
 		this.reason = reason;
@@ -108,7 +123,7 @@ public class LogEntry {
 			}
 			entryOutput.accept(new LogEntry(
 				Type.TEXTCHANNELCREATE,
-				Reactions.UNDO.flag,
+				Buttons.UNDO.flag,
 				userId, // Executor
 				event.getChannel().getIdLong(), // Target
 				null, // Reason
@@ -139,7 +154,7 @@ public class LogEntry {
 			TextChannel tc = event.getChannel();
 			entryOutput.accept(new LogEntry(
 				Type.TEXTCHANNELREMOVE,
-				Reactions.UNDO.flag,
+				Buttons.UNDO.flag,
 				userId, // Executor
 				event.getChannel().getIdLong(), // Target
 				null, // Reason
@@ -161,7 +176,7 @@ public class LogEntry {
 		long userId = user.getIdLong();
 		
 		// HOLY FRICK IM GONNA HAVE A SEIZURE
-		entryOutput.accept(new LogEntry(Type.NICKNAMECHANGE, Reactions.UNDO.flag | Reactions.WARN.flag,
+		entryOutput.accept(new LogEntry(Type.NICKNAMECHANGE, Buttons.UNDO.flag | Buttons.WARN.flag,
 			userId, userId, null, event.getOldNickname(), event.getNewNickname(), 0l, 0l));
 	}
 	
@@ -182,7 +197,7 @@ public class LogEntry {
 		
 		String reason = "Sent a message: \"" + cached.getContentDisplay() + "\"";
 		entryOutput.accept(new LogEntry(Type.DELETEDMESSAGE,
-			Reactions.WARN.flag | Reactions.KICK.flag, 0l, messageId, reason,
+			Buttons.WARN.flag | Buttons.KICK.flag, 0l, messageId, reason,
 			cached.getContentRaw(), cached.getAuthor().getAsTag(),
 			cached.getAttachments().size(), cached.getAuthor().getIdLong()));
 	}
@@ -215,7 +230,7 @@ public class LogEntry {
 				String targetName = target.getAsTag();
 				entryOutput.accept(new LogEntry(
 						Type.BAN,
-						Reactions.UNDO.flag,
+						Buttons.UNDO.flag,
 						executorId, // Executor
 						bannedId, // Target
 						reason, // Reason
@@ -226,7 +241,7 @@ public class LogEntry {
 			// Nothing found.
 			entryOutput.accept(new LogEntry(
 					Type.BAN,
-					Reactions.UNDO.flag,
+					Buttons.UNDO.flag,
 					0l, // Executor
 					target.getIdLong(), // Target
 					"Error getting information.", // Reason
@@ -245,7 +260,7 @@ public class LogEntry {
 	public static void fromEvent(BonziBot bb, GuildUnbanEvent event, Consumer<LogEntry> entryOutput) {
 		entryOutput.accept(new LogEntry(
 				Type.BAN,
-				Reactions.UNDO.flag,
+				Buttons.UNDO.flag,
 				0l, // Executor
 				event.getUser().getIdLong(), // Target
 				null, // Reason

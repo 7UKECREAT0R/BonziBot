@@ -4,6 +4,7 @@ import com.lukecreator.BonziBot.TimeSpan;
 
 /**
  * Represents an infraction level and an action attached to it.
+ * Was going to be used for moderation manuals, but they were removed.
  * @author Lukec
  */
 public class Infraction {

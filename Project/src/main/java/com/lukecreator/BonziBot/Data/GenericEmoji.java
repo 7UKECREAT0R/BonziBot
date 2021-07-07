@@ -14,7 +14,8 @@ public class GenericEmoji implements Serializable {
 	
 	private static final long serialVersionUID = -7411094721697374442L;
 	
-	boolean isGeneric = false, isGuild = false;
+	boolean isGeneric = false;
+	boolean isGuild = false;
 	String genericEmoji = null;
 	long guildEmojiId = -1;
 	

@@ -11,7 +11,7 @@ import java.util.TimeZone;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.TimeSpan;
 
-import net.dv8tion.jda.api.entities.Invite.Guild;
+import net.dv8tion.jda.api.entities.Guild;
 
 /**
  * Owned commands, coins, warns, etc...
@@ -75,17 +75,22 @@ public class UserAccount implements Serializable {
 		}
 	}
 	
+	public static long MAX_COINS = 1000000000000000000l;
 	public long getCoins() {
 		return this.coins;
 	}
 	public void addCoins(long amount) {
 		this.coins += amount;
+		if(this.coins > MAX_COINS)
+			this.coins = MAX_COINS;
 	}
 	public void subCoins(long amount) {
 		this.coins -= amount;
 	}
 	public void setCoins(long coins) {
 		this.coins = coins;
+		if(this.coins > MAX_COINS)
+			this.coins = MAX_COINS;
 	}
 	
 	public int getXP() {
@@ -110,20 +115,22 @@ public class UserAccount implements Serializable {
 		return this.getWarns(g.getIdLong());
 	}
 	public ModernWarn[] getWarns(long guildId) {
-		List<ModernWarn> buffer = new ArrayList<ModernWarn>();
-		for(ModernWarn warn: this.warns) {
-			if(warn.acquiredGuild == guildId)
-				buffer.add(warn);
-		}
-		if(buffer.size() < 1)
-			return new ModernWarn[0];
-		
-		return (ModernWarn[])buffer.toArray
-			(new ModernWarn[buffer.size()]);
+		return this.warns
+			.stream()
+			.filter(w -> w.acquiredGuild == guildId)
+			.toArray(ModernWarn[]::new);
 	}
 	public ModernWarn[] getGlobalWarns() {
 		return (ModernWarn[])this.warns.toArray
 			(new ModernWarn[warns.size()]);
+	}
+	public void setWarns(long guildId, List<ModernWarn> warns) {
+		for(int i = this.warns.size() - 1; i >= 0; i--) {
+			ModernWarn warn = this.warns.get(i);
+			if(warn.acquiredGuild == guildId)
+				this.warns.remove(i);
+		}
+		this.warns.addAll(warns);
 	}
 	public void addWarn(ModernWarn warn) {
 		this.warns.add(warn);

@@ -67,6 +67,7 @@ public class DataSerializer {
     		objectOut.writeObject(obj);
     	} catch(IOException exc) {
     		InternalLogger.printError("Failed to write file \"" + fileName + "\".", Severity.ERROR);
+    		exc.printStackTrace();
     	} finally {
     		safelyCloseStreams(fileOut, objectOut);
     	}

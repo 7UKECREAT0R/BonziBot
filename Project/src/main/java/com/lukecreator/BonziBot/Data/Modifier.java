@@ -4,6 +4,7 @@ public enum Modifier {
 	NO_XP("❌", "Disables the obtaining of XP in the channel. Use this for things like spam channels."),
 	NO_FILTER("🤬", "Disables filtering in the channel. Also disabled in NSFW channels automatically."),
 	NO_MUSIC("🎵", "Disables music commands. Good if you don't want a channel to be flooded with bot spam."),
+	BOT_COMMANDS("🤖", "If bot commands are disabled, then channels with this modifier will allow them."),
 	PICTURES_ONLY("🖼️", "Only allows messages with attachments. Make a showcase channel!"),
 	PREMIUM_ONLY("🏆", "Only lets users that have BonziBot Premium chat in the channel."),
 	ANONYMOUS("🕵️‍♂️", "Every message sent in the channel will be anonymous!"),

@@ -6,6 +6,8 @@ import java.time.ZoneOffset;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Warn;
 
+import net.dv8tion.jda.api.entities.Guild;
+
 /**
  * Represents a warning which can be dished
  * out by moderators for breaking a rule.
@@ -13,16 +15,30 @@ import com.lukecreator.BonziBot.Warn;
 public class ModernWarn implements Serializable {
 	
 	private static final long serialVersionUID = 2l;
+	private static final int MAX_REASON_LEN = 100;
 	
 	public long acquiredGuild;
 	public long id;
 	public String reason;
 	public long timestamp;
 	
-	public ModernWarn(String reason) {
+	public ModernWarn(String reason, Guild guild) {
+		if(reason.length() > MAX_REASON_LEN)
+			reason = reason.substring(0, MAX_REASON_LEN);
+		
 		this.id = BonziUtils.generateId();
 		this.reason = reason;
 		this.timestamp = System.currentTimeMillis();
+		this.acquiredGuild = guild.getIdLong();
+	}
+	public ModernWarn(String reason, long guild) {
+		if(reason.length() > MAX_REASON_LEN)
+			reason = reason.substring(0, MAX_REASON_LEN);
+		
+		this.id = BonziUtils.generateId();
+		this.reason = reason;
+		this.timestamp = System.currentTimeMillis();
+		this.acquiredGuild = guild;
 	}
 	public ModernWarn(Warn old, long acquiredGuild) {
 		this.id = BonziUtils.generateId();

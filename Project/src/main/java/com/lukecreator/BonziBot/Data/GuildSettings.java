@@ -37,9 +37,17 @@ public class GuildSettings implements Serializable {
 		}
 	}
 	
-	// ----------
+	// ------------------
 	// FIELDS
-	// ----------
+	// ------------------
+	
+	// Misc
+	public List<Integer> disabledCommands = new ArrayList<Integer>();
+	public boolean quickDraw = false;
+	private String prefix = Constants.DEFAULT_PREFIX;
+	private Rules rules = new Rules();
+	public boolean tokenScanning = true;
+	public long mutedRole = 0l;
 	
 	// Filtering
 	public FilterLevel filter = FilterLevel.NONE;
@@ -52,7 +60,7 @@ public class GuildSettings implements Serializable {
 	// Bot Commands (for the botcommands modifier)
 	public boolean botCommandsEnabled = true;
 	public boolean loggingEnabled = false;
-	public long loggingChannelCached = -1l;
+	public long loggingChannelCached = 0l;
 	
 	// Join / Leave Messages. Be aware that these won't necessarily be good values even if enabled.
 	public boolean joinMessages = false;
@@ -69,11 +77,12 @@ public class GuildSettings implements Serializable {
 	public boolean joinRole = false;
 	public long joinRoleId = 0l;
 	
-	// Prefix
-	private String prefix = Constants.DEFAULT_PREFIX;
+	// Bans
+	public boolean banAppeals = false;
+	public boolean banMessage = false;
+	public long banAppealsChannel = 0l;
+	public String banMessageString = null;
 	
-	// Rules
-	private Rules rules = new Rules();
 	
 	// ----------
 	// FIELDS
