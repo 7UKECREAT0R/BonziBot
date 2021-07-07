@@ -47,8 +47,7 @@ public class ExposeCommand extends Command {
 				e.slashCommand.replyEmbeds(BonziUtils.failureEmbed(
 						"unfortunately the solar powered monkey men at discord hq said i cant expose messages with attachments in them...",
 						"their words, not mine!")).queue();
-			else
-				e.channel.sendMessage(BonziUtils.failureEmbed(
+			else e.channel.sendMessage(BonziUtils.failureEmbed(
 						"unfortunately the solar powered monkey men at discord hq said i cant expose messages with attachments in them...",
 						"their words, not mine!")).queue();
 			return;
@@ -66,8 +65,7 @@ public class ExposeCommand extends Command {
 		BonziUtils.tryAwardAchievement(e.channel, e.bonzi, e.executor, Achievement.SPY);
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(eb.build()).queue();
-		else
-			e.channel.sendMessage(eb.build()).queue();
+		else e.channel.sendMessage(eb.build()).queue();
 		return;
 	}
 }

@@ -7,7 +7,6 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
-import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -28,10 +27,8 @@ public class TagCommand extends Command {
 	public void executeCommand(CommandExecutionInfo e) {
 		
 		Guild g = e.guild;
-		GuildSettings gs = e.bonzi
-			.guildSettings.getSettings(g);
 		
-		if(gs != null && !gs.enableTags) {
+		if(e.settings != null && !e.settings.enableTags) {
 			MessageEmbed msg = BonziUtils.failureEmbed("Tags are disabled in this server.");
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(msg).queue();
@@ -40,7 +37,7 @@ public class TagCommand extends Command {
 			return;
 		}
 		
-		boolean isPrivate = (gs == null) ? false : gs.privateTags;
+		boolean isPrivate = (e.settings == null) ? false : e.settings.privateTags;
 		
 		String tagName = e.args.getString("tag_name");
 		String resp;

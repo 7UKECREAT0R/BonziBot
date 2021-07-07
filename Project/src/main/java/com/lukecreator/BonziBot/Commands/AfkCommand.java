@@ -46,8 +46,9 @@ public class AfkCommand extends Command {
 		MessageEmbed msg = BonziUtils.quickEmbed(name +
 			" is now AFK.", reason, e.executor, Color.gray).build();
 		
-		if(e.isGuildMessage)
+		if(e.isGuildMessage && e.message != null)
 			e.message.delete().queue(null, ignore -> {});
+		
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(msg).queue();
 		else

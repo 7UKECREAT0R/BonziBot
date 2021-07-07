@@ -53,8 +53,8 @@ public class TestImageCommand extends Command {
 		try {
 			File saved = image.save("tempImages/test.jpg", true);
 			e.channel.sendMessage("Finished in " + timeMs + "ms.").addFile(saved).queue();
-		}
-		catch(IOException exc) {
+			
+		} catch(IOException exc) {
 			exc.printStackTrace();
 			e.channel.sendMessage("IOException.\n\n" + exc.toString()).queue();
 		}

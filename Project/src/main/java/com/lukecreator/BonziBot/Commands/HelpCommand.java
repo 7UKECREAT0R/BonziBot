@@ -13,10 +13,15 @@ public class HelpCommand extends Command {
 	
 	public HelpCommand() {
 		this.name = "Help";
-		this.description = "no desc";
+		this.description = "See all the various commands.";
 		this.category = CommandCategory._HIDDEN;
 		this.args = new CommandArgCollection(new EnumArg("category", CommandCategory.class).optional());
 		this.setCooldown(10000);
+	}
+	
+	@Override
+	public boolean isRegisterable() {
+		return true;
 	}
 	
 	@Override

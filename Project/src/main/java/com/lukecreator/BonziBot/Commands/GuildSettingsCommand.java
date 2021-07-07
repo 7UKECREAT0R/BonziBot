@@ -20,6 +20,7 @@ public class GuildSettingsCommand extends Command {
 		this.unicodeIcon = "⚙️";
 		this.worksInDms = false;
 		this.userRequiredPermissions = new Permission[] { Permission.MANAGE_SERVER };
+		this.forcedCommand = true; // Cannot disable and can always open.
 		
 		this.setCooldown(20000);
 	}

@@ -6,7 +6,6 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
-import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.Rules;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 
@@ -31,17 +30,17 @@ public class SendRulesCommand extends Command {
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
 		e.message.delete().queue(null, ignore);
-		MessageEmbed msg = BonziUtils.generateRules(e.guild, e.bonzi).build();
+		MessageEmbed msg = BonziUtils.generateRules
+			(e.settings, e.guild, e.bonzi).build();
 		GuildSettingsManager gsm = e.bonzi.guildSettings;
-		GuildSettings settings = gsm.getSettings(e.guild);
-		Rules rules = settings.getRules();
+		Rules rules = e.settings.getRules();
 		
 		if(e.isSlashCommand)
 			e.slashCommand.reply(":white_check_mark: `Sent rules message.`").setEphemeral(true).queue();
 		
 		e.channel.sendMessage(msg).queue(sent -> {
 			rules.setRulesMessage(sent);
-			gsm.setSettings(e.guild, settings);
+			gsm.setSettings(e.guild, e.settings);
 		});
 	}
 }

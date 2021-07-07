@@ -53,6 +53,7 @@ public class CommandInfoCommand extends Command {
 			boolean needsUserPerms = userPermissions != null && userPermissions.length > 0 && bonziPermissions[0] != Permission.UNKNOWN;
 			boolean adminOnly = command.adminOnly;
 			boolean hasCooldown = command.hasCooldown;
+			boolean isForced = command.forcedCommand;
 			
 			String prefix = BonziUtils.getPrefixOrDefault(e);
 			String usage;
@@ -98,6 +99,8 @@ public class CommandInfoCommand extends Command {
 				String time = BonziUtils.getLongTimeStringMs(cooldown);
 				eb.addField("Cooldown", "This command has a cooldown of `" + time + "`.", false);
 			}
+			if(isForced)
+				eb.addField("Forced Command", "This is an important command. You cannot disable it and it's always available.", false);
 			
 			String source = getSourceCode(command);
 			eb.addField("Developer Information",
