@@ -25,6 +25,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArg.ArgType;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.CommandAPI.EnumArg;
+import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.EmojiCache;
 import com.lukecreator.BonziBot.Data.GenericReactionEvent;
 import com.lukecreator.BonziBot.Data.GuildSettings;
@@ -34,6 +35,8 @@ import com.lukecreator.BonziBot.Data.StringProvider;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Data.UsernameGenerator;
 import com.lukecreator.BonziBot.Graphics.FontLoader;
+import com.lukecreator.BonziBot.Managers.AppealsManager;
+import com.lukecreator.BonziBot.Managers.BanManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.FunnyChannelManager;
@@ -41,12 +44,14 @@ import com.lukecreator.BonziBot.Managers.GuiManager;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 import com.lukecreator.BonziBot.Managers.LoggingManager;
 import com.lukecreator.BonziBot.Managers.LotteryManager;
+import com.lukecreator.BonziBot.Managers.MuteManager;
 import com.lukecreator.BonziBot.Managers.QuickDrawManager;
 import com.lukecreator.BonziBot.Managers.ReactionManager;
 import com.lukecreator.BonziBot.Managers.RepManager;
 import com.lukecreator.BonziBot.Managers.RewardManager;
 import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
 import com.lukecreator.BonziBot.Managers.TagManager;
+import com.lukecreator.BonziBot.Managers.TodoListManager;
 import com.lukecreator.BonziBot.Managers.UpgradeManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
@@ -55,6 +60,7 @@ import com.lukecreator.BonziBot.Wrappers.RedditClient;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogChange;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
@@ -62,6 +68,7 @@ import net.dv8tion.jda.api.audit.AuditLogKey;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
@@ -101,6 +108,7 @@ public class BonziBot extends ListenerAdapter {
 	
 	JDABuilder builder = null;
 	public boolean adminBypassing = false;
+	public boolean test = false;
 	
 	List<IStorableData> storableData = new ArrayList<IStorableData>();
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
@@ -111,13 +119,17 @@ public class BonziBot extends ListenerAdapter {
 	public QuickDrawManager quickDraw = new QuickDrawManager();
 	public ReactionManager reactions = new ReactionManager();
 	public CooldownManager cooldowns = new CooldownManager();
+	public TodoListManager todolists = new TodoListManager();
 	public UpgradeManager upgrades = new UpgradeManager();
+	public AppealsManager appeals = new AppealsManager();
 	public StringProvider strings = new StringProvider();
 	public LotteryManager lottery = new LotteryManager();
 	public LoggingManager logging = new LoggingManager();
 	public RewardManager rewards = new RewardManager();
 	public RedditClient reddit = new RedditClient();
 	public RepManager reputation = new RepManager();
+	public MuteManager mutes = new MuteManager();
+	public BanManager bans = new BanManager();
 	public GuiManager guis = new GuiManager();
 	public TagManager tags = new TagManager();
 	
@@ -125,7 +137,7 @@ public class BonziBot extends ListenerAdapter {
 	public CommandSystem commands = new CommandSystem(reflectionsInstance);
 	public GitHub github;
 	
-	public BonziBot(boolean test) {
+	public BonziBot(boolean test) throws LoginException {
 		builder = JDABuilder.create(
 			GatewayIntent.GUILD_BANS,
 			GatewayIntent.GUILD_VOICE_STATES,
@@ -135,86 +147,29 @@ public class BonziBot extends ListenerAdapter {
 			GatewayIntent.GUILD_EMOJIS,
 			GatewayIntent.DIRECT_MESSAGES,
 			GatewayIntent.DIRECT_MESSAGE_REACTIONS
-			).disableCache(CacheFlag.ACTIVITY,
-				 CacheFlag.ONLINE_STATUS,
-				 CacheFlag.CLIENT_STATUS);
-		
-		String token = test ? Constants.BOT_TOKEN_TEST : Constants.BOT_TOKEN;
-		builder.setToken(token);
-		builder.addEventListeners(this);
+			).disableCache(
+			CacheFlag.ACTIVITY,
+			CacheFlag.ONLINE_STATUS,
+			CacheFlag.CLIENT_STATUS);
+		this.test = test;
+		String token = test ?
+			Constants.BOT_TOKEN_TEST :
+			Constants.BOT_TOKEN;
+		builder.setToken(token).addEventListeners(this);
 	}
 	public void start() throws InterruptedException, LoginException {
 		setupStorableData();
 		loadData();
 		JDA bot = setupBot();
-		setupExecutors();
+		setupExecutors(bot);
 		loadFonts();
-		slashCommands(bot);
+		
+		if(this.test)
+			slashCommands(bot);
+		
 		postSetup(bot);
 	}
-	
-	void setupStorableData() {
-		storableData.clear();
-		storableData.add(accounts);
-		storableData.add(guildSettings);
-		storableData.add(tags);
-		storableData.add(upgrades);
-		storableData.add(lottery);
-		storableData.add(rewards);
-		storableData.add(logging);
-		storableData.add(reputation);
-		storableData.add(quickDraw);
-		
-		int len = storableData.size();
-		InternalLogger.print("[SD] Populated storable data with " + len + " elements.");
-	}
-	JDA setupBot() throws InterruptedException, LoginException {
-		JDA bot = builder.build();
-		InternalLogger.print("[STATUS] Starting bot...");
-		bot.awaitReady();
-		InternalLogger.print("[STATUS] Bot is ready!");
-		return bot;
-	}
-	void setupExecutors() {
-		
-		Set<Class<? extends AutoRepeat>> toBeExecuted =
-			reflectionsInstance.getSubTypesOf(AutoRepeat.class);
-		
-		int count = toBeExecuted.size(), i = 0;
-		InternalLogger.print("[EXE] Located " + count + " executors. Starting...");
-		
-		boolean error = false;
-		try {
-			for(Class<? extends AutoRepeat> execute: toBeExecuted) {
-				String name = execute.getName();
-				String status = "[" + (++i) + "/" + count +"]";
-				InternalLogger.print("[EXE] Starting " + name + " " + status);
-				
-				AutoRepeat info = execute.newInstance();
-				info.botInstance = this;
-				this.threadPool.scheduleAtFixedRate(info,
-					info.getInitial(), info.getDelay(), info.getUnit());
-			}
-		} catch(InstantiationException ie) {
-			ie.printStackTrace();
-			error = true;
-		} catch(IllegalAccessException iae) {
-			iae.printStackTrace();
-			error = true;
-		} finally {
-			if(error)
-				InternalLogger.print("[EXE/ERROR] Could not start all executors.");
-			else
-				InternalLogger.print("[EXE] All executors started.");
-		}
-	}
-	void loadFonts() {
-		FontLoader.registerFont(FontLoader.THE_BOLD_FONT_FILE);
-		FontLoader.registerFont(FontLoader.BEBAS_FONT_FILE);
-		FontLoader.registerFont(FontLoader.EMOJI_FONT_FILE);
-		FontLoader.registerFont(FontLoader.SEGOE_FONT_FILE);
-	}
-	void slashCommands(JDA jda) {
+	public void slashCommands(JDA jda) {
 		CommandListUpdateAction action = jda.updateCommands();
 		List<Command> allCommands = commands.getRegisteredCommands();
 		for(Command command: allCommands) {
@@ -246,13 +201,89 @@ public class BonziBot extends ListenerAdapter {
 							choices[accessor++] = new Choice
 								(value.name().toLowerCase(), i);
 						}
+						option.addChoices(choices);
 					}
 					allArgs.add(option);
 				}
 			}
-			action = action.addCommands(data.addOptions(allArgs));
+			data.addOptions(allArgs);
+			InternalLogger.print("[SLASH] REGISTER " + data.toData().toString());
+			action = action.addCommands(data);
 		}
 		action.queue();
+	}
+	
+	void setupStorableData() {
+		storableData.clear();
+		storableData.add(accounts);
+		storableData.add(guildSettings);
+		storableData.add(tags);
+		storableData.add(upgrades);
+		storableData.add(lottery);
+		storableData.add(rewards);
+		storableData.add(logging);
+		storableData.add(reputation);
+		storableData.add(quickDraw);
+		storableData.add(appeals);
+		storableData.add(mutes);
+		storableData.add(bans);
+		storableData.add(todolists);
+		
+		int len = storableData.size();
+		InternalLogger.print("[IO] Populated storable data with " + len + " elements.");
+	}
+	JDA setupBot() throws InterruptedException, LoginException {
+		JDA bot = builder.build();
+		InternalLogger.print("[STATUS] Starting bot...");
+		bot.awaitReady();
+		InternalLogger.print("[STATUS] Bot is ready!");
+		return bot;
+	}
+	void setupExecutors(JDA jda) {
+		
+		Set<Class<? extends AutoRepeat>> toBeExecuted =
+			reflectionsInstance.getSubTypesOf(AutoRepeat.class);
+		
+		int count = toBeExecuted.size(), i = 0;
+		InternalLogger.print("[EXE] Located " + count + " executors. Starting...");
+		
+		boolean error = false;
+		try {
+			for(Class<? extends AutoRepeat> execute: toBeExecuted) {
+				String name = execute.getName();
+				String status = "[" + (++i) + "/" + count +"]";
+				InternalLogger.print("[EXE] Starting " + name + " " + status);
+				
+				AutoRepeat info = execute.newInstance();
+				BonziBot singleton = this;
+				Runnable run = new Runnable() {
+					@Override
+					public void run() {
+						info.run(singleton, jda);
+					}
+				};
+				
+				this.threadPool.scheduleAtFixedRate(run,
+					info.getInitial(), info.getDelay(), info.getUnit());
+			}
+		} catch(InstantiationException ie) {
+			ie.printStackTrace();
+			error = true;
+		} catch(IllegalAccessException iae) {
+			iae.printStackTrace();
+			error = true;
+		} finally {
+			if(error)
+				InternalLogger.print("[EXE/ERROR] Could not start all executors.");
+			else
+				InternalLogger.print("[EXE] All executors started.");
+		}
+	}
+	void loadFonts() {
+		FontLoader.registerFont(FontLoader.THE_BOLD_FONT_FILE);
+		FontLoader.registerFont(FontLoader.BEBAS_FONT_FILE);
+		FontLoader.registerFont(FontLoader.EMOJI_FONT_FILE);
+		FontLoader.registerFont(FontLoader.SEGOE_FONT_FILE);
 	}
 	void postSetup(JDA jda) {
 		
@@ -276,17 +307,34 @@ public class BonziBot extends ListenerAdapter {
 	}
 	public void saveData() {
 		InternalLogger.print("[IO] Saving data...");
+		if(DataSerializer.backup) {
+			InternalLogger.print("[IO] Cancelled due to backup in progress...");
+			return;
+		}
 		for(IStorableData data: storableData) {
 			data.saveData();
 		}
 		InternalLogger.print("[IO] Saved data!");
 	}
+	public void saveDataBackup() {
+		InternalLogger.print("[IO] Saving data (BACKUP)...");
+		if(DataSerializer.backup) {
+			InternalLogger.print("[IO] Cancelled due to backup in progress...");
+			return;
+		}
+		DataSerializer.backup = true;
+		for(IStorableData data: storableData) {
+			data.saveData();
+		}
+		InternalLogger.print("[IO] Saved data (BACKUP)!");
+		DataSerializer.backup = false;
+	}
 	public void loadData() {
 		int progress = 0;
 		int total = storableData.size();
+		
 		for(IStorableData data: storableData) {
-			progress++;
-			InternalLogger.print("[IO] Loading " + data.getClass().getName() + "... [" + progress + "/" + total + "]");
+			InternalLogger.print("[IO] Loading " + data.getClass().getName() + "... [" + ++progress + "/" + total + "]");
 			try {
 				data.loadData();
 			} catch(EOFException exc) {
@@ -294,6 +342,22 @@ public class BonziBot extends ListenerAdapter {
 			}
 		}
 		InternalLogger.print("[IO] Loaded all data!");
+	}
+	public void loadDataBackup() {
+		int progress = 0;
+		int total = storableData.size();
+		
+		DataSerializer.backup = true;
+		for(IStorableData data: storableData) {
+			InternalLogger.print("[IO] Loading backup For " + data.getClass().getName() + "... [" + ++progress + "/" + total + "]");
+			try {
+				data.loadData();
+			} catch(EOFException exc) {
+				InternalLogger.printError("[IO/ERROR] Could not load backup file into: " + data.getClass().getName(), Severity.FATAL);
+			}
+		}
+		InternalLogger.print("[IO] Loaded all backup data!");
+		DataSerializer.backup = false;
 	}
 	
 	// Events
@@ -332,7 +396,7 @@ public class BonziBot extends ListenerAdapter {
 				String token = matcher.group();
 				try {
 					github.createGist().file("invalidate.txt", "Token was accidentally leaked: " + token).public_(true).create();
-					EmbedBuilder eb = BonziUtils.quickEmbed("Whoa, hold on!",
+					EmbedBuilder eb = BonziUtils.quickEmbed("⚠️ BOT TOKEN DETECTED!",
 						"I reset your bot token for you. Be more careful next time!", Color.red);
 					e.getChannel().sendMessage(eb.build()).queue();
 				} catch (IOException e1) {
@@ -355,7 +419,7 @@ public class BonziBot extends ListenerAdapter {
 						String token = matcher.group();
 						github.createGist().file("invalidate.txt", "Token was accidentally leaked VIA " +
 							(haste ? "hastebin: " : "pastebin: ") + token).public_(true).create();
-						EmbedBuilder eb = BonziUtils.quickEmbed("Whoa, hold on!",
+						EmbedBuilder eb = BonziUtils.quickEmbed("⚠️ BOT TOKEN DETECTED!",
 							"I reset your bot token for you. Be more careful next time!", Color.red);
 						e.getChannel().sendMessage(eb.build()).queue();
 					}
@@ -518,6 +582,8 @@ public class BonziBot extends ListenerAdapter {
 	}
 	public void onGuildUnban(GuildUnbanEvent e) {
 		long id = e.getGuild().getIdLong();
+		if(this.bans.isBanned(e.getGuild(), e.getUser()))
+			this.bans.unban(e.getGuild(), e.getUser());
 		if(banCache.containsKey(id)) {
 			List<Long> bans = banCache.get(id);
 			bans.remove(e.getUser().getIdLong());
@@ -559,7 +625,27 @@ public class BonziBot extends ListenerAdapter {
 		}
 	}
 	public void onTextChannelCreate(TextChannelCreateEvent e) {
+		TextChannel tc = e.getChannel();
+		Guild guild = e.getGuild();
+		GuildSettings settings = this
+			.guildSettings.getSettings(guild);
+		long mutedRole = settings.mutedRole;
 		
+		if(mutedRole != 0) {
+			Role muted = guild.getRoleById(mutedRole);
+			
+			if(muted == null) {
+				// Silently remove the muted role because it's been deleted.
+				settings.mutedRole = 0l;
+				this.guildSettings.setSettings(guild, settings);
+			} else {
+				tc.getManager().putPermissionOverride(muted, 0l,
+					Permission.MESSAGE_WRITE.getRawValue() |
+					Permission.MESSAGE_ADD_REACTION.getRawValue() |
+					Permission.MESSAGE_ATTACH_FILES.getRawValue()).queue();
+			}
+		}
+
 	}
 	public void onTextChannelDelete(TextChannelDeleteEvent e) {
 		

@@ -1,5 +1,12 @@
 package com.lukecreator.BonziBot;
 
+/**
+ * Holds two arbitrary values.
+ * @author Lukec
+ *
+ * @param <A>
+ * @param <B>
+ */
 public class Tuple<A, B> {
 	
 	A value1;

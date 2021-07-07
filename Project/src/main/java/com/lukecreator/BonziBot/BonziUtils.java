@@ -32,6 +32,7 @@ import com.lukecreator.BonziBot.Data.Modifier;
 import com.lukecreator.BonziBot.Data.Rules;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
+import com.lukecreator.BonziBot.GuiAPI.GuiButton;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
@@ -50,6 +51,10 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
 /**
  * utility methods for just about everything. this
@@ -66,9 +71,30 @@ public class BonziUtils {
 	public static final char[] STANDARD_CHARS = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890".toCharArray(); // for filtering
 	public static final char[] STANDARD_CHARS_ALL = "qwertyuiopasdfghjklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*()_+:\"',./<>?`~".toCharArray();
 	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36 Edg/86.0.622.69";
-	public static DateTimeFormatter MMddyy = DateTimeFormatter.ofPattern("MM/dd/yy");
-	public static DateTimeFormatter MMdd = DateTimeFormatter.ofPattern("MM/dd");
-	private static Random randomInstance = new Random(System.currentTimeMillis());
+	public static final DateTimeFormatter MMddyy = DateTimeFormatter.ofPattern("MM/dd/yy");
+	public static final DateTimeFormatter MMdd = DateTimeFormatter.ofPattern("MM/dd");
+	private static final Random randomInstance = new Random(System.currentTimeMillis());
+	
+	public static final MessageEmbed TERMS = new EmbedBuilder()
+		.setTitle("BonziBot Terms of Use")
+		.setDescription("If you do not agree to any listed information being stored, refusal to participate in the use of BonziBot is enough unless stated otherwise.")
+		
+		.addField("Publicity", "Your name (not including discriminator), premium status, and developer-assigned status may be expressed to the public domain in places like leaderboards."
+				+ " If you no longer share any servers with BonziBot, you and your name will be removed from all leaderboards.", false)
+		
+		.addField("Tag Content", "Any tags created by you with the tag privacy server setting set to \"Public\" will be visible and usable for all users who user BonziBot. Your user-name at the time will"
+				+ " appear under the tag information if viewed by a user. Keeping tag privacy to \"Private\" will only allow users in the Server of which it was created to view this information.", false)
+		
+		.addField("Profiles", "Any data you input into your BonziBot profile will be kept for an indefinite period of time until manually removed. This includes images, bio, birthday,"
+				+ " time zone, and anything else that can be inputted into the social profile. By using the profiles feature, you agree to having that data be made public.", false)
+		
+		.addField("Direct Messages", "If an action or command is performed in the direct messages between you and BonziBot, you agree to being generally messaged when appropriate."
+				+ " Actions such as being banned may send you an unsolicited direct message and can be turned off by running `/privacy dm false`.", false)
+		
+		.addField("Expose", "The special shop-based command \"expose\" recovers the last deleted message sent by a user in the server it was executed in. This means that a deleted message"
+				+ " can be recovered for an undefined period of time. While fun, you can still opt out of this by running `/privacy expose false`. This does not guarantee that the contents"
+				+ " of deleted messages will not be recoverable through moderator logging features present in BonziBot.", false)
+		.build();
 	
 	private static final String[] birthdayMessages = new String[] {
 		"oh yeah! it's {user}'s birthday today!",
@@ -92,6 +118,15 @@ public class BonziUtils {
 	}
 	public static String getWelcomeBackMessage() {
 		return welcomeBackMessages[randomInstance.nextInt(welcomeBackMessages.length)];
+	}
+	public static int randomInt() {
+		return randomInstance.nextInt();
+	}
+	public static int randomInt(int bound) {
+		return randomInstance.nextInt(bound);
+	}
+	public static boolean randomBoolean() {
+		return randomInstance.nextBoolean();
 	}
 	
 	// Colors
@@ -192,6 +227,24 @@ public class BonziUtils {
 		if(s.length() <= maxLength) return s;
 		String part = s.substring(0, maxLength - 3);
 		return part + "...";
+	}
+	/**
+	 * Scramble a word randomly.
+	 */
+	public static String scramble(String in) {
+		if(in == null)
+			return null;
+		if(in.length() < 2)
+			return in;
+		
+		char[] c = in.toCharArray();
+		for(int i = 0; i < c.length; i++) {
+			int swap = randomInt(c.length);
+			char carry = c[i];
+			c[i] = c[swap];
+			c[swap] = carry;
+		}
+		return new String(c);
 	}
 	/**
 	 * Joins strings together and appends "or" to the delimiter for the last element
@@ -459,7 +512,9 @@ public class BonziUtils {
 	}
 	public static String getPrefixOrDefault(CommandExecutionInfo info) {
 		if(info.isGuildMessage)
-			return info.bonzi.guildSettings.getSettings(info.guild).getPrefix();
+			if(info.settings == null)
+				return info.bonzi.guildSettings.getSettings(info.guild).getPrefix();
+			else return info.settings.getPrefix();
 		else return Constants.DEFAULT_PREFIX;
 	}
 	public static String getPrefixOrDefault(Guild guild, BonziBot bb) {
@@ -681,8 +736,7 @@ public class BonziUtils {
 				authorWithColor.getUser().getEffectiveAvatarUrl())
 			.setColor(authorWithColor.getColor());
 	}
-	public static EmbedBuilder generateRules(Guild g, BonziBot bb) {
-		GuildSettings settings = bb.guildSettings.getSettings(g);
+	public static EmbedBuilder generateRules(GuildSettings settings, Guild g, BonziBot bb) {
 		Rules rules = settings.getRules();
 		Rules.Formatting format = rules.getFormatting();
 		String[] lines = rules.getRules();
@@ -734,9 +788,66 @@ public class BonziUtils {
 		return eb;
 	}
 	
+	public static MessageAction appendButtons(MessageAction in, Gui gui) {
+		if(gui == null)
+			return in;
+		if(gui.buttons == null)
+			return in;
+		GuiButton[] buttons = (GuiButton[]) gui.buttons.toArray(new GuiButton[gui.buttons.size()]);
+		if(buttons.length < 1)
+			return in;
+		return appendButtons(in, buttons, gui.isDisabled());
+	}
+	public static MessageAction appendButtons(MessageAction in, GuiButton[] buttons, boolean allDisable) {
+		List<ActionRow> rows = new ArrayList<ActionRow>();
+		List<Button> row = new ArrayList<Button>();
+		for(int i = 0; i < buttons.length; i++) {
+			GuiButton button = buttons[i];
+			if(button.isNewline()) {
+				rows.add(ActionRow.of(row));
+				row.clear();
+				continue;
+			}
+			if(allDisable)
+				button = button.asEnabled(false);
+			row.add(button.toDiscord());
+			if(row.size() >= 5) {
+				rows.add(ActionRow.of(row));
+				row.clear();
+				continue;
+			}
+		}
+		if(row.size() > 0)
+			rows.add(ActionRow.of(row));
+		
+		return in.setActionRows(rows);
+	}
+	public static ReplyAction appendButtons(ReplyAction in, GuiButton[] buttons) {
+		List<ActionRow> rows = new ArrayList<ActionRow>();
+		List<Button> row = new ArrayList<Button>();
+		for(int i = 0; i < buttons.length; i++) {
+			GuiButton button = buttons[i];
+			if(button.isNewline()) {
+				rows.add(ActionRow.of(row));
+				row.clear();
+				continue;
+			}
+			row.add(button.toDiscord());
+			if(row.size() >= 5) {
+				rows.add(ActionRow.of(row));
+				row.clear();
+				continue;
+			}
+		}
+		if(row.size() > 0)
+			rows.add(ActionRow.of(row));
+		
+		return in.addActionRows(rows);
+	}
 	public static void sendGui(CommandExecutionInfo info, Gui gui) {
-		if(info.isSlashCommand)
+		if(info.isSlashCommand && !info.slashCommand.isAcknowledged())
 			info.slashCommand.reply(":envelope_with_arrow: `Opening GUI...`").setEphemeral(false).queue();
+		
 		if(info.isGuildMessage)
 			info.bonzi.guis.sendAndCreateGui(info.tChannel, info.executor, gui, info.bonzi);
 		else info.bonzi.guis.sendAndCreateGui(info.pChannel, gui, info.bonzi);
@@ -866,6 +977,13 @@ public class BonziUtils {
 			info.slashCommand.replyEmbeds(eb.build()).queue();
 		else
 			info.channel.sendMessage(eb.build()).queue();
+	}
+	public static void sendCommandDisabled(Command cmd, CommandExecutionInfo info) {
+		MessageEmbed me = failureEmbed("This command is disabled here.");
+		if(info.isSlashCommand)
+			info.slashCommand.replyEmbeds(me).queue();
+		else
+			info.channel.sendMessage(me).queue();
 	}
 	public static void sendAwaitingConfirmation(CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed(
