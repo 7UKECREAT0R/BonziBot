@@ -70,7 +70,7 @@ public class GuiEditProfile extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, JDA jda) {
+	public void onAction(String actionId, long executorId, JDA jda) {
 		
 		UserAccountManager uam = this.bonziReference.accounts;
 		EventWaiterManager ewm = this.bonziReference.eventWaiter;
@@ -166,7 +166,7 @@ public class GuiEditProfile extends Gui {
 					if(!message.getAttachments().isEmpty()) {
 						Attachment image = message.getAttachments().get(0);
 						String url = image.getUrl();
-						if(Pattern.matches(Constants.IMAGE_URL_REGEX, url)) {
+						if(Constants.IMAGE_URL_REGEX_COMPILED.matcher(url).matches()) {
 							account.backgroundImage = url;
 							uam.setUserAccount(userId, account);
 							BonziUtils.tryAwardAchievement(channel, this.bonziReference, userId, Achievement.SNAZZY);

@@ -66,7 +66,9 @@ public class GuiXpLeaderboard extends GuiPaging {
 			.toArray(new LbEntry[temp.size()]);
 		
 		int count = this.leaderboardContents.length;
-		this.maxPage = (count / PER_PAGE) + 1;
+		this.maxPage = (count / PER_PAGE);
+		if(count % PER_PAGE != 0)
+			this.maxPage++;
 		this.none = this.leaderboardContents.length <= 0;
 	}
 	
@@ -84,9 +86,9 @@ public class GuiXpLeaderboard extends GuiPaging {
 			currentPage[i-startIndex] = this.leaderboardContents[i];
 		}
 		
-		// Draw the embed.
-		EmbedBuilder eb = new EmbedBuilder();
-		eb.setColor(Color.GREEN);
+		// "draw" the embed.
+		EmbedBuilder eb = new EmbedBuilder()
+			.setColor(Color.green);
 		if(none) {
 			eb.setTitle("Having trouble loading the XP leaderboard...");
 			eb.setDescription("Leaderboard users fetched: " + this.leaderboardContents.length);

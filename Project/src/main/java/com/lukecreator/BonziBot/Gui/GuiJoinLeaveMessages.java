@@ -102,7 +102,7 @@ public class GuiJoinLeaveMessages extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, JDA jda) {
+	public void onAction(String actionId, long executorId, JDA jda) {
 		
 		GuildSettingsManager mgr = this.bonziReference.guildSettings;
 		GuildSettings settings = mgr.getSettings(guildId);

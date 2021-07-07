@@ -57,7 +57,7 @@ public class GuiProfile extends Gui {
 	@Override
 	public void initialize(JDA jda) {
 		if(self)
-			this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("📝"), "modify"));
+			this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), "Edit Profile", GuiButton.Color.GRAY, "modify"));
 	}
 	
 	@Override
@@ -205,7 +205,7 @@ public class GuiProfile extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, JDA jda) {
+	public void onAction(String actionId, long executorId, JDA jda) {
 		if(actionId.equals("modify")) {
 			Gui theGui = new GuiEditProfile(userId);
 			BonziBot bb = this.bonziReference;

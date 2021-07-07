@@ -70,7 +70,7 @@ public class GuiRules extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, JDA jda) {
+	public void onAction(String actionId, long executorId, JDA jda) {
 		MessageChannel channel = this.parent.getChannel(jda);
 		GuildSettingsManager gsm = this.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);
@@ -101,7 +101,7 @@ public class GuiRules extends Gui {
 					Guild guild = jda.getGuildById(guildId);
 					rules.retrieveRulesMessage(jda, guildId, edit -> {
 						MessageEmbed newRules = BonziUtils.generateRules
-							(guild, this.bonziReference).build();
+							(settings, guild, this.bonziReference).build();
 						edit.editMessage(newRules).queue();
 					}, fail -> {
 						settings.setRules(rules);
@@ -155,7 +155,7 @@ public class GuiRules extends Gui {
 						Guild guild = jda.getGuildById(guildId);
 						rules.retrieveRulesMessage(jda, guildId, edit -> {
 							MessageEmbed newRules = BonziUtils.generateRules
-								(guild, this.bonziReference).build();
+								(settings, guild, this.bonziReference).build();
 							edit.editMessage(newRules).queue();
 						}, fail -> {
 							settings.setRules(rules);
@@ -206,7 +206,7 @@ public class GuiRules extends Gui {
 						Guild guild = jda.getGuildById(guildId);
 						rules.retrieveRulesMessage(jda, guildId, edit -> {
 							MessageEmbed newRules = BonziUtils.generateRules
-								(guild, this.bonziReference).build();
+								(settings, guild, this.bonziReference).build();
 							edit.editMessage(newRules).queue();
 						}, fail -> {
 							settings.setRules(rules);
@@ -231,7 +231,7 @@ public class GuiRules extends Gui {
 			Guild guild = jda.getGuildById(guildId);
 			rules.retrieveRulesMessage(jda, guildId, edit -> {
 				MessageEmbed newRules = BonziUtils.generateRules
-					(guild, this.bonziReference).build();
+					(settings, guild, this.bonziReference).build();
 				edit.editMessage(newRules).queue();
 			}, fail -> {
 				settings.setRules(rules);

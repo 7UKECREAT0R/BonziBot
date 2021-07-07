@@ -41,8 +41,8 @@ public class GuiTestMenu extends GuiPaging {
 	}
 	
 	@Override
-	public void onAction(String actionId, JDA jda) {
-		super.onAction(actionId, jda);
+	public void onAction(String actionId, long executorId, JDA jda) {
+		super.onAction(actionId, executorId, jda);
 		
 		if(actionId.equals("pick")) {
 			this.pagingEnabled = false;

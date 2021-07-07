@@ -48,7 +48,7 @@ public class GuiTagEditing extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, JDA jda) {
+	public void onAction(String actionId, long executorId, JDA jda) {
 		
 		// Edit
 		if(actionId.equals("edit")) {

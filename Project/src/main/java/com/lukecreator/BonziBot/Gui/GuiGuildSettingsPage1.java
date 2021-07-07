@@ -99,7 +99,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 		long logChannelId = logs ? settings.loggingChannelCached : 0;
 		TextChannel logChannel = logs ? guild.getTextChannelById(logChannelId) : null;
 		String logName = (logChannel != null) ? "Channel: " + logChannel.getAsMention() : "No log channel set.";
-		menu.addField("📝 Logging: `" + (logs?"✅ ENABLED`":"🔳 DISABLED`"), "" + logName + "\nPut detailed log UIs into a channel for easy moderation.", false);
+		menu.addField("📝 Logging: `" + (logs?"✅ ENABLED`":"🔳 DISABLED`"), logName + "\nPut detailed log UIs into a channel for easy moderation.", false);
 		menu.addField("🤖 Bot Commands: `" + (cmdsEnabled?"✅ ENABLED`":"🔳 DISABLED`"), "If this is off, I will only "
 			+ "work in channels with the `Bot Commands` modifier. (check `" + this.prefixOfLocation + "modifiers`)", false);
 		
@@ -131,12 +131,12 @@ public class GuiGuildSettingsPage1 extends Gui {
 			"Give new members a role when they join!";
 		menu.addField("💥 Join Role: `" + (joinRole?"✅ ENABLED`":"🔳 DISABLED`"), roleDesc, false);
 		
-		menu.setFooter("Page 1/2 - Press ➡️");
+		menu.setFooter("Page 1/3 - Press ➡️");
 		return menu.build();
 	}
 	
 	@Override
-	public void onAction(String actionId, JDA jda) {
+	public void onAction(String actionId, long executorId, JDA jda) {
 		GuildSettingsManager gsm = this
 			.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);
@@ -149,7 +149,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 			Guild guild = jda.getGuildById(guildId);
 			rules.retrieveRulesMessage(jda, guildId, edit -> {
 				MessageEmbed newRules = BonziUtils.generateRules
-					(guild, this.bonziReference).build();
+					(settings, guild, this.bonziReference).build();
 				edit.editMessage(newRules).queue();
 			}, fail -> {
 				settings.setRules(rules);

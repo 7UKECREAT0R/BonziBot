@@ -75,7 +75,7 @@ public class GuiHelpMenu extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, JDA jda) {
+	public void onAction(String actionId, long executorId, JDA jda) {
 		CommandCategory c = fromButtonId(actionId);
 		GuiHelpMenuCategory menu = new GuiHelpMenuCategory(c, this.bonziReference);
 		this.parent.setActiveGui(menu, jda);
