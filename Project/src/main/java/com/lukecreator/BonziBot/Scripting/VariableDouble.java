@@ -19,7 +19,9 @@ public class VariableDouble extends ScriptVariableRaw {
 			value = Double.parseDouble((String)o);
 		else if(o instanceof Integer)
 			value = ((Integer)o).doubleValue();
-		else return;
+		else
+			value = -1;
+		return;
 	}
 
 	@Override
