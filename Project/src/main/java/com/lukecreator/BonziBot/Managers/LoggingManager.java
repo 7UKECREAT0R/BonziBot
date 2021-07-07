@@ -53,7 +53,7 @@ public class LoggingManager implements IStorableData {
 		GuildSettings settings = bb.guildSettings.getSettings(g);
 		if(settings.loggingEnabled) {
 			long id = settings.loggingChannelCached;
-			if(id == -1) {
+			if(id == 0) {
 				// Try to relocate.
 				id = this.findLoggingChannel(g);
 				settings.loggingChannelCached = id;
@@ -71,7 +71,7 @@ public class LoggingManager implements IStorableData {
 		GuildSettings settings = bb.guildSettings.getSettings(g);
 		if(settings.loggingEnabled) {
 			long id = settings.loggingChannelCached;
-			if(id == -1) {
+			if(id == 0) {
 				// Try to relocate.
 				id = this.findLoggingChannel(g);
 				settings.loggingChannelCached = id;

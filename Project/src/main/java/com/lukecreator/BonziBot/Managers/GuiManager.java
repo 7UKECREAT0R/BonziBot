@@ -41,7 +41,8 @@ public class GuiManager {
 	}
 	public void sendAndCreateGui(TextChannel tc, User owner, Gui gui, BonziBot main) {
 		
-		initGuiIfNot(gui, tc.getJDA(), tc, main);
+		GuiContainer container = new GuiContainer(gui, tc, owner);
+		initGuiIfNot(gui.setParent(container), tc.getJDA(), tc, main);
 		Guild guild = tc.getGuild();
 		JDA jda = tc.getJDA();
 		long gId = guild.getIdLong();
@@ -53,11 +54,11 @@ public class GuiManager {
 			agl = guildGuis.get(gId);
 		}
 		
-		GuiContainer container = new GuiContainer(gui, tc, owner);
 		container.sendMessage(jda, gId, main, agl); // Applies automatically.
 	}
 	public void sendAndCreateGui(PrivateChannel pc, Gui gui, BonziBot main) {
-		initGuiIfNot(gui, pc.getJDA(), pc, main);
+		GuiContainer container = new GuiContainer(gui, pc);
+		initGuiIfNot(gui.setParent(container), pc.getJDA(), pc, main);
 		User user = pc.getUser();
 		JDA jda = pc.getJDA();
 		long uId = user.getIdLong();
@@ -69,7 +70,6 @@ public class GuiManager {
 			agl = userGuis.get(uId);
 		}
 		
-		GuiContainer container = new GuiContainer(gui, pc);
 		container.sendMessage(jda, uId, main, agl); // Applies automatically.
 	}
 	

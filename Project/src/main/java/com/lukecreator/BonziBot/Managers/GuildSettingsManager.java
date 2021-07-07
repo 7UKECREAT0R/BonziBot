@@ -111,13 +111,12 @@ public class GuildSettingsManager implements IStorableData {
 			if(tc != null) {
 				if(settings.joinMessageIsEmbed) {
 					EmbedBuilder eb = new EmbedBuilder();
-					String regex = Constants.IMAGE_URL_REGEX;
 					List<String> allUrls = new ArrayList<String>();
-					Matcher matcher = Pattern.compile(regex).matcher(send);
+					Matcher matcher = Constants.IMAGE_URL_REGEX_COMPILED.matcher(send);
 					while(matcher.find())
 						allUrls.add(matcher.group());
 					if(!allUrls.isEmpty()) {
-						send = send.replaceAll(regex, "");
+						send = matcher.replaceAll("");
 						String firstImage = allUrls.get(0);
 						eb.setImage(firstImage);
 					}

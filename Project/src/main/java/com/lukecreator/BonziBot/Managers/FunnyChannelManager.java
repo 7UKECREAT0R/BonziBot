@@ -20,6 +20,7 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
 
 /**
  * shhh youre not supposed to see this!
@@ -237,7 +238,10 @@ public class FunnyChannelManager {
 	}
 	public static void transformer(BonziBot bb, GenericGuildVoiceEvent e, String[] args) {
 		String username = UsernameGenerator.generate();
-		e.getMember().modifyNickname(username).queue(null, fail);
+		try {
+			e.getMember().modifyNickname(username).queue(null, fail);
+		} catch(HierarchyException exc) {}
+		
 	}
 	public static void randomwarp(BonziBot bb, GenericGuildVoiceEvent e, String[] args) {
 		// disabled for fear of someone using loops to get the bot ratelimited
