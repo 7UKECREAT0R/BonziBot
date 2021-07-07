@@ -289,7 +289,7 @@ public class BonziEventCache implements Serializable {
 	 * @return if the user successfully left the event.
 	 */
 	@SuppressWarnings("unlikely-arg-type")
-	public boolean onJoinButtonReleased(BonziBot bb, Member member, TextChannel tc, long messageId) {
+	public boolean onLeaveButtonPressed(BonziBot bb, Member member, TextChannel tc, long messageId) {
 		BonziEvent event = null; int i;
 		for(i = 0; i < this.unstartedEvents.size(); i++) {
 			BonziEvent test = this.unstartedEvents.get(i);
@@ -351,7 +351,7 @@ public class BonziEventCache implements Serializable {
 				if(name.equalsIgnoreCase(cmdMessage)) {
 					$return = true;
 					if(!admin) {
-						BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("You don't have permission to use this command."), 4);
+						BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("You don't have permission to use this event command."), 4);
 						break;
 					}
 					MessageEmbed me = event.onCommandEvent(member, name, args);
