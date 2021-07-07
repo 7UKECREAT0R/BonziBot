@@ -2,6 +2,10 @@ package com.lukecreator.BonziBot.Async;
 
 import java.util.concurrent.TimeUnit;
 
+import com.lukecreator.BonziBot.BonziBot;
+
+import net.dv8tion.jda.api.JDA;
+
 public class AutosaveService extends AutoRepeat {
 	
 	public AutosaveService() {
@@ -11,7 +15,7 @@ public class AutosaveService extends AutoRepeat {
 	}
 	
 	@Override
-	public void run() {
-		this.botInstance.saveData();
+	public void run(BonziBot bb, JDA jda) {
+		bb.saveData();
 	}
 }
