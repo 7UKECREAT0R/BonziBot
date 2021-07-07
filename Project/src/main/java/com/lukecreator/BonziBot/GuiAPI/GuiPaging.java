@@ -4,6 +4,11 @@ import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 import net.dv8tion.jda.api.JDA;
 
+/**
+ * A GUI template which implements a paging system.
+ * @author Lukec
+ *
+ */
 public class GuiPaging extends Gui {
 	
 	public int getMinPage() {
@@ -36,7 +41,7 @@ public class GuiPaging extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, JDA jda) {
+	public void onAction(String actionId, long executorId, JDA jda) {
 		if(actionId.equals("pageleft") && pagingEnabled) {
 			if(--currentPage < minPage)
 				currentPage = minPage;

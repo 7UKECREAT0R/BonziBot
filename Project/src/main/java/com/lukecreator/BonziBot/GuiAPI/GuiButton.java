@@ -48,6 +48,14 @@ public class GuiButton {
 	String actionId;
 	boolean enabled = true;
 	
+	public GuiButton(String text, Color color, String actionId) {
+		if(actionId != null && actionId.length() > 40)
+			actionId = actionId.substring(0, 40);
+		this.actionId = actionId;
+		this.color = color;
+		this.text = text;
+		this.icon = null;
+	}
 	public GuiButton(GenericEmoji icon, String text, Color color, String actionId) {
 		if(actionId != null && actionId.length() > 40)
 			actionId = actionId.substring(0, 40);
@@ -63,6 +71,9 @@ public class GuiButton {
 	public GuiButton withColor(Color color) {
 		this.color = color;
 		return this;
+	}
+	public boolean actionIdEqual(String other) {
+		return actionId.equals(other);
 	}
 	public Button toDiscord() {
 		return this.toDiscord(enabled);

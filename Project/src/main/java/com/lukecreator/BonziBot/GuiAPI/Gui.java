@@ -22,6 +22,11 @@ public abstract class Gui {
 	public boolean wasInitialized() {
 		return initialized;
 	}
+	public boolean isDisabled() {
+		if(this.parent == null)
+			return true;
+		return !this.parent.getEnabled();
+	}
 	public void hiddenInit(JDA jda, Guild g, BonziBot b) {
 		if(buttons == null) {
 			buttons = new ArrayList<GuiButton>();
@@ -49,13 +54,17 @@ public abstract class Gui {
 	
 	public Gui(GuiContainer parent, JDA jda, Guild g, BonziBot b) {
 		buttons = new ArrayList<GuiButton>();
-		this.hiddenInit(jda, g, b);
 		this.parent = parent;
+		this.hiddenInit(jda, g, b);
 	}
 	public Gui(GuiContainer parent, JDA jda, User u, BonziBot b) {
 		buttons = new ArrayList<GuiButton>();
-		this.hiddenInit(jda, u, b);
 		this.parent = parent;
+		this.hiddenInit(jda, u, b);
+	}
+	public Gui setParent(GuiContainer parent) {
+		this.parent = parent;
+		return this;
 	}
 	public Gui() {}
 	
@@ -70,14 +79,13 @@ public abstract class Gui {
 			this.postAction(action, react.getJDA());
 		}
 	}*/
-	public void receiveAction(String actionId, JDA jda) {
-		int size = this.buttons.size();
-		for(int i = 0; i < size; i++) {
+	public void receiveAction(String actionId, long executorId, JDA jda) {
+		for(int i = 0; i < this.buttons.size(); i++) {
 			GuiButton button = this.buttons.get(i);
 			if(button.isNewline())
 				continue;
 			if(button.actionId.equals(actionId)) {
-				this.onAction(actionId, jda);
+				this.onAction(actionId, executorId, jda);
 				this.postAction(actionId, jda);
 			}
 		}
@@ -85,7 +93,7 @@ public abstract class Gui {
 	
 	// Overridable
 	public void initialize(JDA jda) {}
-	public void onAction(String actionId, JDA jda) {}
+	public void onAction(String actionId, long executorId, JDA jda) {}
 	public void postAction(String actionId, JDA jda) {}
 	
 	public Object draw(JDA jda) { return EMPTY; }
