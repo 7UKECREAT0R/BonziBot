@@ -111,6 +111,7 @@ public class CommandArgCollection {
 	/**
 	 * Parses slash-command options input into a CommandArg[]
 	 */
+	@SuppressWarnings("rawtypes")
 	public CommandParsedArgs parse(OptionMapping[] options, JDA jda, User exec, Guild g) {
 		
 		CommandArg[] clone = args.clone();
@@ -121,6 +122,24 @@ public class CommandArgCollection {
 				clone[i] = cmd;
 				continue;
 			}
+			if(cmd.type == ArgType.Enum) {
+				EnumArg eArg = (EnumArg)cmd;
+				Enum[] tests = eArg.enumType;
+				cmd.object = tests[(int)options[i].getAsLong()];
+				clone[i] = cmd;
+				continue;
+			} else if(cmd.type == ArgType.TimeSpan) {
+				TimeSpanArg tArg = (TimeSpanArg)cmd;
+				tArg.parseWord(options[i].getAsString(), jda, exec, g);
+				clone[i] = tArg;
+				continue;
+			} else if(cmd.type == ArgType.Color) {
+				ColorArg cArg = (ColorArg)cmd;
+				cArg.parseWord(options[i].getAsString(), jda, exec, g);
+				clone[i] = cArg;
+				continue;
+			}
+			
 			OptionType goalType = cmd.type.nativeOption;
 			switch(goalType) {
 			case BOOLEAN:

@@ -11,22 +11,25 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 public abstract class CommandArg {
 	
 	public enum ArgType {
-		Int(OptionType.INTEGER),
-		Float(OptionType.INTEGER),
-		String(OptionType.STRING),
-		StringRem(OptionType.STRING),
-		Boolean(OptionType.BOOLEAN),
-		User(OptionType.USER),
-		Role(OptionType.ROLE),
-		TimeSpan(OptionType.UNKNOWN),
-		Color(OptionType.UNKNOWN),
-		Enum(OptionType.STRING),
-		Channel(OptionType.CHANNEL),
-		Array(OptionType.UNKNOWN);
+		Int(OptionType.INTEGER, false),
+		Float(OptionType.INTEGER, false),
+		String(OptionType.STRING, false),
+		StringRem(OptionType.STRING, false),
+		Boolean(OptionType.BOOLEAN, false),
+		User(OptionType.USER, false),
+		Role(OptionType.ROLE, false),
+		TimeSpan(OptionType.STRING, true),
+		Color(OptionType.STRING, true),
+		Enum(OptionType.STRING, false),
+		Channel(OptionType.CHANNEL, false),
+		Array(OptionType.UNKNOWN, false);
 		
-		public OptionType nativeOption;
-		private ArgType(OptionType nativeOption) {
+		public OptionType nativeOption;	// Input information for slash commands.
+		public boolean formatValidate;	// Server-sided input validation for slash commands.
+		
+		private ArgType(OptionType nativeOption, boolean formatValidate) {
 			this.nativeOption = nativeOption;
+			this.formatValidate = formatValidate;
 		}
 	}
 	

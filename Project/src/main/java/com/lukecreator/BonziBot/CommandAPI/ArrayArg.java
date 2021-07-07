@@ -83,7 +83,7 @@ public class ArrayArg extends CommandArg {
 	
 	@Override
 	public String getUsageTerm() {
-		String a = this.optional ? "[array: " : "<array: ";
+		String a = this.optional ? "[list: " : "<list: ";
 		String b = this.optional ? "]" : ">";
 		return a + argName + b;
 	}

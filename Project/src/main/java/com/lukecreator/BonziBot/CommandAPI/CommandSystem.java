@@ -27,8 +27,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 /**
- * Manages the loading of commands, argument
- * parsing, and execution.
+ * Manages the loading of commands, argument parsing, and execution.
  */
 public class CommandSystem {
 	
@@ -41,7 +40,8 @@ public class CommandSystem {
 			Set<Class<? extends Command>> classes = refs.getSubTypesOf(Command.class);
 			for(Class<? extends Command> c: classes) {
 				Command inst = c.newInstance();
-				inst.id = Command.LAST_ID++;
+				inst.id = inst.name.hashCode();
+				InternalLogger.print("Register " + inst.getFilteredCommandName() + ":" + inst.id);
 				commands.add(inst);
 			}
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -139,13 +139,59 @@ public class CommandSystem {
 		}
 		
 		for(Command cmd: commands) {
+			
 			if(!cmd.getSlashCommandName().equals(name))
 				continue;
+			
+			if(info.settings != null) {
+				if(!info.settings.botCommandsEnabled & !cmd.forcedCommand) {
+					// Check for bot commands modifier.
+					boolean good = false;
+					for(Modifier mod: info.modifiers) {
+						if(mod == Modifier.BOT_COMMANDS) {
+							good = true;
+							break;
+						}
+					}
+					if(!good)
+						return false;
+				}
+				List<Integer> disabled = info.settings.disabledCommands;
+				if(disabled != null) {
+					for(int test: disabled) {
+						if(test == cmd.id) {
+							BonziUtils.sendCommandDisabled(cmd, info);
+							return false;
+						}
+					}
+				}
+			}
+			
+			// Validate any args with formatValidate true.
+			if(cmd.args != null && cmd.args.args != null) {
+				for(int i = 0; i < cmd.args.args.length; i++) {
+					CommandArg arg = cmd.args.args[i];
+					if(arg.optional && i >= args.length)
+						break;
+					if(!arg.type.formatValidate)
+						continue;
+					OptionMapping o = args[i];
+					if(o == null)
+						break;
+					String input = o.getAsString();
+					if(!arg.isWordParsable(input, event.getGuild())) {
+						BonziUtils.sendUsage(cmd, info, false, arg);
+						return false;
+					}
+				}
+			}
+			
 			CommandParsedArgs cpa = null;
 			if(cmd.args != null) {
 				Guild inputGuild = info.isGuildMessage ? info.guild : null;
 				cpa = cmd.args.parse(args, info.bot, info.executor, inputGuild);
 			}
+			
 			info.setCommandData(cmd.getFilteredCommandName(), new String[args.length], cpa);
 			
 			if(!checkQualifications(cmd, info))
@@ -189,12 +235,33 @@ public class CommandSystem {
 		}
 		return find;
 	}
+	public Command getCommandById(int id) {
+		for(Command cmd: commands) {
+			if(cmd.id == id)
+				return cmd;
+		}
+		return null;
+	}
 	
 	boolean directCommand(CommandExecutionInfo info, String commandName, String[] inputArgs) {
 		for(Command cmd: commands) {
 			String cmdName = cmd.getFilteredCommandName();
+			
 			if(!commandName.equalsIgnoreCase(cmdName))
 				continue;
+			
+			// Check if command is disabled.
+			if(info.settings != null) {
+				List<Integer> disabled = info.settings.disabledCommands;
+				if(disabled != null) {
+					for(Integer test: disabled) {
+						if(test.intValue() == cmd.id) {
+							BonziUtils.sendCommandDisabled(cmd, info);
+							return false;
+						}
+					}
+				}
+			}
 			
 			CommandParsedArgs cpa = null;
 			if(cmd.args != null) {
@@ -219,6 +286,7 @@ public class CommandSystem {
 		}
 		return false;
 	}
+	@SuppressWarnings("deprecation")
 	boolean checkQualifications(Command cmd, CommandExecutionInfo info) {
 		
 		// If this is a shop item, check if the user owns it.
@@ -236,7 +304,8 @@ public class CommandSystem {
 		
 		// Is bonzi awaiting confirmation via eventwaiter?
 		EventWaiterManager ewm = info.bonzi.eventWaiter;
-		if(ewm.isWaitingForReaction(info.executor)) {
+		if(ewm.isWaitingForAction(info.executor) ||
+		 ewm.isWaitingForReaction(info.executor)) {
 			BonziUtils.sendAwaitingConfirmation(info);
 			return false;
 		}

@@ -45,6 +45,8 @@ public class UserArg extends CommandArg {
 	
 	@Override
 	public boolean isWordParsable(String word, Guild theGuild) {
+		if(word == null)
+			return false;
 		if(word.equalsIgnoreCase("me"))
 			return true;
 		if(isMention(word))

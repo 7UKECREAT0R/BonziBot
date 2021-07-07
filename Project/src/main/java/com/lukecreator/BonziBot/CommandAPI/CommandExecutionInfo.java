@@ -1,6 +1,7 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
 import com.lukecreator.BonziBot.BonziBot;
+import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.Modifier;
 
 import net.dv8tion.jda.api.JDA;
@@ -64,10 +65,18 @@ public class CommandExecutionInfo {
 	}
 	public CommandExecutionInfo setBonziBot(BonziBot in) {
 		this.bonzi = in;
+		
+		if(this.isGuildMessage)
+			this.settings = in.guildSettings.getSettings(this.guild);
+		
 		return this;
 	}
 	public CommandExecutionInfo setModifiers(Modifier...modifiers) {
 		this.modifiers = modifiers;
+		return this;
+	}
+	public CommandExecutionInfo setSettings(GuildSettings settings) {
+		this.settings = settings;
 		return this;
 	}
 	
@@ -92,6 +101,7 @@ public class CommandExecutionInfo {
 	// Null if isDirectMessage
 	public Guild guild = null;
 	public Member member = null;
+	public GuildSettings settings = null;
 	
 	// Sometimes null.
 	public TextChannel tChannel = null;
