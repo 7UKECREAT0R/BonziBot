@@ -94,6 +94,9 @@ public class BonziUtils {
 		.addField("Expose", "The special shop-based command \"expose\" recovers the last deleted message sent by a user in the server it was executed in. This means that a deleted message"
 				+ " can be recovered for an undefined period of time. While fun, you can still opt out of this by running `/privacy expose false`. This does not guarantee that the contents"
 				+ " of deleted messages will not be recoverable through moderator logging features present in BonziBot.", false)
+		
+		.addField("Pins", "If a user adds your message to their personal pins, a short preview of its content will be stored there indefinitely until the source user unpins it themselves. "
+				+ "Even after the message is deleted, this preview will remain. If you do not want this, opting out of expose via `/privacy expose false` will prevent this.", false)
 		.build();
 	
 	private static final String[] birthdayMessages = new String[] {
@@ -253,10 +256,12 @@ public class BonziUtils {
 	public static String stringJoinOr(CharSequence delimiter, Iterable<? extends CharSequence> collection) {
 		StringJoiner joiner = new StringJoiner(delimiter);
 		Iterator<? extends CharSequence> iter = collection.iterator();
+		int count = 0;
 		while(iter.hasNext()) {
+			count++;
 			CharSequence chars = iter.next();
 			boolean last = !iter.hasNext();
-				joiner.add(last ? "or " + chars : chars);
+				joiner.add((last&&count>1) ? "or " + chars : chars);
 		}
 		return joiner.toString();
 	}
@@ -267,10 +272,12 @@ public class BonziUtils {
 	public static String stringJoinAnd(CharSequence delimiter, Iterable<? extends CharSequence> collection) {
 		StringJoiner joiner = new StringJoiner(delimiter);
 		Iterator<? extends CharSequence> iter = collection.iterator();
+		int count = 0;
 		while(iter.hasNext()) {
+			count++;
 			CharSequence chars = iter.next();
 			boolean last = !iter.hasNext();
-				joiner.add((last?"and ":"")+chars);
+				joiner.add(((last&&count>1)?"and ":"")+chars);
 		}
 		return joiner.toString();
 	}
@@ -858,7 +865,7 @@ public class BonziUtils {
 		});
 	}
 	public static void sendTempMessage(MessageChannel c, MessageEmbed embed, int seconds) {
-		c.sendMessage(embed).queue(msg -> {
+		c.sendMessageEmbeds(embed).queue(msg -> {
 			msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
 		});
 	}
@@ -885,7 +892,7 @@ public class BonziUtils {
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(usage.build()).queue();
 		else
-			channel.sendMessage(usage.build()).queue();
+			channel.sendMessageEmbeds(usage.build()).queue();
 	}
 	public static void sendNeededPerms(Command cmd, CommandExecutionInfo info) {
 		Permission[] perms = cmd.neededPermissions;
@@ -904,7 +911,7 @@ public class BonziUtils {
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(send.build()).queue();
 		else
-			info.channel.sendMessage(send.build()).queue();
+			info.channel.sendMessageEmbeds(send.build()).queue();
 	}
 	public static void sendUserNeedsPerms(Command cmd, CommandExecutionInfo info) {
 		Permission[] perms = cmd.userRequiredPermissions;
@@ -923,7 +930,7 @@ public class BonziUtils {
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(send.build()).queue();
 		else
-			info.channel.sendMessage(send.build()).queue();
+			info.channel.sendMessageEmbeds(send.build()).queue();
 	}
 	public static void sendModOnly(Command cmd, CommandExecutionInfo info, String prefix) {
 		EmbedBuilder eb = quickEmbed("This command is reserved for moderators/admins.",
@@ -931,7 +938,7 @@ public class BonziUtils {
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(eb.build()).queue();
 		else
-			info.channel.sendMessage(eb.build()).queue();
+			info.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 	public static void sendNotPurchased(Command cmd, CommandExecutionInfo info, String prefix) {
 		EmbedBuilder eb = quickEmbed("You don't own this command yet!",
@@ -939,7 +946,7 @@ public class BonziUtils {
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(eb.build()).queue();
 		else
-			info.channel.sendMessage(eb.build()).queue();
+			info.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 	public static void sendAdminOnly(Command cmd, CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed(
@@ -949,7 +956,7 @@ public class BonziUtils {
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(eb.build()).queue();
 		else
-			info.channel.sendMessage(eb.build()).queue();
+			info.channel.sendMessageEmbeds(eb.build()).queue();
 				
 	}
 	public static void sendOnCooldown(Command cmd, CommandExecutionInfo info, CooldownManager cdm) {
@@ -967,7 +974,7 @@ public class BonziUtils {
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(embed.build()).queue();
 		else
-			info.channel.sendMessage(embed.build()).queue();
+			info.channel.sendMessageEmbeds(embed.build()).queue();
 		return;
 	}
 	public static void sendDoesntWorkDms(Command cmd, CommandExecutionInfo info) {
@@ -976,14 +983,14 @@ public class BonziUtils {
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(eb.build()).queue();
 		else
-			info.channel.sendMessage(eb.build()).queue();
+			info.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 	public static void sendCommandDisabled(Command cmd, CommandExecutionInfo info) {
 		MessageEmbed me = failureEmbed("This command is disabled here.");
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(me).queue();
 		else
-			info.channel.sendMessage(me).queue();
+			info.channel.sendMessageEmbeds(me).queue();
 	}
 	public static void sendAwaitingConfirmation(CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed(
@@ -993,7 +1000,7 @@ public class BonziUtils {
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(eb.build()).queue();
 		else
-			info.channel.sendMessage(eb.build()).queue();
+			info.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 	public static void sendMentionMessage(GuildMessageReceivedEvent e, BonziBot bb) {
 		if(!e.getMessage().getContentRaw().contains("<@"))
@@ -1041,9 +1048,19 @@ public class BonziUtils {
 			account.afkData.noLongerAfk();
 			uam.setUserAccount(user, account);
 			String name = user.getName();
-			tc.sendMessage(BonziUtils.successEmbed(getWelcomeBackMessage().replace("{user}", name))).queue();
+			tc.sendMessageEmbeds(BonziUtils.successEmbed(getWelcomeBackMessage().replace("{user}", name))).queue();
 			return;
 		}
+	}
+	public static MessageEmbed createStarboardEntry(Message msg) {
+		User author = msg.getAuthor();
+		EmbedBuilder eb = new EmbedBuilder()
+			.setColor(Color.orange)
+			.setTitle("Starboard")
+			.setAuthor(author.getName(), null, author.getEffectiveAvatarUrl());
+		eb.setDescription(msg.getContentRaw());
+		eb.appendDescription("\n[Jump to Message](" + msg.getJumpUrl() + ")");
+		return eb.build();
 	}
 	
 	public static void tryAwardAchievement(MessageChannel channel, BonziBot bb, User u, Achievement a) {
@@ -1065,7 +1082,7 @@ public class BonziUtils {
 			builder.setTitle(a.icon.toString() + " " + a.name);
 			builder.setDescription(a.desc);
 			builder.setFooter("You can see your achievements with `" + prefix + "achievements`");
-			channel.sendMessage(builder.build()).queue();
+			channel.sendMessageEmbeds(builder.build()).queue();
 		}
 	}
 	public static void tryAwardAchievement(MessageChannel channel, BonziBot bb, long uid, Achievement a) {
@@ -1118,12 +1135,12 @@ public class BonziUtils {
 		if(user.hasPrivateChannel() && userPrivateChannels.containsKey(id)) {
 			long cId = userPrivateChannels.get(id);
 			PrivateChannel pc = user.getJDA().getPrivateChannelById(cId);
-			pc.sendMessage(me).queue();
+			pc.sendMessageEmbeds(me).queue();
 		} else {
 			user.openPrivateChannel().queue(p -> {
 				long privateChannelId = p.getIdLong();
 				userPrivateChannels.put(id, privateChannelId);
-				p.sendMessage(me).queue();
+				p.sendMessageEmbeds(me).queue();
 			});
 		}
 	}
@@ -1146,6 +1163,13 @@ public class BonziUtils {
 		if(user.hasPrivateChannel() && userPrivateChannels.containsKey(userId)) {
 			return user.getJDA().getPrivateChannelById(userPrivateChannels.get(userId));
 		}
+		// Not cached.
+		return null;
+	}
+	public static PrivateChannel getCachedPrivateChannel(JDA jda, long userId) {
+		if(userPrivateChannels.containsKey(userId))
+			return jda.getPrivateChannelById(userPrivateChannels.get(userId));
+		
 		// Not cached.
 		return null;
 	}
