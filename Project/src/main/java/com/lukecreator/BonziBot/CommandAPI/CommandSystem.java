@@ -175,10 +175,13 @@ public class CommandSystem {
 						break;
 					if(!arg.type.formatValidate)
 						continue;
-					OptionMapping o = args[i];
-					if(o == null)
-						break;
-					String input = o.getAsString();
+					OptionMapping mapping = null;
+					for(OptionMapping test: args)
+						if(test.getName().replace('-', ' ').equalsIgnoreCase(arg.argName))
+							mapping = test;
+					if(mapping == null)
+						continue;
+					String input = mapping.getAsString();
 					if(!arg.isWordParsable(input, event.getGuild())) {
 						BonziUtils.sendUsage(cmd, info, false, arg);
 						return false;

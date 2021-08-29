@@ -2,6 +2,7 @@ package com.lukecreator.BonziBot.CommandAPI;
 
 import java.util.List;
 
+import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.CommandAPI.CommandArg.ArgType;
 
 import net.dv8tion.jda.api.JDA;
@@ -115,52 +116,66 @@ public class CommandArgCollection {
 	public CommandParsedArgs parse(OptionMapping[] options, JDA jda, User exec, Guild g) {
 		
 		CommandArg[] clone = args.clone();
-		for(int i = 0; i < clone.length; i++) {
-			CommandArg cmd = clone[i];
-			if(i >= options.length) {
-				cmd.object = null;
-				clone[i] = cmd;
-				continue;
+		
+		for(OptionMapping mapping: options) {
+			String optionName = mapping.getName().replace('-', ' ');
+			
+			int search = -1;
+			for(int i = 0; i < clone.length; i++) {
+				CommandArg arg = clone[i];
+				if(arg.argName.equalsIgnoreCase(optionName)) {
+					search = i;
+					break;
+				}
 			}
-			if(cmd.type == ArgType.Enum) {
-				EnumArg eArg = (EnumArg)cmd;
-				Enum[] tests = eArg.enumType;
-				cmd.object = tests[(int)options[i].getAsLong()];
-				clone[i] = cmd;
-				continue;
-			} else if(cmd.type == ArgType.TimeSpan) {
-				TimeSpanArg tArg = (TimeSpanArg)cmd;
-				tArg.parseWord(options[i].getAsString(), jda, exec, g);
-				clone[i] = tArg;
-				continue;
-			} else if(cmd.type == ArgType.Color) {
-				ColorArg cArg = (ColorArg)cmd;
-				cArg.parseWord(options[i].getAsString(), jda, exec, g);
-				clone[i] = cArg;
+			
+			if(search == -1) {
+				InternalLogger.print("[ERROR] Got invalid argument: " + optionName);
 				continue;
 			}
 			
-			OptionType goalType = cmd.type.nativeOption;
+			CommandArg cmd = clone[search];
+			ArgType baseType = cmd.type;
+			
+			if(cmd.type == ArgType.Enum) {
+				EnumArg eArg = (EnumArg)cmd;
+				Enum[] tests = eArg.enumType;
+				cmd.object = tests[(int)mapping.getAsLong()];
+				clone[search] = cmd;
+				continue;
+			} else if(cmd.type == ArgType.TimeSpan) {
+				TimeSpanArg tArg = (TimeSpanArg)cmd;
+				tArg.parseWord(mapping.getAsString(), jda, exec, g);
+				clone[search] = tArg;
+				continue;
+			} else if(cmd.type == ArgType.Color) {
+				ColorArg cArg = (ColorArg)cmd;
+				cArg.parseWord(mapping.getAsString(), jda, exec, g);
+				clone[search] = cArg;
+				continue;
+			}
+			
+			OptionType goalType = baseType.nativeOption;
 			switch(goalType) {
 			case BOOLEAN:
-				cmd.object = options[i].getAsBoolean();
+				cmd.object = mapping.getAsBoolean();
 				break;
 			case CHANNEL:
-				cmd.object = options[i].getAsGuildChannel();
+				cmd.object = mapping.getAsGuildChannel();
 				break;
 			case INTEGER:
-				cmd.object = options[i].getAsLong();
+				cmd.object = mapping.getAsLong();
 				break;
 			case ROLE:
-				cmd.object = options[i].getAsRole();
+				cmd.object = mapping.getAsRole();
 				break;
 			case USER:
-				cmd.object = options[i].getAsUser();
+				cmd.object = mapping.getAsUser();
 				break;
 			default:
-				cmd.object = options[i].getAsString();
+				cmd.object = mapping.getAsString();
 			}
-			clone[i] = cmd;
+			clone[search] = cmd;
 		}
 		
 		return new CommandParsedArgs(clone, false);

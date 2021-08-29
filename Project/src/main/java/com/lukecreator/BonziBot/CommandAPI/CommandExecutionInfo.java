@@ -1,5 +1,7 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
+import java.awt.Color;
+
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.Modifier;
@@ -11,6 +13,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.PrivateChannel;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -78,6 +81,18 @@ public class CommandExecutionInfo {
 	public CommandExecutionInfo setSettings(GuildSettings settings) {
 		this.settings = settings;
 		return this;
+	}
+	/**
+	 * Get the color of the executor from role color.
+	 * @return
+	 */
+	public Color getExecutorColor() {
+		if(this.isDirectMessage)
+			return Color.white.darker();
+		
+		if(this.member.getColor() == null)
+			return new Color(Role.DEFAULT_COLOR_RAW);
+		else return this.member.getColor();
 	}
 	
 	public boolean isSlashCommand = false;
