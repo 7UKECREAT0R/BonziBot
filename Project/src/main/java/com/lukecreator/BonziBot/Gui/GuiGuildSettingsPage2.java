@@ -132,7 +132,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 		if(actionId.equals("prefix")) {
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
 			MessageChannel mc = this.parent.getChannel(jda);
-			mc.sendMessage(BonziUtils.quickEmbed("Setting Prefix...",
+			mc.sendMessageEmbeds(BonziUtils.quickEmbed("Setting Prefix...",
 				"Send the new prefix here (max " + Constants.MAX_PREFIX_LENGTH + " characters):", Color.gray).build()).queue(sent -> {
 					long sentId = sent.getIdLong();
 					ewm.waitForResponse(this.parent.ownerId, msg -> {
@@ -144,7 +144,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 						settings.setPrefix(nPrefix.trim());
 						gsm.setSettings(guildId, settings);
 						this.parent.redrawMessage(jda);
-						mc.sendMessage(BonziUtils.successEmbedIncomplete
+						mc.sendMessageEmbeds(BonziUtils.successEmbedIncomplete
 							("Prefix set!", "The new prefix will now be:\n`" + nPrefix + "`")
 							.setFooter("Forget the prefix? Type b:stuck!").build()).queue();
 					});
@@ -186,7 +186,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 				CommandArg tca = new TextChannelArg("");
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
 				MessageChannel mc = this.parent.getChannel(jda);
-				mc.sendMessage(BonziUtils.quickEmbed("Turning on Ban Appeals...",
+				mc.sendMessageEmbeds(BonziUtils.quickEmbed("Turning on Ban Appeals...",
 					"Send the channel you want ban appeals to go into for review!\n*Users can only appeal if banned using __Bonzi's ban command__.*", Color.gray).build()).queue(sent -> {
 					ewm.waitForArgument(this.parent.ownerId, tca, object -> {
 						sent.delete().queue();
@@ -212,7 +212,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 			} else {
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
 				MessageChannel mc = this.parent.getChannel(jda);
-				mc.sendMessage(BonziUtils.quickEmbed("Turning on Ban Messages...",
+				mc.sendMessageEmbeds(BonziUtils.quickEmbed("Turning on Ban Messages...",
 					"Users who are banned with __Bonzi's ban command__ will be messaged this.\n"
 					+ "Insert these variables to customize the message:\n"
 					+ "`{name}` The name of the user.\n"
@@ -237,6 +237,11 @@ public class GuiGuildSettingsPage2 extends Gui {
 			gsm.setSettings(guildId, settings);
 			this.reinitialize(settings);
 			this.parent.redrawMessage(jda);
+			return;
+		}
+		if(actionId.equals("nextpage")) {
+			Gui next = new GuiGuildSettingsPage3(this.guildId, this.guildName);
+			this.parent.setActiveGui(next, jda);
 			return;
 		}
 	}

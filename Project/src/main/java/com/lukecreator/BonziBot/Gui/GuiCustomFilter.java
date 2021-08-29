@@ -152,23 +152,27 @@ public class GuiCustomFilter extends Gui {
 				// Add
 				MessageChannel ch = this.parent.getChannel(jda);
 				if(customFilter.size() > MAX_FILTER_COUNT) {
-					ch.sendMessage(BonziUtils.failureEmbed(
+					ch.sendMessageEmbeds(BonziUtils.failureEmbed(
 						"You can only have " + MAX_FILTER_COUNT + " items in your custom filter!",
 						"Remove a few items before adding more.")).queue();
 					return;
 				}
-				ch.sendMessage(BonziUtils.quickEmbed("Type the word(s) you want to add.",
+				ch.sendMessageEmbeds(BonziUtils.quickEmbed("Type the word(s) you want to add.",
 					"Max " + MAX_FILTER_LENGTH + " characters.", Color.orange).build()).queue(sent -> {
 					waiter.waitForResponse(this.parent.ownerId, message -> {
 						sent.delete().queue();
 						message.delete().queue();
 						String text = message.getContentRaw();
 						if(text.length() < 2) {
-							BonziUtils.sendTempMessage(ch, BonziUtils.failureEmbed("Cancelled."), 3);
+							BonziUtils.sendTempMessage(ch, BonziUtils.failureEmbed("Cancelled."), 2);
 							return;
 						}
 						if(text.length() > MAX_FILTER_LENGTH) {
 							BonziUtils.sendTempMessage(ch, BonziUtils.failureEmbed("Text is too long!"), 3);
+							return;
+						}
+						if(customFilter.stream().anyMatch(str -> str.equalsIgnoreCase(text))) {
+							BonziUtils.sendTempMessage(ch, BonziUtils.failureEmbed("Word already in filter."), 3);
 							return;
 						}
 						customFilter.add(text);

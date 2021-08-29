@@ -94,7 +94,7 @@ public class GuiCalculator extends Gui {
 			MessageChannel mc = this.parent.getChannel(jda);
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
 			
-			mc.sendMessage(BonziUtils.quickEmbed("Mention somebody!", "Add your bros to the calculator session!",
+			mc.sendMessageEmbeds(BonziUtils.quickEmbed("Mention somebody!", "Add your bros to the calculator session!",
 					BonziUtils.COLOR_BONZI_PURPLE).build()).queue(deleteSoon -> {
 				ewm.waitForResponse(this.parent.ownerId, response -> {
 					List<User> add = response.getMentionedUsers();

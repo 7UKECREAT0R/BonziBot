@@ -150,7 +150,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 			rules.retrieveRulesMessage(jda, guildId, edit -> {
 				MessageEmbed newRules = BonziUtils.generateRules
 					(settings, guild, this.bonziReference).build();
-				edit.editMessage(newRules).queue();
+				edit.editMessageEmbeds(newRules).queue();
 			}, fail -> {
 				settings.setRules(rules);
 				gsm.setSettings(guildId, settings);
@@ -191,7 +191,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 				CommandArg tca = new TextChannelArg("");
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
 				MessageChannel mc = this.parent.getChannel(jda);
-				mc.sendMessage(BonziUtils.quickEmbed("Turning on Logging...",
+				mc.sendMessageEmbeds(BonziUtils.quickEmbed("Turning on Logging...",
 					"Mention the channel you want logs to go into!", Color.gray).build()).queue(sent -> {
 						long sentId = sent.getIdLong();
 						ewm.waitForArgument(this.parent.ownerId, tca, object -> {
@@ -239,7 +239,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 				CommandArg tca = new RoleArg("");
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
 				MessageChannel mc = this.parent.getChannel(jda);
-				mc.sendMessage(BonziUtils.quickEmbed("Turning on Join Role...",
+				mc.sendMessageEmbeds(BonziUtils.quickEmbed("Turning on Join Role...",
 					"Mention or send the ID of the role you want to be given to new members.", Color.gray).build()).queue(sent -> {
 					long sentId = sent.getIdLong();
 					ewm.waitForArgument(this.parent.ownerId, tca, object -> {
@@ -266,7 +266,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 								(concernH ? "⚠️ I'm not high up enough on the hierarchy to give people this role!\n" : "") +
 								(concernP ? "⚠️ I don't have the \"Manage Roles\" permission, so I can't assign any roles.\n" : "");
 							concerns = concerns.substring(0, concerns.length() - 1);
-							mc.sendMessage(BonziUtils.quickEmbed("Successfully set the join role, but...", concerns, Color.orange).build()).queue();
+							mc.sendMessageEmbeds(BonziUtils.quickEmbed("Successfully set the join role, but...", concerns, Color.orange).build()).queue();
 						} else
 							BonziUtils.sendTempMessage(mc, BonziUtils.successEmbed("Users will now get \"" + role.getName() + "\" when they join!"), 4);
 					});

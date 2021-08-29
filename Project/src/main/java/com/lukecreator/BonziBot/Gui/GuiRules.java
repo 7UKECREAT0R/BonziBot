@@ -7,7 +7,7 @@ import java.util.Collections;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.ArrayArg;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
-import com.lukecreator.BonziBot.Data.EmojiCache;
+import com.lukecreator.BonziBot.Data.EmoteCache;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.Rules;
@@ -38,7 +38,7 @@ public class GuiRules extends Gui {
 	public void initialize(JDA jda) {
 		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🆕"), "Add", GuiButton.Color.BLUE, "new"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmojiCache.getEmoteByName("b_trash")), "Delete", GuiButton.Color.RED,  "delete"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("b_trash")), "Delete", GuiButton.Color.RED,  "delete"));
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), "Edit", GuiButton.Color.BLUE, "edit"));
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📋"), "Format", GuiButton.Color.GRAY, "format"));
 		this.rules = this.bonziReference.guildSettings.getSettings(guildId).getRules();
@@ -61,7 +61,7 @@ public class GuiRules extends Gui {
 		desc = BonziUtils.cutOffString(desc, MessageEmbed.TEXT_MAX_LENGTH);
 		eb.setDescription(desc);
 		
-		Emote trash = EmojiCache.getEmoteByName("b_trash");
+		Emote trash = EmoteCache.getEmoteByName("b_trash");
 		eb.addField("🆕 Add Rule", "Add a new rule to the end of the list.", false);
 		eb.addField(trash.getAsMention() + " Delete Rule", "Delete a rule by its number.", false);
 		eb.addField("📝 Edit Rule", "Edit a rule by its number.", false);
@@ -88,7 +88,7 @@ public class GuiRules extends Gui {
 			// New
 			MessageEmbed msge = BonziUtils.quickEmbed("Creating New Rule...",
 				"Send the new rule you want to add here...", Color.orange).build();
-			channel.sendMessage(msge).queue(msg -> {
+			channel.sendMessageEmbeds(msge).queue(msg -> {
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
 				ewm.waitForResponse(this.parent.ownerId, response -> {
 					String contents = BonziUtils.cutOffString
@@ -102,7 +102,7 @@ public class GuiRules extends Gui {
 					rules.retrieveRulesMessage(jda, guildId, edit -> {
 						MessageEmbed newRules = BonziUtils.generateRules
 							(settings, guild, this.bonziReference).build();
-						edit.editMessage(newRules).queue();
+						edit.editMessageEmbeds(newRules).queue();
 					}, fail -> {
 						settings.setRules(rules);
 						gsm.setSettings(guildId, settings);
@@ -131,7 +131,7 @@ public class GuiRules extends Gui {
 				MessageEmbed msge = BonziUtils.quickEmbed("Deleting Rule...",
 					"Send the number of the rule you want to delete. If you want to delete multiple rules, separate them with a '"
 						+ ArrayArg.DELIMITER + "'.", Color.orange).build();
-				channel.sendMessage(msge).queue(msg -> {
+				channel.sendMessageEmbeds(msge).queue(msg -> {
 					EventWaiterManager ewm = this.bonziReference.eventWaiter;
 					ArrayArg arg = new ArrayArg("", IntArg.class);
 					ewm.waitForArgument(this.parent.ownerId, arg, response -> {
@@ -156,7 +156,7 @@ public class GuiRules extends Gui {
 						rules.retrieveRulesMessage(jda, guildId, edit -> {
 							MessageEmbed newRules = BonziUtils.generateRules
 								(settings, guild, this.bonziReference).build();
-							edit.editMessage(newRules).queue();
+							edit.editMessageEmbeds(newRules).queue();
 						}, fail -> {
 							settings.setRules(rules);
 							gsm.setSettings(guildId, settings);
@@ -181,7 +181,7 @@ public class GuiRules extends Gui {
 				"Send the number of the rule you want to edit.", Color.orange).build();
 			MessageEmbed embed2 = BonziUtils.quickEmbed("Editing Rule...",
 				"Great, now send what you want the new rule to be.", Color.orange).build();
-			channel.sendMessage(embed1).queue(msg1 -> {
+			channel.sendMessageEmbeds(embed1).queue(msg1 -> {
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
 				IntArg arg1 = new IntArg("");
 				ewm.waitForArgument(this.parent.ownerId, arg1, number -> {
@@ -193,7 +193,7 @@ public class GuiRules extends Gui {
 					}
 					
 					// double whammy
-					msg1.getChannel().sendMessage(embed2).queue(msg2 ->
+					msg1.getChannel().sendMessageEmbeds(embed2).queue(msg2 ->
 					ewm.waitForResponse(this.parent.ownerId, newRule -> {
 						msg2.delete().queue();
 						String contents = BonziUtils.cutOffString
@@ -207,7 +207,7 @@ public class GuiRules extends Gui {
 						rules.retrieveRulesMessage(jda, guildId, edit -> {
 							MessageEmbed newRules = BonziUtils.generateRules
 								(settings, guild, this.bonziReference).build();
-							edit.editMessage(newRules).queue();
+							edit.editMessageEmbeds(newRules).queue();
 						}, fail -> {
 							settings.setRules(rules);
 							gsm.setSettings(guildId, settings);
@@ -232,7 +232,7 @@ public class GuiRules extends Gui {
 			rules.retrieveRulesMessage(jda, guildId, edit -> {
 				MessageEmbed newRules = BonziUtils.generateRules
 					(settings, guild, this.bonziReference).build();
-				edit.editMessage(newRules).queue();
+				edit.editMessageEmbeds(newRules).queue();
 			}, fail -> {
 				settings.setRules(rules);
 				gsm.setSettings(guildId, settings);

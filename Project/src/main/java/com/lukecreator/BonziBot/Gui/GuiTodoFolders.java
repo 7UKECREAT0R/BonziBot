@@ -135,12 +135,12 @@ public class GuiTodoFolders extends Gui {
 				TextChannel channel = (TextChannel)this.parent.getChannel(jda);
 				
 				if(this.folders.size() + 1 >= TodoList.MAX_FOLDERS) {
-					this.parent.getChannel(jda).sendMessage(BonziUtils.failureEmbed("Max number of folders reached.")).queue();
+					this.parent.getChannel(jda).sendMessageEmbeds(BonziUtils.failureEmbed("Max number of folders reached.")).queue();
 					return;
 				}
 				
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
-				channel.sendMessage(BonziUtils.quickEmbed("Creating folder...",
+				channel.sendMessageEmbeds(BonziUtils.quickEmbed("Creating folder...",
 					"Send the name of the folder you want to make here.", Color.orange).build()).queue(del -> {
 					ewm.waitForResponse(executorId, response -> {
 						del.delete().queue();
@@ -149,7 +149,7 @@ public class GuiTodoFolders extends Gui {
 						if(name.length() > TodoFolder.MAX_NAME_LEN)
 							name = name.substring(0, TodoFolder.MAX_NAME_LEN);
 						if(name.length() < 1) {
-							response.getChannel().sendMessage(BonziUtils.failureEmbed("You need to specify a name.", "Cancelled operation.")).queue();
+							response.getChannel().sendMessageEmbeds(BonziUtils.failureEmbed("You need to specify a name.", "Cancelled operation.")).queue();
 							return;
 						}
 						this.folders.add(new TodoFolder(name));

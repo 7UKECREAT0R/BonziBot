@@ -79,7 +79,7 @@ public class GuiEditProfile extends Gui {
 		
 		if(actionId.equals("bio")) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🖊️ Send your bio in chat.");
-			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
+			channel.sendMessageEmbeds(eb.setColor(Color.orange).build()).queue(firstMsg -> {
 				ewm.waitForResponse(userId, message -> {
 					firstMsg.delete().queue();
 					message.delete().queue();
@@ -95,7 +95,7 @@ public class GuiEditProfile extends Gui {
 		
 		if(actionId.equals("color")) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🏳️‍🌈 Send your favorite color!");
-			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
+			channel.sendMessageEmbeds(eb.setColor(Color.orange).build()).queue(firstMsg -> {
 				ewm.waitForArgument(userId, new ColorArg(""), object -> {
 					firstMsg.delete().queue();
 					Color color = (Color)object;
@@ -111,7 +111,7 @@ public class GuiEditProfile extends Gui {
 		if(actionId.equals("timezone")) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("⏰ Send the timezone you're in.",
 					"Type 'none' to set no timezone.");
-			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
+			channel.sendMessageEmbeds(eb.setColor(Color.orange).build()).queue(firstMsg -> {
 				ewm.waitForResponse(userId, message -> {
 					message.delete().queue();
 					firstMsg.delete().queue();
@@ -150,7 +150,7 @@ public class GuiEditProfile extends Gui {
 		if(actionId.equals("background")) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🖼️ Attach or link an image to set as your background.",
 					"Type 'none' to set no background");
-			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
+			channel.sendMessageEmbeds(eb.setColor(Color.orange).build()).queue(firstMsg -> {
 				ewm.waitForResponse(userId, message -> {
 					firstMsg.delete().queue();
 					String content = message.getContentRaw();
@@ -196,7 +196,7 @@ public class GuiEditProfile extends Gui {
 		if(actionId.equals("birthday")) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🍰 Send the date of your birthday!",
 					"Format: `<month>/<day>`\nType 'none' to disable this feature.");
-			channel.sendMessage(eb.setColor(Color.orange).build()).queue(firstMsg -> {
+			channel.sendMessageEmbeds(eb.setColor(Color.orange).build()).queue(firstMsg -> {
 				ewm.waitForResponse(userId, message -> {
 					firstMsg.delete().queue();
 					message.delete().queue(null, silent -> {});
@@ -215,7 +215,7 @@ public class GuiEditProfile extends Gui {
 							.replaceAll(Constants.WHITESPACE_REGEX, "")
 							.split("/");
 						if(halves.length < 2) {
-							channel.sendMessage(BonziUtils.failureEmbed
+							channel.sendMessageEmbeds(BonziUtils.failureEmbed
 								("Hmm... That doesn't look quite right.", "Cancelled operation.\n"
 								+ "It should something like this: `2/20`")).queue();
 							return;
@@ -231,7 +231,7 @@ public class GuiEditProfile extends Gui {
 							BonziUtils.tryAwardAchievement(channel, this.bonziReference, userId, Achievement.SNAZZY);
 							this.parent.redrawMessage(jda);
 						} catch(NumberFormatException nfe) {
-							channel.sendMessage(BonziUtils.failureEmbed
+							channel.sendMessageEmbeds(BonziUtils.failureEmbed
 								("Hmm... That doesn't look quite right.", "Cancelled operation.\n"
 								+ "It should something like this: `2/20`")).queue();
 							return;

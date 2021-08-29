@@ -2,6 +2,7 @@ package com.lukecreator.BonziBot.Gui;
 
 import java.awt.Color;
 
+import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.TextChannelArg;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
@@ -14,11 +15,11 @@ import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 
 public class GuiJoinLeaveMessages extends Gui {
 	
@@ -54,10 +55,12 @@ public class GuiJoinLeaveMessages extends Gui {
 		this.buttons.clear();
 		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
 		this.buttons.add(enabled ? bOff : bOn);
+		this.buttons.add(new GuiButton("Test", GuiButton.Color.BLUE, "test").asEnabled(enabled));
 		this.buttons.add(GuiButton.newline());
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🗨️"), "Set Message...", GuiButton.Color.BLUE, "message").asEnabled(enabled));
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("#️⃣"), "Set Channel...", GuiButton.Color.BLUE,  "channel").asEnabled(enabled));
-		this.buttons.add(embeds ? eOff.asEnabled(enabled) : eOn.asEnabled(enabled));
+		this.buttons.add((embeds ? eOff : eOn).asEnabled(enabled));
+		this.buttons.add(GuiButton.newline());
 	}
 	
 	@Override
@@ -78,12 +81,9 @@ public class GuiJoinLeaveMessages extends Gui {
 		
 		if(msg == null)
 			msg = "Not set.";
-		else {
-			User owner = jda.getUserById(this.parent.ownerId);
-			Guild guild = jda.getGuildById(guildId);
-			msg = BonziUtils.joinLeaveVariables(msg, owner, guild);
-		}
-		if(channelMnt == null) channelMnt = "Not set.";
+		
+		if(channelMnt == null)
+			channelMnt = "Not set.";
 		
 		String statusDesc = enabled ? 
 			  "Click to disable " + keywordl + " messages in this server."
@@ -174,7 +174,7 @@ public class GuiJoinLeaveMessages extends Gui {
 				+ "`(members)` - The member count.\n"
 				+ "`(date)` - The current date.\n"
 				+ "`(created)` - When this user created their account.", false);
-			channel.sendMessage(eb.build()).queue(sent -> {
+			channel.sendMessageEmbeds(eb.build()).queue(sent -> {
 				waiter.waitForResponse(owner, message -> {
 					String text = message.getContentRaw();
 					if(!message.getAttachments().isEmpty()) {
@@ -212,7 +212,7 @@ public class GuiJoinLeaveMessages extends Gui {
 			long owner = this.parent.ownerId;
 			EmbedBuilder eb = BonziUtils.quickEmbed("Mention a channel...",
 					"This will be where " + keywordl + " messages will be sent to!", Color.orange);
-			channel.sendMessage(eb.build()).queue(sent -> {
+			channel.sendMessageEmbeds(eb.build()).queue(sent -> {
 				waiter.waitForArgument(owner, new TextChannelArg(""), _textChannel -> {
 					TextChannel tc = (TextChannel)_textChannel;
 					long tcId = tc.getIdLong();
@@ -227,7 +227,6 @@ public class GuiJoinLeaveMessages extends Gui {
 					return;
 				});
 			});
-			
 			return;
 		}
 		
@@ -248,6 +247,27 @@ public class GuiJoinLeaveMessages extends Gui {
 			this.reinitialize(settings);
 			mgr.setSettings(guildId, settings);
 			this.parent.redrawMessage(jda);
+			return;
+		}
+		
+		if(actionId.equals("test")) {
+			
+			BonziBot bb = this.bonziReference;
+			Guild guild = jda.getGuildById(this.guildId);
+			
+			if(guild == null)
+				return;
+			
+			Member executor = guild.getMemberById(executorId);
+			
+			if(executor == null)
+				return;
+			
+			if(this.leave)
+				bb.guildSettings.simulateMemberLeave(bb, executor);
+			else
+				bb.guildSettings.simulateMemberJoin(bb, executor);
+			
 		}
 	}
 }

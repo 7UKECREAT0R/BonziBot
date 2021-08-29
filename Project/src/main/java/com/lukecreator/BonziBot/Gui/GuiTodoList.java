@@ -110,7 +110,6 @@ public class GuiTodoList extends GuiPaging {
 			if(count < 1)
 				this.empty = true;
 			
-			// TODO if page count went down, decrease currentPage
 			this.maxPage = (count / PER_PAGE);
 			if(count % PER_PAGE != 0)
 				this.maxPage++;
@@ -147,13 +146,13 @@ public class GuiTodoList extends GuiPaging {
 		
 		if(actionId.equals("add")) {
 			if(this.folder.size() + 1 >= TodoFolder.MAX_ITEMS) {
-				this.parent.getChannel(jda).sendMessage(BonziUtils.failureEmbed("Max number of to-do items reached.",
+				this.parent.getChannel(jda).sendMessageEmbeds(BonziUtils.failureEmbed("Max number of to-do items reached.",
 					"Make another folder to add some more items into!")).queue();
 				return;
 			}
 			
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
-			channel.sendMessage(BonziUtils.quickEmbed("Adding item to todo list...",
+			channel.sendMessageEmbeds(BonziUtils.quickEmbed("Adding item to todo list...",
 				"Send the name of the folder you want to make here.", Color.orange).build()).queue(del -> {
 				ewm.waitForResponse(executorId, response -> {
 					del.delete().queue();
@@ -162,11 +161,11 @@ public class GuiTodoList extends GuiPaging {
 					if(name.length() > TodoItem.MAX_NAME_LEN)
 						name = name.substring(0, TodoItem.MAX_NAME_LEN);
 					if(name.length() < 1) {
-						response.getChannel().sendMessage(BonziUtils.failureEmbed("You need to specify a name.", "Cancelled operation.")).queue();
+						response.getChannel().sendMessageEmbeds(BonziUtils.failureEmbed("You need to specify a name.", "Cancelled operation.")).queue();
 						return;
 					}
 					final String nameModified = name;
-					channel.sendMessage(BonziUtils.quickEmbed("Describe your task!",
+					channel.sendMessageEmbeds(BonziUtils.quickEmbed("Describe your task!",
 						"Type 'none' to not include a description.", Color.orange).build()).queue(del2 -> {
 							ewm.waitForResponse(executorId, descResponse -> {
 								del2.delete().queue();
@@ -201,7 +200,7 @@ public class GuiTodoList extends GuiPaging {
 		}
 		if(actionId.equals("icon")) {
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
-			channel.sendMessage(BonziUtils.quickEmbed("Change icon!",
+			channel.sendMessageEmbeds(BonziUtils.quickEmbed("Change icon!",
 					"Send an emoji with a \\ in front of it.\nExample: `\\:grinning:`", Color.orange).build()).queue(del -> {
 					ewm.waitForResponse(executorId, response -> {
 						del.delete().queue();
@@ -209,7 +208,7 @@ public class GuiTodoList extends GuiPaging {
 						
 						String emoji = response.getContentRaw();
 						if(emoji.length() > 4) {
-							response.getChannel().sendMessage(BonziUtils.failureEmbed("Invalid emoji.",
+							response.getChannel().sendMessageEmbeds(BonziUtils.failureEmbed("Invalid emoji.",
 								"Your emoji needs to start with a `\\` and it can't be an emote from a server.\n\nOperation cancelled.")).queue();
 							return;
 						}

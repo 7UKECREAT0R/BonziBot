@@ -12,7 +12,7 @@ import com.lukecreator.BonziBot.CommandAPI.ArrayArg;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
-import com.lukecreator.BonziBot.Data.EmojiCache;
+import com.lukecreator.BonziBot.Data.EmoteCache;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
@@ -41,7 +41,7 @@ public class GuiDisableCommands extends Gui {
 	public void initialize(JDA jda) {
 		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🆕"), "Add Command", GuiButton.Color.BLUE, "new"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmojiCache.getEmoteByName("b_trash")), "Remove Command", GuiButton.Color.RED,  "delete"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("b_trash")), "Remove Command", GuiButton.Color.RED,  "delete"));
 		this.disabledCommands = this.bonziReference.guildSettings.getSettings(guildId).disabledCommands;
 		if(this.disabledCommands == null)
 			this.disabledCommands = new ArrayList<Integer>();
@@ -72,7 +72,7 @@ public class GuiDisableCommands extends Gui {
 		desc = BonziUtils.cutOffString(desc, MessageEmbed.TEXT_MAX_LENGTH);
 		eb.setDescription(desc);
 		
-		Emote trash = EmojiCache.getEmoteByName("b_trash");
+		Emote trash = EmoteCache.getEmoteByName("b_trash");
 		eb.addField("🆕 Add Command", "Add a new command to the blacklist", false);
 		eb.addField(trash.getAsMention() + " Remove Command", "Remove a command from the blacklist.", false);
 		return eb.build();
@@ -97,7 +97,7 @@ public class GuiDisableCommands extends Gui {
 			// New
 			MessageEmbed msge = BonziUtils.quickEmbed("Adding command to blacklist..",
 				"Send the name of the command here.", Color.orange).build();
-			channel.sendMessage(msge).queue(msg -> {
+			channel.sendMessageEmbeds(msge).queue(msg -> {
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
 				ewm.waitForResponse(this.parent.ownerId, response -> {
 					String contents = BonziUtils.cutOffString
@@ -155,7 +155,7 @@ public class GuiDisableCommands extends Gui {
 				MessageEmbed msge = BonziUtils.quickEmbed("Removing command from blacklist...",
 					"Send the number of the command you want to remove. If you want to remove multiple commands, separate them with a '"
 						+ ArrayArg.DELIMITER + "'.", Color.orange).build();
-				channel.sendMessage(msge).queue(msg -> {
+				channel.sendMessageEmbeds(msge).queue(msg -> {
 					EventWaiterManager ewm = this.bonziReference.eventWaiter;
 					ArrayArg arg = new ArrayArg("", IntArg.class);
 					ewm.waitForArgument(this.parent.ownerId, arg, response -> {

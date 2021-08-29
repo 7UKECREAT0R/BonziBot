@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
-import com.lukecreator.BonziBot.Data.EmojiCache;
+import com.lukecreator.BonziBot.Data.EmoteCache;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
@@ -39,7 +39,7 @@ public class GuiTagEditing extends Gui {
 	public void initialize(JDA jda) {
 		super.initialize(jda);
 		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), "Edit Tag", GuiButton.Color.BLUE, "edit"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmojiCache.getEmoteByName("b_trash")), "Delete Tag", GuiButton.Color.RED, "delete"));
+		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("b_trash")), "Delete Tag", GuiButton.Color.RED, "delete"));
 	}
 	
 	@Override
@@ -59,7 +59,7 @@ public class GuiTagEditing extends Gui {
 			if(isEditing) {
 				isEditing = false;
 				startEmbed.setColor(Color.magenta);
-				channel.sendMessage(BonziUtils.quickEmbed("No longer editing this command.",
+				channel.sendMessageEmbeds(BonziUtils.quickEmbed("No longer editing this command.",
 						"You can send messages again!", Color.green).build()).queue(mm -> {
 							mm.delete().queueAfter(3, TimeUnit.SECONDS);
 						});
@@ -71,7 +71,7 @@ public class GuiTagEditing extends Gui {
 			} else {
 				isEditing = true;
 				startEmbed.setColor(Color.white);
-				channel.sendMessage(BonziUtils.quickEmbed("The next message you send will be the new response.",
+				channel.sendMessageEmbeds(BonziUtils.quickEmbed("The next message you send will be the new response.",
 						"Hit the edit button again to cancel editing.", Color.white).build()).queue(sent -> {
 							sentEditingMessage = sent.getIdLong();
 							waiter.waitForResponse(this.parent.ownerId, msg -> {
@@ -97,8 +97,8 @@ public class GuiTagEditing extends Gui {
 			startEmbed.setTitle("Tag was deleted.");
 			startEmbed.setDescription("Previous name: " + tagName);
 			startEmbed.setColor(Color.red);
-			this.parent.redrawMessage(jda);
 			this.parent.disable(jda);
+			this.parent.redrawMessage(jda);
 		}
 	}
 }
