@@ -5,14 +5,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.lukecreator.BonziBot.Data.BanAppeal;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.IStorableData;
 
-import net.dv8tion.jda.api.entities.Invite.Guild;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
 /**
- * Manages which users have the ability to appeal a ban, aka what's referred to internally as mercy.
+ * Manages which users have the ability to appeal a ban, referred to internally as mercy.
+ * This also holds data on existing appeals waiting to be accepted/denied. Any garbage made
+ * shouldn't be an issue for years to come as the data structures are quite small.
  * @author Lukec
  *
  */
@@ -20,6 +23,7 @@ public class AppealsManager implements IStorableData {
 	
 	// Users given a chance to appeal.
 	HashMap<Long, List<Long>> mercy = new HashMap<Long, List<Long>>();
+	HashMap<Long, List<BanAppeal>> appeals = new HashMap<Long, List<BanAppeal>>();
 	
 	public boolean hasMercy(Guild guild, User user) {
 		return this.hasMercy(guild.getIdLong(), user.getIdLong());
@@ -66,6 +70,45 @@ public class AppealsManager implements IStorableData {
 		}
 		mercy.put(guild, m);
 	}
+	
+	public void addAppeal(Guild guild, BanAppeal appeal) {
+		this.addAppeal(guild.getIdLong(), appeal);
+	}
+	public void addAppeal(long guild, BanAppeal appeal) {
+		List<BanAppeal> existing = appeals.get(guild);
+		if(existing == null)
+			existing = new ArrayList<BanAppeal>();
+		
+		existing.add(appeal);
+		appeals.put(guild, existing);
+	}
+	public BanAppeal getAppeal(Guild guild, long bannedUser) {
+		return this.getAppeal(guild.getIdLong(), bannedUser);
+	}
+	public BanAppeal getAppeal(long guild, long bannedUser) {
+		if(appeals.containsKey(guild)) {
+			List<BanAppeal> existing = appeals.get(guild);
+			for(int i = 0; i < existing.size(); i++) {
+				BanAppeal test = existing.get(i);
+				if(test.userId == bannedUser)
+					return test;
+			}
+		}
+		return null;
+	}
+	public BanAppeal removeAppeal(Guild guild, long bannedUser) {
+		return this.removeAppeal(guild.getIdLong(), bannedUser);
+	}
+	public BanAppeal removeAppeal(long guild, long bannedUser) {
+		if(appeals.containsKey(guild)) {
+			List<BanAppeal> existing = appeals.get(guild);
+			for(int i = 0; i < existing.size(); i++)
+				if(existing.get(i).userId == bannedUser)
+					return existing.remove(i);
+		}
+		return null;
+	}
+	
 	
 	@Override
 	public void saveData() {

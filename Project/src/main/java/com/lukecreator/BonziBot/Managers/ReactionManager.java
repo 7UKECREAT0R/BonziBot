@@ -5,16 +5,23 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import com.lukecreator.BonziBot.BonziBot;
+import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Commands.PollCommand;
 import com.lukecreator.BonziBot.Commands.TimedPollCommand;
 import com.lukecreator.BonziBot.Data.GenericReactionEvent;
+import com.lukecreator.BonziBot.Data.GuildSettings;
+import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionAddEvent;
@@ -25,25 +32,90 @@ import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionRemov
  */
 public class ReactionManager {
 	
-	public void reactionAddGuild(GuildMessageReactionAddEvent e) {
-		this.onReaction(new GenericReactionEvent(e));
+	public void reactionAddGuild(GuildMessageReactionAddEvent e, BonziBot bb) {
+		this.onReaction(new GenericReactionEvent(e), bb);
 	}
-	public void reactionRemoveGuild(GuildMessageReactionRemoveEvent e) {
-		this.onReaction(new GenericReactionEvent(e));
+	public void reactionRemoveGuild(GuildMessageReactionRemoveEvent e, BonziBot bb) {
+		this.onReaction(new GenericReactionEvent(e), bb);
 	}
-	public void reactionAddPrivate(PrivateMessageReactionAddEvent e) {
-		this.onReaction(new GenericReactionEvent(e));
+	public void reactionAddPrivate(PrivateMessageReactionAddEvent e, BonziBot bb) {
+		this.onReaction(new GenericReactionEvent(e), bb);
 	}
-	public void reactionRemovePrivate(PrivateMessageReactionRemoveEvent e) {
-		this.onReaction(new GenericReactionEvent(e));
+	public void reactionRemovePrivate(PrivateMessageReactionRemoveEvent e, BonziBot bb) {
+		this.onReaction(new GenericReactionEvent(e), bb);
 	}
 	
-	public void onReaction(GenericReactionEvent e) {
+	public void onReaction(GenericReactionEvent e, BonziBot bb) {
 		long reactor = e.userIdLong;
 		if(Constants.isBonziBot(reactor)) return;
 		
-		// Polls
+		checkPins(e, bb);
+		checkStars(e, bb);
 		checkPolls(e);
+	}
+	void checkPins(GenericReactionEvent e, BonziBot bb) {
+		// cant pin in non-guilds
+		if(e.guild == null)
+			return;
+		if(!e.reactionEmote.isEmoji())
+			return;
+		if(e.user.isBot())
+			return;
+		if(!e.added)
+			return;
+		
+		if(e.reactionEmote.getEmoji().equals("📌")) {
+			e.retrieveMessage().queue(msg -> {
+				User author = msg.getAuthor();
+				UserAccountManager uam = bb.accounts;
+				UserAccount authorAcc = uam.getUserAccount(author);
+				UserAccount account = uam.getUserAccount(e.userIdLong);
+				boolean censorContent = false;
+				if(authorAcc.optOutExpose)
+					censorContent = true;
+				account.addPersonalPin(msg, censorContent);
+				uam.setUserAccount(e.userIdLong, account);
+				msg.getChannel().sendMessage(e.user.getAsMention() + ", pinned! `📌`").queue(del -> {
+					del.delete().queueAfter(3, TimeUnit.SECONDS);
+				});
+			});
+		}
+	}
+	void checkStars(GenericReactionEvent e, BonziBot bb) {
+		if(e.guild == null)
+			return;
+		if(!e.reactionEmote.isEmoji())
+			return;
+		if(e.user.isBot())
+			return;
+		if(!e.added)
+			return;
+		if(!e.reactionEmote.getEmoji().equals("⭐"))
+			return;
+		
+		GuildSettings settings = bb.guildSettings.getSettings(e.guild.getIdLong());
+		if(settings.starboard == 0l)
+			return;
+		
+		e.retrieveMessage().queue(msg -> {
+			msg.retrieveReactionUsers("⭐").queue(users -> {
+				for(User testUser: users)
+					if(testUser.isBot())
+						return;
+				TextChannel channel = e.guild.getTextChannelById(settings.starboard);
+				if(channel == null) {
+					e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("HELP!", "My starboard channel was deleted...")).queue();
+					return;
+				}
+				
+				int count = users.size();
+				if(count >= settings.starboardLimit) {
+					msg.addReaction("⭐").queue();
+					MessageEmbed send = BonziUtils.createStarboardEntry(msg);
+					channel.sendMessageEmbeds(send).queue();
+				}
+			});
+		});
 	}
 	void checkPolls(GenericReactionEvent e) {
 		
@@ -96,7 +168,7 @@ public class ReactionManager {
 							desc = TimedPollCommand.POLL_ENDED + "\n" + desc;
 							EmbedBuilder eb = new EmbedBuilder(embed);
 							eb.setDescription(desc);
-							pollMsg.editMessage(eb.build()).queue();
+							pollMsg.editMessageEmbeds(eb.build()).queue();
 						}
 						return;
 					}
@@ -106,7 +178,7 @@ public class ReactionManager {
 				eb.setColor(up > down ? Color.green :
 					down > up ? Color.red : Color.gray);
 				eb.setFooter(PollCommand.generateFooter(up, down));
-				pollMsg.editMessage(eb.build()).queue();
+				pollMsg.editMessageEmbeds(eb.build()).queue();
 			});
 		}
 	}

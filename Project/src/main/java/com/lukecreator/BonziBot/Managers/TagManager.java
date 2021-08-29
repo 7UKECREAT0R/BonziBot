@@ -310,7 +310,7 @@ public class TagManager implements IStorableData {
 			MessageEmbed me = BonziUtils.successEmbedIncomplete
 				("Successfully created tag!")
 				.setDescription("Use [" + prefix + "taginfo] to modify/delete your tag.").build();
-			channel.sendMessage(me).queue();
+			channel.sendMessageEmbeds(me).queue();
 			return true;
 		}
 		if(this.userInPrivateQueue(m)) {
@@ -323,7 +323,7 @@ public class TagManager implements IStorableData {
 			MessageEmbed me = BonziUtils.successEmbedIncomplete
 					("Successfully created private tag!")
 					.setDescription("Use [" + prefix + "taginfo] to modify/delete your tag.").build();
-			channel.sendMessage(me).queue();
+			channel.sendMessageEmbeds(me).queue();
 			return true;
 		}
 		
@@ -345,7 +345,7 @@ public class TagManager implements IStorableData {
 			MessageEmbed me = BonziUtils.successEmbedIncomplete
 				("Successfully created tag!")
 				.setDescription("Use [" + prefix + "taginfo] to modify/delete your tag.").build();
-			channel.sendMessage(me).queue();
+			channel.sendMessageEmbeds(me).queue();
 			return true;
 		}
 		
@@ -371,7 +371,7 @@ public class TagManager implements IStorableData {
 			if(edit) {
 				me = BonziUtils.successEmbedIncomplete("Successfully edited your private tag.").build();
 			} else me = BonziUtils.successEmbedIncomplete("Successfully created private tag!").setDescription("Use [" + prefix + "taginfo] to edit/delete your tag.").build();
-			channel.sendMessage(me).queue();
+			channel.sendMessageEmbeds(me).queue();
 			return true;
 		} else {
 			TagData tag = TagData.constructFromMessage(tagName, msg);
@@ -382,7 +382,7 @@ public class TagManager implements IStorableData {
 			if(edit) {
 				me = BonziUtils.successEmbedIncomplete("Successfully edited your tag.").build();
 			} else me = BonziUtils.successEmbedIncomplete("Successfully created tag!").setDescription("Use [" + prefix + "taginfo] to edit/delete your tag.").build();
-			channel.sendMessage(me).queue();
+			channel.sendMessageEmbeds(me).queue();
 			return true;
 		}
 	}

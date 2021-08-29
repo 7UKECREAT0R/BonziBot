@@ -146,14 +146,14 @@ public class EventWaiterManager {
 	public void getConfirmation(long id, MessageChannel channel, String title, Consumer<Boolean> consumer) {
 		Consumer<String> wrapper = (str -> { consumer.accept(str.equals("_cyes")); });
 		EmbedBuilder eb = BonziUtils.quickEmbed(title, "<@" + id + ">, click yes or no to confirm.").setColor(Color.orange);
-		this.waitForAction(id, channel.sendMessage(eb.build()), wrapper, CONFIRM_YES, CONFIRM_NO).queue();
+		this.waitForAction(id, channel.sendMessageEmbeds(eb.build()), wrapper, CONFIRM_YES, CONFIRM_NO).queue();
 	}
 	public void getConfirmation(User user, MessageChannel channel, MessageEmbed me, Consumer<Boolean> consumer) {
 		getConfirmation(user.getIdLong(), channel, me, consumer);
 	}
 	public void getConfirmation(long id, MessageChannel channel, MessageEmbed me, Consumer<Boolean> consumer) {
 		Consumer<String> wrapper = (str -> { consumer.accept(str.equals("_cyes")); });
-		this.waitForAction(id, channel.sendMessage(me), wrapper, CONFIRM_YES, CONFIRM_NO).queue();
+		this.waitForAction(id, channel.sendMessageEmbeds(me), wrapper, CONFIRM_YES, CONFIRM_NO).queue();
 	}
 	@Deprecated
 	public boolean isWaitingForReaction(User u) {
@@ -217,7 +217,7 @@ public class EventWaiterManager {
 			EmbedBuilder eb = BonziUtils.quickEmbed(
 				"Incorrect type of response.",
 				arg.getErrorDescription(), Color.red);
-			channel.sendMessage(eb.build()).queue(sent -> {
+			channel.sendMessageEmbeds(eb.build()).queue(sent -> {
 				sent.delete().queueAfter(5, TimeUnit.SECONDS);
 			});
 			return;
@@ -232,7 +232,7 @@ public class EventWaiterManager {
 		if(parsed == null) {
 			MessageEmbed me = BonziUtils.failureEmbed
 				("An error occurred. Cancelled waiting.");
-			channel.sendMessage(me).queue();
+			channel.sendMessageEmbeds(me).queue();
 			return;
 		}
 		
@@ -263,7 +263,7 @@ public class EventWaiterManager {
 		MessageEmbed me = BonziUtils.failureEmbed
 			("Stopped waiting for your reaction."
 			,"Invalid option specified.");
-		e.channel.sendMessage(me).queue();
+		e.channel.sendMessageEmbeds(me).queue();
 		this.reactionWaiters.remove(uid);
 		return;
 	}

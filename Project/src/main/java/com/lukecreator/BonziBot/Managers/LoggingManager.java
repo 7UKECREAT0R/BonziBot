@@ -157,7 +157,7 @@ public class LoggingManager implements IStorableData {
 			executor, Color.orange);
 		bb.eventWaiter.getConfirmation(executor, potential, eb.build(), confirm -> {
 			if(!confirm) {
-				potential.sendMessage(BonziUtils.failureEmbed("Alright, cancelled.")).queue();
+				potential.sendMessageEmbeds(BonziUtils.failureEmbed("Alright, cancelled.")).queue();
 				return;
 			} else {
 				String prefix = bb.guildSettings.getSettings(guild).getPrefix();
@@ -165,7 +165,7 @@ public class LoggingManager implements IStorableData {
 				gs.loggingEnabled = true;
 				gs.loggingChannelCached = potential.getIdLong();
 				bb.guildSettings.setSettings(guild, gs);
-				potential.sendMessage(BonziUtils.successEmbed(
+				potential.sendMessageEmbeds(BonziUtils.successEmbed(
 					"Alright, this channel is officially the new logging channel!",
 					"pro tip: you can do `" + prefix + "serversettings` to change this at any time.")).queue();
 			}
