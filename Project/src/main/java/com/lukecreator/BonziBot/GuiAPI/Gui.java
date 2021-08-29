@@ -48,7 +48,7 @@ public abstract class Gui {
 	
 	public static final MessageEmbed EMPTY = new EmbedBuilder()
 			.setTitle("EMPTY")
-			.setDescription("For debugging purposes.")
+			.setDescription("For debugging purposes I guess?")
 			.setColor(Color.magenta)
 			.build();
 	

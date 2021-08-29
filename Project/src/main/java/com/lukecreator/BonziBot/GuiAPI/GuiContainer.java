@@ -112,9 +112,9 @@ public class GuiContainer {
 			Guild g = jda.getGuildById(guildId);
 			TextChannel tc = g.getTextChannelById(channelId);
 			if(drawn instanceof MessageEmbed)
-				buttons(tc.sendMessage((MessageEmbed)drawn)).queue(success);
+				buttons(tc.sendMessageEmbeds((MessageEmbed)drawn)).queue(success);
 			if(drawn instanceof EmbedBuilder)
-				buttons(tc.sendMessage(((EmbedBuilder)drawn).build())).queue(success);
+				buttons(tc.sendMessageEmbeds(((EmbedBuilder)drawn).build())).queue(success);
 			if(drawn instanceof String)
 				buttons(tc.sendMessage((String)drawn)).queue(success);
 			if(drawn instanceof File)
@@ -129,9 +129,9 @@ public class GuiContainer {
 						long cId = BonziUtils.userPrivateChannels.get(userDmId);
 						PrivateChannel pc = u.getJDA().getPrivateChannelById(cId);
 						if(drawn instanceof MessageEmbed)
-							buttons(pc.sendMessage((MessageEmbed)drawn)).queue(success);
+							buttons(pc.sendMessageEmbeds((MessageEmbed)drawn)).queue(success);
 						if(drawn instanceof EmbedBuilder)
-							buttons(pc.sendMessage(((EmbedBuilder)drawn).build())).queue(success);
+							buttons(pc.sendMessageEmbeds(((EmbedBuilder)drawn).build())).queue(success);
 						if(drawn instanceof String)
 							buttons(pc.sendMessage((String)drawn)).queue(success);
 						if(drawn instanceof File)
@@ -141,9 +141,9 @@ public class GuiContainer {
 							long privateChannelId = p.getIdLong();
 							BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
 							if(drawn instanceof MessageEmbed)
-								buttons(p.sendMessage((MessageEmbed)drawn)).queue(success);
+								buttons(p.sendMessageEmbeds((MessageEmbed)drawn)).queue(success);
 							if(drawn instanceof EmbedBuilder)
-								buttons(p.sendMessage(((EmbedBuilder)drawn).build())).queue(success);
+								buttons(p.sendMessageEmbeds(((EmbedBuilder)drawn).build())).queue(success);
 							if(drawn instanceof String)
 								buttons(p.sendMessage((String)drawn)).queue(success);
 							if(drawn instanceof File)
@@ -157,9 +157,9 @@ public class GuiContainer {
 					long cId = BonziUtils.userPrivateChannels.get(userDmId);
 					PrivateChannel pc = user.getJDA().getPrivateChannelById(cId);
 					if(drawn instanceof MessageEmbed)
-						buttons(pc.sendMessage((MessageEmbed)drawn)).queue(success);
+						buttons(pc.sendMessageEmbeds((MessageEmbed)drawn)).queue(success);
 					if(drawn instanceof EmbedBuilder)
-						buttons(pc.sendMessage(((EmbedBuilder)drawn).build())).queue(success);
+						buttons(pc.sendMessageEmbeds(((EmbedBuilder)drawn).build())).queue(success);
 					if(drawn instanceof String)
 						buttons(pc.sendMessage((String)drawn)).queue(success);
 					if(drawn instanceof File)
@@ -169,9 +169,9 @@ public class GuiContainer {
 						long privateChannelId = p.getIdLong();
 						BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
 						if(drawn instanceof MessageEmbed)
-							buttons(p.sendMessage((MessageEmbed)drawn)).queue(success);
+							buttons(p.sendMessageEmbeds((MessageEmbed)drawn)).queue(success);
 						if(drawn instanceof EmbedBuilder)
-							buttons(p.sendMessage(((EmbedBuilder)drawn).build())).queue(success);
+							buttons(p.sendMessageEmbeds(((EmbedBuilder)drawn).build())).queue(success);
 						if(drawn instanceof String)
 							buttons(p.sendMessage((String)drawn)).queue(success);
 						if(drawn instanceof File)
@@ -191,9 +191,9 @@ public class GuiContainer {
 			Guild g = jda.getGuildById(guildId);
 			TextChannel tc = g.getTextChannelById(channelId);
 			if(drawn instanceof MessageEmbed)
-				buttons(tc.editMessageById(messageId, (MessageEmbed)drawn)).queue();
+				buttons(tc.editMessageEmbedsById(messageId, (MessageEmbed)drawn)).queue();
 			if(drawn instanceof EmbedBuilder)
-				buttons(tc.editMessageById(messageId, ((EmbedBuilder)drawn).build())).queue();
+				buttons(tc.editMessageEmbedsById(messageId, ((EmbedBuilder)drawn).build())).queue();
 			if(drawn instanceof String)
 				buttons(tc.editMessageById(messageId, (String)drawn)).queue();
 		} else {
@@ -204,18 +204,18 @@ public class GuiContainer {
 					if(pc == null) {
 						u.openPrivateChannel().queue(p -> {
 							if(drawn instanceof MessageEmbed)
-								buttons(p.editMessageById(messageId, (MessageEmbed)drawn)).queue();
+								buttons(p.editMessageEmbedsById(messageId, (MessageEmbed)drawn)).queue();
 							if(drawn instanceof EmbedBuilder)
-								buttons(p.editMessageById(messageId, ((EmbedBuilder)drawn).build())).queue();
+								buttons(p.editMessageEmbedsById(messageId, ((EmbedBuilder)drawn).build())).queue();
 							if(drawn instanceof String)
 								buttons(p.editMessageById(messageId, (String)drawn)).queue();
 							BonziUtils.userPrivateChannels.put(u.getIdLong(), p.getIdLong());
 						});
 					} else {
 						if(drawn instanceof MessageEmbed)
-							buttons(pc.editMessageById(messageId, (MessageEmbed)drawn)).queue();
+							buttons(pc.editMessageEmbedsById(messageId, (MessageEmbed)drawn)).queue();
 						if(drawn instanceof EmbedBuilder)
-							buttons(pc.editMessageById(messageId, ((EmbedBuilder)drawn).build())).queue();
+							buttons(pc.editMessageEmbedsById(messageId, ((EmbedBuilder)drawn).build())).queue();
 						if(drawn instanceof String)
 							buttons(pc.editMessageById(messageId, (String)drawn)).queue();
 					}
@@ -226,18 +226,18 @@ public class GuiContainer {
 				if(pc == null) {
 					user.openPrivateChannel().queue(p -> {
 						if(drawn instanceof MessageEmbed)
-							buttons(p.editMessageById(messageId, (MessageEmbed)drawn)).queue();
+							buttons(p.editMessageEmbedsById(messageId, (MessageEmbed)drawn)).queue();
 						if(drawn instanceof EmbedBuilder)
-							buttons(p.editMessageById(messageId, ((EmbedBuilder)drawn).build())).queue();
+							buttons(p.editMessageEmbedsById(messageId, ((EmbedBuilder)drawn).build())).queue();
 						if(drawn instanceof String)
 							buttons(p.editMessageById(messageId, (String)drawn)).queue();
 						BonziUtils.userPrivateChannels.put(user.getIdLong(), p.getIdLong());
 					});
 				} else {
 					if(drawn instanceof MessageEmbed)
-						buttons(pc.editMessageById(messageId, (MessageEmbed)drawn)).queue();
+						buttons(pc.editMessageEmbedsById(messageId, (MessageEmbed)drawn)).queue();
 					if(drawn instanceof EmbedBuilder)
-						buttons(pc.editMessageById(messageId, ((EmbedBuilder)drawn).build())).queue();
+						buttons(pc.editMessageEmbedsById(messageId, ((EmbedBuilder)drawn).build())).queue();
 					if(drawn instanceof String)
 						buttons(pc.editMessageById(messageId, (String)drawn)).queue();
 				}
@@ -419,15 +419,17 @@ public class GuiContainer {
 		gui.receiveReaction(emote);
 	}*/
 	public void onAction(ButtonClickEvent event) {
-		if(!this.enabled)
+		if(!this.enabled) {
+			event.reply(":x: `This GUI has been disabled.`").setEphemeral(true).queue();
 			return;
+		}
 		
 		nevermind:
 		if(this.ownerId != event.getUser().getIdLong()) {
 			// Check whitelist
 			for(Long wl: this.ownerWhitelist)
 				if(event.getUser().getIdLong() == wl.longValue())
-					break nevermind; // yes labels I know but this is valid
+					break nevermind;
 			event.reply(":x: `This GUI was opened by someone else.`").setEphemeral(true).queue();
 			return;
 		}
