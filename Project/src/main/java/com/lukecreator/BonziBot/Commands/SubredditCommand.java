@@ -40,7 +40,7 @@ public class SubredditCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("Subreddit '" + subName + "' doesn't exist!")).queue();
 			else
-				e.channel.sendMessage(BonziUtils.failureEmbed("Subreddit '" + subName + "' doesn't exist!")).queue();
+				e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Subreddit '" + subName + "' doesn't exist!")).queue();
 			return;
 		}
 		
@@ -50,25 +50,16 @@ public class SubredditCommand extends Command {
 		e.channel.sendMessage("Downloading a fresh post...").queue(msg -> {
 			Submission post = client.getRandomSubmission(subName);
 			if(post == null) {
-				if(e.isSlashCommand)
-					e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("There's nothing on that subreddit!")).queue();
-				else
-					e.channel.sendMessage(BonziUtils.failureEmbed("There's nothing on that subreddit!")).queue();
+				e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("There's nothing on that subreddit!")).queue();
 				return;
 			}
 			if(e.isGuildMessage && !e.tChannel.isNSFW()) {
 				if(sub.nsfw) {
-					if(e.isSlashCommand)
-						e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("This subreddit is NSFW.", "Please use an NSFW channel for this subreddit specifically!")).queue();
-					else
-						e.channel.sendMessage(BonziUtils.failureEmbed("This subreddit is NSFW.", "Please use an NSFW channel for this subreddit specifically!")).queue();
+					e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("This subreddit is NSFW.", "Please use an NSFW channel for this subreddit specifically!")).queue();
 					return;
 				}
 				if(post.isNSFW()) {
-					if(e.isSlashCommand)
-						e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("The post that was gotten was NSFW. Can't post it here!")).queue();
-					else
-						e.channel.sendMessage(BonziUtils.failureEmbed("The post that was gotten was NSFW. Can't post it here!")).queue();
+					e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("The post that was gotten was NSFW. Can't post it here!")).queue();
 					return;
 				}
 			}
@@ -97,7 +88,7 @@ public class SubredditCommand extends Command {
 					eb.addField("", strings[i], false);
 				}
 			}
-			msg.editMessage(eb.build()).queue();
+			msg.editMessageEmbeds(eb.build()).queue();
 			if(media.hasVideoMedia)
 				e.channel.sendMessage(media.videoURL).queue();
 		});

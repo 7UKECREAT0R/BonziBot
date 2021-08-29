@@ -44,7 +44,7 @@ public class DisplaySubredditInformation extends Command {
 		eb.addField("Is NSFW?", String.valueOf(subreddit.nsfw), true);
 		eb.addField("Created", subreddit.created.toString(), true);
 		eb.addField("Color Hex", subreddit.colorHex, true);
-		e.channel.sendMessage(eb.build()).queue();
+		e.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 	
 }

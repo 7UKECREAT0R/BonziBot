@@ -52,7 +52,7 @@ public class TimedPollCommand extends Command {
 		if(e.isSlashCommand)
 			e.slashCommand.reply(":white_check_mark: `Created poll for " + BonziUtils.getLongTimeStringMs(time.ms) + "!`").setEphemeral(true).queue();
 		
-		e.channel.sendMessage(eb.build()).queue(msg -> {
+		e.channel.sendMessageEmbeds(eb.build()).queue(msg -> {
 			msg.addReaction("👍").queue();
 			msg.addReaction("👎").queue();
 		});

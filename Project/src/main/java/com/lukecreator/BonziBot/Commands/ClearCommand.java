@@ -44,11 +44,11 @@ public class ClearCommand extends Command {
 		long messageId = e.message.getIdLong();
 		
 		if(amount < 0) {
-			e.channel.sendMessage(BonziUtils.failureEmbed("you cant bring messages back 😔")).queue();
+			e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("you cant bring messages back 😔")).queue();
 			return;
 		}
 		if(amount > 100) {
-			e.channel.sendMessage(BonziUtils.failureEmbed("Max limit is 100.")).queue();
+			e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Max limit is 100.")).queue();
 			return;
 		}
 		

@@ -31,6 +31,6 @@ public class DisplayUserInfoCommand extends Command {
 		ModernWarn[] warns = self.getGlobalWarns();
 		if(warns.length > 0)
 			eb.addField("warn 0:", warns[0].toString(), false);
-		e.channel.sendMessage(eb.build()).queue();
+		e.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 }

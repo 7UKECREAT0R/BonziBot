@@ -33,7 +33,7 @@ public class TagCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(msg).queue();
 			else
-				e.channel.sendMessage(msg).queue();
+				e.channel.sendMessageEmbeds(msg).queue();
 			return;
 		}
 		
@@ -56,7 +56,7 @@ public class TagCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.replyEmbeds(msg).queue();
 				else
-					e.channel.sendMessage(msg).queue();
+					e.channel.sendMessageEmbeds(msg).queue();
 				return;
 			} else {
 				String m1 = "This tag doesn't exist yet!";
@@ -70,7 +70,7 @@ public class TagCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.replyEmbeds(msg).queue();
 				else
-					e.channel.sendMessage(msg).queue();
+					e.channel.sendMessageEmbeds(msg).queue();
 				return;
 			}
 		} else {

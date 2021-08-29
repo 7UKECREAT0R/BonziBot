@@ -50,7 +50,7 @@ public class TodoListCommand extends Command {
 					e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("Folder doesn't exist!",
 						"Run the command without any arguments to view your folders.")).queue();
 				else
-					e.channel.sendMessage(BonziUtils.failureEmbed("Folder doesn't exist!",
+					e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Folder doesn't exist!",
 						"Run the command without any arguments to view your folders.")).queue();
 				return;
 			}

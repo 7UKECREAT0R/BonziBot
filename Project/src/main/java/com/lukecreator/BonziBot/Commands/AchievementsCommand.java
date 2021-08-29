@@ -45,6 +45,6 @@ public class AchievementsCommand extends Command {
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(eb.build()).queue();
 		else
-			e.channel.sendMessage(eb.build()).queue();
+			e.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 }

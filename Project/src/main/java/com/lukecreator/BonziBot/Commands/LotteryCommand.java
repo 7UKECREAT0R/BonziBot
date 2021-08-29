@@ -38,7 +38,7 @@ public class LotteryCommand extends Command {
 				e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("You need " + LotteryManager.S_TICKET_COST + 
 					" coins to buy a lottery ticket!", "You currently have " + BonziUtils.comma(currentCoins) + " coins.")).queue();
 			else
-				e.channel.sendMessage(BonziUtils.failureEmbed("You need " + LotteryManager.S_TICKET_COST + 
+				e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("You need " + LotteryManager.S_TICKET_COST + 
 					" coins to buy a lottery ticket!", "You currently have " + BonziUtils.comma(currentCoins) + " coins.")).queue();
 			return;
 		}
@@ -58,7 +58,7 @@ public class LotteryCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(eb.build()).queue();
 			else
-				e.channel.sendMessage(eb.build()).queue();
+				e.channel.sendMessageEmbeds(eb.build()).queue();
 			return;
 		} else {
 			MessageEmbed me = BonziUtils.failureEmbed("You didn't win this time...  -" + LotteryManager.S_TICKET_COST + " coins.",
@@ -66,7 +66,7 @@ public class LotteryCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(me).queue();
 			else
-				e.channel.sendMessage(me).queue();
+				e.channel.sendMessageEmbeds(me).queue();
 			return;
 		}
 	}

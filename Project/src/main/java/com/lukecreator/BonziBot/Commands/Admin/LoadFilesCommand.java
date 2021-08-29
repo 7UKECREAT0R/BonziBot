@@ -26,10 +26,10 @@ public class LoadFilesCommand extends Command {
 		
 		if(backup) {
 			e.bonzi.loadDataBackup();
-			e.channel.sendMessage(BonziUtils.successEmbed("Loaded backup files.")).queue();
+			e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Loaded backup files.")).queue();
 		} else {
 			e.bonzi.loadData();
-			e.channel.sendMessage(BonziUtils.successEmbed("Loaded regular files.")).queue();
+			e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Loaded regular files.")).queue();
 		}
 	}
 }

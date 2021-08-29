@@ -60,7 +60,7 @@ public class MuteCommand extends Command {
 			if(mutes.isMuted(targetMember)) {
 				if(e.isSlashCommand && !e.slashCommand.isAcknowledged())
 					e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("User's already muted.")).queue();
-				else e.channel.sendMessage(BonziUtils.failureEmbed("User's already muted.")).queue();
+				else e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("User's already muted.")).queue();
 				return;
 			}
 			
@@ -72,7 +72,7 @@ public class MuteCommand extends Command {
 				guild.addRoleToMember(targetMember, give).reason(reason).queue(null, fail -> {
 					if(e.isSlashCommand && !e.slashCommand.isAcknowledged())
 						e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("Could not give 'Silenced' role. (no idea why)")).queue();
-					else e.channel.sendMessage(BonziUtils.failureEmbed("Could not give 'Silenced' role. (no idea why)")).queue();
+					else e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Could not give 'Silenced' role. (no idea why)")).queue();
 				});
 				
 				MessageEmbed me = BonziUtils.successEmbed("User has been muted.", "Reason: `" + (hasReason ?
@@ -80,13 +80,13 @@ public class MuteCommand extends Command {
 				
 				if(e.isSlashCommand && !e.slashCommand.isAcknowledged())
 					e.slashCommand.replyEmbeds(me).queue();
-				else e.channel.sendMessage(me).queue();
+				else e.channel.sendMessageEmbeds(me).queue();
 				return;
 				
 			} catch(HierarchyException he) {
 				if(e.isSlashCommand && !e.slashCommand.isAcknowledged())
 					e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("My role is not high enough to give the 'Silenced' role to anyone.", "Please do it manually, as the mute has still been logged.")).queue();
-				else e.channel.sendMessage(BonziUtils.failureEmbed("My role is not high enough to give the 'Silenced' role to anyone.", "Please do it manually, as the mute has still been logged.")).queue();
+				else e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("My role is not high enough to give the 'Silenced' role to anyone.", "Please do it manually, as the mute has still been logged.")).queue();
 			}
 		};
 		
@@ -95,7 +95,7 @@ public class MuteCommand extends Command {
 			MessageEmbed send = BonziUtils.quickEmbed("Setup", "I'm creating and setting up a 'Silenced' role for you... **Please move it above the roles you want to be able to mute!**", Color.orange).build();
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(send).queue();
-			else e.channel.sendMessage(send).queue();
+			else e.channel.sendMessageEmbeds(send).queue();
 			
 			e.guild.createRole().setName("Silenced").setColor(Color.gray).setMentionable(false).queue(newRole -> {
 				e.settings.mutedRole = newRole.getIdLong();

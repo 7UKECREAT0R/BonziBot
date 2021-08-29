@@ -42,7 +42,7 @@ public class UnmuteCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("User isn't muted.")).setEphemeral(true).queue();
 			else
-				e.channel.sendMessage(BonziUtils.failureEmbed("User isn't muted.")).queue();
+				e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("User isn't muted.")).queue();
 			return;
 		}
 		
@@ -52,6 +52,6 @@ public class UnmuteCommand extends Command {
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(BonziUtils.successEmbed("Unmuted user successfully.", "User: `" + target.getAsTag() + "`")).queue();
 		else
-			e.channel.sendMessage(BonziUtils.successEmbed("Unmuted user successfully.", "User: `" + target.getAsTag() + "`")).queue();
+			e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Unmuted user successfully.", "User: `" + target.getAsTag() + "`")).queue();
 	}
 }

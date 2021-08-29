@@ -37,7 +37,7 @@ public class PrivacyCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(success).queue();
 			else
-				e.channel.sendMessage(success).queue();
+				e.channel.sendMessageEmbeds(success).queue();
 			e.bonzi.accounts.setUserAccount(e.executor, account);
 			
 		} else if(category.equalsIgnoreCase("expose")) {
@@ -46,14 +46,14 @@ public class PrivacyCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(success).queue();
 			else
-				e.channel.sendMessage(success).queue();
+				e.channel.sendMessageEmbeds(success).queue();
 			e.bonzi.accounts.setUserAccount(e.executor, account);
 			
 		} else {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("Unknown Category.", "Please view the `terms` command.")).queue();
 			else
-				e.channel.sendMessage(BonziUtils.failureEmbed("Unknown Category.", "Please view the `terms` command.")).queue();
+				e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Unknown Category.", "Please view the `terms` command.")).queue();
 		}
 	}
 }

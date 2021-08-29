@@ -22,7 +22,7 @@ public class AdminBypassCommand extends Command {
 	public void executeCommand(CommandExecutionInfo e) {
 		boolean enable = e.args.getBoolean("enable");
 		e.bonzi.adminBypassing = enable;
-		e.channel.sendMessage(BonziUtils.quickEmbed
+		e.channel.sendMessageEmbeds(BonziUtils.quickEmbed
 			("Admin Bypass", "New setting: " + enable,
 			BonziUtils.COLOR_BONZI_PURPLE).build()).queue();
 		return;

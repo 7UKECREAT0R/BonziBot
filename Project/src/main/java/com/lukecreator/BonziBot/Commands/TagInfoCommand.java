@@ -37,7 +37,7 @@ public class TagInfoCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(msg).queue();
 			else
-				e.channel.sendMessage(msg).queue();
+				e.channel.sendMessageEmbeds(msg).queue();
 			return;
 		}
 		
@@ -55,7 +55,7 @@ public class TagInfoCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(msg).queue();
 			else
-				e.channel.sendMessage(msg).queue();
+				e.channel.sendMessageEmbeds(msg).queue();
 			return;
 		}
 		
@@ -92,7 +92,7 @@ public class TagInfoCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(eb.build()).queue();
 			else
-				e.channel.sendMessage(eb.build()).queue();
+				e.channel.sendMessageEmbeds(eb.build()).queue();
 		}
 	}
 }

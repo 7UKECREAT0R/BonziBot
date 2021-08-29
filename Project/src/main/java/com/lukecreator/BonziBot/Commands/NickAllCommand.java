@@ -113,7 +113,7 @@ public class NickAllCommand extends Command {
 	public void executeCommand(CommandExecutionInfo e) {
 		
 		if(STILL_NICKNAMING.contains(e.guild.getIdLong())) {
-			e.channel.sendMessage(BonziUtils.failureEmbed("Please wait until I'm finished nicknaming my current batch!")).queue();
+			e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Please wait until I'm finished nicknaming my current batch!")).queue();
 			this.resetCooldown(e);
 			return;
 		}
@@ -130,16 +130,16 @@ public class NickAllCommand extends Command {
 		if(e.isSlashCommand) {
 			e.slashCommand.replyEmbeds(eb.build()).setEphemeral(true).queue();
 		} else {
-			e.channel.sendMessage(eb.build()).queue();
+			e.channel.sendMessageEmbeds(eb.build()).queue();
 		}
-		e.channel.sendMessage(BonziUtils.successEmbedIncomplete("Send the condition to apply.").setFooter("Type 'all' to pick all members.\nType 'cancel' to cancel this action.").build()).queue();
+		e.channel.sendMessageEmbeds(BonziUtils.successEmbedIncomplete("Send the condition to apply.").setFooter("Type 'all' to pick all members.\nType 'cancel' to cancel this action.").build()).queue();
 		
 		EventWaiterManager ewm = e.bonzi.eventWaiter;
 		ewm.waitForResponse(e.executor, msg -> {
 			String conditionString = msg.getContentRaw();
 			
 			if(conditionString.equalsIgnoreCase("cancel")) {
-				e.channel.sendMessage(BonziUtils.failureEmbed("Cancelled.")).queue();
+				e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Cancelled.")).queue();
 				this.resetCooldown(e);
 				return;
 			}
@@ -163,7 +163,7 @@ public class NickAllCommand extends Command {
 						c = new RoleCondition();
 						Guild g = e.isGuildMessage ? e.guild : null;
 						if(!c.getArg().isWordParsable(conditionData, g)) {
-							e.channel.sendMessage(BonziUtils.failureEmbed("Invalid role specified.")).queue();
+							e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Invalid role specified.")).queue();
 							this.resetCooldown(e);
 							return;
 						}
@@ -178,7 +178,7 @@ public class NickAllCommand extends Command {
 				}
 				
 				if(c == null) {
-					e.channel.sendMessage(BonziUtils.failureEmbed("No valid conditions were specified.")).queue();
+					e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("No valid conditions were specified.")).queue();
 					this.resetCooldown(e);
 					return;
 				}
@@ -204,7 +204,7 @@ public class NickAllCommand extends Command {
 			}
 			
 			if(matchedMembers.isEmpty()) {
-				e.channel.sendMessage(BonziUtils.failureEmbed("Couldn't find anyone that matches that condition!", "Try narrowing your search a bit.")).queue();
+				e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Couldn't find anyone that matches that condition!", "Try narrowing your search a bit.")).queue();
 				this.resetCooldown(e);
 				return;
 			}
@@ -226,7 +226,7 @@ public class NickAllCommand extends Command {
 			eb1.addField("{highestrole}", "The name of the highest role this user has.", true);
 			eb1.addField("{nothing}", "No nickname.", true);
 			eb1.addField("{random}", "A randomly generated nickname.", true);
-			e.channel.sendMessage(eb1.build()).queue();
+			e.channel.sendMessageEmbeds(eb1.build()).queue();
 			
 			ewm.waitForResponse(msg.getAuthor(), nicknameMsg -> {
 				
@@ -243,12 +243,12 @@ public class NickAllCommand extends Command {
 				ewm.getConfirmation(nicknameMsg.getAuthor(), nicknameMsg.getChannel(), eb2.build(), confirm -> {
 					
 					if(!confirm) {
-						e.channel.sendMessage(BonziUtils.failureEmbed("Cancelled Nickall.")).queue();
+						e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Cancelled Nickall.")).queue();
 						this.resetCooldown(e);
 						return;
 					}
 					
-					e.channel.sendMessage(BonziUtils.successEmbed("Starting to nickname!", "Please wait about " + time + "...")).queue();
+					e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Starting to nickname!", "Please wait about " + time + "...")).queue();
 					
 					long guildId = e.guild.getIdLong();
 					STILL_NICKNAMING.add(guildId);
@@ -286,11 +286,11 @@ public class NickAllCommand extends Command {
 							try {
 								iteration.modifyNickname(vars).queue(_v -> {
 									NickAllCommand.STILL_NICKNAMING.remove(guildId);
-									e.channel.sendMessage(BonziUtils.successEmbed("Finished nicknaming!")).queue();
+									e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Finished nicknaming!")).queue();
 								}, f -> {});
 							} catch(HierarchyException exc) {
 								NickAllCommand.STILL_NICKNAMING.remove(guildId);
-								e.channel.sendMessage(BonziUtils.successEmbed("Finished nicknaming!")).queue();
+								e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Finished nicknaming!")).queue();
 							}
 						} else {
 							try {

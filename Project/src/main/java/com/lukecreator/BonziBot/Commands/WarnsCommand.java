@@ -45,7 +45,7 @@ public class WarnsCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(send).queue();
 			else
-				e.channel.sendMessage(send).queue();
+				e.channel.sendMessageEmbeds(send).queue();
 			return;
 		}
 		

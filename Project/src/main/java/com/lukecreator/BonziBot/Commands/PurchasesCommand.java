@@ -45,7 +45,7 @@ public class PurchasesCommand extends Command {
 					"You don't have any commands yet on your account!",
 					"Use `" + prefix + "shop` to take a look at some of the things you can buy.")).queue();
 			else
-				e.channel.sendMessage(BonziUtils.failureEmbed(
+				e.channel.sendMessageEmbeds(BonziUtils.failureEmbed(
 					"You don't have any commands yet on your account!",
 					"Use `" + prefix + "shop` to take a look at some of the things you can buy.")).queue();
 			return;
@@ -73,7 +73,7 @@ public class PurchasesCommand extends Command {
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(me).queue();
 		else
-			e.channel.sendMessage(me).queue();
+			e.channel.sendMessageEmbeds(me).queue();
 		return;
 	}
 }

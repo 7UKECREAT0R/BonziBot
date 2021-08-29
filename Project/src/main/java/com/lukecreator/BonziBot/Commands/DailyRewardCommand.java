@@ -37,7 +37,7 @@ public class DailyRewardCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(me).queue();
 			else
-				e.channel.sendMessage(me).queue();
+				e.channel.sendMessageEmbeds(me).queue();
 			return;
 		}
 		
@@ -55,7 +55,7 @@ public class DailyRewardCommand extends Command {
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(eb.build()).queue();
 		else
-			e.channel.sendMessage(eb.build()).queue();
+			e.channel.sendMessageEmbeds(eb.build()).queue();
 		return;
 	}
 }

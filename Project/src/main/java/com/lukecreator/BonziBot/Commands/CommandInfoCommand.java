@@ -112,13 +112,13 @@ public class CommandInfoCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(eb.build()).queue();
 			else
-				e.channel.sendMessage(eb.build()).queue();
+				e.channel.sendMessageEmbeds(eb.build()).queue();
 			return;
 		}
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("Couldn't find a command with that name!")).queue();
 		else
-			e.channel.sendMessage(BonziUtils.failureEmbed("Couldn't find a command with that name!")).queue();
+			e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Couldn't find a command with that name!")).queue();
 	}
 	
 	String getSourceCode(Command command) {

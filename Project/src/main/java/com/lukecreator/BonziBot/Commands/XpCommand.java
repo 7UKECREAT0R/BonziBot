@@ -69,7 +69,7 @@ public class XpCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("something went super wrong:", Image.downloadMessage)).queue();
 				else
-					e.channel.sendMessage(BonziUtils.failureEmbed("something went super wrong:", Image.downloadMessage)).queue();
+					e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("something went super wrong:", Image.downloadMessage)).queue();
 				return;
 			}
 		}

@@ -67,7 +67,7 @@ public class BuyCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.replyEmbeds(me).queue();
 				else
-					e.channel.sendMessage(me).queue();
+					e.channel.sendMessageEmbeds(me).queue();
 				return;
 			}
 			
@@ -83,7 +83,7 @@ public class BuyCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.replyEmbeds(me).queue();
 				else
-					e.channel.sendMessage(me).queue();
+					e.channel.sendMessageEmbeds(me).queue();
 				return;
 			}
 			
@@ -94,7 +94,7 @@ public class BuyCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.replyEmbeds(me).queue();
 				else
-					e.channel.sendMessage(me).queue();
+					e.channel.sendMessageEmbeds(me).queue();
 				return;
 			}
 			
@@ -104,7 +104,7 @@ public class BuyCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.replyEmbeds(me).queue();
 				else
-					e.channel.sendMessage(me).queue();
+					e.channel.sendMessageEmbeds(me).queue();
 				return;
 			}
 			
@@ -122,7 +122,7 @@ public class BuyCommand extends Command {
 					if(e.isSlashCommand)
 						e.slashCommand.getHook().editOriginalEmbeds(me).queue();
 					else
-						e.channel.sendMessage(me).queue();
+						e.channel.sendMessageEmbeds(me).queue();
 					return;
 				}
 				if(gift) {
@@ -148,7 +148,7 @@ public class BuyCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.getHook().editOriginalEmbeds(me).queue();
 				else
-					e.channel.sendMessage(me).queue();
+					e.channel.sendMessageEmbeds(me).queue();
 				return;
 			});
 		} else {
@@ -158,7 +158,7 @@ public class BuyCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.replyEmbeds(me).queue();
 				else
-					e.channel.sendMessage(me).queue();
+					e.channel.sendMessageEmbeds(me).queue();
 				return;
 			}
 			
@@ -175,7 +175,7 @@ public class BuyCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.replyEmbeds(me).queue();
 				else
-					e.channel.sendMessage(me).queue();
+					e.channel.sendMessageEmbeds(me).queue();
 				return;
 			}
 			
@@ -184,7 +184,7 @@ public class BuyCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.replyEmbeds(me).queue();
 				else
-					e.channel.sendMessage(me).queue();
+					e.channel.sendMessageEmbeds(me).queue();
 				return;
 			}
 			
@@ -193,7 +193,7 @@ public class BuyCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.replyEmbeds(me).queue();
 				else
-					e.channel.sendMessage(me).queue();
+					e.channel.sendMessageEmbeds(me).queue();
 				return;
 			}
 			
@@ -210,7 +210,7 @@ public class BuyCommand extends Command {
 					if(e.isSlashCommand)
 						e.slashCommand.getHook().editOriginalEmbeds(me).queue();
 					else
-						e.channel.sendMessage(me).queue();
+						e.channel.sendMessageEmbeds(me).queue();
 					return;
 				}
 				if(gift) {
@@ -236,7 +236,7 @@ public class BuyCommand extends Command {
 				if(e.isSlashCommand)
 					e.slashCommand.getHook().editOriginalEmbeds(me).queue();
 				else
-					e.channel.sendMessage(me).queue();
+					e.channel.sendMessageEmbeds(me).queue();
 				return;
 			});
 		}
@@ -245,7 +245,7 @@ public class BuyCommand extends Command {
 	void sendGiftSuccess(MessageChannel channel, String receiverName) {
 		MessageEmbed me = BonziUtils.successEmbed
 				("Success! Your gift to " + receiverName + " is on its way!");
-		channel.sendMessage(me).queue();
+		channel.sendMessageEmbeds(me).queue();
 	}
 	void sendGiftDM(User sender, User user, String item) {
 		EmbedBuilder eb = new EmbedBuilder();

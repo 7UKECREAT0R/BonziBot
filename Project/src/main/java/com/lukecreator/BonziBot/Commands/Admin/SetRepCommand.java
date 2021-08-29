@@ -34,6 +34,6 @@ public class SetRepCommand extends Command {
 		account.setRep(newRep);
 		uam.setUserAccount(target, account);
 		
-		e.channel.sendMessage(BonziUtils.successEmbed("Successfully set reputation to " + newRep + ".")).queue();
+		e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Successfully set reputation to " + newRep + ".")).queue();
 	}
 }

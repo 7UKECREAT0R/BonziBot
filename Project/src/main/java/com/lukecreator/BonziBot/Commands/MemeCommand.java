@@ -47,7 +47,7 @@ public class MemeCommand extends Command {
 				.setColor(Color.magenta)
 				.setImage(meme.getURL())
 				.setFooter("From r/" + meme.getSubreddit());
-			e.channel.sendMessage(eb.build()).queue();
+			e.channel.sendMessageEmbeds(eb.build()).queue();
 		}
 	}
 	

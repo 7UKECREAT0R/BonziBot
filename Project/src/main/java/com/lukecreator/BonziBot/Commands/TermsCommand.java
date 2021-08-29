@@ -22,6 +22,6 @@ public class TermsCommand extends Command {
 	public void executeCommand(CommandExecutionInfo e) {
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(BonziUtils.TERMS).setEphemeral(true).queue();
-		else e.channel.sendMessage(BonziUtils.TERMS).queue();
+		else e.channel.sendMessageEmbeds(BonziUtils.TERMS).queue();
 	}
 }

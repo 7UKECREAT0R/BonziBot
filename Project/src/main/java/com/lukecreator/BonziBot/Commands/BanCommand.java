@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
 
 public class BanCommand extends Command {
 
@@ -49,6 +50,7 @@ public class BanCommand extends Command {
 		User _target = e.args.getUser("target");
 		Member target = e.guild.getMember(_target);
 		Member self = e.member;
+		Member bonzi = e.guild.getSelfMember();
 		
 		String reason = e.args.getString("reason");
 		TimeSpan time = e.args.getTimeSpan("time");
@@ -62,7 +64,16 @@ public class BanCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(send).queue();
 			else
-				e.channel.sendMessage(send).queue();
+				e.channel.sendMessageEmbeds(send).queue();
+			return;
+		}
+		if(!bonzi.canInteract(target)) {
+			MessageEmbed send = BonziUtils.failureEmbed("Help!",
+				"This person is either an administrator, owner, or higher up than me so I can't ban them.");
+			if(e.isSlashCommand)
+				e.slashCommand.replyEmbeds(send).queue();
+			else
+				e.channel.sendMessageEmbeds(send).queue();
 			return;
 		}
 		
@@ -78,16 +89,31 @@ public class BanCommand extends Command {
 				long ends = System.currentTimeMillis() + time.ms;
 				e.bonzi.bans.ban(guildId, tId, ends);
 			}
-			e.guild.ban(target, 1, reason).queue(null, fail -> {
-				e.bonzi.bans.unban(target);
-				e.channel.sendMessage("Something went seriously wrong and I couldn't ban the user... Maybe this will help:\n```" + fail.toString() + "```").queue();
-				return;
-			});
+			try {
+				e.guild.ban(target, 1, reason).queue(null, fail -> {
+					e.bonzi.bans.unban(target);
+					if(e.isSlashCommand)
+						e.slashCommand.getHook().editOriginal("Something went seriously wrong and I couldn't ban the user... Maybe this will help:\n```" + fail.toString() + "```").queue();
+					else
+						e.channel.sendMessage("Something went seriously wrong and I couldn't ban the user... Maybe this will help:\n```" + fail.toString() + "```").queue();
+					return;
+				});
+			} catch(HierarchyException exc) {
+				if(e.isSlashCommand)
+					e.slashCommand.getHook().editOriginalEmbeds(BonziUtils.failureEmbed("Hierarchy Error", "This user is too high for me to ban!")).queue();
+				else
+					e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Hierarchy Error", "This user is too high for me to ban!")).queue();
+			}
 			
 			String desc = "For: `" + (temporary?time.toLongString():"forever") +
 				"`\nReason: `" + (reason==null?"unspecified":reason) + "`";
 			
-			e.channel.sendMessage(BonziUtils.successEmbed("Banned!", desc)).queue();
+			MessageEmbed send = BonziUtils.successEmbed("Banned!", desc);
+			
+			if(e.isSlashCommand)
+				e.slashCommand.getHook().editOriginalEmbeds(send).queue();
+			else
+				e.channel.sendMessageEmbeds(send).queue();
 		};
 		
 		if(!profile.optOutDms && (settings.banAppeals | settings.banMessage)) {
@@ -132,18 +158,13 @@ public class BanCommand extends Command {
 				
 				GuiButton[] buttons = {
 					new GuiButton("Appeal Ban", GuiButton.Color.BLUE,
-						"_appeal:" + guildId).asEnabled(settings.banAppeals)
+						"_appeal:request:" + guildId).asEnabled(settings.banAppeals)
 				};
 				
-				if(e.isSlashCommand) {
-					BonziUtils.appendButtons(e.slashCommand.replyEmbeds(eb.build()), buttons).queue(readyToBan, fail -> {
-						e.channel.sendMessage(BonziUtils.successEmbed("Banned!", "User had DMs off so I couldn't message them.")).queue();
-					});
-				} else {
-					BonziUtils.appendButtons(pc.sendMessage(eb.build()), buttons, false).queue(readyToBan, fail -> {
-						e.channel.sendMessage(BonziUtils.successEmbed("Banned!", "User had DMs off so I couldn't message them.")).queue();
-					});
-				}
+				if(e.isSlashCommand)
+					e.slashCommand.deferReply().queue();
+				
+				BonziUtils.appendButtons(pc.sendMessageEmbeds(eb.build()), buttons, false).queue(readyToBan);
 			};
 			
 			if(_pc == null)
@@ -151,6 +172,8 @@ public class BanCommand extends Command {
 			else
 				dm.accept(_pc);
 		} else {
+			if(e.isSlashCommand)
+				e.slashCommand.deferReply().queue();
 			// User is not accepting DMs so the ban can commence immediately.
 			readyToBan.accept(null);
 		}

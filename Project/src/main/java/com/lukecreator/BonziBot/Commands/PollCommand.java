@@ -44,7 +44,7 @@ public class PollCommand extends Command {
 		if(e.isSlashCommand)
 			e.slashCommand.reply(":white_check_mark: `Created poll!`").setEphemeral(true).queue();
 		
-		e.channel.sendMessage(eb.build()).queue(msg -> {
+		e.channel.sendMessageEmbeds(eb.build()).queue(msg -> {
 			msg.addReaction("👍").queue();
 			msg.addReaction("👎").queue();
 		});

@@ -48,7 +48,7 @@ public class TicTacToeCommand extends Command {
 					GuiTicTacToe gui = new GuiTicTacToe(e.executor, opponent);
 					BonziUtils.sendGui(e, gui);
 				} else {
-					e.channel.sendMessage(BonziUtils.failureEmbed(opponent.getName() + " rejected the tic-tac-toe duel.")).queue();
+					e.channel.sendMessageEmbeds(BonziUtils.failureEmbed(opponent.getName() + " rejected the tic-tac-toe duel.")).queue();
 					return;
 				}
 			});
@@ -57,7 +57,7 @@ public class TicTacToeCommand extends Command {
 					new GuiButton("ACCEPT", GuiButton.Color.GREEN, "tttaccept"),
 					new GuiButton("REJECT", GuiButton.Color.RED, "tttreject")).queue();
 			} else {
-				ewm.waitForAction(opponent, e.channel.sendMessage(eb.build()), onAccept,
+				ewm.waitForAction(opponent, e.channel.sendMessageEmbeds(eb.build()), onAccept,
 					new GuiButton("ACCEPT", GuiButton.Color.GREEN, "tttaccept"),
 					new GuiButton("REJECT", GuiButton.Color.RED, "tttreject")).queue();
 			}
@@ -76,7 +76,7 @@ public class TicTacToeCommand extends Command {
 				ewm.waitForGlobalAction(e.slashCommand.replyEmbeds(eb.build()).setEphemeral(false), onAccept,
 					new GuiButton(GenericEmoji.fromEmoji("⚔️"), "JOIN", GuiButton.Color.GREEN, "jointtt"));
 			} else {
-				ewm.waitForGlobalAction(e.channel.sendMessage(eb.build()), onAccept,
+				ewm.waitForGlobalAction(e.channel.sendMessageEmbeds(eb.build()), onAccept,
 					new GuiButton(GenericEmoji.fromEmoji("⚔️"), "JOIN", GuiButton.Color.GREEN, "jointtt"));
 			}
 		}

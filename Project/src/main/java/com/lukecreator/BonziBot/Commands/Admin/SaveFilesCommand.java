@@ -28,7 +28,7 @@ public class SaveFilesCommand extends Command {
 		
 		if(backup) {
 			e.bonzi.saveDataBackup();
-			e.channel.sendMessage(BonziUtils.successEmbed("Saved backup files.")).queue();
-		} else e.channel.sendMessage(BonziUtils.successEmbed("Saved regular files.")).queue();
+			e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Saved backup files.")).queue();
+		} else e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Saved regular files.")).queue();
 	}
 }

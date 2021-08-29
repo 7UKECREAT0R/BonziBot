@@ -38,7 +38,7 @@ public class SendRulesCommand extends Command {
 		if(e.isSlashCommand)
 			e.slashCommand.reply(":white_check_mark: `Sent rules message.`").setEphemeral(true).queue();
 		
-		e.channel.sendMessage(msg).queue(sent -> {
+		e.channel.sendMessageEmbeds(msg).queue(sent -> {
 			rules.setRulesMessage(sent);
 			gsm.setSettings(e.guild, e.settings);
 		});

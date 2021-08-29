@@ -42,7 +42,7 @@ public class PayCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(msg).queue();
 			else
-				e.channel.sendMessage(msg).queue();
+				e.channel.sendMessageEmbeds(msg).queue();
 			return;
 		}
 		if(amount < 0) {
@@ -52,14 +52,14 @@ public class PayCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(msg).queue();
 			else
-				e.channel.sendMessage(msg).queue();
+				e.channel.sendMessageEmbeds(msg).queue();
 			return;
 		} else if(amount == 0) {
 			MessageEmbed msg = BonziUtils.failureEmbed("you need to put a number that's not 0 lol");
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(msg).queue();
 			else
-				e.channel.sendMessage(msg).queue();
+				e.channel.sendMessageEmbeds(msg).queue();
 			return;
 		}
 		
@@ -71,7 +71,7 @@ public class PayCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(msg).queue();
 			else
-				e.channel.sendMessage(msg).queue();
+				e.channel.sendMessageEmbeds(msg).queue();
 			return;
 		}
 		
@@ -87,7 +87,7 @@ public class PayCommand extends Command {
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(eb.build()).queue();
 		else
-			e.channel.sendMessage(eb.build()).queue();
+			e.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 	
 }

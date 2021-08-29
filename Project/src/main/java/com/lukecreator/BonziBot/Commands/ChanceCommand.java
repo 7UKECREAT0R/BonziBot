@@ -48,13 +48,13 @@ public class ChanceCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(eb.build()).queue();
 			else
-				e.channel.sendMessage(eb.build()).queue();
+				e.channel.sendMessageEmbeds(eb.build()).queue();
 			return;
 		} else if(amount == 0) {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(BonziUtils.successEmbed("🥳 CONGRATULATIONS! You won a 1000x coins multiplier! (+0 COINS!) 🥳")).queue();
 			else
-				e.channel.sendMessage(BonziUtils.successEmbed("🥳 CONGRATULATIONS! You won a 1000x coins multiplier! (+0 COINS!) 🥳")).queue();
+				e.channel.sendMessageEmbeds(BonziUtils.successEmbed("🥳 CONGRATULATIONS! You won a 1000x coins multiplier! (+0 COINS!) 🥳")).queue();
 			return;
 		}
 		
@@ -64,7 +64,7 @@ public class ChanceCommand extends Command {
 					("You can't afford that chance bro!").setDescription
 					("Current balance: " + balanceString).build()).queue();
 			else
-				e.channel.sendMessage(BonziUtils.failureEmbedIncomplete
+				e.channel.sendMessageEmbeds(BonziUtils.failureEmbedIncomplete
 					("You can't afford that chance bro!").setDescription
 					("Current balance: " + balanceString).build()).queue();
 			return;
@@ -87,7 +87,7 @@ public class ChanceCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(eb.build()).queue();
 			else
-				e.channel.sendMessage(eb.build()).queue();
+				e.channel.sendMessageEmbeds(eb.build()).queue();
 		} else {
 			newCoins -= amount;
 			EmbedBuilder eb = BonziUtils.quickEmbed(
@@ -96,7 +96,7 @@ public class ChanceCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(eb.build()).queue();
 			else
-				e.channel.sendMessage(eb.build()).queue();
+				e.channel.sendMessageEmbeds(eb.build()).queue();
 		}
 		account.setCoins(newCoins);
 		uam.setUserAccount(u, account);

@@ -23,7 +23,7 @@ public class HowToIdCommand extends Command {
 		if(e.isSlashCommand) 
 			e.slashCommand.replyEmbeds(BonziUtils.successEmbed("Check DMs (if they're open)!")).queue();
 		else if(e.isGuildMessage)
-			e.channel.sendMessage(BonziUtils.successEmbed("Check DMs (if they're open)!")).queue();
+			e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Check DMs (if they're open)!")).queue();
 		
 		BonziUtils.messageUser(e.executor,
 			  "How to get something's ID.\n\n"

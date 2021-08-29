@@ -48,14 +48,14 @@ public class SlotsCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(me).queue();
 			else
-				e.channel.sendMessage(me).queue();
+				e.channel.sendMessageEmbeds(me).queue();
 			return;
 		} else if(amount < 0) {
 			MessageEmbed me = BonziUtils.failureEmbed("bro what r u DOING");
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(me).queue();
 			else
-				e.channel.sendMessage(me).queue();
+				e.channel.sendMessageEmbeds(me).queue();
 			return;
 		}
 		
@@ -67,7 +67,7 @@ public class SlotsCommand extends Command {
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(me).queue();
 			else
-				e.channel.sendMessage(me).queue();
+				e.channel.sendMessageEmbeds(me).queue();
 			return;
 		}
 		
@@ -135,7 +135,7 @@ public class SlotsCommand extends Command {
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(eb.build()).queue();
 		else
-			e.channel.sendMessage(eb.build()).queue();
+			e.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 	
 	public int getWins(Slot[] slots) {
