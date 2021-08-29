@@ -114,7 +114,7 @@ public class BonziEventCache implements Serializable {
 		if(event.autoStart) {
 			MessageEmbed me = event.onEventStarted();
 			if(me == null) me = BonziUtils.failureEmbed("no starting embed was given.");
-			channel.sendMessage(me).queue(sent -> {
+			channel.sendMessageEmbeds(me).queue(sent -> {
 				sent.addReaction(BonziEvent.JOIN_BUTTON).queue();
 				long id = sent.getIdLong();
 				event.sentMessageId = id;
@@ -125,7 +125,7 @@ public class BonziEventCache implements Serializable {
 				this.startedEvents.add(event);
 			});
 		} else {
-			channel.sendMessage(event.constructQueueMessage()).queue(sent -> {
+			channel.sendMessageEmbeds(event.constructQueueMessage()).queue(sent -> {
 				sent.addReaction(BonziEvent.JOIN_BUTTON).queue();
 				long id = sent.getIdLong();
 				event.sentMessageId = id;
@@ -144,7 +144,7 @@ public class BonziEventCache implements Serializable {
 				MessageEmbed embed = event.onEventEnded();
 				if(event.sentMessage) {
 					TextChannel tc = guild.getTextChannelById(event.sentTextChannel);
-					tc.editMessageById(event.sentMessageId, embed).queue();
+					tc.editMessageEmbedsById(event.sentMessageId, embed).queue();
 				}
 				startedEvents.remove(i--);
 				return;
@@ -159,7 +159,7 @@ public class BonziEventCache implements Serializable {
 				MessageEmbed embed = event.onEventEnded();
 				if(event.sentMessage) {
 					TextChannel tc = guild.getTextChannelById(event.sentTextChannel);
-					tc.editMessageById(event.sentMessageId, embed).queue();
+					tc.editMessageEmbedsById(event.sentMessageId, embed).queue();
 				}
 				unstartedEvents.remove(i--);
 				return;
@@ -174,7 +174,7 @@ public class BonziEventCache implements Serializable {
 				MessageEmbed embed = event.onEventEnded();
 				if(event.sentMessage) {
 					TextChannel tc = guild.getTextChannelById(event.sentTextChannel);
-					tc.editMessageById(event.sentMessageId, embed).queue();
+					tc.editMessageEmbedsById(event.sentMessageId, embed).queue();
 				}
 				startedEvents.remove(i--);
 				return;
@@ -194,8 +194,6 @@ public class BonziEventCache implements Serializable {
 		BonziEvent event = this.unstartedEvents.remove(index);
 		this.startedEvents.add(event);
 		
-		// TODO when textchannel is deleted, check if an event was in it.
-		// the less stale events that stack up the better.
 		TextChannel tc = guild.getTextChannelById(event.sentTextChannel);
 		if(tc == null) {
 			this.startedEvents.remove(event);
@@ -208,7 +206,7 @@ public class BonziEventCache implements Serializable {
 			this.startExecutorFor(event); // checks requestTimedEvents in method
 			MessageEmbed newMessage = event.onEventStarted();
 			if(newMessage != null)
-				sent.editMessage(newMessage).queue();
+				sent.editMessageEmbeds(newMessage).queue();
 		}, fail -> {
 			this.startedEvents.remove(event);
 			return;
@@ -274,7 +272,7 @@ public class BonziEventCache implements Serializable {
 			this.startEvent(i, member.getGuild());
 		} else if(!event.eventStarted) {
 			MessageEmbed update = event.constructQueueMessage();
-			tc.editMessageById(event.sentMessageId, update).queue();
+			tc.editMessageEmbedsById(event.sentMessageId, update).queue();
 		}
 		
 		return true;
@@ -306,7 +304,7 @@ public class BonziEventCache implements Serializable {
 		
 		event.enteredMembers.remove(member.getUser());
 		MessageEmbed update = event.constructQueueMessage();
-		tc.editMessageById(event.sentMessageId, update).queue();
+		tc.editMessageEmbedsById(event.sentMessageId, update).queue();
 		return true;
 	}
 	/**
@@ -344,7 +342,7 @@ public class BonziEventCache implements Serializable {
 					$return = true;
 					MessageEmbed me = event.onCommandEvent(member, name, args);
 					if(me != null)
-						channel.editMessageById(event.sentMessageId, me).queue();
+						channel.editMessageEmbedsById(event.sentMessageId, me).queue();
 				}
 			}
 			for(String cmdMessage: event.moderatorCommandMessages) {
@@ -356,7 +354,7 @@ public class BonziEventCache implements Serializable {
 					}
 					MessageEmbed me = event.onCommandEvent(member, name, args);
 					if(me != null)
-						channel.editMessageById(event.sentMessageId, me).queue();
+						channel.editMessageEmbedsById(event.sentMessageId, me).queue();
 				}
 			}
 		}
