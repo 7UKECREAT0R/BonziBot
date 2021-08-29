@@ -30,7 +30,9 @@ public class GuildSettings implements Serializable {
 		SENSITIVE("Aggresive Filtering: Filter media names, urls, and text. For strict family friendly servers.",
 			"This server is strictly family-friendly.");
 		
-		public final String desc, footer; // rules footer
+		public final String
+			desc,	// serversettings description
+			footer; // footer in rules menu
 		private FilterLevel(String desc, String footer) {
 			this.desc = desc;
 			this.footer = footer;
@@ -48,6 +50,8 @@ public class GuildSettings implements Serializable {
 	private Rules rules = new Rules();
 	public boolean tokenScanning = true;
 	public long mutedRole = 0l;
+	public long starboard = 0l;
+	public int starboardLimit = 3;
 	
 	// Filtering
 	public FilterLevel filter = FilterLevel.NONE;
@@ -82,7 +86,6 @@ public class GuildSettings implements Serializable {
 	public boolean banMessage = false;
 	public long banAppealsChannel = 0l;
 	public String banMessageString = null;
-	
 	
 	// ----------
 	// FIELDS

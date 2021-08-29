@@ -45,7 +45,7 @@ public class GenericEmoji implements Serializable {
 		if(isGeneric) {
 			msg.addReaction(genericEmoji).queue();
 		} else {
-			Emote e = EmojiCache.getEmoteById(guildEmojiId);
+			Emote e = EmoteCache.getEmoteById(guildEmojiId);
 			msg.addReaction(e).queue();
 		}
 	}
@@ -55,14 +55,14 @@ public class GenericEmoji implements Serializable {
 		if(this.isGeneric)
 			return this.genericEmoji;
 		else {
-			Emote e = EmojiCache.getEmoteById(this.guildEmojiId);
+			Emote e = EmoteCache.getEmoteById(this.guildEmojiId);
 			return (e == null) ? "invalid" : e.getName();
 		}
 	}
 	public Emoji toEmoji() {
 		if(this.isGeneric)
 			return Emoji.fromUnicode(this.genericEmoji);
-		else return Emoji.fromEmote(EmojiCache.getEmoteById(guildEmojiId));
+		else return Emoji.fromEmote(EmoteCache.getEmoteById(guildEmojiId));
 	}
 	
 	private GenericEmoji(String genericEmoji) {

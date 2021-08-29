@@ -12,6 +12,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.TimeSpan;
 
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 
 /**
  * Owned commands, coins, warns, etc...
@@ -36,6 +37,7 @@ public class UserAccount implements Serializable {
 	public TimeZone timeZone = null;
 	public LocalDate birthday = null;
 	public AfkData afkData = new AfkData();
+	private List<MessageReference> pins = new ArrayList<MessageReference>();
 	private final List<Achievement> achievements = new ArrayList<Achievement>();
 	private final List<Badge> badges = new ArrayList<Badge>();
 	
@@ -86,6 +88,8 @@ public class UserAccount implements Serializable {
 	}
 	public void subCoins(long amount) {
 		this.coins -= amount;
+		if(this.coins < 0)
+			this.coins = 0;
 	}
 	public void setCoins(long coins) {
 		this.coins = coins;
@@ -100,7 +104,9 @@ public class UserAccount implements Serializable {
 		return BonziUtils.calculateLevel(this.xp);
 	}
 	public boolean incrementXP() {
-		return incrementXP(1);
+		int l = getLevel();
+		this.xp++;
+		return getLevel() != l;
 	}
 	public boolean incrementXP(int amount) {
 		int l = getLevel();
@@ -145,6 +151,31 @@ public class UserAccount implements Serializable {
 				return warns.remove(i);
 		}
 		return null;
+	}
+	
+	public void addPersonalPin(Message msg, boolean excludeContent) {
+		if(this.pins == null)
+			this.pins = new ArrayList<MessageReference>();
+		this.pins.add(0, new MessageReference(msg, excludeContent));
+	}
+	public void removePersonalPin(int index) {
+		if(this.pins == null)
+			return;
+		this.pins.remove(index);
+	}
+	public MessageReference[] getPersonalPinsArray() {
+		if(this.pins == null)
+			return new MessageReference[0];
+		return (MessageReference[])pins.toArray(new MessageReference[pins.size()]);
+	}
+	public List<MessageReference> getPersonalPins() {
+		if(this.pins == null)
+			this.pins = new ArrayList<MessageReference>();
+		return this.pins;
+	}
+	public void setPersonalPins(List<MessageReference> apply) {
+		this.pins = apply;
+		return;
 	}
 	
 	public boolean hasAchievement(Achievement a) {
