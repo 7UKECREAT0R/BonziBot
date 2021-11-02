@@ -7,7 +7,7 @@ from scratch because the old codebase sucked major doo doo slab*
 [RIGHT HERE!](https://discord.com/api/oauth2/authorize?client_id=545806922209558537&permissions=2150927424&scope=applications.commands%20bot)
 
 ## but can I steal the code...?
-go for it! it might take a little bit of effort to get it un-bonzi-ified but the infrastructure is built to be SUPER malleable and expandable. enjoy using the custom gui library, graphics library, command system, argument parsers, event waiters, event manager, and executor system!
+go for it! it might take a little bit of effort to get it un-bonzi-ified but the infrastructure is built to be SUPER malleable and expandable. enjoy using the custom gui library, graphics library, command system, argument parsers, event waiters, event manager, executor system, data manager, and scripting api!
 
 ### you must do these things if you use BonziBot's source:
 - share the same license as this project (GPL-3)
