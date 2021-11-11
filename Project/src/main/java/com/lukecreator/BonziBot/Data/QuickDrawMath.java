@@ -23,7 +23,10 @@ public class QuickDrawMath extends QuickDraw {
 		char p;
 		switch(mode) {
 		case 0:
-			this.answer = String.valueOf(a + b);
+			if(a == 9 && b == 10)
+				this.answer = "21";
+			else
+				this.answer = String.valueOf(a + b);
 			p = '+';
 			break;
 		case 1:

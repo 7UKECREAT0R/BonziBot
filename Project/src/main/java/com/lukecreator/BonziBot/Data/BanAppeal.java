@@ -21,7 +21,7 @@ public class BanAppeal implements Serializable {
 	
 	private static final long serialVersionUID = 7838786200973148685L;
 	
-	public String username;
+	public String username; // this is a complete tag btw (ABC#0001)
 	public String avatarUrl;
 	public long userId;
 	public String content;
@@ -53,11 +53,11 @@ public class BanAppeal implements Serializable {
 			eb.setFooter("Should this user be unbanned?");
 			
 			GuiButton[] buttons = new GuiButton[] {
-				new GuiButton("Accept Appeal", GuiButton.Color.GREEN, "_appeal:accept:" + this.userId),
-				new GuiButton("Reject Appeal", GuiButton.Color.RED, "_appeal:reject:" + this.userId)
+				new GuiButton("Accept Appeal", GuiButton.ButtonColor.GREEN, "_appeal:accept:" + this.userId),
+				new GuiButton("Reject Appeal", GuiButton.ButtonColor.RED, "_appeal:reject:" + this.userId)
 			};
 			
-			BonziUtils.appendButtons(tc.sendMessageEmbeds(eb.build()), buttons, false).queue(success -> {
+			BonziUtils.appendComponents(tc.sendMessageEmbeds(eb.build()), buttons, false).queue(success -> {
 				completion.accept(success);
 			}, failure);
 		}, fail -> { /* Ban not valid. */});

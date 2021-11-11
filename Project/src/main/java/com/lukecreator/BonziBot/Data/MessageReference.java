@@ -53,4 +53,16 @@ public class MessageReference implements Serializable {
 			name += " " + EmoteCache.mentionEmoteByName("bot_tag");
 		this.authorName = name;
 	}
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null)
+			return false;
+		
+		if(obj instanceof MessageReference)
+			return ((MessageReference)obj).messageId == this.messageId;
+		else if(obj instanceof Long)
+			return ((Long)obj).longValue() == this.messageId;
+		else
+			return false;
+	}
 }

@@ -15,15 +15,12 @@ import net.dv8tion.jda.api.requests.restaction.MessageAction;
  */
 public abstract class QuickDraw {
 	
-	private static Random random = null; 
+	private static Random random = new Random(); 
 	
 	/**
 	 * Create a random QuickDraw game.
 	 */
 	public static QuickDraw create(BonziBot bb) {
-		if(random == null)
-			random = new Random();
-		
 		switch(random.nextInt(4)) {
 		case 0:
 			return new QuickDrawMath(bb);

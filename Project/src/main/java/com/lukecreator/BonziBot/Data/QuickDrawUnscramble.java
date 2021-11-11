@@ -15,7 +15,7 @@ public class QuickDrawUnscramble extends QuickDraw {
 	QuickDrawUnscramble(BonziBot bb) {
 		this.word = bb.strings.getWord();
 		this.reward = this.word.length() * 5 + 30;
-		this.scrambled = BonziUtils.scramble(word);
+		this.scrambled = BonziUtils.scramble(word, 2);
 	}
 	
 	@Override
