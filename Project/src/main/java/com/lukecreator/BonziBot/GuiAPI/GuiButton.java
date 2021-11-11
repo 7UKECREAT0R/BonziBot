@@ -9,107 +9,71 @@ import net.dv8tion.jda.api.interactions.components.Button;
  * @author Lukec
  *
  */
-public class GuiButton {
+public class GuiButton extends GuiElement {
 	
-	public enum Color {
+	public enum ButtonColor {
 		BLUE,
 		GREEN,
 		GRAY,
 		RED
 	}
 	
-	// --- Legacy GuiButton Code ---
-	/*GenericEmoji icon;
-	public GenericEmoji getIcon() {
-		return icon;
-	}
-	int actionId;
-	
-	public GuiButton(GenericEmoji icon, int actionId) {
-		this.icon = icon;
-		this.actionId = actionId;
-	}
-	
-	public boolean wasClicked(ReactionEmote emote) {
-		return this.icon.isEqual(emote);
-	}
-	public int getActionId() {
-		return this.actionId;
-	}*/
-	
-	boolean newline;
-	public boolean isNewline() {
-		return this.newline;
-	}
-	
 	GenericEmoji icon;
 	String text;
-	Color color;
-	String actionId;
-	boolean enabled = true;
-	
-	public GuiButton(String text, Color color, String actionId) {
+	ButtonColor color;
+	public GuiButton(String text, ButtonColor color, String actionId) {
 		if(actionId != null && actionId.length() > 40)
 			actionId = actionId.substring(0, 40);
-		this.actionId = actionId;
+		this.id = actionId;
 		this.color = color;
 		this.text = text;
 		this.icon = null;
 	}
-	public GuiButton(GenericEmoji icon, String text, Color color, String actionId) {
+	public GuiButton(GenericEmoji icon, String text, ButtonColor color, String actionId) {
 		if(actionId != null && actionId.length() > 40)
 			actionId = actionId.substring(0, 40);
-		this.actionId = actionId;
+		this.id = actionId;
 		this.color = color;
 		this.text = text;
 		this.icon = icon;
 	}
-	public GuiButton asEnabled(boolean enabled) {
-		this.enabled = enabled;
-		return this;
+	public static GuiButton singleEmoji(GenericEmoji icon, String actionId) {
+		return new GuiButton(icon, null, ButtonColor.GRAY, actionId);
 	}
-	public GuiButton withColor(Color color) {
+	
+	public GuiButton withColor(ButtonColor color) {
 		this.color = color;
 		return this;
 	}
-	public boolean actionIdEqual(String other) {
-		return actionId.equals(other);
-	}
+	
+	@Override
 	public Button toDiscord() {
 		return this.toDiscord(enabled);
 	}
+	@Override
 	public Button toDiscord(boolean enabled) {
 		Button button = null;
 		switch(color) {
 		case BLUE:
-			button = (text == null) ? Button.primary(actionId, icon.toEmoji()) : Button.primary(actionId, text);
+			button = (text == null) ? Button.primary(id, icon.toEmoji()) : Button.primary(id, text);
 			break;
 		case GRAY:
-			button = (text == null) ? Button.secondary(actionId, icon.toEmoji()) : Button.secondary(actionId, text);
+			button = (text == null) ? Button.secondary(id, icon.toEmoji()) : Button.secondary(id, text);
 			break;
 		case GREEN:
-			button = (text == null) ? Button.success(actionId, icon.toEmoji()) : Button.success(actionId, text);
+			button = (text == null) ? Button.success(id, icon.toEmoji()) : Button.success(id, text);
 			break;
 		case RED:
-			button = (text == null) ? Button.danger(actionId, icon.toEmoji()) : Button.danger(actionId, text);
+			button = (text == null) ? Button.danger(id, icon.toEmoji()) : Button.danger(id, text);
 			break;
 		default:
-			button = (text == null) ? Button.primary(actionId, icon.toEmoji()) : Button.primary(actionId, text);
+			button = (text == null) ? Button.primary(id, icon.toEmoji()) : Button.primary(id, text);
 		}
 		if(!enabled)
 			button = button.asDisabled();
 		if(icon != null)
 			button = button.withEmoji(icon.toEmoji());
 		
-		return button;
-	}
-	
-	public static GuiButton singleEmoji(GenericEmoji icon, String actionId) {
-		return new GuiButton(icon, null, Color.GRAY, actionId);
-	}
-	public static GuiButton newline() {
-		GuiButton button = new GuiButton(null, null, Color.BLUE, null);
-		button.newline = true;
 		return button;
 	}
 }

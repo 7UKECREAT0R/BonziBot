@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 
 /**
  * Limit one per Entity, represents a imited
@@ -51,7 +52,18 @@ public class AllocGuiList {
 			guiContainer.onReaction(react, executor);
 		}
 	}*/
-	public void onButtonClick(ButtonClickEvent event, long messageId, User executor) {
+	public void handleInteraction(ButtonClickEvent event, long messageId, User executor) {
+		for(GuiContainer gui: guis) {
+			if(!gui.hasSentMessage)
+				continue;
+			if(gui.messageId == -1)
+				continue;
+			if(gui.messageId != messageId)
+				continue;
+			gui.onAction(event);
+		}
+	}
+	public void handleInteraction(SelectionMenuEvent event, long messageId, User executor) {
 		for(GuiContainer gui: guis) {
 			if(!gui.hasSentMessage)
 				continue;

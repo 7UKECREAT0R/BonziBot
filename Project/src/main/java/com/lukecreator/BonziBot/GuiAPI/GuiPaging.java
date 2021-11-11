@@ -36,12 +36,12 @@ public class GuiPaging extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "pageleft"));
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➡️"), "pageright"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "pageleft"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➡️"), "pageright"));
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		if(actionId.equals("pageleft") && pagingEnabled) {
 			if(--currentPage < minPage)
 				currentPage = minPage;
