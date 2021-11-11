@@ -74,4 +74,14 @@ public class RoleArg extends CommandArg {
 	public String getErrorDescription() {
 		return "You can either mention a role or use the role's ID.";
 	}
+	
+	@Override
+	public String stringify(Object obj) {
+		if(obj == null)
+			return null;
+		if(obj instanceof Role) {
+			return ((Role)obj).getAsMention();
+		} else
+			return obj.toString();
+	}
 }

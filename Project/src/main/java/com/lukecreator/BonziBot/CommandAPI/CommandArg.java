@@ -1,5 +1,8 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
@@ -21,17 +24,19 @@ public abstract class CommandArg {
 		TimeSpan(OptionType.STRING, true),
 		Color(OptionType.STRING, true),
 		Enum(OptionType.STRING, false),
+		Choice(OptionType.STRING, false),
 		Channel(OptionType.CHANNEL, false),
 		Array(OptionType.UNKNOWN, false);
 		
 		public OptionType nativeOption;	// Input information for slash commands.
-		public boolean formatValidate;	// Server-sided input validation for slash commands.
+		public boolean formatValidate;	// Use bonzi-sided input validation for slash command arguments.
 		
 		private ArgType(OptionType nativeOption, boolean formatValidate) {
 			this.nativeOption = nativeOption;
 			this.formatValidate = formatValidate;
 		}
 	}
+	
 	
 	public CommandArg(String name) {
 		this.argName = name;
@@ -88,5 +93,64 @@ public abstract class CommandArg {
 	 */
 	public String getErrorDescription() {
 		return "Incorrect Argument Type.";
+	}
+	
+	/**
+	 * {@link #toString()}s this object in the way implemented by this
+	 * specific CommandArg. If null is passed in, null will be returned.
+	 * @param obj
+	 * @return
+	 */
+	public String stringify(Object obj) {
+		if(obj == null)
+			return null;
+		return obj.toString();
+	}
+	
+	/**
+	 * Clone this CommandArg into a new object.
+	 * @return
+	 */
+	public CommandArg createNew() {
+		Class<? extends CommandArg> clazz = this.getClass();
+		try {
+			if(type == ArgType.Enum) {
+				EnumArg selfEnum = (EnumArg)this;
+				Constructor<?> cnst = clazz.getConstructor(String.class, Class.class);
+				CommandArg arg = (CommandArg)cnst.newInstance(this.argName, selfEnum.baseClass);
+				arg.optional = this.optional;
+				arg.object = null; // default
+				return arg;
+			} else if(type == ArgType.Choice) {
+				String[] choices = ((ChoiceArg)this).choices;
+				String[] copy = new String[choices.length];
+				for(int i = 0; i < choices.length; i++)
+					copy[i] = new String(choices[i]);
+				Constructor<?> cnst = clazz.getConstructor(String.class, String[].class);
+				CommandArg arg = (CommandArg)cnst.newInstance(this.argName, copy);
+				arg.optional = this.optional;
+				arg.object = null; // default
+				return arg;
+			} else {
+				Constructor<?> cnst = clazz.getConstructor(String.class);
+				CommandArg arg = (CommandArg)cnst.newInstance(this.argName);
+				arg.optional = this.optional;
+				arg.object = null; // default
+				return arg;
+			}
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

@@ -54,4 +54,16 @@ public class IntArg extends CommandArg {
 	public String getErrorDescription() {
 		return "Here you can type any whole number. (2, 11, 146, 5k, 20k)";
 	}
+	
+	@Override
+	public String stringify(Object obj) {
+		if(obj == null)
+			return null;
+		if(obj instanceof Integer) {
+			return String.valueOf(((Integer)obj).intValue());
+		} else if(obj instanceof Long) {
+			return String.valueOf(((Long)obj).longValue());
+		} else
+			return obj.toString();
+	}
 }

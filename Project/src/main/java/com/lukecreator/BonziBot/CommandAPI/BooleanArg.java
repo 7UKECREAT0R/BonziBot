@@ -9,12 +9,27 @@ import net.dv8tion.jda.api.entities.User;
 public class BooleanArg extends CommandArg {
 	
 	public static final String[] YES = new String[] {
-			"yes", "yeah", "true", "enabled", "y", "enable", "on"
+			"yes", "yeah", "true", "enabled", "y", "enable", "on", "yea", "yep"
 	};
 	public static final String[] NO = new String[] {
-			"no", "nope", "false", "disabled", "n", "disable", "off"
+			"no", "nope", "false", "disabled", "n", "disable", "off", "nah", "na"
 	};
 	public static final String[] ALL = ArrayUtils.addAll(YES, NO);
+	
+	public static boolean parseBoolean(String str) {
+		for(String s: YES) {
+			if(str.equalsIgnoreCase(s)) {
+				return true;
+			}
+		}
+		for(String s: NO) {
+			if(str.equalsIgnoreCase(s)) {
+				return false;
+			}
+		}
+		
+		return false;
+	}
 	
 	public BooleanArg(String name) {
 		super(name);
@@ -50,5 +65,15 @@ public class BooleanArg extends CommandArg {
 	@Override
 	public String getErrorDescription() {
 		return "You can put a \"yes\", \"no\", \"true\", \"false\", etc... here.";
+	}
+	
+	@Override
+	public String stringify(Object obj) {
+		if(obj == null)
+			return null;
+		if(obj instanceof Boolean) {
+			return ((Boolean)obj).booleanValue() ? "true" : "false";
+		} else
+			return obj.toString();
 	}
 }

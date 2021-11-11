@@ -162,5 +162,14 @@ public class ColorArg extends CommandArg {
 		return "You need to specify a valid color. (red, green, #1EFF1E, [255,0,0], etc...)";
 	}
 	
-	
+	@Override
+	public String stringify(Object obj) {
+		if(obj == null)
+			return null;
+		if(obj instanceof Color) {
+			Color c = (Color)obj;
+			return "[" + c.getRed() + ", " + c.getGreen() + ", " + c.getBlue() + "]";
+		} else
+			return obj.toString();
+	}
 }

@@ -33,4 +33,16 @@ public class FloatArg extends CommandArg {
 	public String getErrorDescription() {
 		return "Here you should specify any number.";
 	}
+	
+	@Override
+	public String stringify(Object obj) {
+		if(obj == null)
+			return null;
+		if(obj instanceof Float) {
+			return String.valueOf(((Float)obj).floatValue());
+		} else if(obj instanceof Double) {
+			return String.valueOf(((Double)obj).doubleValue());
+		} else
+			return obj.toString();
+	}
 }

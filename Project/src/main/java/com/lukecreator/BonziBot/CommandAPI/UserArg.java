@@ -119,4 +119,14 @@ public class UserArg extends CommandArg {
 	public String getErrorDescription() {
 		return "You can either mention a user, type their name, or use their ID here. (You can also say \"me\"!)";
 	}
+	
+	@Override
+	public String stringify(Object obj) {
+		if(obj == null)
+			return null;
+		if(obj instanceof User) {
+			return ((User)obj).getAsMention();
+		} else
+			return obj.toString();
+	}
 }

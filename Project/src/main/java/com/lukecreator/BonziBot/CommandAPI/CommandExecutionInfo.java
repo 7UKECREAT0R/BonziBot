@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -58,7 +59,6 @@ public class CommandExecutionInfo {
 		guild = e.getGuild();
 		member = e.getMember();
 		message = null; // beware
-		
 	}
 	public CommandExecutionInfo setCommandData(String commandName, String[] inputArgs, CommandParsedArgs args) {
 		this.commandName = commandName;
@@ -121,4 +121,25 @@ public class CommandExecutionInfo {
 	// Sometimes null.
 	public TextChannel tChannel = null;
 	public PrivateChannel pChannel = null;
+	
+	/**
+	 * Generic method to send a message depending on general context.
+	 * @param content
+	 */
+	public void sendMessage(String content) {
+		if(this.isSlashCommand)
+			this.slashCommand.reply(content).queue();
+		else
+			this.channel.sendMessage(content).queue();
+	}
+	/**
+	 * Generic method to send a message depending on general context.
+	 * @param embed
+	 */
+	public void sendMessageEmbeds(MessageEmbed embed) {
+		if(this.isSlashCommand)
+			this.slashCommand.replyEmbeds(embed).queue();
+		else
+			this.channel.sendMessageEmbeds(embed).queue();
+	}
 }

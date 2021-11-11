@@ -87,4 +87,23 @@ public class ArrayArg extends CommandArg {
 		String b = this.optional ? "]" : ">";
 		return a + argName + b;
 	}
+	
+	@Override
+	public String stringify(Object obj) {
+		if(obj == null)
+			return null;
+		if(obj instanceof Object[]) {
+			Object[] objs = (Object[])obj;
+			String[] join = new String[objs.length];
+			for(int i = 0; i < objs.length; i++) {
+				Object o = objs[i];
+				if(o == null)
+					join[i] = null;
+				else
+					join[i] = o.toString();
+			}
+			return "[" + String.join(", ", join) + "]";
+		} else
+			return obj.toString();
+	}
 }

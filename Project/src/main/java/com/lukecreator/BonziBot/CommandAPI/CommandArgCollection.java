@@ -115,7 +115,9 @@ public class CommandArgCollection {
 	@SuppressWarnings("rawtypes")
 	public CommandParsedArgs parse(OptionMapping[] options, JDA jda, User exec, Guild g) {
 		
-		CommandArg[] clone = args.clone();
+		CommandArg[] clone = new CommandArg[this.args.length];
+		for(int i = 0; i < clone.length; i++)
+			clone[i] = this.args[i].createNew();
 		
 		for(OptionMapping mapping: options) {
 			String optionName = mapping.getName().replace('-', ' ');
@@ -141,6 +143,11 @@ public class CommandArgCollection {
 				EnumArg eArg = (EnumArg)cmd;
 				Enum[] tests = eArg.enumType;
 				cmd.object = tests[(int)mapping.getAsLong()];
+				clone[search] = cmd;
+				continue;
+			}if(cmd.type == ArgType.Choice) {
+				ChoiceArg cArg = (ChoiceArg)cmd;
+				cmd.object = cArg.getValues()[(int)mapping.getAsLong()];
 				clone[search] = cmd;
 				continue;
 			} else if(cmd.type == ArgType.TimeSpan) {

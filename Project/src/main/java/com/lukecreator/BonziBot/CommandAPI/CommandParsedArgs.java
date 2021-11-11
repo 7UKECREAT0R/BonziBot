@@ -38,7 +38,7 @@ public class CommandParsedArgs {
 		return o != null;
 	}
 	
-	// Getters (ft. poop casts)
+	// Getters (ft. poo casts)
 	public Object get(String name) {
 		return data.get(name);
 	}

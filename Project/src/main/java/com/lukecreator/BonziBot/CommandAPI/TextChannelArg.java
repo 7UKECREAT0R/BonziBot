@@ -76,4 +76,14 @@ public class TextChannelArg extends CommandArg {
 	public String getErrorDescription() {
 		return "Mention a text channel, such as #epic-gaming, or send its ID.";
 	}
+	
+	@Override
+	public String stringify(Object obj) {
+		if(obj == null)
+			return null;
+		if(obj instanceof TextChannel) {
+			return ((TextChannel)obj).getAsMention();
+		} else
+			return obj.toString();
+	}
 }
