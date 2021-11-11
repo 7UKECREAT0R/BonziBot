@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionRemoveEvent;
 
@@ -156,7 +157,7 @@ public class GuiManager {
 				return;
 			}
 			
-			guiList.onButtonClick(e, mId, clicker);
+			guiList.handleInteraction(e, mId, clicker);
 			guildGuis.put(gId, guiList);
 		} else {
 			User clicker = e.getUser();
@@ -174,7 +175,47 @@ public class GuiManager {
 				return;
 			}
 			
-			guiList.onButtonClick(e, mId, clicker);
+			guiList.handleInteraction(e, mId, clicker);
+			userGuis.put(uId, guiList);
+		}
+	}
+	public void onSelectionMenu(SelectionMenuEvent e) {
+		if(e.isFromGuild()) {
+			Guild g = e.getGuild();
+			long gId = g.getIdLong();
+			User clicker = e.getUser();
+			
+			if(!guildGuis.containsKey(gId)) {
+				e.reply(":warning: `The bot has restarted since this was sent. Please open the GUI again!`").setEphemeral(true).queue();
+				return;
+			}
+			
+			AllocGuiList guiList = guildGuis.get(gId);
+			long mId = e.getMessageIdLong();
+			if(!guiList.hasMessageId(mId)) {
+				e.reply(":warning: `This GUI has expired. Please open it again!`").setEphemeral(true).queue();
+				return;
+			}
+			
+			guiList.handleInteraction(e, mId, clicker);
+			guildGuis.put(gId, guiList);
+		} else {
+			User clicker = e.getUser();
+			long uId = clicker.getIdLong();
+			
+			if(!userGuis.containsKey(uId)) {
+				e.reply(":warning: `The bot has restarted since this was sent. Please open the GUI again!`").setEphemeral(true).queue();
+				return;
+			}
+			
+			AllocGuiList guiList = userGuis.get(uId);
+			long mId = e.getMessageIdLong();
+			if(!guiList.hasMessageId(mId)) {
+				e.reply(":warning: `This GUI has expired. Please open it again!`").setEphemeral(true).queue();
+				return;
+			}
+			
+			guiList.handleInteraction(e, mId, clicker);
 			userGuis.put(uId, guiList);
 		}
 	}

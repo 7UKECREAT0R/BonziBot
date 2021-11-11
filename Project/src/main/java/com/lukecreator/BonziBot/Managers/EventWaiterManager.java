@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
@@ -44,8 +45,8 @@ public class EventWaiterManager {
 		= new HashMap<Long, Tuple<GuiButton[], Consumer<String>>>();
 	HashMap<Long, Tuple<GuiButton[], Consumer<Tuple<User, String>>>> globalActionWaiters
 		= new HashMap<Long, Tuple<GuiButton[], Consumer<Tuple<User, String>>>>();
-	private static final GuiButton CONFIRM_YES = new GuiButton("Yes", GuiButton.Color.GREEN, "_cyes");
-	private static final GuiButton CONFIRM_NO = new GuiButton("No", GuiButton.Color.RED, "_cno");
+	private static final GuiButton CONFIRM_YES = new GuiButton("Yes", GuiButton.ButtonColor.GREEN, "_cyes");
+	private static final GuiButton CONFIRM_NO = new GuiButton("No", GuiButton.ButtonColor.RED, "_cno");
 	
 	// Base methods used for raw event waiting.
 	public void waitForResponse(User user, Consumer<? super Message> onResponse) {
@@ -78,7 +79,7 @@ public class EventWaiterManager {
 	}
 	
 	// Reaction waiters which return index pressed.
-	// OBSOLETE as of 6-8-21. Use waitForAction(...)
+	// DEPRECATED as of 6-8-21. Use waitForAction(...)
 	@Deprecated
 	public void waitForReaction(User user, Message msg, GenericEmoji[] emoji, Consumer<Integer> consumer) {
 		waitForReaction(user.getIdLong(), msg, emoji, consumer);
@@ -105,14 +106,14 @@ public class EventWaiterManager {
 	}
 	public MessageAction waitForAction(long userId, MessageAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
 		this.actionWaiters.put(userId, new Tuple<GuiButton[], Consumer<String>>(buttons, consumer));
-		return BonziUtils.appendButtons(msgAction, buttons, false);
+		return BonziUtils.appendComponents(msgAction, buttons, false);
 	}
 	public ReplyAction waitForAction(User user, ReplyAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
 		return waitForAction(user.getIdLong(), msgAction, consumer, buttons);
 	}
 	public ReplyAction waitForAction(long userId, ReplyAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
 		this.actionWaiters.put(userId, new Tuple<GuiButton[], Consumer<String>>(buttons, consumer));
-		return BonziUtils.appendButtons(msgAction, buttons);
+		return BonziUtils.appendComponents(msgAction, buttons);
 	}
 	public void stopWaitingForAction(User user) {
 		stopWaitingForAction(user.getIdLong());
@@ -121,12 +122,12 @@ public class EventWaiterManager {
 		this.actionWaiters.remove(userId);
 	}
 	public void waitForGlobalAction(MessageAction msgAction, Consumer<Tuple<User, String>> consumer, GuiButton... buttons) {
-		BonziUtils.appendButtons(msgAction, buttons, false).queue(msg -> {
+		BonziUtils.appendComponents(msgAction, buttons, false).queue(msg -> {
 			this.globalActionWaiters.put(msg.getIdLong(), new Tuple<GuiButton[], Consumer<Tuple<User, String>>>(buttons, consumer));
 		});
 	}
 	public void waitForGlobalAction(ReplyAction msgAction, Consumer<Tuple<User, String>> consumer, GuiButton... buttons) {
-		BonziUtils.appendButtons(msgAction, buttons).queue(hook -> {
+		BonziUtils.appendComponents(msgAction, buttons).queue(hook -> {
 			hook.retrieveOriginal().queue(msg -> {
 				this.globalActionWaiters.put(msg.getIdLong(), new Tuple<GuiButton[], Consumer<Tuple<User, String>>>(buttons, consumer));
 			});
@@ -208,6 +209,20 @@ public class EventWaiterManager {
 		CommandArg arg = obj.getA();
 		Consumer<Object> event = obj.getB();
 		String content = msg.getContentRaw();
+		
+		if(content.length() > 1024)
+			content = content.substring(0, 1024);
+		
+		final boolean deleteMessage;
+		
+		if(content.length() < 1 && !msg.getAttachments().isEmpty()) {
+			Attachment file = msg.getAttachments().get(0);
+			if(file.isImage())
+				content = file.getUrl();
+			deleteMessage = false;
+		} else
+			deleteMessage = true;
+		
 		MessageChannel channel = msg.getChannel();
 		Guild guild = msg.isFromGuild() ? msg.getGuild() : null;
 		JDA jda = msg.getJDA();
@@ -227,7 +242,8 @@ public class EventWaiterManager {
 		arg.parseWord(content, jda, msg.getAuthor(), guild);
 		Object parsed = arg.object;
 		
-		msg.delete().queue();
+		if(deleteMessage)
+			msg.delete().queue();
 		
 		if(parsed == null) {
 			MessageEmbed me = BonziUtils.failureEmbed
@@ -280,7 +296,7 @@ public class EventWaiterManager {
 			
 			for(int i = 0; i < possible.length; i++) {
 				GuiButton test = possible[i];
-				if(test.actionIdEqual(cId)) {
+				if(test.idEqual(cId)) {
 					Message m = e.getMessage();
 					if(m != null) m.delete().queue(null, fail -> {});
 					this.actionWaiters.remove(id);
@@ -304,7 +320,7 @@ public class EventWaiterManager {
 			
 			for(int i = 0; i < possible.length; i++) {
 				GuiButton test = possible[i];
-				if(test.actionIdEqual(cId)) {
+				if(test.idEqual(cId)) {
 					Message m = e.getMessage();
 					if(m != null) m.delete().queue(null, fail -> {});
 					this.globalActionWaiters.remove(mid);
