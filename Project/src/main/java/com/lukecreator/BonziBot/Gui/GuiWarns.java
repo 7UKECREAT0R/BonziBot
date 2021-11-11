@@ -19,7 +19,7 @@ import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.Member;
 
 public class GuiWarns extends GuiPaging {
 	
@@ -34,11 +34,11 @@ public class GuiWarns extends GuiPaging {
 	String guildName;
 	String userName;
 	
-	public GuiWarns(List<ModernWarn> contents, User user, Guild guild) {
+	public GuiWarns(List<ModernWarn> contents, Member member, Guild guild) {
 		this.guildName = guild.getName();
 		this.guildId = guild.getIdLong();
-		this.userName = user.getName();
-		this.userId = user.getIdLong();
+		this.userName = member.getUser().getName();
+		this.userId = member.getUser().getIdLong();
 		Collections.sort(contents, new ModernWarnSort().reversed());
 		this.contents = contents;
 		int count = contents.size();
@@ -52,16 +52,16 @@ public class GuiWarns extends GuiPaging {
 		this.reinitialize(jda);
 	}
 	public void reinitialize(JDA jda) {
-		this.buttons.clear();
+		this.elements.clear();
 		
 		if(this.removeMode) {
-			this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
-			this.buttons.add(new GuiButton("Up", GuiButton.Color.BLUE, "up"));
-			this.buttons.add(new GuiButton("Down", GuiButton.Color.BLUE, "down"));
-			this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("❌"), "delete").withColor(GuiButton.Color.RED));
+			this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
+			this.elements.add(new GuiButton("Up", GuiButton.ButtonColor.BLUE, "up"));
+			this.elements.add(new GuiButton("Down", GuiButton.ButtonColor.BLUE, "down"));
+			this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("❌"), "delete").withColor(GuiButton.ButtonColor.RED));
 		} else {
 			super.initialize(jda);
-			this.buttons.add(new GuiButton("Remove Warns", GuiButton.Color.RED, "removemode"));
+			this.elements.add(new GuiButton("Remove Warns", GuiButton.ButtonColor.RED, "removemode"));
 		}
 	}
 	
@@ -118,7 +118,7 @@ public class GuiWarns extends GuiPaging {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		UserAccountManager uam = this.bonziReference.accounts;
 		UserAccount account = uam.getUserAccount(this.userId);
 		
@@ -170,7 +170,7 @@ public class GuiWarns extends GuiPaging {
 				this.parent.redrawMessage(jda);
 			}
 		} else {
-			super.onAction(actionId, executorId, jda);
+			super.onButtonClick(actionId, executorId, jda);
 			if(actionId.equalsIgnoreCase("removemode")) {
 				this.removeMode = true;
 				this.removeCursor = 0;

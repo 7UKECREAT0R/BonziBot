@@ -38,15 +38,15 @@ public class GuiTodoFolders extends Gui {
 	}
 	public void reinitialize() {
 		
-		this.buttons.clear();
+		this.elements.clear();
 		if(this.deleteMode) {
-			this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
-			this.buttons.add(new GuiButton("Up", GuiButton.Color.BLUE, "up"));
-			this.buttons.add(new GuiButton("Down", GuiButton.Color.BLUE, "down"));
-			this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("❌"), "delete").withColor(GuiButton.Color.RED));
+			this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
+			this.elements.add(new GuiButton("Up", GuiButton.ButtonColor.BLUE, "up"));
+			this.elements.add(new GuiButton("Down", GuiButton.ButtonColor.BLUE, "down"));
+			this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("❌"), "delete").withColor(GuiButton.ButtonColor.RED));
 		} else {
-			this.buttons.add(new GuiButton("Create Folder", GuiButton.Color.BLUE, "create").asEnabled(this.folders.size() < TodoList.MAX_FOLDERS));
-			this.buttons.add(new GuiButton("Remove Folder", GuiButton.Color.RED, "remove").asEnabled(this.folders.size() > 0));
+			this.elements.add(new GuiButton("Create Folder", GuiButton.ButtonColor.BLUE, "create").asEnabled(this.folders.size() < TodoList.MAX_FOLDERS));
+			this.elements.add(new GuiButton("Remove Folder", GuiButton.ButtonColor.RED, "remove").asEnabled(this.folders.size() > 0));
 		}
 	}
 	
@@ -83,7 +83,7 @@ public class GuiTodoFolders extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		if(this.deleteMode) {
 			if(actionId.equals("return")) {
 				this.deleteMode = false;

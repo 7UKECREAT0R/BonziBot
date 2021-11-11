@@ -39,9 +39,9 @@ public class GuiDisableCommands extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🆕"), "Add Command", GuiButton.Color.BLUE, "new"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("b_trash")), "Remove Command", GuiButton.Color.RED,  "delete"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🆕"), "Add Command", GuiButton.ButtonColor.BLUE, "new"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("b_trash")), "Remove Command", GuiButton.ButtonColor.RED,  "delete"));
 		this.disabledCommands = this.bonziReference.guildSettings.getSettings(guildId).disabledCommands;
 		if(this.disabledCommands == null)
 			this.disabledCommands = new ArrayList<Integer>();
@@ -79,7 +79,7 @@ public class GuiDisableCommands extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		MessageChannel channel = this.parent.getChannel(jda);
 		GuildSettingsManager gsm = this.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);

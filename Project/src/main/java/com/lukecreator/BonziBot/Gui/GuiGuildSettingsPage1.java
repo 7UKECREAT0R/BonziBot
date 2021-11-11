@@ -54,17 +54,17 @@ public class GuiGuildSettingsPage1 extends Gui {
 		boolean botcmds = settings.botCommandsEnabled;
 		boolean jr = settings.joinRole;
 		
-		this.buttons.clear();
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🤬"), "Filter Level", GuiButton.Color.BLUE, "filter"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🗒️"), "Custom Filter", GuiButton.Color.BLUE, "customfilter"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📜"), tags?"Disable Tags":"Enable Tags", tags?GuiButton.Color.RED:GuiButton.Color.GREEN, "tag"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🕵️"), ptags?"Disable Private Tags":"Enable Private Tags", ptags?GuiButton.Color.RED:GuiButton.Color.GREEN, "tagprivacy"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), logs?"Disable Logging":"Enable Logging", logs?GuiButton.Color.RED:GuiButton.Color.GREEN, "logging"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🤖"), botcmds?"Disable Bot Commands":"Enable Bot Commands", botcmds?GuiButton.Color.RED:GuiButton.Color.GREEN, "botcommands"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("👋"), "Join Message", GuiButton.Color.BLUE, "joinmessage"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🚪"), "Leave Message", GuiButton.Color.BLUE, "leavemessage"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("💥"), jr?"Disable Join Role":"Enable Join Role", GuiButton.Color.BLUE, "joinrole"));
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➡️"), "nextpage"));
+		this.elements.clear();
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🤬"), "Filter Level", GuiButton.ButtonColor.BLUE, "filter"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🗒️"), "Custom Filter", GuiButton.ButtonColor.BLUE, "customfilter"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📜"), tags?"Disable Tags":"Enable Tags", tags?GuiButton.ButtonColor.RED:GuiButton.ButtonColor.GREEN, "tag"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🕵️"), ptags?"Disable Private Tags":"Enable Private Tags", ptags?GuiButton.ButtonColor.RED:GuiButton.ButtonColor.GREEN, "tagprivacy"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📝"), logs?"Disable Logging":"Enable Logging", logs?GuiButton.ButtonColor.RED:GuiButton.ButtonColor.GREEN, "logging"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🤖"), botcmds?"Disable Bot Commands":"Enable Bot Commands", botcmds?GuiButton.ButtonColor.RED:GuiButton.ButtonColor.GREEN, "botcommands"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("👋"), "Join Message", GuiButton.ButtonColor.BLUE, "joinmessage"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🚪"), "Leave Message", GuiButton.ButtonColor.BLUE, "leavemessage"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("💥"), jr?"Disable Join Role":"Enable Join Role", GuiButton.ButtonColor.BLUE, "joinrole"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➡️"), "nextpage"));
 	}
 	
 	@Override
@@ -136,7 +136,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		GuildSettingsManager gsm = this
 			.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);

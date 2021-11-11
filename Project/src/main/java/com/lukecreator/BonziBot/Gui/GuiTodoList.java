@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.Data.TodoFolder;
 import com.lukecreator.BonziBot.Data.TodoItem;
 import com.lukecreator.BonziBot.Data.TodoList;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
+import com.lukecreator.BonziBot.GuiAPI.GuiNewline;
 import com.lukecreator.BonziBot.GuiAPI.GuiPaging;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 
@@ -41,15 +42,15 @@ public class GuiTodoList extends GuiPaging {
 		this.reinitialize(jda);
 	}
 	public void reinitialize(JDA jda) {
-		this.buttons.clear();
+		this.elements.clear();
 		super.initialize(jda);
-		this.buttons.add(GuiButton.newline());
-		this.buttons.add(new GuiButton("Finished", GuiButton.Color.GREEN, "done").asEnabled(folder.size() > 0));
-		this.buttons.add(new GuiButton("Push Down", GuiButton.Color.GRAY, "push").asEnabled(folder.size() > 0));
-		this.buttons.add(GuiButton.newline());
+		this.elements.add(new GuiNewline());
+		this.elements.add(new GuiButton("Finished", GuiButton.ButtonColor.GREEN, "done").asEnabled(folder.size() > 0 && this.currentPage == 1));
+		this.elements.add(new GuiButton("Push Down", GuiButton.ButtonColor.GRAY, "push").asEnabled(folder.size() > 0));
+		this.elements.add(new GuiNewline());
 		
-		this.buttons.add(new GuiButton("Add Item", GuiButton.Color.BLUE, "add").asEnabled(folder.size() < TodoFolder.MAX_ITEMS));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🖼️"), "Set Icon", GuiButton.Color.BLUE, "icon"));
+		this.elements.add(new GuiButton("Add Item", GuiButton.ButtonColor.BLUE, "add").asEnabled(folder.size() < TodoFolder.MAX_ITEMS));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🖼️"), "Set Icon", GuiButton.ButtonColor.BLUE, "icon"));
 	}
 	
 	@Override
@@ -93,8 +94,24 @@ public class GuiTodoList extends GuiPaging {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
-		super.onAction(actionId, executorId, jda);
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
+		
+		if(actionId.equals("pageleft") && pagingEnabled) {
+			if(--currentPage < minPage)
+				currentPage = minPage;
+			else {
+				this.reinitialize(jda);
+				parent.redrawMessage(jda);
+			}
+		}
+		if(actionId.equals("pageright") && pagingEnabled) {
+			if(++currentPage > maxPage)
+				currentPage = maxPage;
+			else {
+				this.reinitialize(jda);
+				parent.redrawMessage(jda);
+			}
+		}
 		
 		MessageChannel channel = this.parent.getChannel(jda);
 		
@@ -153,7 +170,7 @@ public class GuiTodoList extends GuiPaging {
 			
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
 			channel.sendMessageEmbeds(BonziUtils.quickEmbed("Adding item to todo list...",
-				"Send the name of the folder you want to make here.", Color.orange).build()).queue(del -> {
+				"What will its title be?", Color.orange).build()).queue(del -> {
 				ewm.waitForResponse(executorId, response -> {
 					del.delete().queue();
 					response.delete().queue(null, fail -> {});
@@ -165,7 +182,7 @@ public class GuiTodoList extends GuiPaging {
 						return;
 					}
 					final String nameModified = name;
-					channel.sendMessageEmbeds(BonziUtils.quickEmbed("Describe your task!",
+					channel.sendMessageEmbeds(BonziUtils.quickEmbed("Now, describe your task!",
 						"Type 'none' to not include a description.", Color.orange).build()).queue(del2 -> {
 							ewm.waitForResponse(executorId, descResponse -> {
 								del2.delete().queue();

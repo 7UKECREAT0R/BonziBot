@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
+import com.lukecreator.BonziBot.GuiAPI.GuiNewline;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -48,46 +49,47 @@ public class GuiCalculator extends Gui {
 		this.reinitialize();
 	}
 	public void reinitialize() {
-		this.buttons.clear();
+		this.elements.clear();
 		
-		this.buttons.add(new GuiButton(this.closed ? "/\\" : "\\/",
-			this.closed ? GuiButton.Color.GREEN : GuiButton.Color.BLUE, "close"));
+		this.elements.add(new GuiButton(this.closed ? "/\\" : "\\/",
+			this.closed ? GuiButton.ButtonColor.GREEN : GuiButton.ButtonColor.BLUE, "close"));
 		
 		if(this.closed)
 			return;
 		
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🫂"), "friends")
-			.asEnabled(this.inGuild).withColor(GuiButton.Color.BLUE));
-		this.buttons.add(new GuiButton("C", GuiButton.Color.RED, "clear"));
-		this.buttons.add(new GuiButton("/", GuiButton.Color.BLUE, "div"));
-		this.buttons.add(GuiButton.newline());
+		this.elements.add(((GuiButton)GuiButton.singleEmoji(GenericEmoji.fromEmoji("🫂"), "friends")
+				.asEnabled(this.inGuild)).withColor(GuiButton.ButtonColor.BLUE));
 		
-		this.buttons.add(new GuiButton("7", GuiButton.Color.GRAY, "7"));
-		this.buttons.add(new GuiButton("8", GuiButton.Color.GRAY, "8"));
-		this.buttons.add(new GuiButton("9", GuiButton.Color.GRAY, "9"));
-		this.buttons.add(new GuiButton("x", GuiButton.Color.BLUE, "mul"));
-		this.buttons.add(GuiButton.newline());
+		this.elements.add(new GuiButton("C", GuiButton.ButtonColor.RED, "clear"));
+		this.elements.add(new GuiButton("/", GuiButton.ButtonColor.BLUE, "div"));
+		this.elements.add(new GuiNewline());
 		
-		this.buttons.add(new GuiButton("4", GuiButton.Color.GRAY, "4"));
-		this.buttons.add(new GuiButton("5", GuiButton.Color.GRAY, "5"));
-		this.buttons.add(new GuiButton("6", GuiButton.Color.GRAY, "6"));
-		this.buttons.add(new GuiButton("-", GuiButton.Color.BLUE, "sub"));
-		this.buttons.add(GuiButton.newline());
+		this.elements.add(new GuiButton("7", GuiButton.ButtonColor.GRAY, "7"));
+		this.elements.add(new GuiButton("8", GuiButton.ButtonColor.GRAY, "8"));
+		this.elements.add(new GuiButton("9", GuiButton.ButtonColor.GRAY, "9"));
+		this.elements.add(new GuiButton("x", GuiButton.ButtonColor.BLUE, "mul"));
+		this.elements.add(new GuiNewline());
 		
-		this.buttons.add(new GuiButton("1", GuiButton.Color.GRAY, "1"));
-		this.buttons.add(new GuiButton("2", GuiButton.Color.GRAY, "2"));
-		this.buttons.add(new GuiButton("3", GuiButton.Color.GRAY, "3"));
-		this.buttons.add(new GuiButton("+", GuiButton.Color.BLUE, "add"));
-		this.buttons.add(GuiButton.newline());
+		this.elements.add(new GuiButton("4", GuiButton.ButtonColor.GRAY, "4"));
+		this.elements.add(new GuiButton("5", GuiButton.ButtonColor.GRAY, "5"));
+		this.elements.add(new GuiButton("6", GuiButton.ButtonColor.GRAY, "6"));
+		this.elements.add(new GuiButton("-", GuiButton.ButtonColor.BLUE, "sub"));
+		this.elements.add(new GuiNewline());
 		
-		this.buttons.add(new GuiButton("+/-", GuiButton.Color.GRAY, "invert"));
-		this.buttons.add(new GuiButton("0", GuiButton.Color.GRAY, "0"));
-		this.buttons.add(new GuiButton(".", GuiButton.Color.GRAY, "dot"));
-		this.buttons.add(new GuiButton("=", GuiButton.Color.BLUE, "equ"));
+		this.elements.add(new GuiButton("1", GuiButton.ButtonColor.GRAY, "1"));
+		this.elements.add(new GuiButton("2", GuiButton.ButtonColor.GRAY, "2"));
+		this.elements.add(new GuiButton("3", GuiButton.ButtonColor.GRAY, "3"));
+		this.elements.add(new GuiButton("+", GuiButton.ButtonColor.BLUE, "add"));
+		this.elements.add(new GuiNewline());
+		
+		this.elements.add(new GuiButton("+/-", GuiButton.ButtonColor.GRAY, "invert"));
+		this.elements.add(new GuiButton("0", GuiButton.ButtonColor.GRAY, "0"));
+		this.elements.add(new GuiButton(".", GuiButton.ButtonColor.GRAY, "dot"));
+		this.elements.add(new GuiButton("=", GuiButton.ButtonColor.BLUE, "equ"));
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		if(actionId.equals("friends")) {
 			if(!this.inGuild)
 				return;
@@ -203,7 +205,10 @@ public class GuiCalculator extends Gui {
 	void combineValues() {
 		switch(this.operation) {
 		case ADD:
-			this.buffer = this.value + this.buffer;
+			if(this.value == 9 && this.buffer == 10)
+				this.buffer = 21;
+			else
+				this.buffer = this.value + this.buffer;
 			break;
 		case SUB:
 			this.buffer = this.value - this.buffer;

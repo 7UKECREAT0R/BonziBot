@@ -46,7 +46,7 @@ public class GuiHelpMenuCategory extends GuiPaging {
 	@Override
 	public void initialize(JDA jda) {
 		super.initialize(jda);
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("📁"), "return").withColor(GuiButton.Color.GRAY));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("📁"), "return").withColor(GuiButton.ButtonColor.GRAY));
 	}
 	
 	@Override
@@ -78,9 +78,10 @@ public class GuiHelpMenuCategory extends GuiPaging {
 			String name = current.name;
 			String desc = current.description;
 			String cmdName = current.getFilteredCommandName();
+			String prefixFixed = current.isRegisterable() ? "/" : prefix;
 			String[] usages = (current.args != null) ?
-				current.args.buildUsage(prefix, cmdName) :
-				new String[] { '`' + prefix + cmdName + '`' };
+				current.args.buildUsage(prefixFixed, cmdName) :
+				new String[] { '`' + prefixFixed + cmdName + '`' };
 			String usage = String.join("\n", usages);
 				
 			int subCatOfCmd = current.subCategory;
@@ -102,8 +103,8 @@ public class GuiHelpMenuCategory extends GuiPaging {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
-		super.onAction(actionId, executorId, jda);
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
+		super.onButtonClick(actionId, executorId, jda);
 		if(actionId.equals("return")) {
 			GuiHelpMenu menu = new GuiHelpMenu(this.category == CommandCategory._HIDDEN);
 			this.parent.setActiveGui(menu, jda);

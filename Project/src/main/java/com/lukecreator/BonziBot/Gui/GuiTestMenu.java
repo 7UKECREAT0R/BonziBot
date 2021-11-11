@@ -2,15 +2,17 @@ package com.lukecreator.BonziBot.Gui;
 
 import java.awt.Color;
 
-import com.lukecreator.BonziBot.Data.GenericEmoji;
+import com.lukecreator.BonziBot.GuiAPI.DropdownItem;
+import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
-import com.lukecreator.BonziBot.GuiAPI.GuiPaging;
+import com.lukecreator.BonziBot.GuiAPI.GuiButton.ButtonColor;
+import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
-public class GuiTestMenu extends GuiPaging {
+public class GuiTestMenu extends Gui {
 	
 	enum Things {
 		Spaghetti,
@@ -18,37 +20,50 @@ public class GuiTestMenu extends GuiPaging {
 		Bananas,
 		Kelp,
 		TripleCheesecake,
-		Spinach
+		Spinach,
+		Hushpuppy,
+		OnionRing,
+		Wallpaper
 	}
+	
 	final Things[] set = Things.values();
+	
+	Things selected = null;
 	
 	@Override
 	public void initialize(JDA jda) {
 		super.initialize(jda);
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🔵"), "Choose!", GuiButton.Color.GREEN, "pick"));
-		this.maxPage = set.length;
+		
+		this.elements.add(new GuiDropdown("Favorite Food", "fav", false).addItemsTransform(set, thing -> {
+			return new DropdownItem(thing, thing.toString());
+		}));
+		this.elements.add(new GuiButton("SEND", ButtonColor.GREEN, "send"));
 	}
 	
 	@Override
 	public Object draw(JDA jda) {
-		String sel = set[this.currentPage - 1].toString();
+		
+		String selection = this.selected == null ? "none" : this.selected.toString();
+		
 		EmbedBuilder eb = new EmbedBuilder()
 			.setColor(Color.magenta)
-			.setTitle("Paging Test!")
-			.setDescription("Pick your favorite food!");
-		eb.addField(this.getPageString(), sel, false);
+			.setTitle("dropdowns test wOOOoooOOoo")
+			.setDescription("Current Selection: " + selection);
 		return eb.build();
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
-		super.onAction(actionId, executorId, jda);
-		
-		if(actionId.equals("pick")) {
-			this.pagingEnabled = false;
-			String sel = set[this.currentPage - 1].toString();
-			MessageChannel channel = parent.getChannel(jda);
-			channel.sendMessage("Selected: " + sel).queue();
+	public void onButtonClick(String buttonId, long clickerId, JDA jda) {
+		if(buttonId.equals("send")) {
+			MessageChannel channel = this.parent.getChannel(jda);
+			channel.sendMessage("YOU PICKED: \"" + this.selected.toString() + "\"").queue();
 		}
+	}
+	
+	@Override
+	public void onDropdownChanged(GuiDropdown dropdown, long clickerId, JDA jda) {
+		Things selected = (Things)dropdown.getSelectedObject();
+		this.selected = selected;
+		this.parent.redrawMessage(jda);
 	}
 }

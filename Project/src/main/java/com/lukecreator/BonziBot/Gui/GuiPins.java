@@ -69,16 +69,16 @@ public class GuiPins extends GuiPaging {
 		if(pins.size() % PER_PAGE != 0)
 			this.maxPage++;
 		
-		this.buttons.clear();
+		this.elements.clear();
 		if(this.deleteMode) {
-			this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
-			this.buttons.add(new GuiButton("Up", GuiButton.Color.BLUE, "up"));
-			this.buttons.add(new GuiButton("Down", GuiButton.Color.BLUE, "down"));
-			this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("❌"), "delete").withColor(GuiButton.Color.RED));
+			this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
+			this.elements.add(new GuiButton("Up", GuiButton.ButtonColor.BLUE, "up"));
+			this.elements.add(new GuiButton("Down", GuiButton.ButtonColor.BLUE, "down"));
+			this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("❌"), "delete").withColor(GuiButton.ButtonColor.RED));
 		} else {
 			super.initialize(null);
-			this.buttons.add(new GuiButton("Remove Pins", GuiButton.Color.RED, "remove").asEnabled(this.pins.size() > 0));
-			this.buttons.add(new GuiButton(currentServer ? "This Server" : "All Pins", GuiButton.Color.GRAY, "guildonly").asEnabled(guildId != 0l));
+			this.elements.add(new GuiButton("Remove Pins", GuiButton.ButtonColor.RED, "remove").asEnabled(this.pins.size() > 0));
+			this.elements.add(new GuiButton(currentServer ? "This Server" : "All Pins", GuiButton.ButtonColor.GRAY, "guildonly").asEnabled(guildId != 0l));
 			
 		}
 	}
@@ -116,7 +116,7 @@ public class GuiPins extends GuiPaging {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		if(this.deleteMode) {
 			if(actionId.equals("return")) {
 				this.deleteMode = false;
@@ -151,11 +151,12 @@ public class GuiPins extends GuiPaging {
 			}
 			if(actionId.equals("delete")) {
 				int offset = (this.currentPage - 1) * PER_PAGE;
-				this.pins.remove(offset + this.deleteCursor);
+				this.allPins.remove(this.pins.remove(offset + this.deleteCursor));
+				
 				
 				UserAccountManager uam = this.bonziReference.accounts;
 				UserAccount account = uam.getUserAccount(executorId);
-				account.setPersonalPins(this.pins);
+				account.setPersonalPins(this.allPins);
 				uam.setUserAccount(executorId, account);
 				
 				if(this.pins.size() > 0) {
@@ -175,7 +176,7 @@ public class GuiPins extends GuiPaging {
 				this.parent.redrawMessage(jda);
 			}
 		} else {
-			super.onAction(actionId, executorId, jda);
+			super.onButtonClick(actionId, executorId, jda);
 			if(actionId.equals("remove")) {
 				this.deleteMode = true;
 				this.deleteCursor = 0;

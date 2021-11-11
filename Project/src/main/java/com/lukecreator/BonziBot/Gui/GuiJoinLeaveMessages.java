@@ -9,6 +9,7 @@ import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
+import com.lukecreator.BonziBot.GuiAPI.GuiNewline;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 
@@ -38,10 +39,10 @@ public class GuiJoinLeaveMessages extends Gui {
 		keywordl = keyword.toLowerCase();
 	}
 	
-	GuiButton bOn = new GuiButton(GenericEmoji.fromEmoji("🖱️"), "Enable", GuiButton.Color.GREEN, "toggle");
-	GuiButton bOff = new GuiButton(GenericEmoji.fromEmoji("🖱️"), "Disable", GuiButton.Color.RED, "toggle");
-	GuiButton eOn = new GuiButton(GenericEmoji.fromEmoji("📰"), "Enable Embed", GuiButton.Color.GREEN, "embed");
-	GuiButton eOff = new GuiButton(GenericEmoji.fromEmoji("📰"), "Disable Embed", GuiButton.Color.RED, "embed");
+	GuiButton bOn = new GuiButton(GenericEmoji.fromEmoji("🖱️"), "Enable", GuiButton.ButtonColor.GREEN, "toggle");
+	GuiButton bOff = new GuiButton(GenericEmoji.fromEmoji("🖱️"), "Disable", GuiButton.ButtonColor.RED, "toggle");
+	GuiButton eOn = new GuiButton(GenericEmoji.fromEmoji("📰"), "Enable Embed", GuiButton.ButtonColor.GREEN, "embed");
+	GuiButton eOff = new GuiButton(GenericEmoji.fromEmoji("📰"), "Disable Embed", GuiButton.ButtonColor.RED, "embed");
 	@Override
 	public void initialize(JDA jda) {
 		
@@ -52,15 +53,15 @@ public class GuiJoinLeaveMessages extends Gui {
 	public void reinitialize(GuildSettings settings) {
 		boolean enabled = leave ? settings.leaveMessages : settings.joinMessages;
 		boolean embeds = leave ? settings.leaveMessageIsEmbed : settings.joinMessageIsEmbed;
-		this.buttons.clear();
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
-		this.buttons.add(enabled ? bOff : bOn);
-		this.buttons.add(new GuiButton("Test", GuiButton.Color.BLUE, "test").asEnabled(enabled));
-		this.buttons.add(GuiButton.newline());
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🗨️"), "Set Message...", GuiButton.Color.BLUE, "message").asEnabled(enabled));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("#️⃣"), "Set Channel...", GuiButton.Color.BLUE,  "channel").asEnabled(enabled));
-		this.buttons.add((embeds ? eOff : eOn).asEnabled(enabled));
-		this.buttons.add(GuiButton.newline());
+		this.elements.clear();
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
+		this.elements.add(enabled ? bOff : bOn);
+		this.elements.add(new GuiButton("Test", GuiButton.ButtonColor.BLUE, "test").asEnabled(enabled));
+		this.elements.add(new GuiNewline());
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🗨️"), "Set Message...", GuiButton.ButtonColor.BLUE, "message").asEnabled(enabled));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("#️⃣"), "Set Channel...", GuiButton.ButtonColor.BLUE,  "channel").asEnabled(enabled));
+		this.elements.add((embeds ? eOff : eOn).asEnabled(enabled));
+		this.elements.add(new GuiNewline());
 	}
 	
 	@Override
@@ -102,7 +103,7 @@ public class GuiJoinLeaveMessages extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		
 		GuildSettingsManager mgr = this.bonziReference.guildSettings;
 		GuildSettings settings = mgr.getSettings(guildId);

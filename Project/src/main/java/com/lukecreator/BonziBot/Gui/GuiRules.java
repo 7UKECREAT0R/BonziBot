@@ -36,11 +36,11 @@ public class GuiRules extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🆕"), "Add", GuiButton.Color.BLUE, "new"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("b_trash")), "Delete", GuiButton.Color.RED,  "delete"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), "Edit", GuiButton.Color.BLUE, "edit"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📋"), "Format", GuiButton.Color.GRAY, "format"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🆕"), "Add", GuiButton.ButtonColor.BLUE, "new"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("b_trash")), "Delete", GuiButton.ButtonColor.RED,  "delete"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📝"), "Edit", GuiButton.ButtonColor.BLUE, "edit"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📋"), "Format", GuiButton.ButtonColor.GRAY, "format"));
 		this.rules = this.bonziReference.guildSettings.getSettings(guildId).getRules();
 	}
 	
@@ -70,7 +70,7 @@ public class GuiRules extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		MessageChannel channel = this.parent.getChannel(jda);
 		GuildSettingsManager gsm = this.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);

@@ -31,11 +31,11 @@ public class GuiEditProfile extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🖊️"), "Bio", GuiButton.Color.BLUE, "bio"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🏳️‍🌈"), "Favorite Color", GuiButton.Color.BLUE, "color"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("⏰"), "Timezone", GuiButton.Color.BLUE, "timezone"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🖼️"), "Background", GuiButton.Color.BLUE, "background"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🍰"), "Birthday", GuiButton.Color.BLUE, "birthday"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🖊️"), "Bio", GuiButton.ButtonColor.BLUE, "bio"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🏳️‍🌈"), "Favorite Color", GuiButton.ButtonColor.BLUE, "color"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("⏰"), "Timezone", GuiButton.ButtonColor.BLUE, "timezone"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🖼️"), "Background", GuiButton.ButtonColor.BLUE, "background"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🍰"), "Birthday", GuiButton.ButtonColor.BLUE, "birthday"));
 	}
 	
 	@Override
@@ -70,7 +70,7 @@ public class GuiEditProfile extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		
 		UserAccountManager uam = this.bonziReference.accounts;
 		EventWaiterManager ewm = this.bonziReference.eventWaiter;

@@ -42,15 +42,15 @@ public class GuiCustomFilter extends Gui {
 		this.reinitialize(customFilter);
 	}
 	public void reinitialize(List<String> customFilter) {
-		this.buttons.clear();
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
+		this.elements.clear();
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
 		if(this.deleteMode) {
-			this.buttons.add(new GuiButton("Up", GuiButton.Color.BLUE, "up"));
-			this.buttons.add(new GuiButton("Down", GuiButton.Color.BLUE, "down"));
-			this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("❌"), "delete").withColor(GuiButton.Color.RED));
+			this.elements.add(new GuiButton("Up", GuiButton.ButtonColor.BLUE, "up"));
+			this.elements.add(new GuiButton("Down", GuiButton.ButtonColor.BLUE, "down"));
+			this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("❌"), "delete").withColor(GuiButton.ButtonColor.RED));
 		} else {
-			this.buttons.add(new GuiButton("New Word", GuiButton.Color.GREEN, "new"));
-			this.buttons.add(new GuiButton("Remove Word", GuiButton.Color.RED, "remove").asEnabled(customFilter.size() > 0));
+			this.elements.add(new GuiButton("New Word", GuiButton.ButtonColor.GREEN, "new"));
+			this.elements.add(new GuiButton("Remove Word", GuiButton.ButtonColor.RED, "remove").asEnabled(customFilter.size() > 0));
 		}
 	}
 	
@@ -92,7 +92,7 @@ public class GuiCustomFilter extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		GuildSettingsManager gsm = this.bonziReference.guildSettings;
 		EventWaiterManager waiter = this.bonziReference.eventWaiter;
 		GuildSettings settings = gsm.getSettings(guildId);

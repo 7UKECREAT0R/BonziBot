@@ -38,8 +38,8 @@ public class GuiTagEditing extends Gui {
 	@Override
 	public void initialize(JDA jda) {
 		super.initialize(jda);
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), "Edit Tag", GuiButton.Color.BLUE, "edit"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("b_trash")), "Delete Tag", GuiButton.Color.RED, "delete"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📝"), "Edit Tag", GuiButton.ButtonColor.BLUE, "edit"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("b_trash")), "Delete Tag", GuiButton.ButtonColor.RED, "delete"));
 	}
 	
 	@Override
@@ -48,7 +48,7 @@ public class GuiTagEditing extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		
 		// Edit
 		if(actionId.equals("edit")) {

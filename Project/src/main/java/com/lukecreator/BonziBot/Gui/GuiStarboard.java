@@ -9,6 +9,7 @@ import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
+import com.lukecreator.BonziBot.GuiAPI.GuiNewline;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 
@@ -43,13 +44,13 @@ public class GuiStarboard extends Gui {
 		this.reinitialize();
 	}
 	public void reinitialize() {
-		this.buttons.clear();
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("#️⃣"), "Channel", GuiButton.Color.BLUE, "channel"));
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🔼"), "limitup").asEnabled(enabled));
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🔽"), "limitdown").asEnabled(enabled));
-		this.buttons.add(GuiButton.newline());
-		this.buttons.add(new GuiButton("Disable", GuiButton.Color.RED, "disable").asEnabled(enabled));
+		this.elements.clear();
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("#️⃣"), "Channel", GuiButton.ButtonColor.BLUE, "channel"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🔼"), "limitup").asEnabled(enabled));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🔽"), "limitdown").asEnabled(enabled));
+		this.elements.add(new GuiNewline());
+		this.elements.add(new GuiButton("Disable", GuiButton.ButtonColor.RED, "disable").asEnabled(enabled));
 	}
 	
 	@Override
@@ -70,7 +71,7 @@ public class GuiStarboard extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		GuildSettingsManager gsm = this.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);
 		

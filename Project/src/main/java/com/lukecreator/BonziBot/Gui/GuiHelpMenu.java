@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
+import com.lukecreator.BonziBot.GuiAPI.GuiNewline;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -43,15 +44,15 @@ public class GuiHelpMenu extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🎊"), "c0"));
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🟡"), "c1"));
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("👮"), "c2"));
-		this.buttons.add(GuiButton.newline());
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🛠️"), "c3"));
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🎵"), "c4"));
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🚀"), "c5"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🎊"), "c0"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🟡"), "c1"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("👮"), "c2"));
+		this.elements.add(new GuiNewline());
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🛠️"), "c3"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🎵"), "c4"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🚀"), "c5"));
 		if(this.adminMode)
-			this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🛡️"), "c6"));
+			this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🛡️"), "c6"));
 	}
 	
 	@Override
@@ -75,7 +76,7 @@ public class GuiHelpMenu extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		CommandCategory c = fromButtonId(actionId);
 		GuiHelpMenuCategory menu = new GuiHelpMenuCategory(c, this.bonziReference);
 		this.parent.setActiveGui(menu, jda);

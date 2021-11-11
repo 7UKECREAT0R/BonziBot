@@ -32,9 +32,9 @@ public class GuiGuildSettingsPage3 extends Gui {
 		this.reinitialize(settings);
 	}
 	public void reinitialize(GuildSettings settings) {
-		this.buttons.clear();
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "lastpage"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🌟"), "Starboard", GuiButton.Color.GRAY, "starboard"));
+		this.elements.clear();
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "lastpage"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🌟"), "Starboard", GuiButton.ButtonColor.GRAY, "starboard"));
 	}
 	
 	@Override
@@ -60,7 +60,7 @@ public class GuiGuildSettingsPage3 extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		//GuildSettingsManager gsm = this.bonziReference.guildSettings;
 		//GuildSettings settings = gsm.getSettings(guildId);
 		

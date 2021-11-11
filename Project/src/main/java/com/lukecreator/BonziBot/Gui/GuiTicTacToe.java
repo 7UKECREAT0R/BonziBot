@@ -6,6 +6,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
+import com.lukecreator.BonziBot.GuiAPI.GuiNewline;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
@@ -61,34 +62,34 @@ public class GuiTicTacToe extends Gui {
 		this.reinitialize();
 	}
 	public void reinitialize() {
-		this.buttons.clear();
+		this.elements.clear();
 		for(int y = 0; y < 3; y++) {
 			for(int x = 0; x < 3; x++) {
-				this.buttons.add(buttonForTile(x, y));
+				this.elements.add(buttonForTile(x, y));
 			}
 			if(y != 2)
-				this.buttons.add(GuiButton.newline());
+				this.elements.add(new GuiNewline());
 		}
 	}
 	GuiButton buttonForTile(int x, int y) {
 		Tile tile = grid[x][y];
 		String actionId = encode(x, y);
 		
-		GuiButton.Color color = GuiButton.Color.GRAY;
+		GuiButton.ButtonColor color = GuiButton.ButtonColor.GRAY;
 		
 		if(this.ended && this.scheme != WinScheme.TIE) {
 			if(this.scheme == WinScheme.HORIZONTAL) {
 				if(y == this.winOffset)
-					color = GuiButton.Color.GREEN;
+					color = GuiButton.ButtonColor.GREEN;
 			} else if(this.scheme == WinScheme.VERTICAL) {
 				if(x == this.winOffset)
-					color = GuiButton.Color.GREEN;
+					color = GuiButton.ButtonColor.GREEN;
 			} else if(this.scheme == WinScheme.DIAGONAL_DSC) {
 				if(x == y)
-					color = GuiButton.Color.GREEN;
+					color = GuiButton.ButtonColor.GREEN;
 			} else if(this.scheme == WinScheme.DIAGONAL_ASC) {
 				if(y == 2 - x)
-					color = GuiButton.Color.GREEN;
+					color = GuiButton.ButtonColor.GREEN;
 			}
 		}
 		
@@ -100,7 +101,7 @@ public class GuiTicTacToe extends Gui {
 		case X:
 			return GuiButton.singleEmoji(GenericEmoji.fromEmoji("❌"), actionId).withColor(color); 
 		default:
-			return new GuiButton("error", GuiButton.Color.RED, actionId);
+			return new GuiButton("error", GuiButton.ButtonColor.RED, actionId);
 		}
 	}
 	
@@ -120,7 +121,7 @@ public class GuiTicTacToe extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		if(ended) return;
 		Point clicked = decode(actionId);
 		if(clicked == null)

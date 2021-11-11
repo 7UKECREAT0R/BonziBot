@@ -49,16 +49,16 @@ public class GuiGuildSettingsPage2 extends Gui {
 		boolean banMsg = settings.banMessage;
 		boolean token = settings.tokenScanning;
 		
-		this.buttons.clear();
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "lastpage"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("↪️"), "Prefix", GuiButton.Color.BLUE, "prefix"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📖"), "Rules", GuiButton.Color.BLUE,  "rules"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🚫"), "Disable Commands", GuiButton.Color.BLUE,  "disable"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🎲"), (qd ? "Disable" : "Enable") + " Quick Draw", qd ? GuiButton.Color.RED : GuiButton.Color.GREEN,  "quickdraw"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📥"), (appeals ? "Disable" : "Enable") + " Ban Appeals", appeals ? GuiButton.Color.RED : GuiButton.Color.GREEN, "appeals"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📳"), (banMsg ? "Disable" : "Enable") + " Ban Message", banMsg ? GuiButton.Color.RED : GuiButton.Color.GREEN, "banmsg"));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🔬"), (token ? "Disable" : "Enable") + " Token Scanning", token ? GuiButton.Color.RED : GuiButton.Color.GREEN, "tokenscan"));
-		this.buttons.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➡️"), "nextpage"));
+		this.elements.clear();
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "lastpage"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("↪️"), "Prefix", GuiButton.ButtonColor.BLUE, "prefix"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📖"), "Rules", GuiButton.ButtonColor.BLUE,  "rules"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🚫"), "Disable Commands", GuiButton.ButtonColor.BLUE,  "disable"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🎲"), (qd ? "Disable" : "Enable") + " Quick Draw", qd ? GuiButton.ButtonColor.RED : GuiButton.ButtonColor.GREEN,  "quickdraw"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📥"), (appeals ? "Disable" : "Enable") + " Ban Appeals", appeals ? GuiButton.ButtonColor.RED : GuiButton.ButtonColor.GREEN, "appeals"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📳"), (banMsg ? "Disable" : "Enable") + " Ban Message", banMsg ? GuiButton.ButtonColor.RED : GuiButton.ButtonColor.GREEN, "banmsg"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🔬"), (token ? "Disable" : "Enable") + " Token Scanning", token ? GuiButton.ButtonColor.RED : GuiButton.ButtonColor.GREEN, "tokenscan"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➡️"), "nextpage"));
 	}
 	
 	@Override
@@ -118,7 +118,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 	}
 	
 	@Override
-	public void onAction(String actionId, long executorId, JDA jda) {
+	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		GuildSettingsManager gsm = this
 			.bonziReference.guildSettings;
 		GuildSettings settings = gsm.getSettings(guildId);
