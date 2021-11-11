@@ -29,11 +29,6 @@ public class ClearCommand extends Command {
 		this.userRequiredPermissions = new Permission[] { Permission.MESSAGE_MANAGE };
 		this.category = CommandCategory.MODERATION;
 	}
-	
-	@Override
-	public boolean isRegisterable() {
-		return false; // too many inherent issues
-	}
 
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
@@ -41,7 +36,7 @@ public class ClearCommand extends Command {
 		boolean limit = e.args.argSpecified("limit");
 		long limitUser = limit ? e.args.getUser("limit").getIdLong() : 0l;
 		TextChannel channel = e.tChannel;
-		long messageId = e.message.getIdLong();
+		long messageId = channel.getLatestMessageIdLong();
 		
 		if(amount < 0) {
 			e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("you cant bring messages back 😔")).queue();

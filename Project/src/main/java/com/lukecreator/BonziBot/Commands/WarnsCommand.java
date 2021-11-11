@@ -16,6 +16,7 @@ import com.lukecreator.BonziBot.Gui.GuiWarns;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
@@ -36,6 +37,7 @@ public class WarnsCommand extends Command {
 	@Override
 	public void executeCommand(CommandExecutionInfo e) {
 		User target = e.args.getUser("target");
+		Member targetMember = e.guild.getMember(target);
 		UserAccountManager uam = e.bonzi.accounts;
 		UserAccount account = uam.getUserAccount(target);
 		ModernWarn[] warns = account.getWarns(e.guild);
@@ -52,7 +54,7 @@ public class WarnsCommand extends Command {
 		List<ModernWarn> list = new ArrayList<ModernWarn>(warns.length);
 		for(int i = 0; i < warns.length; i++)
 			list.add(warns[i]);
-		GuiWarns gui = new GuiWarns(list, target, e.guild);
+		GuiWarns gui = new GuiWarns(list, targetMember, e.guild);
 		BonziUtils.sendGui(e, gui);
 	}
 }

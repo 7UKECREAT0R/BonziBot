@@ -157,14 +157,14 @@ public class BanCommand extends Command {
 				eb.setDescription(desc);
 				
 				GuiButton[] buttons = {
-					new GuiButton("Appeal Ban", GuiButton.Color.BLUE,
+					(GuiButton)new GuiButton("Appeal Ban", GuiButton.ButtonColor.BLUE,
 						"_appeal:request:" + guildId).asEnabled(settings.banAppeals)
 				};
 				
 				if(e.isSlashCommand)
 					e.slashCommand.deferReply().queue();
 				
-				BonziUtils.appendButtons(pc.sendMessageEmbeds(eb.build()), buttons, false).queue(readyToBan);
+				BonziUtils.appendComponents(pc.sendMessageEmbeds(eb.build()), buttons, false).queue(readyToBan);
 			};
 			
 			if(_pc == null)

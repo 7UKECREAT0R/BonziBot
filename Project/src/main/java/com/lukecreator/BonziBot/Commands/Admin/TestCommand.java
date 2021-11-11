@@ -13,7 +13,7 @@ public class TestCommand extends Command {
 		this.description = "Tests a feature.";
 		this.category = CommandCategory._HIDDEN;
 		this.args = null;
-		this.adminOnly = true;
+		this.adminOnly = false;
 	}
 	
 	@Override

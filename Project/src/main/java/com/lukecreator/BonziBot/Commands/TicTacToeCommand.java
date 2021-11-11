@@ -54,12 +54,12 @@ public class TicTacToeCommand extends Command {
 			});
 			if(e.isSlashCommand) {
 				ewm.waitForAction(opponent, e.slashCommand.replyEmbeds(eb.build()).setEphemeral(false), onAccept,
-					new GuiButton("ACCEPT", GuiButton.Color.GREEN, "tttaccept"),
-					new GuiButton("REJECT", GuiButton.Color.RED, "tttreject")).queue();
+					new GuiButton("ACCEPT", GuiButton.ButtonColor.GREEN, "tttaccept"),
+					new GuiButton("REJECT", GuiButton.ButtonColor.RED, "tttreject")).queue();
 			} else {
 				ewm.waitForAction(opponent, e.channel.sendMessageEmbeds(eb.build()), onAccept,
-					new GuiButton("ACCEPT", GuiButton.Color.GREEN, "tttaccept"),
-					new GuiButton("REJECT", GuiButton.Color.RED, "tttreject")).queue();
+					new GuiButton("ACCEPT", GuiButton.ButtonColor.GREEN, "tttaccept"),
+					new GuiButton("REJECT", GuiButton.ButtonColor.RED, "tttreject")).queue();
 			}
 		} else {
 			EmbedBuilder eb = new EmbedBuilder()
@@ -74,10 +74,10 @@ public class TicTacToeCommand extends Command {
 			});
 			if(e.isSlashCommand) {
 				ewm.waitForGlobalAction(e.slashCommand.replyEmbeds(eb.build()).setEphemeral(false), onAccept,
-					new GuiButton(GenericEmoji.fromEmoji("⚔️"), "JOIN", GuiButton.Color.GREEN, "jointtt"));
+					new GuiButton(GenericEmoji.fromEmoji("⚔️"), "JOIN", GuiButton.ButtonColor.GREEN, "jointtt"));
 			} else {
 				ewm.waitForGlobalAction(e.channel.sendMessageEmbeds(eb.build()), onAccept,
-					new GuiButton(GenericEmoji.fromEmoji("⚔️"), "JOIN", GuiButton.Color.GREEN, "jointtt"));
+					new GuiButton(GenericEmoji.fromEmoji("⚔️"), "JOIN", GuiButton.ButtonColor.GREEN, "jointtt"));
 			}
 		}
 	}

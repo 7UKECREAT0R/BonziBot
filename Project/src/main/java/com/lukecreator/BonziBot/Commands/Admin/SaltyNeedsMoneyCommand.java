@@ -8,7 +8,7 @@ import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
 public class SaltyNeedsMoneyCommand extends Command {
 
-	static final long SALTE = 292755668623163399l;
+	static final long SALTE = 429795795404062720l;
 	
 	public SaltyNeedsMoneyCommand() {
 		this.subCategory = 0;
