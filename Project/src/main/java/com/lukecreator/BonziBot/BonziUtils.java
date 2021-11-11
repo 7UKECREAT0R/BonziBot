@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArg;
@@ -32,7 +33,8 @@ import com.lukecreator.BonziBot.Data.Modifier;
 import com.lukecreator.BonziBot.Data.Rules;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
-import com.lukecreator.BonziBot.GuiAPI.GuiButton;
+import com.lukecreator.BonziBot.GuiAPI.GuiElement;
+import com.lukecreator.BonziBot.GuiAPI.GuiNewline;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
@@ -44,6 +46,7 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.PrivateChannel;
@@ -52,7 +55,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
 
@@ -82,7 +85,7 @@ public class BonziUtils {
 		.addField("Publicity", "Your name (not including discriminator), premium status, and developer-assigned status may be expressed to the public domain in places like leaderboards."
 				+ " If you no longer share any servers with BonziBot, you and your name will be removed from all leaderboards.", false)
 		
-		.addField("Tag Content", "Any tags created by you with the tag privacy server setting set to \"Public\" will be visible and usable for all users who user BonziBot. Your user-name at the time will"
+		.addField("Tag Content", "Any tags created by you with the tag privacy server setting set to \"Public\" will be visible and usable for all users who use BonziBot. Your user-name at the time will"
 				+ " appear under the tag information if viewed by a user. Keeping tag privacy to \"Private\" will only allow users in the Server of which it was created to view this information.", false)
 		
 		.addField("Profiles", "Any data you input into your BonziBot profile will be kept for an indefinite period of time until manually removed. This includes images, bio, birthday,"
@@ -235,13 +238,19 @@ public class BonziUtils {
 	 * Scramble a word randomly.
 	 */
 	public static String scramble(String in) {
+		return scramble(in, in.length());
+	}
+	/**
+	 * Scramble a word randomly with specified max iterations.
+	 */
+	public static String scramble(String in, int iterations) {
 		if(in == null)
 			return null;
 		if(in.length() < 2)
 			return in;
 		
 		char[] c = in.toCharArray();
-		for(int i = 0; i < c.length; i++) {
+		for(int i = 0; i < iterations; i++) {
 			int swap = randomInt(c.length);
 			char carry = c[i];
 			c[i] = c[swap];
@@ -249,6 +258,7 @@ public class BonziUtils {
 		}
 		return new String(c);
 	}
+	
 	/**
 	 * Joins strings together and appends "or" to the delimiter for the last element
 	 * (a, b, c, or d)
@@ -261,7 +271,21 @@ public class BonziUtils {
 			count++;
 			CharSequence chars = iter.next();
 			boolean last = !iter.hasNext();
-				joiner.add((last&&count>1) ? "or " + chars : chars);
+			joiner.add((last&&count>1) ? "or " + chars : chars);
+		}
+		return joiner.toString();
+	}
+	/**
+	 * Joins strings together and appends "or" to the delimiter for the last element
+	 * (a, b, c, or d)
+	 */
+	public static String stringJoinOr(CharSequence delimiter, String[] array) {
+		StringJoiner joiner = new StringJoiner(delimiter);
+		int count = 0;
+		for(int i = 0; i < array.length; i++) {
+			String chars = array[i];
+			boolean last = i + 1 == array.length;
+			joiner.add((last&&count>1) ? "or " + chars : chars);
 		}
 		return joiner.toString();
 	}
@@ -277,9 +301,38 @@ public class BonziUtils {
 			count++;
 			CharSequence chars = iter.next();
 			boolean last = !iter.hasNext();
-				joiner.add(((last&&count>1)?"and ":"")+chars);
+			joiner.add(((last&&count>1)?"and ":"")+chars);
 		}
 		return joiner.toString();
+	}
+	/**
+	 * Joins strings together and appends "and" to the delimiter for the last element
+	 * (a, b, c, and d)
+	 */
+	public static String stringJoinAnd(CharSequence delimiter, String[] array) {
+		if(array == null || array.length == 0)
+			return "";
+		StringJoiner joiner = new StringJoiner(delimiter);
+		int count = 0;
+		for(int i = 0; i < array.length; i++) {
+			String chars = array[i];
+			boolean last = i + 1 == array.length;
+			joiner.add((last&&count>1) ? "and " + chars : chars);
+		}
+		return joiner.toString();
+	}
+	/**
+	 * String-join a set of some arbitrary object that isn't a CharSequence.
+	 * @param delimiter
+	 * @param items
+	 * @return
+	 */
+	public static String stringJoinArbitrary(CharSequence delimiter, Iterable<? extends Object> items) {
+		List<String> convert = new ArrayList<String>();
+		Iterator<? extends Object> iterator = items.iterator();
+		while(iterator.hasNext())
+			convert.add(iterator.next().toString());
+		return String.join(delimiter, convert);
 	}
 	/**
 	 * String-join a set of some arbitrary object that isn't a CharSequence.
@@ -291,6 +344,31 @@ public class BonziUtils {
 		String[] convert = new String[items.length];
 		for(int i = 0; i < items.length; i++)
 			convert[i] = items[i].toString();
+		return String.join(delimiter, convert);
+	}
+	/**
+	 * String-join a set of objects, applying a function to each object before joining.
+	 * @param delimiter
+	 * @param items
+	 * @return
+	 */
+	public static String stringJoinTransform(CharSequence delimiter, Function<Object, String> transformer, Iterable<? extends Object> items) {
+		List<String> convert = new ArrayList<String>();
+		Iterator<? extends Object> iterator = items.iterator();
+		while(iterator.hasNext())
+			convert.add(transformer.apply(iterator.next()));
+		return String.join(delimiter, convert);
+	}
+	/**
+	 * String-join a set of objects, applying a function to each object before joining.
+	 * @param delimiter
+	 * @param items
+	 * @return
+	 */
+	public static String stringJoinTransform(CharSequence delimiter, Function<Object, String> transformer, Object[] items) {
+		String[] convert = new String[items.length];
+		for(int i = 0; i < items.length; i++)
+			convert[i] = transformer.apply(items[i]);
 		return String.join(delimiter, convert);
 	}
 	/**
@@ -795,57 +873,81 @@ public class BonziUtils {
 		return eb;
 	}
 	
-	public static MessageAction appendButtons(MessageAction in, Gui gui) {
+	public static MessageAction appendComponents(MessageAction in, Gui gui) {
 		if(gui == null)
 			return in;
-		if(gui.buttons == null)
+		if(gui.elements == null)
 			return in;
-		GuiButton[] buttons = (GuiButton[]) gui.buttons.toArray(new GuiButton[gui.buttons.size()]);
+		GuiElement[] buttons = (GuiElement[]) gui.elements.toArray(new GuiElement[gui.elements.size()]);
 		if(buttons.length < 1)
 			return in;
-		return appendButtons(in, buttons, gui.isDisabled());
+		return appendComponents(in, buttons, gui.isDisabled());
 	}
-	public static MessageAction appendButtons(MessageAction in, GuiButton[] buttons, boolean allDisable) {
+	public static MessageAction appendComponents(MessageAction in, GuiElement[] elements, boolean allDisable) {
 		List<ActionRow> rows = new ArrayList<ActionRow>();
-		List<Button> row = new ArrayList<Button>();
-		for(int i = 0; i < buttons.length; i++) {
-			GuiButton button = buttons[i];
-			if(button.isNewline()) {
+		List<Component> row = new ArrayList<Component>();
+		int rowWidth = 0;
+		
+		for(int i = 0; i < elements.length; i++) {
+			GuiElement element = elements[i];
+			if(element instanceof GuiNewline) {
 				rows.add(ActionRow.of(row));
 				row.clear();
+				rowWidth = 0;
 				continue;
 			}
+			Component toAdd;
 			if(allDisable)
-				button = button.asEnabled(false);
-			row.add(button.toDiscord());
-			if(row.size() >= 5) {
+				toAdd = element.asEnabled(false).toDiscord();
+			else
+				toAdd = element.toDiscord();
+			
+			// Width of this element more or less.
+			int width = 5 / toAdd.getMaxPerRow();
+			
+			if(rowWidth + width > 5) {
 				rows.add(ActionRow.of(row));
 				row.clear();
-				continue;
+				rowWidth = 0;
 			}
+			
+			row.add(toAdd);
+			rowWidth += width;
 		}
+		
 		if(row.size() > 0)
 			rows.add(ActionRow.of(row));
 		
 		return in.setActionRows(rows);
 	}
-	public static ReplyAction appendButtons(ReplyAction in, GuiButton[] buttons) {
+	public static ReplyAction appendComponents(ReplyAction in, GuiElement[] elements) {
 		List<ActionRow> rows = new ArrayList<ActionRow>();
-		List<Button> row = new ArrayList<Button>();
-		for(int i = 0; i < buttons.length; i++) {
-			GuiButton button = buttons[i];
-			if(button.isNewline()) {
+		List<Component> row = new ArrayList<Component>();
+		int rowWidth = 0;
+		
+		for(int i = 0; i < elements.length; i++) {
+			GuiElement element = elements[i];
+			if(element instanceof GuiNewline) {
 				rows.add(ActionRow.of(row));
 				row.clear();
+				rowWidth = 0;
 				continue;
 			}
-			row.add(button.toDiscord());
-			if(row.size() >= 5) {
+			Component toAdd = element.toDiscord();
+			
+			// Width of this element more or less.
+			int width = 5 / toAdd.getMaxPerRow();
+			
+			if(rowWidth + width > 5) {
 				rows.add(ActionRow.of(row));
 				row.clear();
-				continue;
+				rowWidth = 0;
 			}
+			
+			row.add(toAdd);
+			rowWidth += width;
 		}
+		
 		if(row.size() > 0)
 			rows.add(ActionRow.of(row));
 		
@@ -1054,11 +1156,24 @@ public class BonziUtils {
 	}
 	public static MessageEmbed createStarboardEntry(Message msg) {
 		User author = msg.getAuthor();
+		List<Attachment> att = msg.getAttachments();
 		EmbedBuilder eb = new EmbedBuilder()
 			.setColor(Color.orange)
 			.setTitle("Starboard")
 			.setAuthor(author.getName(), null, author.getEffectiveAvatarUrl());
 		eb.setDescription(msg.getContentRaw());
+		if(!att.isEmpty()) {
+			Attachment a = att.get(0);
+			if(a.isImage())
+				eb.setImage(a.getUrl());
+			else if(a.isVideo())
+				eb.setImage(a.getUrl());
+			else {
+				int size = att.size();
+				String plur = plural("Attachment", size);
+				eb.appendDescription("\n🗃️ " + size + " " + plur);
+			}
+		}
 		eb.appendDescription("\n[Jump to Message](" + msg.getJumpUrl() + ")");
 		return eb.build();
 	}
@@ -1203,6 +1318,27 @@ public class BonziUtils {
 		}
 		// Remove trailing newline character.
 		return output.deleteCharAt(output.length() - 1).toString();
+	}
+	public static String requestGet(String url) throws IOException {
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection)obj.openConnection();
+		con.setRequestMethod("GET");
+		int resp = con.getResponseCode();
+		if (resp == HttpURLConnection.HTTP_OK) { // success
+			BufferedReader in = new BufferedReader(
+				new InputStreamReader(
+					con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+			return response.toString();
+		} else {
+			return null;
+		}
 	}
 	public static long getFileSizeBytes(String url) throws MalformedURLException {
 		return getFileSizeBytes(new URL(url));
