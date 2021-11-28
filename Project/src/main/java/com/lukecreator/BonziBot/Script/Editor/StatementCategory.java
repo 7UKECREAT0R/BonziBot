@@ -10,7 +10,7 @@ public enum StatementCategory {
 	DATA("<:script_data:903021825230000188>", "Data"),
 	STORAGE("<:script_storage:903021825204846632>", "Storage"),
 	LIMITING("<:script_limiting:901186623541243925>", "Limiting"),
-	MESSAGING("<:script_messaging:901186623360888864>", "Messaging"),
+	MESSAGES("<:script_messaging:901186623360888864>", "Messages"),
 	ROLES("<:script_roles:901186623604162600>", "Roles"),
 	ACTIONS("<:script_action:901186623532830790>", "Actions");
 	
