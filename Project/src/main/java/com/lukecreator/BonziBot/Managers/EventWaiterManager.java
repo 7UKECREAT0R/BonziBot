@@ -45,6 +45,7 @@ public class EventWaiterManager {
 		= new HashMap<Long, Tuple<GuiButton[], Consumer<String>>>();
 	HashMap<Long, Tuple<GuiButton[], Consumer<Tuple<User, String>>>> globalActionWaiters
 		= new HashMap<Long, Tuple<GuiButton[], Consumer<Tuple<User, String>>>>();
+	
 	private static final GuiButton CONFIRM_YES = new GuiButton("Yes", GuiButton.ButtonColor.GREEN, "_cyes");
 	private static final GuiButton CONFIRM_NO = new GuiButton("No", GuiButton.ButtonColor.RED, "_cno");
 	
