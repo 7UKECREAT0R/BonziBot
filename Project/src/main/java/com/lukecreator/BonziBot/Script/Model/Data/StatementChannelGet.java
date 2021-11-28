@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 
 public class StatementChannelGet extends ScriptGetter {
 	
+	private static final long serialVersionUID = 1L;
+
 	public StatementChannelGet() {
 		super();
 		this.nameOfType = "Channel";
@@ -17,7 +19,7 @@ public class StatementChannelGet extends ScriptGetter {
 		
 		this.propertyBindings = new ArrayList<Binding>();
 		
-		this.propertyBindings.add(new Binding("Name", channel -> {
+		this.propertyBindings.add(new Binding("Name", (channel) -> {
 			return ((GuildChannel)channel).getName();
 		}));
 		this.propertyBindings.add(new Binding("Mention", channel -> {

@@ -1,18 +1,17 @@
 package com.lukecreator.BonziBot.Script.Model.System;
 
-import java.io.Serializable;
-
-import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
-import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue;
+import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
 import com.lukecreator.BonziBot.Script.Model.ScriptError;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
-public class StatementToDecimal implements ScriptStatement, Serializable {
+import net.dv8tion.jda.api.entities.Guild;
+
+public class StatementToDecimal implements ScriptStatement {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -20,20 +19,25 @@ public class StatementToDecimal implements ScriptStatement, Serializable {
 	
 	@Override
 	public String getKeyword() {
-		return "todec";
+		return "to_decimal";
 	}
 	@Override
 	public String getAsCode() {
-		return "todec " + this.variableName;
+		return "to_decimal " + Script.asArgument(this.variableName);
 	}
 
 	@Override
-	public GuiEditEntry[] getArgs() {
+	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			new GuiEditEntryText(new StringArg("valuename"), null, "Variable", "The variable that should be converted to a decimal value.")
+			caller.getVariableChoice(null, "Variable", "The variable that should be converted to a decimal value.")
 		};
 	}
-
+	
+	@Override
+	public String getNewVariable() {
+		return variableName;
+	}
+	
 	@Override
 	public StatementCategory getCategory() {
 		return StatementCategory.SYSTEM;

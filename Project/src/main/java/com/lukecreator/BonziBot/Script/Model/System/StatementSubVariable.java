@@ -6,31 +6,41 @@ import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue.Type;
+import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
+import net.dv8tion.jda.api.entities.Guild;
+
 public class StatementSubVariable implements ScriptStatement {
+	
+	private static final long serialVersionUID = 1L;
 	
 	String variableName;
 	DynamicValue value;
 	
 	@Override
 	public String getKeyword() {
-		return "sub";
+		return "subtract ";
 	}
 	
 	@Override
 	public String getAsCode() {
-		return "sub " + this.variableName + " " + value.toString();
+		return "subtract " + Script.asArgument(this.variableName) + " " + Script.asArgument(value.toString());
 	}
 
 	@Override
-	public GuiEditEntry[] getArgs() {
+	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
+			caller.getVariableChoice(),
 			new GuiEditEntryText(new StringArg("value"), null, "Value", "The value or variable which will be subtracted."),
-			new GuiEditEntryText(new StringArg("valuename"), null, "Variable", "The variable that will be modified.")
 		};
+	}
+	
+	@Override
+	public String getNewVariable() {
+		return null;
 	}
 	
 	@Override

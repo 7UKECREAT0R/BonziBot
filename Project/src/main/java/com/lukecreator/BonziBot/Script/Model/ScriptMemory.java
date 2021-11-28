@@ -6,10 +6,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue.Type;
+
+import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 
 /**
  * A fixed size span of virtual memory for a script to execute with.
@@ -25,6 +31,7 @@ public class ScriptMemory {
 	public static final int MAX_SYMBOL_NAME = 32;
 	public static final int MAX_PER_SCRIPT = 2048; // 2KB memory
 	public static final Charset STRING_ENCODING = StandardCharsets.UTF_8;
+	public static final Pattern VARIABLE_INSERT = Pattern.compile("\\{([\\w ]+)\\}");
 	
 	class Symbol {
 		DynamicValue.Type type;
@@ -53,9 +60,44 @@ public class ScriptMemory {
 		this.size = size;
 		this.bytes = new byte[size];
 	}
+	/**
+	 * Replace all the variables denoted by {curly brackets} with their values. Used in certain user-inputs.
+	 * @return
+	 */
+	public String replaceVariables(String input) {
+		Matcher matcher = VARIABLE_INSERT.matcher(input);
+		while(matcher.find()) {
+			String variableName = matcher.group(1);
+			Symbol symbol = this.getSymbol(variableName);
+			if(symbol == null)
+				continue;
+			
+			final String replacement;
+			if(symbol.type == Type.OBJREF) {
+				DynamicValue value = this.readVariable(symbol);
+				Object referenced = this.getReferencedObject(value);
+				if(referenced instanceof GuildChannel)
+					replacement = ((GuildChannel)referenced).getAsMention();
+				else if(referenced instanceof Role)
+					replacement = ((Role)referenced).getName();
+				else if(referenced instanceof Member)
+					replacement = ((Member)referenced).getAsMention();
+				else
+					replacement = referenced.toString();
+			} else {
+				DynamicValue value = this.readVariable(symbol);
+				replacement = value.getConcatString();
+			}
+			
+			input = input.replace(matcher.group(), replacement);
+			continue;
+		}
+		
+		return input;
+	}
 	
 	/**
-	 * 
+	 * Allocate a new ScriptMemory with a specified inital size.
 	 * @param size
 	 * @return A newly allocated set of script memory.
 	 * @throws OutOfMemoryError when <code>size</code> is greater than {@value #MAX_PER_SCRIPT}
@@ -137,7 +179,7 @@ public class ScriptMemory {
 			this.writeVariable(name, value.getAsString());
 			break;
 		case OBJREF:
-			this.writeVariable(name, value.getAsString());
+			this.writeVariable(name, value.getAsObjectIndex());
 		default:
 			break;
 		}
@@ -170,8 +212,11 @@ public class ScriptMemory {
 		int in = 0;
 		
 		// Copy bytes into buffer.
-		for(int i = loc; i < loc + bytes.length; i++)
+		for(int i = loc; i < loc + bytes.length; i++) {
+			if(i >= this.bytes.length)
+				break;
 			this.bytes[i] = bytes[in++];
+		}
 	}
 	
 	public void writeVariable(Symbol symbol, DynamicValue value) {
@@ -188,12 +233,18 @@ public class ScriptMemory {
 		case STRING:
 			this.writeVariable(symbol, value.getAsString());
 			break;
+		case OBJREF:
+			this.writeVariable(symbol, value.getAsObjectIndex());
+			break;
 		default:
 			break;
 		}
 	}
 	public void writeVariable(Symbol symbol, long value) {
 		this.writeVariable(symbol.name, Longs.toByteArray(value), DynamicValue.Type.INT);
+	}
+	public void writeVariable(Symbol symbol, int objRef) {
+		this.writeVariable(symbol.name, Ints.toByteArray(objRef), DynamicValue.Type.OBJREF);
 	}
 	public void writeVariable(Symbol symbol, double value) {
 		// jank implementation
@@ -241,6 +292,27 @@ public class ScriptMemory {
 			return DynamicValue.fromInt(this.readVariableInt(symbol));
 		case STRING:
 			return DynamicValue.fromString(this.readVariableString(symbol));
+		case OBJREF:
+			return DynamicValue.referenceObject(this.readVariableObjectIndex(symbol));
+		default:
+			return null;
+		}
+	}
+	public DynamicValue readVariable(Symbol symbol) {
+		if(symbol == null)
+			return null;
+		
+		switch(symbol.type) {
+		case BOOLEAN:
+			return DynamicValue.fromBoolean(this.readVariableBoolean(symbol));
+		case DECIMAL:
+			return DynamicValue.fromDouble(this.readVariableDouble(symbol));
+		case INT:
+			return DynamicValue.fromInt(this.readVariableInt(symbol));
+		case STRING:
+			return DynamicValue.fromString(this.readVariableString(symbol));
+		case OBJREF:
+			return DynamicValue.referenceObject(this.readVariableObjectIndex(symbol));
 		default:
 			return null;
 		}
@@ -304,6 +376,12 @@ public class ScriptMemory {
 			return 0;
 		else return Longs.fromByteArray(read);
 	}
+	public int readVariableObjectIndex(Symbol symbol) {
+		byte[] read = this.readSymbol(symbol);
+		if(read.length == 0)
+			return 0;
+		else return Ints.fromByteArray(read);
+	}
 	public double readVariableDouble(Symbol symbol) {
 		byte[] read = this.readSymbol(symbol);
 		if(read.length == 0)
@@ -333,8 +411,13 @@ public class ScriptMemory {
 		int start = symbol.location;
 		
 		byte[] buffer = new byte[sz];
-		for(int i = start; i < start + sz; i++)
+		for(int i = start; i < start + sz; i++) {
+			if(i >= this.bytes.length) {
+				this.bytes[i] = 0;
+				continue;
+			}
 			buffer[copy++] = this.bytes[i];
+		}
 		
 		return buffer;
 	}

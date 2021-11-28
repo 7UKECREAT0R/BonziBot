@@ -1,23 +1,21 @@
 package com.lukecreator.BonziBot.Script.Model.System;
 
-import java.io.Serializable;
-
-import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
-import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue;
+import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
 import com.lukecreator.BonziBot.Script.Model.ScriptError;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 
-public class StatementToString implements ScriptStatement, Serializable {
+public class StatementToString implements ScriptStatement {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -25,18 +23,23 @@ public class StatementToString implements ScriptStatement, Serializable {
 	
 	@Override
 	public String getKeyword() {
-		return "totext";
+		return "to_text";
 	}
 	@Override
 	public String getAsCode() {
-		return "totext " + this.variableName;
+		return "to_text " + Script.asArgument(this.variableName);
 	}
 
 	@Override
-	public GuiEditEntry[] getArgs() {
+	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			new GuiEditEntryText(new StringArg("valuename"), null, "Variable", "The variable that should be converted to a text value.")
+			caller.getVariableChoice(null, "Variable", "The variable that should be converted to a text value.")
 		};
+	}
+	
+	@Override
+	public String getNewVariable() {
+		return this.variableName;
 	}
 
 	@Override

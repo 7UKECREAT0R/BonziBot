@@ -1,13 +1,19 @@
 package com.lukecreator.BonziBot.Script.Model;
 
+import java.io.Serializable;
+
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
+
+import net.dv8tion.jda.api.entities.Guild;
 
 /**
  * A statement in the script waiting to be executed.
  * @author Lukec
  */
-public interface ScriptStatement {
+public interface ScriptStatement extends Serializable {
+	
+	public static final long serialVersionUID = 1L;
 	
 	/**
 	 * Get the keyword used in the scripting language to invoke this statement.
@@ -20,10 +26,17 @@ public interface ScriptStatement {
 	 */
 	public String getAsCode();
 	/**
-	 * Get the number and names of the args to be passed into this statement.
+	 * Get GUI entries of the args to be passed into this statement.
+	 * @param caller The calling script.
+	 * @param server TODO
 	 * @return
 	 */
-	public GuiEditEntry[] getArgs();
+	public GuiEditEntry[] getArgs(Script caller, Guild server);
+	/**
+	 * Get the name of a variable which this statement could potentially create. <code>null</code> if none.
+	 * @return
+	 */
+	public String getNewVariable();
 	
 	/**
 	 * Get the category this statement type resides in.

@@ -12,6 +12,8 @@ import net.dv8tion.jda.api.entities.Role;
 
 public class StatementMemberGet extends ScriptGetter {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static final Comparator<Role> ROLE_SORT = new Comparator<Role>() {
 		@Override
 		public int compare(Role o1, Role o2) {

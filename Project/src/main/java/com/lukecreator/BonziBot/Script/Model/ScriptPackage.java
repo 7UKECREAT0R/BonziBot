@@ -1,15 +1,28 @@
 package com.lukecreator.BonziBot.Script.Model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * A package that holds up to 20 scripts.
  * @author Lukec
  */
-public class ScriptPackage {
+public class ScriptPackage implements Serializable {
 	
-	public static final int MAX_SCRIPTS = 20;
+	private static final long serialVersionUID = 1L;
+	public static final int MAX_PACKAGES = 10; // 10 * 10 = 100 Total Scripts per-server (Stays below max guild command count)
+	public static final int MAX_SCRIPTS = 10;
+	public static final int MAX_LENGTH_PACKAGE_NAME = 32;
+	
+	private static String _pkgNameRegex = "[a-zA-Z _-]+";
+	private static Pattern pkgNamePattern = Pattern.compile(_pkgNameRegex);
+	public static boolean checkPackageName(String str) {
+		if(str.length() > MAX_LENGTH_PACKAGE_NAME)
+			return false;
+		return pkgNamePattern.matcher(str).matches();
+	}
 	
 	String packageName;
 	boolean enabled;
@@ -20,6 +33,15 @@ public class ScriptPackage {
 		this.scripts = new ArrayList<Script>();
 		this.packageName = name;
 		this.enabled = true;
+	}
+	public List<Script> getScripts() {
+		return this.scripts;
+	}
+	public String getName() {
+		return this.packageName;
+	}
+	public String rename(String newName) {
+		return this.packageName = newName;
 	}
 	public boolean isEnabled() {
 		return this.enabled;
@@ -40,6 +62,15 @@ public class ScriptPackage {
 		if(index < 0)
 			return null;
 		return this.scripts.get(index);
+	}
+	public Script getByName(String scriptName) {
+		if(this.scripts == null)
+			return null;
+		for(Script script: this.scripts) {
+			if(script.name.equalsIgnoreCase(scriptName))
+				return script;
+		}
+		return null;
 	}
 	
 	public void addScript(Script script) {

@@ -12,36 +12,54 @@ public class ScriptStatementCollection implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public ScriptExecutor setupExecutor() {
-		return new ScriptExecutor(this, ScriptMemory.MAX_PER_SCRIPT);
+	public ScriptExecutor createExecutor() {
+		this.parent.invocations++;
+		return new ScriptExecutor(this.parent, ScriptMemory.MAX_PER_SCRIPT);
 	}
 	
-	int i = 0;
-	List<ScriptStatement> statements = new ArrayList<ScriptStatement>();
+	private Script parent;
+	int i;
+	List<ScriptStatement> statements;
 	
+	public ScriptStatementCollection(Script parent) {
+		this.i = 0;
+		this.parent = parent;
+		this.parent.code = this;
+		this.statements = new ArrayList<ScriptStatement>();
+	}
+	
+	/**
+	 * Get total number of statements.
+	 * @return
+	 */
+	public int size() {
+		return this.statements.size();
+	}
 	/**
 	 * Seek to a certain location.
 	 * @param i
 	 */
-	public void seek(int i) {
+	public ScriptStatementCollection seek(int i) {
 		if(i < 0)
 			i = 0;
 		if(i >= this.statements.size())
 			i = this.statements.size() - 1;
 		
 		this.i = i;
+		return this;
 	}
 	/**
 	 * Seek to a certain location relative to the current location.
 	 * @param amount
 	 */
-	public void seekRelative(int amount) {
+	public ScriptStatementCollection seekRelative(int amount) {
 		this.i += amount;
 		
 		if(this.i < 0)
 			this.i = 0;
 		if(this.i >= this.statements.size())
 			this.i = this.statements.size() - 1;
+		return this;
 	}
 	
 	/**
@@ -49,16 +67,24 @@ public class ScriptStatementCollection implements Serializable {
 	 * @return
 	 */
 	public boolean hasNext() {
-		return this.statements.size() > i;
+		return i < this.statements.size();
 	}
 	/**
 	 * Get the next statement and increment location.
 	 * @return
 	 */
 	public ScriptStatement next() {
+		if(i < 0 && i >= this.statements.size())
+			return null;
 		return this.statements.get(i++);
 	}
 	
+	public boolean isEmpty() {
+		return this.statements.isEmpty();
+	}
+	public int getIndex() {
+		return this.i;
+	}
 	/**
 	 * Peek at the next element in the collection.
 	 * @return
@@ -83,8 +109,11 @@ public class ScriptStatementCollection implements Serializable {
 	}
 	
 	
-	public void add(ScriptStatement statement) {
-		this.statements.add(statement);
+	public void add(int index, ScriptStatement statement) {
+		if(index >= this.statements.size() - 1)
+			this.statements.add(statement);
+		else
+			this.statements.add(index + 1, statement);
 	}
 	public void remove(int index) {
 		this.statements.remove(index);

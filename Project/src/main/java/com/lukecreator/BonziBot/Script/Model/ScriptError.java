@@ -14,5 +14,8 @@ public class ScriptError {
 		this.message = message;
 		this.line = line;
 	}
-	
+	public ScriptError(Exception exception, ScriptStatement line) {
+		this.message = exception.getMessage() + "\n\n```" + exception.toString() + "```\n\n";
+		this.line = line;
+	}
 }

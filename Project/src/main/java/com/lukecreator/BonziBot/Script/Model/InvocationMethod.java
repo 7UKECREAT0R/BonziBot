@@ -1,10 +1,12 @@
 package com.lukecreator.BonziBot.Script.Model;
 
+import java.io.Serializable;
+
 /**
  * A method of invoking a script. Can be implemented.
  * @author Lukec
  */
-public interface InvocationMethod {
+public interface InvocationMethod extends Serializable {
 	
 	public enum Implementation {
 		COMMAND("Run through a command."),
@@ -22,5 +24,6 @@ public interface InvocationMethod {
 	}
 	
 	public Implementation getImplementation();
+	public String getAsExplanation();
 	public String[] getEventVariables();
 }

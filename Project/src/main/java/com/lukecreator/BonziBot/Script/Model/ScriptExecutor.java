@@ -25,6 +25,7 @@ public class ScriptExecutor {
 		return null;
 	}
 	
+	public final Script _script;
 	public final ScriptStatementCollection statements;
 	public final ScriptMemory memory;
 	
@@ -39,8 +40,9 @@ public class ScriptExecutor {
 		this.cancelColor = color;
 	}
 	
-	public ScriptExecutor(ScriptStatementCollection statements, int memory) throws OutOfMemoryError {
-		this.statements = statements;
+	public ScriptExecutor(Script script, int memory) throws OutOfMemoryError {
+		this._script = script;
+		this.statements = script.code.seek(0);
 		this.memory = ScriptMemory.allocate(memory);
 	}
 	
@@ -53,19 +55,24 @@ public class ScriptExecutor {
 		while(this.statements.hasNext()) {
 			
 			ScriptStatement current = this.statements.next();
-			current.execute(context, this);
 			
-			if((err = getLastError()) != null) {
-				// An error was raised.
-				context.sendMessageEmbeds(BonziUtils.failureEmbed
-					("An error has occurred.",
-					err.message + "\n\nAt: " + err.line.getAsCode()));
-				return;
-			}
-			if(this.cancel) {
-				context.sendMessageEmbeds(BonziUtils.quickEmbed
-					(null, this.cancelMessage, this.cancelColor).build());
-				return;
+			try {
+				current.execute(context, this);
+			} catch(Exception exc) {
+				raiseError(new ScriptError(exc, current));
+			} finally {
+				if((err = getLastError()) != null) {
+					// An error was raised.
+					context.sendMessageEmbeds(BonziUtils.failureEmbed
+						("An error has occurred.",
+						err.message + "\n\nAt:\n```\n" + err.line.getAsCode() + "\n```"));
+					return;
+				}
+				if(this.cancel) {
+					context.sendMessageEmbeds(5, BonziUtils.quickEmbed
+						(null, this.cancelMessage, this.cancelColor).build());
+					return;
+				}
 			}
 		}
 	}

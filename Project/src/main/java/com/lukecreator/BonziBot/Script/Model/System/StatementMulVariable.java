@@ -6,31 +6,41 @@ import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue.Type;
+import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
+import net.dv8tion.jda.api.entities.Guild;
+
 public class StatementMulVariable implements ScriptStatement {
+	
+	private static final long serialVersionUID = 1L;
 	
 	String variableName;
 	DynamicValue value;
 	
 	@Override
 	public String getKeyword() {
-		return "mul";
+		return "multiply";
 	}
 	
 	@Override
 	public String getAsCode() {
-		return "mul " + this.variableName + " " + value.toString();
+		return "multiply " + Script.asArgument(this.variableName) + " " + Script.asArgument(value.toString());
 	}
 
 	@Override
-	public GuiEditEntry[] getArgs() {
+	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			new GuiEditEntryText(new StringArg("value"), null, "Value", "The value or variable which will be multiplied with the variable."),
-			new GuiEditEntryText(new StringArg("valuename"), null, "Variable", "The variable that will be modified.")
+			caller.getVariableChoice(),
+			new GuiEditEntryText(new StringArg("value"), null, "Value", "The value or variable that will be multiplied with.")
 		};
+	}
+	
+	@Override
+	public String getNewVariable() {
+		return null;
 	}
 	
 	@Override

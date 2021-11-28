@@ -1,20 +1,30 @@
 package com.lukecreator.BonziBot.Script.Model;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.function.Function;
 
 import com.lukecreator.BonziBot.BonziUtils;
-import com.lukecreator.BonziBot.CommandAPI.ChoiceArg;
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
+import com.lukecreator.BonziBot.GuiAPI.DropdownItem;
+import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
+import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryChoice;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
+
+import net.dv8tion.jda.api.entities.Guild;
 
 /**
  * Provides an efficient means of mass producing getters for objects.
  * @author Lukec
  */
 public abstract class ScriptGetter implements ScriptStatement {
+	
+	private static final long serialVersionUID = 1L;
+
+	// Hacky serializable function!
+	public interface SerializableFunction<T,R> extends Function<T,R>, Serializable {}
 	
 	/**
 	 * Names a transformer function which aims to wrap a getter method
@@ -35,11 +45,14 @@ public abstract class ScriptGetter implements ScriptStatement {
 	 * </code>
 	 * @author Lukec
 	 */
-	public class Binding {
-		public final String name;
-		public final Function<Object, Object> transformer;
+	public class Binding implements Serializable {
 		
-		public Binding(String name, Function<Object, Object> transformer) {
+		private static final long serialVersionUID = 1L;
+		
+		public final String name;
+		public final SerializableFunction<Object, Object> transformer;
+		
+		public Binding(String name, SerializableFunction<Object, Object> transformer) {
 			this.name = name;
 			this.transformer = transformer;
 		}
@@ -86,26 +99,35 @@ public abstract class ScriptGetter implements ScriptStatement {
 	}
 
 	@Override
-	public GuiEditEntry[] getArgs() {
+	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		int i = 0;
 		String[] _choices = new String[propertyBindings.size()];
 		for(Binding binding: this.propertyBindings)
 			_choices[i++] = '`' + binding.name + '`';
 		String choices = BonziUtils.stringJoinOr(", ", _choices);
 		
-		if(getsObjectFromContext()) {
+		GuiDropdown fieldSelector = new GuiDropdown("Field to get...", "field", false);
+		fieldSelector.addItemsTransform(this.propertyBindings, binding -> {
+			return new DropdownItem(binding.name, binding.name);
+		});
+		
+		if(this.getsObjectFromContext()) {
 			return new GuiEditEntry[] {
-				new GuiEditEntryText(new StringArg("object"), "🏀", BonziUtils.titleString(this.nameOfType), "The " +
-					this.nameOfType.toLowerCase() + " to get the data from."),
-				new GuiEditEntryText(new ChoiceArg("field", (String[])this.propertyBindings.stream().map(b -> b.name).toArray()), "🗂️", "Field", "Available options:\n" + choices),
+					new GuiEditEntryChoice(fieldSelector, "🗂️", "Field", "Available options:\n" + choices),
 				new GuiEditEntryText(new StringArg("dst"), "📩", "Destination Variable", "The variable that the data will be placed in.")
 			};
 		} else {
 			return new GuiEditEntry[] {
-				new GuiEditEntryText(new ChoiceArg("field", (String[])this.propertyBindings.stream().map(b -> b.name).toArray()), "🗂️", "Field", "Available options:\n" + choices),
+				caller.getVariableChoice("🏀", BonziUtils.titleString(this.nameOfType), "The " + this.nameOfType.toLowerCase() + " to get the data from."),
+				new GuiEditEntryChoice(fieldSelector, "🗂️", "Field", "Available options:\n" + choices),
 				new GuiEditEntryText(new StringArg("dst"), "📩", "Destination Variable", "The variable that the data will be placed in.")
 			};
 		}
+	}
+	
+	@Override
+	public String getNewVariable() {
+		return this.destination;
 	}
 
 	@Override
@@ -115,10 +137,14 @@ public abstract class ScriptGetter implements ScriptStatement {
 
 	@Override
 	public void parse(Object[] inputs) {
-		int i = 0;
-		if(this.getsObjectFromContext())
-			this.object = (String)inputs[i++];
-		this.destination = (String)inputs[i];
+		if(this.getsObjectFromContext()) {
+			this.field = (String)inputs[0];
+			this.destination = (String)inputs[1];
+		} else {
+			this.object = (String)inputs[0];
+			this.field = (String)inputs[1];
+			this.destination = (String)inputs[2];
+		}
 	}
 
 	@Override
@@ -141,8 +167,9 @@ public abstract class ScriptGetter implements ScriptStatement {
 			}
 		}
 		
-		if(!obj.getClass().isAssignableFrom(this.requiredType)) {
-			ScriptExecutor.raiseError(new ScriptError("Variable '" + this.object + "' is not a " + this.nameOfType + ".", this));
+		Class<? extends Object> clazz = obj.getClass();
+		if(clazz.isAssignableFrom(this.requiredType)) {
+			ScriptExecutor.raiseError(new ScriptError("Variable '" + this.object + "' is not a " + this.nameOfType + ". It's a " + clazz.getSimpleName(), this));
 			return;
 		}
 		

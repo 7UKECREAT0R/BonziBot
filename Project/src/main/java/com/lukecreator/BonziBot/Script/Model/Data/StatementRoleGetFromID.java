@@ -5,15 +5,19 @@ import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue;
+import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
 import com.lukecreator.BonziBot.Script.Model.ScriptError;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 
 public class StatementRoleGetFromID implements ScriptStatement {
-
+	
+	private static final long serialVersionUID = 1L;
+	
 	public String id;
 	public String dst;
 	
@@ -28,13 +32,18 @@ public class StatementRoleGetFromID implements ScriptStatement {
 	}
 
 	@Override
-	public GuiEditEntry[] getArgs() {
+	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			new GuiEditEntryText(new StringArg("id"), "🔢", "ID", "The ID or variable containing the ID of the role to get."),
+			new GuiEditEntryText(new StringArg("id"), "🔢", "ID", "The ID of the role to get."),
 			new GuiEditEntryText(new StringArg("dst"), "📩", "Destination Variable", "The variable that the found role will be placed in.")
 		};
 	}
-
+	
+	@Override
+	public String getNewVariable() {
+		return this.dst;
+	}
+	
 	@Override
 	public StatementCategory getCategory() {
 		return StatementCategory.DATA;

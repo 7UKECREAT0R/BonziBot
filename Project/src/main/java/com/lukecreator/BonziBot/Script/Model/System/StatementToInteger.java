@@ -1,18 +1,17 @@
 package com.lukecreator.BonziBot.Script.Model.System;
 
-import java.io.Serializable;
-
-import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
-import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue;
+import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
 import com.lukecreator.BonziBot.Script.Model.ScriptError;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
-public class StatementToInteger implements ScriptStatement, Serializable {
+import net.dv8tion.jda.api.entities.Guild;
+
+public class StatementToInteger implements ScriptStatement {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -20,18 +19,23 @@ public class StatementToInteger implements ScriptStatement, Serializable {
 	
 	@Override
 	public String getKeyword() {
-		return "toint";
+		return "to_integer";
 	}
 	@Override
 	public String getAsCode() {
-		return "toint " + this.variableName;
+		return "to_integer " + Script.asArgument(this.variableName);
 	}
 
 	@Override
-	public GuiEditEntry[] getArgs() {
+	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			new GuiEditEntryText(new StringArg("valuename"), null, "Variable", "The variable that should be converted to an integer value.")
+			caller.getVariableChoice(null, "Variable", "The variable that should be converted to an integer value.")
 		};
+	}
+	
+	@Override
+	public String getNewVariable() {
+		return variableName;
 	}
 
 	@Override

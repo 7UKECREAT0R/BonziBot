@@ -1,8 +1,9 @@
 package com.lukecreator.BonziBot.Script.Model;
 
+import java.util.concurrent.TimeUnit;
+
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
-import com.lukecreator.BonziBot.CommandAPI.CommandParsedArgs;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 
 import net.dv8tion.jda.api.JDA;
@@ -36,7 +37,7 @@ public class ScriptContextInfo {
 	public final String fullText;
 	public final String commandName;
 	public final String[] inputArgs;
-	public final CommandParsedArgs args;
+	//public final CommandParsedArgs args;
 	public boolean hasSlashCommand;
 	public SlashCommandEvent slashCommand;
 	
@@ -76,7 +77,6 @@ public class ScriptContextInfo {
 		this.fullText = info.fullText;
 		this.commandName = info.commandName;
 		this.inputArgs = info.inputArgs;
-		this.args = info.args;
 		this.slashCommand = info.slashCommand;
 		this.msg = info.message;
 		this.channel = info.tChannel;
@@ -87,7 +87,7 @@ public class ScriptContextInfo {
 		this.guild = info.guild;
 		this.settings = info.settings;
 	}
-	public ScriptContextInfo(String fullText, String commandName, String[] inputArgs, CommandParsedArgs args, SlashCommandEvent slashCommand, Message msg,
+	public ScriptContextInfo(String fullText, String commandName, String[] inputArgs, SlashCommandEvent slashCommand, Message msg,
 			TextChannel channel, JDA jda, BonziBot bonzi, User user, Member member, Guild guild, GuildSettings settings) {
 		this.hasCommand = commandName != null;
 		this.hasMessage = msg != null;
@@ -101,7 +101,6 @@ public class ScriptContextInfo {
 		this.fullText = fullText;
 		this.commandName = commandName;
 		this.inputArgs = inputArgs;
-		this.args = args;
 		this.slashCommand = slashCommand;
 		this.msg = msg;
 		this.channel = channel;
@@ -124,6 +123,20 @@ public class ScriptContextInfo {
 			this.channel.sendMessage(content).queue();
 	}
 	/**
+	 * Generic method to send a temporary message depending on general context.
+	 * @param content
+	 */
+	public void sendMessage(int seconds, String content) {
+		if(this.hasSlashCommand)
+			this.slashCommand.reply(content).queue(interaction -> {
+				interaction.deleteOriginal().queueAfter(seconds, TimeUnit.SECONDS);
+			});
+		else
+			this.channel.sendMessage(content).queue(msg -> {
+				msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+			});
+	}
+	/**
 	 * Generic method to send a message depending on general context.
 	 * @param embed
 	 */
@@ -132,5 +145,19 @@ public class ScriptContextInfo {
 			this.slashCommand.replyEmbeds(embed).queue();
 		else
 			this.channel.sendMessageEmbeds(embed).queue();
+	}
+	/**
+	 * Generic method to send a temporary message depending on general context.
+	 * @param embed
+	 */
+	public void sendMessageEmbeds(int seconds, MessageEmbed embed) {
+		if(this.hasSlashCommand)
+			this.slashCommand.replyEmbeds(embed).queue(interaction -> {
+				interaction.deleteOriginal().queueAfter(seconds, TimeUnit.SECONDS);
+			});
+		else
+			this.channel.sendMessageEmbeds(embed).queue(msg -> {
+				msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+			});
 	}
 }

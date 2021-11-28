@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.entities.Role;
 
 public class StatementRoleGet extends ScriptGetter {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public StatementRoleGet() {
 		super();
 		this.nameOfType = "Role";

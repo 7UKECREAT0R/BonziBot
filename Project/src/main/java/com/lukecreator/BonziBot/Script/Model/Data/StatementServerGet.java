@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.Script.Model.ScriptGetter;
 
 public class StatementServerGet extends ScriptGetter {
 	
+	private static final long serialVersionUID = 1L;
 	public static final String DEFAULT_URL = "https://cdn.discordapp.com/icons/529089349762023436/de43f3f240e355be98bd71760a9ab842.webp?size=256";
 	
 	public StatementServerGet() {
@@ -47,5 +48,4 @@ public class StatementServerGet extends ScriptGetter {
 				.stream().filter(m -> m.getUser().isBot()).count());
 		}));
 	}
-	
 }

@@ -1,6 +1,7 @@
-package com.lukecreator.BonziBot.Script.Model.System;
+package com.lukecreator.BonziBot.Script.Model.Limiting;
 
-import com.lukecreator.BonziBot.CommandAPI.BooleanArg;
+import java.awt.Color;
+
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue;
@@ -9,73 +10,63 @@ import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
 import com.lukecreator.BonziBot.Script.Model.ScriptError;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
+import com.lukecreator.BonziBot.Script.Model.ScriptStorage;
+import com.lukecreator.BonziBot.Script.Model.ScriptStorage.StorageEntry;
 
 import net.dv8tion.jda.api.entities.Guild;
 
-public class StatementToBoolean implements ScriptStatement {
-	
+public class StatementLimitHasData implements ScriptStatement {
 	private static final long serialVersionUID = 1L;
 
-	public String variableName;
+	String key;
 	
 	@Override
 	public String getKeyword() {
-		return "to_boolean";
+		return "require_has_data";
 	}
+
 	@Override
 	public String getAsCode() {
-		return "to_boolean " + Script.asArgument(this.variableName);
+		return "require_has_data " + Script.asArgument(key);
 	}
 
 	@Override
 	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			caller.getVariableChoice(null, "Variable", "The variable that should be converted to a boolean value.")
+			caller.getVariableChoice(null, "Key", "The key to check for data from."),
 		};
 	}
-	
+
 	@Override
 	public String getNewVariable() {
-		return variableName;
+		return null;
 	}
-	
+
 	@Override
 	public StatementCategory getCategory() {
-		return StatementCategory.SYSTEM;
+		return StatementCategory.LIMITING;
 	}
 
 	@Override
 	public void parse(Object[] inputs) {
-		this.variableName = (String)inputs[0];
+		this.key = (String)inputs[0];
 	}
 
 	@Override
 	public void execute(ScriptContextInfo info, ScriptExecutor context) {
-		DynamicValue value = context.memory.readVariable(this.variableName);
-		
-		if(value == null) {
-			ScriptExecutor.raiseError(new ScriptError("Variable doesn't exist.", this));
+		DynamicValue keyVar = context.memory.readVariable(this.key);
+		if(keyVar == null) {
+			ScriptExecutor.raiseError(new ScriptError("Non-existent variable as key.", this));
 			return;
 		}
 		
-		boolean parsed = false;
+		Object object = keyVar.getAsObject(context.memory);
+		long key = ScriptStorage.toKey(object);
+		StorageEntry entry = context._script.storage.getData(key);
 		
-		switch(value.getType()) {
-		case BOOLEAN:
+		if(entry == null) {
+			context.cancelExecution("No data for key \"" + this.key + "\" yet.", Color.orange);
 			return;
-		case DECIMAL:
-			parsed = ((int)value.getAsDouble()) == 1;
-			break;
-		case INT:
-			parsed = value.getAsInt() == 1;
-			break;
-		case STRING:
-			parsed = BooleanArg.parseBoolean(value.getAsString());
-			break;
-		default:
-			return; // no operation
 		}
-		
-		context.memory.writeVariable(this.variableName, parsed);
 	}
 }

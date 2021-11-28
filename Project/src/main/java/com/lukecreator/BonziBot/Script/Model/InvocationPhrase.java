@@ -2,6 +2,8 @@ package com.lukecreator.BonziBot.Script.Model;
 
 public class InvocationPhrase implements InvocationMethod {
 	
+	private static final long serialVersionUID = 1L;
+	
 	@Override
 	public Implementation getImplementation() {
 		return Implementation.PHRASE;
@@ -23,6 +25,11 @@ public class InvocationPhrase implements InvocationMethod {
 	
 	@Override
 	public String[] getEventVariables() {
-		return new String[] { "user", "message", "channel", "server" };
+		return new String[] { "member", "channel" };
+	}
+	
+	@Override
+	public String getAsExplanation() {
+		return "Run when the phrase \"" + this.phrase + "\" is said.";
 	}
 }

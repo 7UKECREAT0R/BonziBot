@@ -1,6 +1,4 @@
-package com.lukecreator.BonziBot.Script.Model.System;
-
-import java.awt.Color;
+package com.lukecreator.BonziBot.Script.Model.Storage;
 
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
@@ -11,43 +9,39 @@ import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
 import net.dv8tion.jda.api.entities.Guild;
 
-public class StatementStop implements ScriptStatement {
+public class StatementClearStorage implements ScriptStatement {
 	
 	private static final long serialVersionUID = 1L;
-
+	
 	@Override
 	public String getKeyword() {
-		return "stop";
+		return "s_clear";
 	}
 	@Override
 	public String getAsCode() {
-		return "stop";
+		return "s_clear";
 	}
 
 	@Override
 	public GuiEditEntry[] getArgs(Script caller, Guild server) {
-		return new GuiEditEntry[0];
+		return new GuiEditEntry[] {};
 	}
 	
 	@Override
 	public String getNewVariable() {
 		return null;
 	}
-	
+
 	@Override
 	public StatementCategory getCategory() {
-		return StatementCategory.SYSTEM;
+		return StatementCategory.STORAGE;
 	}
 
 	@Override
-	public void parse(Object[] inputs) {
-		return;
-	}
-
+	public void parse(Object[] inputs) {}
+	
 	@Override
 	public void execute(ScriptContextInfo info, ScriptExecutor context) {
-		context.cancelExecution("Cancelled execution.", Color.orange);
+		context._script.storage.clearData();
 	}
-
-
 }

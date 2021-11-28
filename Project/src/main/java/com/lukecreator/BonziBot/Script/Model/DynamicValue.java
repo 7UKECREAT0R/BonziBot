@@ -69,6 +69,43 @@ public class DynamicValue implements Serializable {
 		
 		return dv;
 	}
+	/**
+	 * Compares A to B. -1 means less than, and 1 means greater. 0 means equals.
+	 * @param aVar
+	 * @param bVar
+	 * @return
+	 */
+	public static double compare(DynamicValue aVar, DynamicValue bVar) {
+		if(aVar.type == bVar.type)
+			return compareEqualType(aVar, bVar);
+		
+		double valueA = aVar.getComparePower();
+		double valueB = bVar.getComparePower();
+		
+		return valueA - valueB;
+	}
+	/**
+	 * Compares A to B, is guaranteed that types are equal.
+	 * @param aVar
+	 * @param bVar
+	 * @return
+	 */
+	public static double compareEqualType(DynamicValue aVar, DynamicValue bVar) {
+		switch(aVar.type) {
+		case BOOLEAN:
+			return (aVar.b ? 1 : 0) - (bVar.b ? 1 : 0);
+		case DECIMAL:
+			return aVar.d - bVar.d;
+		case INT:
+			return aVar.i - bVar.i;
+		case STRING:
+			return aVar.s.length() - bVar.s.length();
+		case OBJREF:
+		default:
+			return 0;
+		}
+	}
+	
 	public static DynamicValue referenceObject(int index) {
 		return new DynamicValue(index);
 	}
@@ -94,6 +131,38 @@ public class DynamicValue implements Serializable {
 		} else return this.type.sz;
 	}
 	
+	// Number methods for generic math.
+	public boolean isNumber() {
+		return this.type == Type.INT || this.type == Type.DECIMAL;
+	}
+	public double getNumber() {
+		if(this.type == Type.INT)
+			return (double)this.i;
+		else
+			return this.d;
+	}
+	
+	/**
+	 * Get this dynamic value as a generic Object
+	 * @param objects The script memory incase a dereference has to happen.
+	 * @return A java `Object` representing this `DynamicValue`.
+	 */
+	public Object getAsObject(ScriptMemory objects) {
+		switch(this.type) {
+		case BOOLEAN:
+			return new Boolean(this.b);
+		case DECIMAL:
+			return new Double(this.d);
+		case INT:
+			return new Long(this.i);
+		case OBJREF:
+			return objects.getReferencedObject(this);
+		case STRING:
+			return this.s;
+		default:
+			return null;
+		}
+	}
 	public long getAsInt() {
 		return this.i;
 	}
@@ -125,6 +194,29 @@ public class DynamicValue implements Serializable {
 			return "Object Reference " + this.objref;
 		default:
 			return "";
+		}
+	}
+	public String asArg() {
+		return Script.asArgument(this.getConcatString());
+	}
+	/**
+	 * Get the weight of this variable in a comparison. A generalized numeric value representing this DynamicValue.
+	 * @return
+	 */
+	public double getComparePower() {
+		switch(this.type) {
+		case BOOLEAN:
+			return this.b ? 1 : 0;
+		case DECIMAL:
+			return this.d;
+		case INT:
+			return this.i;
+		case STRING:
+			return this.s.length();
+		
+		case OBJREF:
+		default:
+			return 0;
 		}
 	}
 	@Override
