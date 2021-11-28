@@ -2,13 +2,13 @@ package com.lukecreator.BonziBot.Gui;
 
 import java.awt.Color;
 import java.time.LocalDate;
-import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.ColorArg;
 import com.lukecreator.BonziBot.Data.Achievement;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
+import com.lukecreator.BonziBot.Data.TimeZone;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
@@ -58,7 +58,7 @@ public class GuiEditProfile extends Gui {
 		if(background == null)
 			background = "No background.";
 		String tzString = timezone != null ?
-			timezone.getDisplayName() : "Unset";
+			timezone.name : "Unset";
 		
 		EmbedBuilder eb = BonziUtils.quickEmbed("Editing Profile...", "Change your bio, timezone, favorite color, or even background image!", favColor);
 		eb.addField("🖊️ Bio", "`A short description of yourself.`\n" + BonziUtils.cutOffString(bio, 128), false);
@@ -125,21 +125,14 @@ public class GuiEditProfile extends Gui {
 						return;
 					}
 					
-					String[] zones = TimeZone.getAvailableIDs();
-					boolean valid = false;
-					for(String zone: zones) {
-						if(id.equals(zone)) {
-							valid = true;
-							break;
-						}
-					}
-					if(!valid) {
-						BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("Invalid Time Zone! Cancelled operation.",
-							"If you put an abbreviation (like PST), make sure it's in all capitals!"), 6);
+					TimeZone newZone = TimeZone.searchTimezone(id);
+					
+					if(newZone == null) {
+						BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("Invalid Time Zone! Cancelled operation."), 3);
 						return;
 					}
-					TimeZone tz = TimeZone.getTimeZone(id);
-					account.timeZone = tz;
+					
+					account.timeZone = newZone;
 					uam.setUserAccount(userId, account);
 					BonziUtils.tryAwardAchievement(channel, this.bonziReference, userId, Achievement.SNAZZY);
 					this.parent.redrawMessage(jda);

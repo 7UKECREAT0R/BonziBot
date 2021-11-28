@@ -49,7 +49,7 @@ public class GuiRules extends Gui {
 		EmbedBuilder eb = new EmbedBuilder()
 			.setColor(BonziUtils.COLOR_BONZI_PURPLE)
 			.setTitle(guildName + " Rules Editor")
-			.setFooter("Run '" + this.prefixOfLocation + "sendrules' to send the message.");
+			.setFooter("Run '/sendrules' to send the message.");
 		String[] lines = rules.getRules();
 		StringBuilder full = new StringBuilder();
 		for(int i = 0; i < lines.length; i++) {

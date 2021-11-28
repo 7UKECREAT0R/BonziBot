@@ -166,7 +166,7 @@ public class GuiProfile extends Gui {
 		
 		if(account.timeZone != null) {
 			infoY += infoHeight;
-			String timezone = "Timezone: " + account.timeZone.getDisplayName();
+			String timezone = "Timezone: " + account.timeZone.name + " (" + account.timeZone.gmt + ')';
 			image.drawString(timezone, Color.white, infoX, infoY);
 		}
 		
