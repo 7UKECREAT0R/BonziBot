@@ -28,7 +28,7 @@ public class TagInfoCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		Guild g = e.guild;
 		

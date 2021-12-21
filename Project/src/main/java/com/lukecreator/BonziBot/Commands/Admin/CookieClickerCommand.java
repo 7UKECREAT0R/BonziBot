@@ -21,7 +21,7 @@ public class CookieClickerCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		String text = e.args.getString("text");
 		ActionRow row = ActionRow.of(Button.primary("_clicker", text).withEmoji(Emoji.fromUnicode("🍪")));
 		e.channel.sendMessage("`Cookie Clicker!` 0").setActionRows(row).queue();

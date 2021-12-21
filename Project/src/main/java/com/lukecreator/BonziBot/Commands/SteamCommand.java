@@ -23,7 +23,7 @@ public class SteamCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		// How release names are stored.
 		String title = e.args.getString("game title").toUpperCase();

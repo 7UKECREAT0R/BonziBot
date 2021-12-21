@@ -14,7 +14,7 @@ public class LoadLegacyFilesCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		e.bonzi.accounts.loadLegacy();
 		e.bonzi.tags.loadLegacy();
 		e.message.addReaction("👍").queue();

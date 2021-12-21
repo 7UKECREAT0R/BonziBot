@@ -41,7 +41,7 @@ public class XpCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		User target = e.args.argSpecified("target") ?
 			e.args.getUser("target") : e.executor;
 		
@@ -50,7 +50,7 @@ public class XpCommand extends Command {
 		String name = target.getName();
 		
 		int xp = acc.getXP();
-		int level = acc.getLevel();
+		int level = acc.calculateLevel();
 		int nextLevel = level + 1;
 		int startXp = BonziUtils.calculateXpForLevel(level);
 		int nextXp = BonziUtils.calculateXpForLevel(nextLevel);
@@ -117,11 +117,11 @@ public class XpCommand extends Command {
 				
 				Rect bar = Rect.fromSides(barLeft, barRight, barTop, barBottom);
 				Rect partBar = Rect.fromSides(barLeft, barLeft + (int)fillWidth, barTop, barBottom);
-				Rect stBar = Rect.fromSides(partBar.right - BAR_ROUND, partBar.right, partBar.top, partBar.bottom);
+				//Rect stBar = Rect.fromSides(partBar.right - BAR_ROUND, partBar.right, partBar.top, partBar.bottom);
 				
 				image.drawRoundedRect(bar, BAR_ROUND, EMPTY_COLOR);
 				image.drawRoundedRect(partBar, BAR_ROUND, acc.favoriteColor);
-				image.drawRect(stBar, acc.favoriteColor);
+				//image.drawRect(stBar, acc.favoriteColor);
 				image.setFontSize(24);
 				image.drawCenteredString(xpString + " XP", Color.white, bar);
 				
@@ -182,11 +182,11 @@ public class XpCommand extends Command {
 		
 		Rect bar = Rect.fromSides(barLeft, barRight, barTop, barBottom);
 		Rect partBar = Rect.fromSides(barLeft, barLeft + (int)fillWidth, barTop, barBottom);
-		Rect stBar = Rect.fromSides(partBar.right - BAR_ROUND, partBar.right, partBar.top, partBar.bottom);
+		//Rect stBar = Rect.fromSides(partBar.right - BAR_ROUND, partBar.right, partBar.top, partBar.bottom);
 		
 		image.drawRoundedRect(bar, BAR_ROUND, EMPTY_COLOR);
 		image.drawRoundedRect(partBar, BAR_ROUND, acc.favoriteColor);
-		image.drawRect(stBar, acc.favoriteColor);
+		//image.drawRect(stBar, acc.favoriteColor);
 		image.setFontSize(24);
 		image.drawCenteredString(xpString + " XP", Color.white, bar);
 		

@@ -19,7 +19,7 @@ public class RomanNumeralCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		int input = e.args.getInt("input");
 		String roman = BonziUtils.numeral(input);
 		e.channel.sendMessage("`" + input + "` -> `" + roman + "`").queue();

@@ -17,7 +17,7 @@ public class AdminHelpCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		GuiHelpMenuCategory menu = new GuiHelpMenuCategory
 			(CommandCategory._HIDDEN, e.bonzi);
 		BonziUtils.sendGui(e, menu);

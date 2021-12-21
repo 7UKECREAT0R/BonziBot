@@ -17,7 +17,7 @@ public class ResetGridCooldownsCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		e.bonzi.grid.resetCooldowns();
 		e.channel.sendMessage("reset em").queue();
 	}

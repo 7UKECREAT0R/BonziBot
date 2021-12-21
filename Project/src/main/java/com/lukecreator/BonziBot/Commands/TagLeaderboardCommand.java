@@ -21,7 +21,7 @@ public class TagLeaderboardCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		Guild g = e.guild;
 		boolean isPrivate = (e.settings == null) ? false : e.settings.privateTags;
 		

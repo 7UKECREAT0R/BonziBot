@@ -16,10 +16,11 @@ public class JokeCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		String joke = e.bonzi.strings.getJoke();
 		if(e.isSlashCommand)
 			e.slashCommand.reply(joke).queue();
-		e.channel.sendMessage(joke).queue();
+		else
+			e.channel.sendMessage(joke).queue();
 	}
 }

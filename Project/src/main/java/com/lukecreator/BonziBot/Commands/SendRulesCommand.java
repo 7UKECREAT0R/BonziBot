@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 
 public class SendRulesCommand extends Command {
 	
-	Consumer<? super Throwable> ignore = f -> {};
+	static final Consumer<? super Throwable> ignore = f -> {};
 	
 	public SendRulesCommand() {
 		this.subCategory = 0;
@@ -24,11 +24,11 @@ public class SendRulesCommand extends Command {
 		this.args = null;
 		this.worksInDms = false;
 		this.userRequiredPermissions = new Permission[] { Permission.MANAGE_SERVER };
-		this.category = CommandCategory._HIDDEN;
+		this.category = CommandCategory.UTILITIES;
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		e.message.delete().queue(null, ignore);
 		MessageEmbed msg = BonziUtils.generateRules
 			(e.settings, e.guild, e.bonzi).build();

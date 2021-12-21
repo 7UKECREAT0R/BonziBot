@@ -20,7 +20,7 @@ public class CalculatorCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		GuiCalculator gui = new GuiCalculator(e.isGuildMessage);
 		BonziUtils.sendGui(e, gui);
 	}

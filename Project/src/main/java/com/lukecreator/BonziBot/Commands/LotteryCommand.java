@@ -26,7 +26,7 @@ public class LotteryCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		User u = e.executor;
 		UserAccountManager uam = e.bonzi.accounts;

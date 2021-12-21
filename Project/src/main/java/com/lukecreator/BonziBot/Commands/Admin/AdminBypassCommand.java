@@ -19,7 +19,7 @@ public class AdminBypassCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		boolean enable = e.args.getBoolean("enable");
 		e.bonzi.adminBypassing = enable;
 		e.channel.sendMessageEmbeds(BonziUtils.quickEmbed

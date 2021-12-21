@@ -40,7 +40,7 @@ public class SlotsCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		int amount = e.args.getInt("amount");
 		if(amount == 0) {

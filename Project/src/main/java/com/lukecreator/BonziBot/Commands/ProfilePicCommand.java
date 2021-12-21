@@ -26,7 +26,7 @@ public class ProfilePicCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		User u = e.args.argSpecified("target") ?
 			e.args.getUser("target") : e.executor;

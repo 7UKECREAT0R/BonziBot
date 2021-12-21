@@ -24,7 +24,7 @@ public class RevokePurchasesCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		boolean self = !e.args.argSpecified("target");
 		User target = self ? e.executor : e.args.getUser("target");
 		

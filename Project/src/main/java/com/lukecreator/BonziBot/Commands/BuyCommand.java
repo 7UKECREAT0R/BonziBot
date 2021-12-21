@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.EnumArg;
+import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Data.UserAccount;
@@ -27,18 +28,16 @@ public class BuyCommand extends Command {
 		this.name = "Buy";
 		this.unicodeIcon = "💸";
 		this.description = "Buy an item from the BonziBot shop for yourself, or gift it to someone else!";
-		this.args = CommandArgCollection.single("item").withUsageOverride("<item> [@gift receiver]");
+		this.args = new CommandArgCollection(new StringArg("item"), new UserArg("gift").optional());
 		this.category = CommandCategory.COINS;
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		String itemName = e.args.getString("item");
 		EnumArg parser = new EnumArg("", PremiumItem.class);
-		UserArg userParser = new UserArg("");
-		String lastArg = e.inputArgs[e.inputArgs.length-1];
-		boolean gift = userParser.isWordParsable(lastArg, e.guild);
+		boolean gift = e.args.argSpecified("gift");
 		
 		String prefix = BonziUtils.getPrefixOrDefault(e);
 		String redirToShopT = "Not a valid item in the BonziBot shop!";
@@ -47,12 +46,7 @@ public class BuyCommand extends Command {
 		UserAccountManager uam = e.bonzi.accounts;
 		UserAccount account = uam.getUserAccount(e.executor);
 		
-		if(gift) {
-			int len = lastArg.length() + 1;
-			itemName = itemName.substring(0, itemName.length() - len);
-			userParser.parseWord(lastArg, e.bot, e.executor, e.guild);
-		}
-		User giftReceiver = gift ? (User)userParser.object : null;
+		User giftReceiver = e.args.getUser("gift");
 		boolean validReceiver = giftReceiver != null;
 		long giftId = validReceiver ? giftReceiver.getIdLong() : 0l;
 		UserAccount giftAccount = validReceiver ? uam.getUserAccount(giftReceiver) : null;

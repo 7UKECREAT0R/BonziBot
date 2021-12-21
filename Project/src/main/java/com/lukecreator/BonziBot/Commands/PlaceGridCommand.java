@@ -25,7 +25,7 @@ public class PlaceGridCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		int x = e.args.getInt("x");
 		int y = e.args.getInt("y");

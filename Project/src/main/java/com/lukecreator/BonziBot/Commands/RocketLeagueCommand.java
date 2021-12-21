@@ -30,7 +30,7 @@ public class RocketLeagueCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		EmbedBuilder eb = new EmbedBuilder();
 		eb.setColor(Color.cyan);
 		

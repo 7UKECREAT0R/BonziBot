@@ -43,7 +43,7 @@ public class LightshotCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		long id = e.executor.getIdLong();
 		if(!e.bonzi.special.getIsBro(id) && !e.bonzi.special.getIsAdmin(id)) {

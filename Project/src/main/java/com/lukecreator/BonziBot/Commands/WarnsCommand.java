@@ -35,7 +35,7 @@ public class WarnsCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		User target = e.args.getUser("target");
 		Member targetMember = e.guild.getMember(target);
 		UserAccountManager uam = e.bonzi.accounts;

@@ -20,7 +20,7 @@ public class GridCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		EmbedBuilder eb = BonziUtils.quickEmbed("The Current GRID", "To place a pixel, type `/placegrid <x> <y> <color/emoji>`", BonziUtils.COLOR_BONZI_PURPLE);
 		eb.addField("0, 0", e.bonzi.grid.getString(), false);

@@ -20,7 +20,7 @@ public class LoadFilesCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		boolean backup = e.args.argSpecified("backup")?
 			e.args.getBoolean("backup") : false;
 		

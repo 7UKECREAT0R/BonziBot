@@ -18,7 +18,7 @@ public class PinsCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		GuiPins gui = new GuiPins(e.executor, e.getExecutorColor(), e.isGuildMessage ? e.guild.getIdLong() : 0l);
 		BonziUtils.sendGui(e, gui);
 	}

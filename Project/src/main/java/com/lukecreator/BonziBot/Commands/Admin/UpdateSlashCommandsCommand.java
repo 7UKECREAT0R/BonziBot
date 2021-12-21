@@ -17,7 +17,7 @@ public class UpdateSlashCommandsCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		e.bonzi.slashCommands(e.bot);
 		e.channel.sendMessage(":thumbsup:").queue();
 	}

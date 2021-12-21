@@ -1,6 +1,7 @@
 package com.lukecreator.BonziBot.Commands;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.lukecreator.BonziBot.BonziUtils;
@@ -31,7 +32,7 @@ public class ClearCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		int amount = e.args.getInt("amount");
 		boolean limit = e.args.argSpecified("limit");
 		long limitUser = limit ? e.args.getUser("limit").getIdLong() : 0l;
@@ -39,16 +40,18 @@ public class ClearCommand extends Command {
 		long messageId = channel.getLatestMessageIdLong();
 		
 		if(amount < 0) {
-			e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("you cant bring messages back 😔")).queue();
+			e.sendMessageEmbeds(BonziUtils.failureEmbed("you cant bring messages back 😔"));
 			return;
 		}
 		if(amount > 100) {
-			e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Max limit is 100.")).queue();
+			e.sendMessageEmbeds(BonziUtils.failureEmbed("Max limit is 100."));
 			return;
 		}
 		
 		channel.getHistoryBefore(messageId, amount).queue(history -> {
-			e.message.delete().queue();
+			if(e.message != null)
+				e.message.delete().queue();
+			
 			List<Message> msgs = history.getRetrievedHistory();
 			if(limit) {
 				msgs = msgs
@@ -56,8 +59,14 @@ public class ClearCommand extends Command {
 					.filter(m -> m.getAuthor().getIdLong() == limitUser)
 					.collect(Collectors.toList());
 			}
-
-			BonziUtils.sendTempMessage(e.channel, BonziUtils.successEmbed("Clearing " + amount + " messages..."), 3);
+			
+			if(e.isSlashCommand) {
+				e.slashCommand.replyEmbeds(BonziUtils.successEmbed("Clearing " + amount + " messages...")).setEphemeral(false).queue(hook -> {
+					hook.deleteOriginal().queueAfter(3, TimeUnit.SECONDS);
+				});
+			} else {
+				BonziUtils.sendTempMessage(e.channel, BonziUtils.successEmbed("Clearing " + amount + " messages..."), 3);
+			}
 			channel.purgeMessages(msgs);
 		});
 	}

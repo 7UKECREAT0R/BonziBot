@@ -40,7 +40,7 @@ public class ProfileCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		boolean specified = e.args.argSpecified("target");
 		User target = specified ? e.args.getUser("target") : e.executor;

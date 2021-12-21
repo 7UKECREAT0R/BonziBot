@@ -28,7 +28,7 @@ public class MakeEmbedCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 
 		GuiEditEntry[] fields = {
 			new GuiEditEntryText(new StringArg("title"), null, "Title", "The title that will go on the embed."),
@@ -41,8 +41,7 @@ public class MakeEmbedCommand extends Command {
 				new DropdownItem(0, "Large Image"),
 				new DropdownItem(1, "Small Image"),
 				new DropdownItem(2, "Avatar")), null,
-					"Image Size", "The size of the image, if given.")
-					.optional()
+					"Image Size", "The size of the image, if given.").optional()
 		};
 		
 		GuiEditDialog dialog = new GuiEditDialog(null, "Embed Maker-inator 5000", fields).after(o -> {

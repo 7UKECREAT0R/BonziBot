@@ -29,7 +29,7 @@ public class TodoListCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		boolean openFolder = e.args.argSpecified("folder");
 		String folder = e.args.getString("folder");
 		

@@ -26,7 +26,7 @@ public class CommandInfoCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		String commandName = e.args.getString("command name");
 		
 		CommandSystem system = e.bonzi.commands;

@@ -35,7 +35,7 @@ public class TimedPollCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		TimeSpan time = e.args.getTimeSpan("length");
 		String poll = e.args.getString("question");
 		

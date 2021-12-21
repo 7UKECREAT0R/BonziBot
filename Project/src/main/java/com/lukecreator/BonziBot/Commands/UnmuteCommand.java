@@ -28,7 +28,7 @@ public class UnmuteCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		User target = e.args.getUser("target");
 		

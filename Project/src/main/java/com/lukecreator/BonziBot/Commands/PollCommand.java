@@ -29,7 +29,7 @@ public class PollCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		String poll = e.args.getString("question");
 		
 		EmbedBuilder eb;

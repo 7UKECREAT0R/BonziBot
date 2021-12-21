@@ -46,7 +46,7 @@ public class BanCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		User _target = e.args.getUser("target");
 		Member target = e.guild.getMember(_target);
 		Member self = e.member;

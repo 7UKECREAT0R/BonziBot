@@ -18,7 +18,7 @@ public class XpForLevelCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		int level = e.args.getInt("level");
 		int xp = BonziUtils.calculateXpForLevel(level);
 		String com = BonziUtils.comma(xp);

@@ -17,7 +17,7 @@ public class TestCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		GuiTestMenu test = new GuiTestMenu();
 		BonziUtils.sendGui(e, test);

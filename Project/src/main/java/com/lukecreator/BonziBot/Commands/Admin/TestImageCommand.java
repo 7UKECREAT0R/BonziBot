@@ -32,7 +32,7 @@ public class TestImageCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		Color bgColor = e.args.getColor("BG Color");
 		Color fgColor = e.args.getColor("Text Color");

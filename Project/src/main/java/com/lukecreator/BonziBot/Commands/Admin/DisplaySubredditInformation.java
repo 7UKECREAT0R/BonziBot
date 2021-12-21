@@ -22,7 +22,7 @@ public class DisplaySubredditInformation extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		String sub = e.args.getString("subreddit_name");
 		BonziBot bonzi = e.bonzi;
 		RedditClient reddit = bonzi.reddit;

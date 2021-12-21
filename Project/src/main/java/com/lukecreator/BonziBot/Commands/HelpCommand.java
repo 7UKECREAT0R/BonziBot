@@ -25,7 +25,7 @@ public class HelpCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		if(e.args.argSpecified("category")) {
 			CommandCategory c = (CommandCategory)e.args.get("category");
 			GuiHelpMenuCategory menu = new GuiHelpMenuCategory(c, e.bonzi);

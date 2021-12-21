@@ -19,7 +19,7 @@ public class HowToIdCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		if(e.isSlashCommand) 
 			e.slashCommand.replyEmbeds(BonziUtils.successEmbed("Check DMs (if they're open)!")).queue();
 		else if(e.isGuildMessage)

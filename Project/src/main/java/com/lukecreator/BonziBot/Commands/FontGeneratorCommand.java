@@ -21,7 +21,7 @@ public class FontGeneratorCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		String text = e.args.getString("text");
 		GuiFontGenerator gui = new GuiFontGenerator(text);
 		BonziUtils.sendGui(e, gui);

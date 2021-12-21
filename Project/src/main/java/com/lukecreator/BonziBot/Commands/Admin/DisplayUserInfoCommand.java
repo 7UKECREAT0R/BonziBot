@@ -20,7 +20,7 @@ public class DisplayUserInfoCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		UserAccount self = e.bonzi.accounts
 			.getUserAccount(e.executor.getIdLong());
 		User u = e.executor;

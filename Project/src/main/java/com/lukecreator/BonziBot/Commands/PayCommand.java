@@ -29,7 +29,7 @@ public class PayCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		User target = e.args.getUser("receiver");
 		UserAccountManager uam = e.bonzi.accounts;
 		UserAccount receiveAccount = uam.getUserAccount(target);

@@ -110,7 +110,7 @@ public class NickAllCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		if(STILL_NICKNAMING.contains(e.guild.getIdLong())) {
 			e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("Please wait until I'm finished nicknaming my current batch!")).queue();

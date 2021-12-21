@@ -20,15 +20,18 @@ public class RepCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		EmbedBuilder eb = BonziUtils.quickEmbed("Repping People",
-			  "You can rep a user once every 24 hours.\n"
-			+ "Type `+rep` or `-rep` to affect the user who last sent a message.\n"
-			+ "Alternatively, `+rep <@user>` and `-rep <@user>` also works.",
-			e.executor, BonziUtils.COLOR_BONZI_PURPLE);
+			  "You can rep a user once every 24 hours.",
+			  e.executor, BonziUtils.COLOR_BONZI_PURPLE);
+		eb.addField("Simple", "Type `+rep` or `-rep` in chat to give/remove reputation from the last user that sent a message.", false);
+		eb.addField("Specific", "Want to rep someone specific? Type `+rep <@user>` or `-rep <@user>` to do that, too!", false);
+		
 		String prefix = BonziUtils.getPrefixOrDefault(e);
+		
 		eb.addField("Reputation Use", "Your reputation shows up on your `" + prefix + "profile` and shows up as either a positive or negative number."
 			+ "The higher the reputation you have, the better!", false);
+		
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(eb.build()).queue();
 		else

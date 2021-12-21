@@ -20,7 +20,7 @@ public class SaltyNeedsMoneyCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		UserAccountManager uam = e.bonzi.accounts;
 		
 		UserAccount account = uam.getUserAccount(SALTE);

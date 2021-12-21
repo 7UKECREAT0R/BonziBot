@@ -24,7 +24,7 @@ public class DailyRewardCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		User u = e.executor;
 		RewardManager rm = e.bonzi.rewards;
 		

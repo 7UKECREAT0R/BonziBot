@@ -21,7 +21,7 @@ public class CoinflipCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		int side = rand.nextInt(2);
 		String msg = (side == 0) ?
 			Constants.COINFLIP_H:

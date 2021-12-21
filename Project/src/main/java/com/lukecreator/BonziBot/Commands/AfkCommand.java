@@ -29,7 +29,7 @@ public class AfkCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		TimeSpan _length = e.args.getTimeSpan("length");
 		String reason = e.args.getString("reason");
 		reason = BonziUtils.cutOffString(reason, 1024);

@@ -29,7 +29,7 @@ public class ExposeCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		LoggingManager lm = e.bonzi.logging;
 		Message message = lm.getExposeData(e.guild);
 		

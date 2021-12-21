@@ -23,7 +23,7 @@ public class AwardBadgesCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		SpecialPeopleManager spm = e.bonzi.special;
 		UserAccountManager uam = e.bonzi.accounts;
 		

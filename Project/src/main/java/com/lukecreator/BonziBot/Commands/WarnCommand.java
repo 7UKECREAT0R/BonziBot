@@ -32,7 +32,7 @@ public class WarnCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		User target = e.args.getUser("target");
 		String reason = e.args.getString("text");
 		UserAccountManager uam = e.bonzi.accounts;

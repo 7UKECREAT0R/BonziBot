@@ -30,7 +30,7 @@ public class SubredditCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		BonziBot bb = e.bonzi;
 		RedditClient client = bb.reddit;
 		String subName = e.args.getString("sub");
@@ -63,10 +63,20 @@ public class SubredditCommand extends Command {
 					return;
 				}
 			}
-			EmbedBuilder eb = new EmbedBuilder()
-				.setColor(sub.color)
-				.setAuthor(sub.name, sub.url, sub.iconUrl)
-				.setTitle(post.getTitle(), post.getUrl());
+			
+			EmbedBuilder eb;
+			if(EmbedBuilder.URL_PATTERN.matcher(sub.iconUrl).matches()) {
+				eb = new EmbedBuilder()
+						.setColor(sub.color)
+						.setAuthor(sub.name, sub.url, sub.iconUrl)
+						.setTitle(post.getTitle(), post.getUrl());
+			} else {
+				eb = new EmbedBuilder()
+						.setColor(sub.color)
+						.setAuthor(sub.name, sub.url, null)
+						.setTitle(post.getTitle(), post.getUrl());
+			}
+
 			
 			String postUrl = client.getSubmissionAboutUrl(post);
 			SubredditPostVideoData media

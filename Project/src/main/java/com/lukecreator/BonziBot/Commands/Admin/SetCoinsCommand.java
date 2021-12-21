@@ -24,7 +24,7 @@ public class SetCoinsCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		int amount = e.args.getInt("amount");
 		User target = e.args.argSpecified("target") ? e.args.getUser("target") : e.executor;
 		

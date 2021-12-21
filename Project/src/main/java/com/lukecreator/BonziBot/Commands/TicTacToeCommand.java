@@ -30,7 +30,7 @@ public class TicTacToeCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		boolean chosen = e.args.argSpecified("opponent");
 
 		EventWaiterManager ewm = e.bonzi.eventWaiter;

@@ -26,7 +26,7 @@ public class MemeCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		BonziBot bb = e.bonzi;
 		RedditClient client = bb.reddit;
 		

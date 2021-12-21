@@ -8,7 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 public class TermsCommand extends Command {
 
 	public TermsCommand() {
-		this.subCategory = 1;
+		this.subCategory = 2;
 		this.name = "Terms";
 		this.unicodeIcon = "🔒";
 		this.description = "Make sure you agree on how I use your information.";
@@ -19,7 +19,7 @@ public class TermsCommand extends Command {
 	}
 
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(BonziUtils.TERMS).setEphemeral(true).queue();
 		else e.channel.sendMessageEmbeds(BonziUtils.TERMS).queue();

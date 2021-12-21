@@ -27,7 +27,7 @@ public class ShopCommand extends Command {
 	}
 	
 	@Override
-	public void executeCommand(CommandExecutionInfo e) {
+	public void run(CommandExecutionInfo e) {
 		
 		User user = e.executor;
 		UserAccountManager uam = e.bonzi.accounts;
