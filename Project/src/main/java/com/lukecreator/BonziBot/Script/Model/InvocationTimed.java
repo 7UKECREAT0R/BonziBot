@@ -10,14 +10,12 @@ public class InvocationTimed implements InvocationMethod {
 
 	private static final long serialVersionUID = 1L;
 	
-	int timesRun = 0;
+	public int timesRun = 0;
 	
 	@Override
 	public Implementation getImplementation() {
 		return Implementation.TIMED;
 	}
-	
-	public static final long MINIMUM = TimeSpan.fromHours(1).ms;
 	
 	public TimeSpan time;
 	
@@ -42,7 +40,7 @@ public class InvocationTimed implements InvocationMethod {
 	
 	@Override
 	public String[] getEventVariables() {
-		return new String[] { };
+		return new String[] { "total_runs" };
 	}
 	
 	@Override

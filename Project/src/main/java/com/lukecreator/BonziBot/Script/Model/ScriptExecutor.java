@@ -33,11 +33,25 @@ public class ScriptExecutor {
 	String cancelMessage = null;	// The message in the embed.
 	Color cancelColor = Color.red;	// The color of the embed.
 	boolean cancel = false;			// Whether to cancel the script.
+	boolean silentCancel = false;
 	
+	/**
+	 * Cancel the running of this script with an embedded message and color.
+	 * @param message
+	 * @param color
+	 */
 	public void cancelExecution(String message, Color color) {
 		this.cancel = true;
 		this.cancelMessage = message;
 		this.cancelColor = color;
+		this.silentCancel = false;
+	}
+	/**
+	 * Silently cancel the running of this script.
+	 */
+	public void cancelExecution() {
+		this.cancel = true;
+		this.silentCancel = true;
 	}
 	
 	public ScriptExecutor(Script script, int memory) throws OutOfMemoryError {
@@ -50,6 +64,10 @@ public class ScriptExecutor {
 		this.run(0, context);
 	}
 	public void run(int startAt, ScriptContextInfo context) {
+		
+		if(statements.size() < 1)
+			return;
+		
 		this.statements.seek(0);
 		ScriptError err = null;
 		while(this.statements.hasNext()) {
@@ -69,8 +87,10 @@ public class ScriptExecutor {
 					return;
 				}
 				if(this.cancel) {
-					context.sendMessageEmbeds(5, BonziUtils.quickEmbed
-						(null, this.cancelMessage, this.cancelColor).build());
+					if(!this.silentCancel) {
+						context.sendMessageEmbeds(5, BonziUtils.quickEmbed
+							(null, this.cancelMessage, this.cancelColor).build());
+					}
 					return;
 				}
 			}

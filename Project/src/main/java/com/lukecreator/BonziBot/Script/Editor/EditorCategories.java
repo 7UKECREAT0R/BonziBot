@@ -1,5 +1,8 @@
 package com.lukecreator.BonziBot.Script.Editor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.lukecreator.BonziBot.Script.Model.InvocationButton;
 import com.lukecreator.BonziBot.Script.Model.InvocationCommand;
 import com.lukecreator.BonziBot.Script.Model.InvocationJoin;
@@ -17,10 +20,10 @@ import com.lukecreator.BonziBot.Script.Model.Data.StatementRoleGetFromID;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementRoleGetFromName;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementServerGet;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitCompare;
-import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitHasData;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitOwner;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitPermission;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitRole;
+import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitUser;
 import com.lukecreator.BonziBot.Script.Model.Messages.StatementAddReaction;
 import com.lukecreator.BonziBot.Script.Model.Messages.StatementSendMessageEmbed;
 import com.lukecreator.BonziBot.Script.Model.Messages.StatementSendMessageText;
@@ -101,7 +104,8 @@ public class EditorCategories {
 		new StatementDescriptor(StatementLimitRole.class, "Require Role", "Require user to have role to continue past this statement."),
 		new StatementDescriptor(StatementLimitOwner.class, "Require Owner", "Require user to be owner of server to continue past this statement."),
 		new StatementDescriptor(StatementLimitCompare.class, "Require Comparison", "Only continue the code if a comparison passes."),
-		new StatementDescriptor(StatementLimitHasData.class, "Require Data", "Require a key of data in storage to be present to continue."),
+	  //new StatementDescriptor(StatementLimitHasData.class, "Require Data", "Require a key of data in storage to be present to continue."), removed due to useless
+		new StatementDescriptor(StatementLimitUser.class, "Require User", "Require the executor to have a name or ID to continue."),
 	};
 	static final StatementDescriptor[] MESSAGING = {
 		new StatementDescriptor(StatementSendMessageText.class, "Send Message (text)", "Send a plain-text message."),
@@ -117,6 +121,30 @@ public class EditorCategories {
 		
 	};
 	
+	static StatementDescriptor[] ALL = null;
+	public static StatementDescriptor[] getAllPossibleStatements() {
+		if(ALL == null) {
+			List<StatementDescriptor> list = new ArrayList<StatementDescriptor>();
+			for(StatementDescriptor sd: SYSTEM)
+				list.add(sd);
+			for(StatementDescriptor sd: DATA)
+				list.add(sd);
+			for(StatementDescriptor sd: STORAGE)
+				list.add(sd);
+			for(StatementDescriptor sd: LIMITING)
+				list.add(sd);
+			for(StatementDescriptor sd: MESSAGING)
+				list.add(sd);
+			for(StatementDescriptor sd: ROLES)
+				list.add(sd);
+			for(StatementDescriptor sd: ACTIONS)
+				list.add(sd);
+			ALL = (StatementDescriptor[])list.toArray
+				(new StatementDescriptor[list.size()]);
+		}
+		
+		return ALL;
+	}
 	public static StatementDescriptor[] getStatementsForCategory(StatementCategory category) {
 		switch(category) {
 		case ACTIONS: 	return ACTIONS;

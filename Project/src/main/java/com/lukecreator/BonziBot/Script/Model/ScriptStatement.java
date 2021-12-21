@@ -28,7 +28,7 @@ public interface ScriptStatement extends Serializable {
 	/**
 	 * Get GUI entries of the args to be passed into this statement.
 	 * @param caller The calling script.
-	 * @param server TODO
+	 * @param server The server the GUI will be placed in.
 	 * @return
 	 */
 	public GuiEditEntry[] getArgs(Script caller, Guild server);

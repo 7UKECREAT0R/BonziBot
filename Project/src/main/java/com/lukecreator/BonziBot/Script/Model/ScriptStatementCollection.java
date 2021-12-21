@@ -24,7 +24,6 @@ public class ScriptStatementCollection implements Serializable {
 	public ScriptStatementCollection(Script parent) {
 		this.i = 0;
 		this.parent = parent;
-		this.parent.code = this;
 		this.statements = new ArrayList<ScriptStatement>();
 	}
 	
@@ -74,7 +73,7 @@ public class ScriptStatementCollection implements Serializable {
 	 * @return
 	 */
 	public ScriptStatement next() {
-		if(i < 0 && i >= this.statements.size())
+		if(i < 0 || i >= this.statements.size())
 			return null;
 		return this.statements.get(i++);
 	}
@@ -114,6 +113,9 @@ public class ScriptStatementCollection implements Serializable {
 			this.statements.add(statement);
 		else
 			this.statements.add(index + 1, statement);
+	}
+	public void add(ScriptStatement statement) {
+		this.statements.add(statement);
 	}
 	public void remove(int index) {
 		this.statements.remove(index);

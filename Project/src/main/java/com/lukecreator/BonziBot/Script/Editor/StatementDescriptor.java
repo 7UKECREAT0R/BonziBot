@@ -16,6 +16,11 @@ public class StatementDescriptor {
 	public final String name;
 	public final String desc;
 	
+	private String keyword = null;
+	public String getKeyword() {
+		return this.keyword;
+	}
+	
 	@SuppressWarnings("unchecked") // it's fine since i'm hardcoding these
 	public StatementDescriptor(Class<? extends ScriptStatement> clazz, String name, String desc) {
 		this.isGetter = clazz.isAssignableFrom(ScriptGetter.class);
@@ -28,6 +33,12 @@ public class StatementDescriptor {
 		}
 		this.name = name;
 		this.desc = desc;
+		
+		try {
+			this.keyword = clazz.newInstance().getKeyword();
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 	@SuppressWarnings("unchecked")
 	public StatementDescriptor(Class<? extends ScriptStatement> clazz, boolean isGetter, String name, String desc) {
@@ -42,6 +53,11 @@ public class StatementDescriptor {
 		
 		this.name = name;
 		this.desc = desc;
+		try {
+			this.keyword = clazz.newInstance().getKeyword();
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 	public ScriptStatement createNewFromClass() throws InstantiationException, IllegalAccessException {
 		if(this.isGetter)

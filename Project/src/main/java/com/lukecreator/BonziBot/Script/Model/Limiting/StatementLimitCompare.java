@@ -1,7 +1,5 @@
 package com.lukecreator.BonziBot.Script.Model.Limiting;
 
-import java.awt.Color;
-
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.GuiAPI.DropdownItem;
 import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
@@ -114,8 +112,7 @@ public class StatementLimitCompare implements ScriptStatement {
 		}
 		
 		if(!satisfied) {
-			context.cancelExecution("Cancelled because " + aVar.getConcatString() + ' '
-				+ comparison.english + ' ' + bVar.getConcatString(), Color.orange);
+			context.cancelExecution();
 			return;
 		}
 	}
