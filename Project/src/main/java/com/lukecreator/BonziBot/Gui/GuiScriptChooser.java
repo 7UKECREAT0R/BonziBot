@@ -11,6 +11,7 @@ import com.lukecreator.BonziBot.GuiAPI.GuiButton;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton.ButtonColor;
 import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
+import com.lukecreator.BonziBot.Managers.ScriptCache;
 import com.lukecreator.BonziBot.Script.Model.InvocationCommand;
 import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptPackage;
@@ -82,7 +83,7 @@ public class GuiScriptChooser extends Gui {
 		int size = this.thePackage.size();
 		for(int i = 0; i < size; i++) {
 			Script script = this.thePackage.get(i);
-			String desc = '`' + script.method.getAsExplanation() + "`\n*Created by " + script.author.getAsMention() + '*';
+			String desc = '`' + script.method.getAsExplanation() + '`';
 			if(this.scriptChooser.anySelected() && this.scriptChooser.getSelectedIndexes()[0] == i)
 				desc = "➜ " + desc;
 			eb.addField("📜 " + script.name, desc, false);
@@ -141,6 +142,7 @@ public class GuiScriptChooser extends Gui {
 			ewm.getConfirmation(this.parent.ownerId, channel, "Are you sure you want to delete this?", b -> {
 				if(!b)
 					return;
+				ScriptCache.unregister(this.parent.guildId, this.thePackage, selected);
 				if(selected.method instanceof InvocationCommand) {
 					Guild guild = jda.getGuildById(this.parent.guildId);
 					guild.deleteCommandById(((InvocationCommand)selected.method)._commandId).queue();

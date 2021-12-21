@@ -2,13 +2,17 @@ package com.lukecreator.BonziBot.Managers;
 
 import java.io.EOFException;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
+import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
+import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Legacy.UserAccountLegacyLoader;
 
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
 /**
@@ -20,6 +24,23 @@ public class UserAccountManager implements IStorableData {
 	
 	public UserAccountManager() {
 		accounts = new HashMap<Long, UserAccount>();
+	}
+	/**
+	 * Returns if the user levelled up.
+	 * @param info
+	 */
+	public void incrementXp(CommandExecutionInfo info) {
+		UserAccount account = this.getUserAccount(info.executor.getIdLong());
+		
+		if(account.incrementXP()) {
+			MessageEmbed me = BonziUtils.quickEmbed("Level up!",
+				info.executor.getAsMention() + ", you're now level `" + account.calculateLevel() + "`!")
+				.setColor(info.member.getColor()).build();
+			
+			info.channel.sendMessageEmbeds(me).queue(msg -> {
+				msg.delete().queueAfter(5, TimeUnit.SECONDS);
+			});
+		}
 	}
 	public UserAccount getUserAccount(User u) {
 		return getUserAccount(u.getIdLong());

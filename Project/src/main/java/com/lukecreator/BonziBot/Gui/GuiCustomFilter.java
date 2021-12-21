@@ -28,10 +28,12 @@ public class GuiCustomFilter extends Gui {
 	
 	long guildId;
 	String guildName;
+	Gui previous;
 	
-	public GuiCustomFilter(long guildId, String guildName) {
+	public GuiCustomFilter(long guildId, String guildName, Gui previous) {
 		this.guildId = guildId;
 		this.guildName = guildName;
+		this.previous = previous; 
 	}
 	
 	@Override
@@ -144,8 +146,7 @@ public class GuiCustomFilter extends Gui {
 		} else {
 			if(actionId.equals("return")) {
 				// Back
-				Gui back = new GuiGuildSettingsPage1(guildId, guildName);
-				this.parent.setActiveGui(back, jda);
+				this.parent.setActiveGui(this.previous, jda);
 				return;
 			}
 			if(actionId.equals("new")) {

@@ -62,6 +62,7 @@ public class GuiScriptEditor extends Gui {
 		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📂"), "Return", ButtonColor.GRAY, "return"));
 		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬆️"), "up"));
 		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬇️"), "down"));
+		//this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("✒️"), "paste"));
 		this.elements.add(new GuiNewline());
 		this.elements.add(new GuiButton("Add Statement", ButtonColor.BLUE, "add").asEnabled(canAdd));
 		this.elements.add(new GuiButton("Remove", ButtonColor.RED, "remove").asEnabled(count > 0));
@@ -116,6 +117,31 @@ public class GuiScriptEditor extends Gui {
 			this.parent.redrawMessage(jda);
 			return;
 		}
+		/*if(buttonId.equals("paste")) {
+			MessageEmbed me = BonziUtils.quickEmbed("Pasting Code",
+				"Paste your new code here.",
+				Color.orange).build();
+			MessageChannel channel = this.parent.getChannel(jda);
+			EventWaiterManager ewm = this.bonziReference.eventWaiter;
+			
+			channel.sendMessageEmbeds(me).queue(del -> {
+				ewm.waitForResponse(clickerId, response -> {
+					del.delete().queue();
+					response.delete().queue();
+					
+					// get content and trim codeblock markdown
+					String content = response.getContentRaw();
+					content = content.replace(GuiScriptEditor.ARROW + " ", "");
+					if(content.startsWith("```\n"))
+						content = content.substring(4);
+					if(content.endsWith("\n```"))
+						content = content.substring(0, content.length() - 4);
+					
+					String[] lines = content.split("\n");
+					
+				});
+			});
+		}*/
 		
 		if(buttonId.equals("add")) {
 			if(!this.categoryDropdown.anySelected())

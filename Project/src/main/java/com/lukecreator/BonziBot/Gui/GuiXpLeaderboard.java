@@ -120,7 +120,7 @@ public class GuiXpLeaderboard extends GuiPaging {
 				name += " " + icon;
 			
 			String xp = BonziUtils.comma(acc.getXP()) + " XP";
-			String lvl = "Level " + acc.getLevel();
+			String lvl = "Level " + acc.calculateLevel();
 			eb.addField(name, xp + "\n" + lvl, false);
 		}
 		

@@ -36,21 +36,38 @@ public class GuiPaging extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "pageleft"));
-		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➡️"), "pageright"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "pageleft").asEnabled(this.currentPage > this.minPage));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➡️"), "pageright").asEnabled(this.currentPage < this.maxPage));
 	}
 	
 	@Override
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
-		if(actionId.equals("pageleft") && pagingEnabled) {
-			if(--currentPage < minPage)
+		
+		if(!this.pagingEnabled)
+			return;
+		
+		boolean left = actionId.equals("pageleft");
+		boolean right = actionId.equals("pageright");
+		
+		if(left) {
+			if(--currentPage < minPage) {
 				currentPage = minPage;
-			else parent.redrawMessage(jda);
+				return;
+			}
 		}
-		if(actionId.equals("pageright") && pagingEnabled) {
-			if(++currentPage > maxPage)
+		if(right) {
+			if(++currentPage > maxPage) {
 				currentPage = maxPage;
-			else parent.redrawMessage(jda);
+				return;
+			}
+		}
+		
+		if(left | right) {
+			GuiButton button0 = (GuiButton)this.elements.get(0);
+			button0.asEnabled(this.currentPage > this.minPage);
+			GuiButton button1 = (GuiButton)this.elements.get(1);
+			button1.asEnabled(this.currentPage < this.maxPage);
+			parent.redrawMessage(jda);
 		}
 	}
 }

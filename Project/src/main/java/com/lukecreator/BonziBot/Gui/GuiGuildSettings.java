@@ -1,228 +1,110 @@
 package com.lukecreator.BonziBot.Gui;
 
-import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.lukecreator.BonziBot.BonziUtils;
-import com.lukecreator.BonziBot.CommandAPI.CommandArg;
-import com.lukecreator.BonziBot.CommandAPI.RoleArg;
-import com.lukecreator.BonziBot.CommandAPI.TextChannelArg;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.GuildSettings.FilterLevel;
+import com.lukecreator.BonziBot.GuiAPI.DropdownItem;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
-import com.lukecreator.BonziBot.GuiAPI.GuiButton;
-import com.lukecreator.BonziBot.Managers.EventWaiterManager;
-import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
+import com.lukecreator.BonziBot.GuiAPI.GuiComplex;
+import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
 
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
 
+/**
+ * Better, more modular version of GuiGuildSettingsPageX. Switching to this because it will look nicer and 
+ * @author Lukec
+ */
 public class GuiGuildSettings extends Gui {
 	
-	long guildId;
-	String guildName;
+	final List<GuiComplex<GuildSettings>> options;
+	final GuiDropdown dropdown;
 	
-	public GuiGuildSettings(long guildId, String guildName) {
-		this.guildId = guildId;
-		this.guildName = guildName;
-	}
-	public GuiGuildSettings(Guild guild) {
-		this.guildId = guild.getIdLong();
-		this.guildName = guild.getName();
-	}
-	
-	@Override
-	public void initialize(JDA jda) {
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🤬"), 0));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🗒️"), 1));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📜"), 2));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🕵️"), 3));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("📝"), 4));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🤖"), 5));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("👋"), 6));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("🚪"), 7));
-		this.buttons.add(new GuiButton(GenericEmoji.fromEmoji("💥"), 8));
-	}
-	
-	@Override
-	public MessageEmbed draw(JDA jda) {
-		EmbedBuilder menu = BonziUtils.quickEmbed
-			(this.guildName, "Server Settings - Press "
-			+ "a button to toggle/enter an option.",
-			BonziUtils.COLOR_BONZI_PURPLE);
+	static List<GuiComplex<GuildSettings>> createOptionList(GuildSettings data, long guildId) {
 		
-		Guild guild = jda.getGuildById(guildId);
-		GuildSettings settings = this.bonziReference
-			.guildSettings.getSettings(guildId);
-		FilterLevel filter = settings.filter;
+		List<GuiComplex<GuildSettings>> list = new ArrayList<GuiComplex<GuildSettings>>();
+		// TODO port settings code
 		
-		String emoji = this.emojiForFilter(filter);
-		String filterTitle = "🤬 Filter Level: `" + emoji + " " + filter.name() + "`";
-		String filterDesc = filter.desc;
-		menu.addField(filterTitle, filterDesc, false);
-		
-		List<String> cFilter = settings.customFilter;
-		int cFS = cFilter.size();
-		String cFDesc = "`Filtering " + cFS + BonziUtils.plural(" word", cFS) + "`";
-		menu.addField("🗒️ Custom Filter", cFDesc, false);
-		
-		boolean tags = settings.enableTags;
-		boolean ptags = settings.privateTags;
-		menu.addField("📜 Tags: `" + (tags?"✅ ENABLED`":"🔳 DISABLED`"), "Tags use user generated content from around the world so they are off by default.", false);
-		menu.addField("🕵️ Tag Privacy: `" + (ptags?"PRIVATE`":"PUBLIC`"), "Enabling private tags will use your server's own tags rather than the public ones.", false);
-		
-		boolean logs = settings.loggingEnabled;
-		boolean cmdsEnabled = settings.botCommandsEnabled;
-		long logChannelId = logs ? settings.loggingChannelCached : 0;
-		TextChannel logChannel = logs ? guild.getTextChannelById(logChannelId) : null;
-		String logName = (logChannel != null) ? "Channel: " + logChannel.getAsMention() : "No log channel set.";
-		menu.addField("📝 Logging: `" + (logs?"✅ ENABLED`":"🔳 DISABLED`"), "" + logName + "\nPut detailed log UIs into a channel for easy moderation.", false);
-		menu.addField("🤖 Bot Commands: `" + (cmdsEnabled?"✅ ENABLED`":"🔳 DISABLED`"), "If this is off, I will only "
-			+ "work in channels with the `Bot Commands` modifier. (check `" + this.prefixOfLocation + "modifiers`)", false);
-		
-		boolean joinMsg = settings.joinMessages,
-			leaveMsg = settings.leaveMessages;
-		String joinMessage = joinMsg ? settings.joinMessage : null;
-		String leaveMessage = leaveMsg ? settings.leaveMessage : null;
-		long joinCh = joinMsg ? settings.joinMessageChannel : 0l;
-		long leaveCh = leaveMsg ? settings.leaveMessageChannel : 0l;
-		String joinDesc, leaveDesc;
-		
-		if(!joinMsg || joinMessage == null || joinCh == 0l)
-			joinDesc = joinMsg?"❗ Enabled, but hasn't been completely set up yet. ❗":"Send a customized message in a channel whenever a member joins the server.";
-		else
-			joinDesc = "In the channel <#" + joinCh + ">. Click to change settings/disable.";
+		// Filter Level
+		/*
+		FilterLevel filterLevel = data.filter;
+		list.add(new GuiComplex<GuildSettings>(data, new GuiButton(GenericEmoji.fromEmoji("🤬"), "Filter Level", GuiButton.ButtonColor.BLUE, "filter"))
+			.whenDrawn(eb -> {
+				
+			}));
+		list.add(new GuiComplex<GuildSettings>(data, new GuiButton(GenericEmoji.fromEmoji("🗒️"), "Custom Filter", GuiButton.ButtonColor.BLUE, "filter")));*/
 			
-		if(!leaveMsg || leaveMessage == null || leaveCh == 0l)
-			leaveDesc = leaveMsg?"❗ Enabled, but hasn't been completely set up yet. ❗":"Send a customized message in a channel whenever a member leaves.";
-		else
-			leaveDesc = "In the channel <#" + leaveCh + ">. Click to change settings/disable.";
+		// [TODO] Ill work on porting this some other day but for now I'm running out of time
 		
-		menu.addField("👋 Join Messages: `" + (joinMsg?"✅ ENABLED`":"🔳 DISABLED`"), joinDesc, false);
-		menu.addField("🚪 Leave Messages: `" + (leaveMsg?"✅ ENABLED`":"🔳 DISABLED`"), leaveDesc, false);
 		
-		boolean joinRole = settings.joinRole;
-		long joinRoleId = settings.joinRoleId;
-		String roleDesc = joinRole ? 
-			"Giving <@&" + joinRoleId + "> to new members." :
-			"Give new members a role when they join!";
-		menu.addField("💥 Join Role: `" + (joinRole?"✅ ENABLED`":"🔳 DISABLED`"), roleDesc, false);
 		
-		return menu.build();
+		return list;
 	}
 	
-	@Override
-	public void onAction(int buttonId, JDA jda) {
-		GuildSettingsManager gsm = this
-			.bonziReference.guildSettings;
-		GuildSettings settings = gsm.getSettings(guildId);
-		
-		if(buttonId == 0) {
-			// Filtering setting
-			settings.cycleFilter();
-			gsm.setSettings(guildId, settings);
-			this.parent.redrawMessage(jda);
-			return;
-		}
-		if(buttonId == 1) {
-			// Custom filter
-			Gui next = new GuiCustomFilter(guildId, guildName);
-			this.parent.setActiveGui(next, jda);
-		}
-		if(buttonId == 2) {
-			// Tags enabled
-			settings.enableTags = !settings.enableTags;
-			gsm.setSettings(guildId, settings);
-			this.parent.redrawMessage(jda);
-			return;
-		}
-		if(buttonId == 3) {
-			// Tag privacy
-			settings.privateTags = !settings.privateTags;
-			gsm.setSettings(guildId, settings);
-			this.parent.redrawMessage(jda);
-			return;
-		}
-		if(buttonId == 4) {
-			// Logging
-			if(settings.loggingEnabled) {
-				settings.loggingEnabled = false;
-				gsm.setSettings(guildId, settings);
-				this.parent.redrawMessage(jda);
-			} else {
-				CommandArg tca = new TextChannelArg("");
-				EventWaiterManager ewm = this.bonziReference.eventWaiter;
-				MessageChannel mc = this.parent.getChannel(jda);
-				mc.sendMessage(BonziUtils.quickEmbed("Turning on Logging...",
-					"Mention the channel you want logs to go into!", Color.gray).build()).queue(sent -> {
-						long sentId = sent.getIdLong();
-						ewm.waitForArgument(this.parent.ownerId, tca, object -> {
-							mc.deleteMessageById(sentId).queue();
-							TextChannel tc = (TextChannel)object;
-							settings.loggingEnabled = true;
-							settings.loggingChannelCached = tc.getIdLong();
-							gsm.setSettings(guildId, settings);
-							this.parent.redrawMessage(jda);
-							BonziUtils.sendTempMessage(mc, BonziUtils.successEmbed("Logging is now enabled in #" + tc.getName() + "!"), 3);
-						});
-					});
-			}
-			return;
-		}
-		if(buttonId == 5) {
-			// Bot commands
-			settings.botCommandsEnabled = !settings.botCommandsEnabled;
-			gsm.setSettings(guildId, settings);
-			this.parent.redrawMessage(jda);
-			return;
-		}
-		if(buttonId == 6) {
-			// Join messages
-			GuiJoinLeaveMessages gui = new GuiJoinLeaveMessages(guildId, guildName, false);
-			this.parent.setActiveGui(gui, jda);
-			return;
-		}
-		if(buttonId == 7) {
-			// Leave messages
-			GuiJoinLeaveMessages gui = new GuiJoinLeaveMessages(guildId, guildName, true);
-			this.parent.setActiveGui(gui, jda);
-			return;
-		}
-		if(buttonId == 8) {
-			// Join role
-			if(settings.joinRole) {
-				settings.joinRole = false;
-				gsm.setSettings(guildId, settings);
-				this.parent.redrawMessage(jda);
-			} else {
-				CommandArg tca = new RoleArg("");
-				EventWaiterManager ewm = this.bonziReference.eventWaiter;
-				MessageChannel mc = this.parent.getChannel(jda);
-				mc.sendMessage(BonziUtils.quickEmbed("Turning on Join Role...",
-					"Mention or send the ID of the role you want to be given to new members.", Color.gray).build()).queue(sent -> {
-						long sentId = sent.getIdLong();
-						ewm.waitForArgument(this.parent.ownerId, tca, object -> {
-							mc.deleteMessageById(sentId).queue();
-							Role role = (Role)object;
-							settings.joinRole = true;
-							settings.joinRoleId = role.getIdLong();
-							gsm.setSettings(guildId, settings);
-							this.parent.redrawMessage(jda);
-							BonziUtils.sendTempMessage(mc, BonziUtils.successEmbed("Users will now get " + role.getName() + " when they join!"), 4);
-						});
-					});
-			}
-			return;
-		}
-	}
+	long guildId;
+	GuildSettings settings;
 	
-	public String emojiForFilter(FilterLevel level) {
+	public GuiGuildSettings(GuildSettings settings, long guildId) {
+		this.settings = settings;
+		this.guildId = guildId;
+		this.options = createOptionList(settings, guildId);
+		
+		this.dropdown = new GuiDropdown("Choose Setting...", "setting_choice", false);
+		this.dropdown.addItem(new DropdownItem(options.get(0), "Filter Level", "0")
+				.withEmoji(GenericEmoji.fromEmoji("🤬"))
+				.withDescription("Set the swear/content filter for the server."));
+		this.dropdown.addItem(new DropdownItem(options.get(1), "Custom Filter", "1")
+				.withEmoji(GenericEmoji.fromEmoji("🗒️"))
+				.withDescription("Manage your custom filtered words."));
+		this.dropdown.addItem(new DropdownItem(options.get(2), "Tags", "2")
+				.withEmoji(GenericEmoji.fromEmoji("📜"))
+				.withDescription("Enable or disable tags in this server."));
+		this.dropdown.addItem(new DropdownItem(options.get(3), "Tag Privacy", "3")
+				.withEmoji(GenericEmoji.fromEmoji("🕵️"))
+				.withDescription("Enable or disable your server's own private tags."));
+		this.dropdown.addItem(new DropdownItem(options.get(4), "Logging", "4")
+				.withEmoji(GenericEmoji.fromEmoji("📝"))
+				.withDescription("Enable or disable advanced logging."));
+		this.dropdown.addItem(new DropdownItem(options.get(5), "Bot Commands", "5")
+				.withEmoji(GenericEmoji.fromEmoji("🤖"))
+				.withDescription("Completely disable bot commands unless in a channel with the 'Bot Commands' modifier."));
+		this.dropdown.addItem(new DropdownItem(options.get(6), "Join Messages", "6")
+				.withEmoji(GenericEmoji.fromEmoji("👋"))
+				.withDescription("Send a customizable message when a member joins."));
+		this.dropdown.addItem(new DropdownItem(options.get(7), "Leave Messages", "7")
+				.withEmoji(GenericEmoji.fromEmoji("🚪"))
+				.withDescription("Send a customizable message when a member leaves."));
+		this.dropdown.addItem(new DropdownItem(options.get(8), "Join Role", "8")
+				.withEmoji(GenericEmoji.fromEmoji("💥"))
+				.withDescription("Give members a role when they join the server."));
+		this.dropdown.addItem(new DropdownItem(options.get(9), "Prefix", "9")
+				.withEmoji(GenericEmoji.fromEmoji("↪️"))
+				.withDescription("Set my prefix if you aren't using slash commands. (you should)"));
+		this.dropdown.addItem(new DropdownItem(options.get(10), "Rules", "10")
+				.withEmoji(GenericEmoji.fromEmoji("📖"))
+				.withDescription("Customize the server's rules and send a customizable embed!"));
+		this.dropdown.addItem(new DropdownItem(options.get(11), "Disable Commands", "11")
+				.withEmoji(GenericEmoji.fromEmoji("🚫"))
+				.withDescription("Disable certain commands from being used entirely."));
+		this.dropdown.addItem(new DropdownItem(options.get(12), "Quick Draw", "12")
+				.withEmoji(GenericEmoji.fromEmoji("🎲"))
+				.withDescription("Send quick coin-earning challenges every few minutes!"));
+		this.dropdown.addItem(new DropdownItem(options.get(13), "Ban Appeals", "13")
+				.withEmoji(GenericEmoji.fromEmoji("📥"))
+				.withDescription("Allow users to appeal their bans, if banned through /ban."));
+		this.dropdown.addItem(new DropdownItem(options.get(14), "Ban Message", "14")
+				.withEmoji(GenericEmoji.fromEmoji("📳"))
+				.withDescription("Send users a friendly little message when banned through /ban."));
+		this.dropdown.addItem(new DropdownItem(options.get(15), "Token Scanning", "15")
+				.withEmoji(GenericEmoji.fromEmoji("🔬"))
+				.withDescription("Scan for discord bot tokens and automatically invalidate them."));
+		this.dropdown.addItem(new DropdownItem(options.get(16), "Starboard", "16")
+				.withEmoji(GenericEmoji.fromEmoji("🌟"))
+				.withDescription("Let users star messages, which are then placed in a hall of fame!"));
+	}
+	public static String emojiForFilter(FilterLevel level) {
 		switch(level) {
 		case NONE:
 			return "❌";
@@ -236,4 +118,17 @@ public class GuiGuildSettings extends Gui {
 			return "❔";
 		}
 	}
+	
+	int selectedIndex = 0;
+	GuiComplex<GuildSettings> selected = null;
+	
+	@Override
+	public void initialize(JDA jda) {
+		this.reinitialize();
+	}
+	public void reinitialize() {
+		this.elements.clear();
+		
+	}
+	
 }

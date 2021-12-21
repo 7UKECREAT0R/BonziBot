@@ -13,6 +13,7 @@ import com.lukecreator.BonziBot.GuiAPI.GuiButton;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton.ButtonColor;
 import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
+import com.lukecreator.BonziBot.Managers.ScriptCache;
 import com.lukecreator.BonziBot.Script.Model.InvocationCommand;
 import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptPackage;
@@ -132,15 +133,16 @@ public class GuiScriptPackages extends Gui {
 		if(buttonId.equals("delete")) {
 			Consumer<Boolean> afterConfirmation = b -> {
 				if(b) {
-					// Delete Slash Commands
+					// delete slash commands and unregister from cache
 					for(Script script: pkg.getScripts()) {
+						ScriptCache.unregister(this.parent.guildId, pkg, script);
 						if(script.method instanceof InvocationCommand) {
 							Guild guild = jda.getGuildById(this.parent.guildId);
 							guild.deleteCommandById(((InvocationCommand)script.method)._commandId).queue();
 						}
 					}
 					
-					// Delete Package (execution by GC lol)
+					// delete package (execution by gc lol)
 					int index = this.packageChooser.getSelectedIndexes()[0];
 					this.packages.remove(index);
 					this.packageChooser.removeItemAtIndex(index);

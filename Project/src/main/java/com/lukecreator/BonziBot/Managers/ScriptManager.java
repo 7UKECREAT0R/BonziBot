@@ -40,6 +40,8 @@ public class ScriptManager implements IStorableData {
 			return false;
 		
 		for(ScriptPackage pkg: pkgs) {
+			if(!pkg.isEnabled())
+				continue;
 			List<Script> scripts = pkg.getScripts();
 			if(scripts == null)
 				return false;
@@ -80,7 +82,7 @@ public class ScriptManager implements IStorableData {
 				ScriptContextInfo context = new ScriptContextInfo(event.getCommandString(), event.getName(), inputArgs, event,
 					null, event.getTextChannel(), event.getJDA(), bb, event.getUser(), event.getMember(), event.getGuild(), settings);
 				
-				// Run the script!
+				// run the script
 				executor.run(context);
 				
 				// if interaction hasn't been responded to make sure to do that
@@ -105,7 +107,7 @@ public class ScriptManager implements IStorableData {
 		Optional<ScriptPackage> _match = pkgs.stream().filter(pkg ->
 			pkg.getName().equalsIgnoreCase(packageName)).findFirst();
 		
-		if(!_match.isPresent())
+		if(!_match.isPresent() || !_match.get().isEnabled())
 			return false;	// no response
 		
 		ScriptPackage match = _match.get();

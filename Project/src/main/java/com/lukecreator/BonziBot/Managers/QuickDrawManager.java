@@ -7,7 +7,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.lukecreator.BonziBot.BonziBot;
-import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Data.QuickDraw;
@@ -49,7 +48,7 @@ public class QuickDrawManager implements IStorableData {
 		if(sent != 0l)
 			tc.deleteMessageById(sent).queue();
 		
-		BonziUtils.sendTempMessage(tc, winner.getAsMention() + "` won the Quick Draw!` `+" + reward + " coins!`", 5);
+		profile.game.constructWinnerMessage(winner, reward, tc).queue();
 		
 		profile.game = null;
 		return profile;

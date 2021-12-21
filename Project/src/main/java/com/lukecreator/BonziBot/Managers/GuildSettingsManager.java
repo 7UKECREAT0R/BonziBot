@@ -34,7 +34,8 @@ public class GuildSettingsManager implements IStorableData {
 	public HashMap<Long, GuildSettings> settings = new HashMap<Long, GuildSettings>();
 	
 	public GuildSettings getSettings(Guild g) {
-		if(g == null) return null;
+		if(g == null)
+			return null;
 		return getSettings(g.getIdLong());
 	}
 	public void setSettings(Guild g, GuildSettings gs) {

@@ -73,7 +73,7 @@ public abstract class Gui {
 	}
 	public Gui() {}
 	
-	protected GuiContainer parent;
+	public GuiContainer parent;
 	public List<GuiElement> elements;
 	
 	/**

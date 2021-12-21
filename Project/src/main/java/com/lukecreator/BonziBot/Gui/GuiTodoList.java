@@ -3,6 +3,7 @@ package com.lukecreator.BonziBot.Gui;
 import java.awt.Color;
 
 import com.lukecreator.BonziBot.BonziUtils;
+import com.lukecreator.BonziBot.CommandAPI.EmojiArg;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.TodoFolder;
 import com.lukecreator.BonziBot.Data.TodoItem;
@@ -218,19 +219,12 @@ public class GuiTodoList extends GuiPaging {
 		if(actionId.equals("icon")) {
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
 			channel.sendMessageEmbeds(BonziUtils.quickEmbed("Change icon!",
-					"Send an emoji with a \\ in front of it.\nExample: `\\:grinning:`", Color.orange).build()).queue(del -> {
-					ewm.waitForResponse(executorId, response -> {
+					"Send an emoji in chat.", Color.orange).build()).queue(del -> {
+					ewm.waitForArgument(executorId, new EmojiArg(""), obj -> {
 						del.delete().queue();
-						response.delete().queue(null, fail -> {});
 						
-						String emoji = response.getContentRaw();
-						if(emoji.length() > 4) {
-							response.getChannel().sendMessageEmbeds(BonziUtils.failureEmbed("Invalid emoji.",
-								"Your emoji needs to start with a `\\` and it can't be an emote from a server.\n\nOperation cancelled.")).queue();
-							return;
-						}
-						
-						this.folder.folderIcon = emoji;
+						GenericEmoji _emoji = (GenericEmoji)obj;
+						this.folder.folderIcon = _emoji.toString();
 						
 						TodoList todoList = this.bonziReference
 							.todolists.getTodoList(executorId);

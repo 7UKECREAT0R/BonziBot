@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 
 /**
  * GUI which allows dynamic building of a set of editable fields, all wrapping the arg parsing API.
+ * To accept the outputted data, use {@link #after(Consumer)} to attach a consumer.
  * @author Lukec
  */
 public class GuiEditDialog extends Gui {
@@ -56,7 +57,7 @@ public class GuiEditDialog extends Gui {
 		this.fields = entries;
 		this.setFields = new boolean[entries.length];
 		for(int i = 0; i < entries.length; i++)
-			setFields[i] = false;
+			setFields[i] = entries[i].valueGiven();
 	}
 	public GuiEditDialog(@Nullable Gui returnTo, String title, @Nonnull GuiEditEntry...entries) {
 		this.returnTo = returnTo;
@@ -65,7 +66,7 @@ public class GuiEditDialog extends Gui {
 		this.fields = entries;
 		this.setFields = new boolean[entries.length];
 		for(int i = 0; i < entries.length; i++)
-			setFields[i] = false;
+			setFields[i] = entries[i].valueGiven();
 	}
 	public GuiEditDialog after(Consumer<Output> action) {
 		this.onClosed = action;
@@ -97,7 +98,11 @@ public class GuiEditDialog extends Gui {
 					this.elements.add(new GuiButton(GenericEmoji.fromEmoji(entry.emoji), text, color, actionId));
 				else
 					this.elements.add(new GuiButton(text, color, actionId));
-			} else if(entry instanceof GuiEditEntryChoice){
+			} else if(entry instanceof GuiEditEntrySwitch) {
+				GuiButton.ButtonColor color = GuiButton.ButtonColor.GRAY;
+				String emoji = ((GuiEditEntrySwitch)entry).value ? "✅" : "❌";
+				this.elements.add(new GuiButton(GenericEmoji.fromEmoji(emoji), text, color, actionId));
+			} else if(entry instanceof GuiEditEntryChoice) {
 				GuiDropdown toAdd = ((GuiEditEntryChoice)entry).getDropdown();
 				this.elements.add(toAdd);
 			}
@@ -159,6 +164,7 @@ public class GuiEditDialog extends Gui {
 			break;
 		}
 		
+		this.reinitialize();
 		this.parent.redrawMessage(jda);
 		return;
 	}
@@ -201,6 +207,11 @@ public class GuiEditDialog extends Gui {
 							this.parent.redrawMessage(jda);
 						});
 					});
+				} else if(actionId.equals(test) && entry instanceof GuiEditEntrySwitch) {
+					GuiEditEntrySwitch swtch = ((GuiEditEntrySwitch)this.fields[i]);
+					swtch.value = !swtch.value;
+					this.reinitialize();
+					this.parent.redrawMessage(jda);
 				}
 			}
 		}

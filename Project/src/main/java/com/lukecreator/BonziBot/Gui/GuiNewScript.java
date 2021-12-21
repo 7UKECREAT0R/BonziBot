@@ -14,6 +14,7 @@ import com.lukecreator.BonziBot.GuiAPI.GuiButton;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton.ButtonColor;
 import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
+import com.lukecreator.BonziBot.Managers.ScriptCache;
 import com.lukecreator.BonziBot.Script.Editor.EditorCategories;
 import com.lukecreator.BonziBot.Script.Model.InvocationButton;
 import com.lukecreator.BonziBot.Script.Model.InvocationCommand;
@@ -35,6 +36,7 @@ import net.dv8tion.jda.api.interactions.components.Button;
 public class GuiNewScript extends Gui {
 	
 	class SetterField {
+		String value;
 		String name;
 		boolean set;
 		
@@ -42,10 +44,14 @@ public class GuiNewScript extends Gui {
 			this.name = name;
 			this.set = false;
 		}
+		public void set(String value) {
+			this.value = value;
+			this.set = true;
+		}
 		@Override
 		public String toString() {
 			if(this.set)
-				return "`✅` " + this.name;
+				return '`' + this.value + "` " + this.name;
 			else
 				return "`❌` " + this.name;
 		}
@@ -54,7 +60,7 @@ public class GuiNewScript extends Gui {
 	public static final int MAX_ARGS = 5;
 	
 	GuiScriptChooser previous;
-	GuiDropdown methodDropdown = new GuiDropdown("Choose an invocation method...", "method", false);
+	GuiDropdown methodDropdown = new GuiDropdown("Choose a run method...", "method", false);
 	
 	boolean cancelled;
 	SetterField[] setFields;
@@ -149,8 +155,7 @@ public class GuiNewScript extends Gui {
 		EmbedBuilder eb = new EmbedBuilder();
 		eb.setColor(BonziUtils.COLOR_BONZI_PURPLE);
 		eb.setTitle(this.script.name);
-		eb.setDescription("Choose an 'invocation method' for the script. "
-			+ "This is basically the thing that has to be done/happen to trigger the script.");
+		eb.setDescription("Choose how this script gets run.");
 		if(this.canFinish())
 			eb.setFooter("Hit 'Create' to create your script!");
 		else {
@@ -180,18 +185,23 @@ public class GuiNewScript extends Gui {
 				return; // if u did this u a hacker
 			
 			if(this.script.method instanceof InvocationCommand) {
-				// Add to Guild Commands
+				// Add to guild commands before registering into the cache.
+				// This ensures it obtains a valid id from discord before being applied.
 				Guild guild = jda.getGuildById(this.parent.guildId);
 				CommandData upload = ((InvocationCommand)this.script.method).toDiscord();
 				guild.upsertCommand(upload).queue(command -> {
 					((InvocationCommand)this.script.method)._commandId = command.getIdLong();
+					ScriptCache.register(this.parent.guildId, this.previous.thePackage, this.script);
 				});
+			} else {
+				ScriptCache.register(this.parent.guildId, this.previous.thePackage, this.script);
 			}
 			
-			new ScriptStatementCollection(this.script); // Sets this.script.code inside constructor.
+			this.script.code = new ScriptStatementCollection(this.script);
 			this.script.storage = new ScriptStorage();
 			this.previous.thePackage.addScript(this.script);
 			this.previous.scriptChooser.addItem(new DropdownItem(this.script, this.script.name));
+			
 			this.previous.reinitialize();
 			this.parent.setActiveGui(this.previous, jda);
 			return;
@@ -202,7 +212,6 @@ public class GuiNewScript extends Gui {
 		long id = this.parent.ownerId;
 		
 		// Method Specific
-		
 		
 		// BUTTON
 		if(buttonId.equals("button_text")) {
@@ -216,7 +225,8 @@ public class GuiNewScript extends Gui {
 					
 					((InvocationButton)this.script.method).buttonText = str;
 					
-					this.setFields[0].set = true;
+					this.setFields[0].set(str);
+					
 					this.reinitialize();
 					this.parent.redrawMessage(jda);
 				});
@@ -234,7 +244,8 @@ public class GuiNewScript extends Gui {
 					
 					((InvocationButton)this.script.method).buttonColor = color;
 					
-					this.setFields[1].set = true;
+					this.setFields[1].set(BonziUtils.titleString(color.toString()));
+					
 					this.reinitialize();
 					this.parent.redrawMessage(jda);
 				});
@@ -256,7 +267,8 @@ public class GuiNewScript extends Gui {
 					
 					((InvocationCommand)this.script.method).commandName = str;
 					
-					this.setFields[0].set = true;
+					this.setFields[0].set(str);
+					
 					this.reinitialize();
 					this.parent.redrawMessage(jda);
 				});
@@ -278,7 +290,8 @@ public class GuiNewScript extends Gui {
 					
 					((InvocationCommand)this.script.method).argNames.set(num, str);
 					
-					this.setFields[num + 1].set = true;
+					this.setFields[num + 1].set(str);
+					
 					this.reinitialize();
 					this.parent.redrawMessage(jda);
 				});
@@ -338,7 +351,8 @@ public class GuiNewScript extends Gui {
 					
 					((InvocationPhrase)this.script.method).setPhrase(str);
 					
-					this.setFields[0].set = true;
+					this.setFields[0].set(str);
+					
 					this.reinitialize();
 					this.parent.redrawMessage(jda);
 				});
@@ -355,14 +369,15 @@ public class GuiNewScript extends Gui {
 					TimeSpan timespan = (TimeSpan)_timespan;
 					msg.delete().queue();
 					
-					if(timespan.ms < InvocationTimed.MINIMUM) {
+					if(timespan.ms < ScriptCache.DELAY_MINIMUM) {
 						BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("Interval must be an hour or more.", "Cancelled operation."), 5);
 						return;
 					}
 					
 					((InvocationTimed)this.script.method).time = timespan;
 					
-					this.setFields[0].set = true;
+					this.setFields[0].set(timespan.toLongString());
+					
 					this.reinitialize();
 					this.parent.redrawMessage(jda);
 				});

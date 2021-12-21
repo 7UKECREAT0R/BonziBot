@@ -161,7 +161,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 		}
 		if(actionId.equals("customfilter")) {
 			// Custom filter
-			Gui next = new GuiCustomFilter(guildId, guildName);
+			Gui next = new GuiCustomFilter(guildId, guildName, this);
 			this.parent.setActiveGui(next, jda);
 		}
 		if(actionId.equals("tag")) {
