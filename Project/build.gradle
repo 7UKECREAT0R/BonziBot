@@ -3,14 +3,14 @@ apply plugin: 'java-library'
 apply plugin: 'java-library-distribution'
 
 buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
-  }
+	repositories {
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+	}
+	dependencies {
+		classpath "gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0"
+	}
 }
 
 apply plugin: "com.github.johnrengelman.shadow"
@@ -20,29 +20,38 @@ repositories {
     jcenter()
     mavenCentral()
     mavenLocal()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven {
+    	url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
     maven {
         name 'm2-dv8tion'
         url 'https://m2.dv8tion.net/releases'
     }
 }
 
+configurations.all {
+    exclude module: 'log4j'
+}
+
 dependencies {
-	implementation 'net.dv8tion:JDA:4.2.1_275'
-	implementation 'com.sedmelluq:lavaplayer:1.3.7'
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.1'
+	implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+	
+	implementation 'net.dv8tion:JDA:4.4.0_352'
+	implementation 'com.sedmelluq:lavaplayer:1.3.77'
 	implementation group: 'org.kohsuke', name: 'github-api', version: '1.131'
 	
-	compile 'com.google.api-client:google-api-client:1.31.2'
-	compile 'com.google.apis:google-api-services-youtube:v3-rev20210407-1.31.0'
-	compile 'net.sourceforge.htmlunit:htmlunit:2.49.0'
+	implementation group: 'com.google.api-client', name: 'google-api-client', version: '1.31.5'
+	implementation group: 'com.google.apis', name: 'google-api-services-youtube', version: 'v3-rev222-1.25.0'
+	implementation group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.53.0'
+	implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
 	
-	compile group: 'com.pi4j', name: 'pi4j-core', version: '1.2'
-	compile group: 'com.github.jreddit', name: 'jreddit', version: '1.0.3'
-	compile group: 'net.sf.sociaal', name: 'freetts', version: '1.2.2'
-	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
-	compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
+	implementation group: 'com.pi4j', name: 'pi4j-core', version: '1.2'
+	implementation group: 'com.github.jreddit', name: 'jreddit', version: '1.0.3'
+	implementation group: 'net.sf.sociaal', name: 'freetts', version: '1.2.2'
+	implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
 	
-    testImplementation 'junit:junit:4.13'
+	testImplementation 'junit:junit:4.13'
 }
 
 compileJava.options.encoding = 'UTF-8'
@@ -52,7 +61,7 @@ javadoc.options.encoding = 'UTF-8'
 jar {
 	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
 	baseName = 'BonziBot'
-	version = '1.0'
+	version = '2.0'
 	manifest {
 		attributes 'Main-Class': 'com.lukecreator.BonziBot.App'
 	}
