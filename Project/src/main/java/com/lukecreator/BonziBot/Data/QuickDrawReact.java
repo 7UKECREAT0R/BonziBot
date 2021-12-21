@@ -5,6 +5,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 public class QuickDrawReact extends QuickDraw {
@@ -16,6 +17,10 @@ public class QuickDrawReact extends QuickDraw {
 	@Override
 	public MessageAction constructMessage(TextChannel channel) {
 		return channel.sendMessage("`Quick Draw!` React to this message!");
+	}
+	@Override
+	public MessageAction constructWinnerMessage(User winner, int coinsGained, TextChannel channel) {
+		return channel.sendMessage(winner.getAsMention() + "` won the Quick Draw!` `+" + coinsGained + " coins!`");
 	}
 	
 	@Override

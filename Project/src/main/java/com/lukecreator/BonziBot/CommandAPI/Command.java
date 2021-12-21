@@ -68,5 +68,5 @@ public abstract class Command {
 	// The permissions the BOT needs to run this command.
 	public Permission[] neededPermissions = new Permission[] { Permission.UNKNOWN };
 	
-	public void executeCommand(CommandExecutionInfo e) {}
+	public void run(CommandExecutionInfo e) {}
 }

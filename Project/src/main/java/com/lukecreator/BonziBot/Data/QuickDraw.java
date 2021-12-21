@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.BonziBot;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 /**
@@ -42,6 +43,10 @@ public abstract class QuickDraw {
 	 * Construct the message to be sent.
 	 */
 	public abstract MessageAction constructMessage(TextChannel channel);
+	/**
+	 * Construct the message to be sent when a user wins.
+	 */
+	public abstract MessageAction constructWinnerMessage(User winner, int coinsGained, TextChannel channel);
 	/**
 	 * Perform any actions on the sent message such as adding reactions.
 	 */

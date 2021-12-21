@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.TimeSpan;
@@ -100,18 +99,18 @@ public class UserAccount implements Serializable {
 	public int getXP() {
 		return this.xp;
 	}
-	public int getLevel() {
+	public int calculateLevel() {
 		return BonziUtils.calculateLevel(this.xp);
 	}
 	public boolean incrementXP() {
-		int l = getLevel();
+		int l = calculateLevel();
 		this.xp++;
-		return getLevel() != l;
+		return calculateLevel() != l;
 	}
 	public boolean incrementXP(int amount) {
-		int l = getLevel();
+		int l = calculateLevel();
 		this.xp += amount;
-		return getLevel() != l;
+		return calculateLevel() != l;
 	}
 	public void setXP(int xp) {
 		this.xp = xp;

@@ -21,8 +21,7 @@ public class EnumArg extends CommandArg {
 	public final int validTypes;
 	Enum[] enumType;
 	
-	@SuppressWarnings("unchecked")
-	public EnumArg(String name, Class inClass) {
+	public EnumArg(String name, Class<? extends Enum> inClass) {
 		super(name);
 		this.type = ArgType.Enum;
 		

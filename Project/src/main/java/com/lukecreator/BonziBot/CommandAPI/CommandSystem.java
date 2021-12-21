@@ -52,19 +52,29 @@ public class CommandSystem {
 	}
 	
 	/**
-	 * Parse the input and direct it to a command.
-	 * Returns if a command was run successfully.
+	 * Parse the input and direct it to a command. Returns if a command
+	 * was run successfully. Only called in a non-slash-command context.
 	 */
-	public boolean onInput(CommandExecutionInfo info) {
+	public boolean onTextInput(CommandExecutionInfo info) {
 		
 		String text = info.fullText;
-		if(BonziUtils.isWhitespace(text)) return false;
+		if(BonziUtils.isWhitespace(text))
+			return false;
 		
-		String prefix = BonziUtils.getPrefixOrDefault(info);
+		String prefix;
+		
+		if(info.isGuildMessage)
+			if(info.settings == null)
+				prefix = info.bonzi.guildSettings.getSettings(info.guild).getPrefix();
+			else
+				prefix = info.settings.getPrefix();
+		else
+			prefix = Constants.DEFAULT_PREFIX;
 		
 		String[] parts = text.split
 			(Constants.WHITESPACE_REGEX);
-		if(parts.length == 0) return false;
+		if(parts.length == 0)
+			return false;
 		
 		// Assign modifiers for the current channel.
 		if(info.isGuildMessage) {
@@ -208,7 +218,7 @@ public class CommandSystem {
 			}
 			
 			// Should be good to execute.
-			cmd.executeCommand(info);
+			cmd.run(info);
 			return true;
 		}
 		return false;
@@ -255,6 +265,18 @@ public class CommandSystem {
 			
 			// Check if command is disabled.
 			if(info.settings != null) {
+				if(!info.settings.botCommandsEnabled & !cmd.forcedCommand) {
+					// Check for bot commands modifier.
+					boolean good = false;
+					for(Modifier mod: info.modifiers) {
+						if(mod == Modifier.BOT_COMMANDS) {
+							good = true;
+							break;
+						}
+					}
+					if(!good)
+						return false;
+				}
 				List<Integer> disabled = info.settings.disabledCommands;
 				if(disabled != null) {
 					for(Integer test: disabled) {
@@ -284,7 +306,7 @@ public class CommandSystem {
 			}
 			
 			// Should be good to execute.
-			cmd.executeCommand(info);
+			cmd.run(info);
 			return true;
 		}
 		return false;
@@ -346,7 +368,7 @@ public class CommandSystem {
 			}
 		}
 		
-		// Check permissions.
+		// Check Bonzi's permissions.
 		boolean hasPerms = cmd.neededPermissions[0] != Permission.UNKNOWN;
 		if(hasPerms && info.isGuildMessage) {
 			Guild guild = info.guild;
@@ -361,17 +383,18 @@ public class CommandSystem {
 		if(info.isGuildMessage && cmd.userRequiredPermissions != null) {
 			if(!(info.bonzi.adminBypassing && admin)) {
 				Member executor = info.member;
-				boolean good = true;
-				for(Permission p: cmd.userRequiredPermissions) {
-					if(!executor.hasPermission(p)) {
-						good = false;
-						break;
+				if(!executor.isOwner()) {
+					boolean good = true;
+					for(Permission p: cmd.userRequiredPermissions) {
+						if(!executor.hasPermission(p)) {
+							good = false;
+							break;
+						}
 					}
-				}
-				
-				if(!good) {
-					BonziUtils.sendUserNeedsPerms(cmd, info);
-					return false;
+					if(!good) {
+						BonziUtils.sendUserNeedsPerms(cmd, info);
+						return false;
+					}
 				}
 			}
 		}

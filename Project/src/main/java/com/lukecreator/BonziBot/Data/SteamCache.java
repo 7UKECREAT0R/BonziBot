@@ -31,18 +31,18 @@ public class SteamCache {
 		if(titlesFetched)
 			return;
 		
-		InternalLogger.print("[STEAM] Fetching steam titles...");
+		InternalLogger.print("Fetching steam titles...");
 		
 		try {
 			String bigAssString = this.downloadTitles();
 			if(!bigAssString.startsWith(DATA_START)) {
-				InternalLogger.print("[STEAM] This is not what I wanted.");
+				InternalLogger.print("This is not what the steam cache wanted.");
 				return;
 			}
 			bigAssString = bigAssString.substring(DATA_START.length());
 			String[] bigAssArray = bigAssString.split(",");
 			
-			InternalLogger.print("[STEAM] Beginning processing...");
+			InternalLogger.print("Beginning processing of steam titles...");
 			
 			int i = 0;
 			Release current = new Release();
@@ -68,7 +68,7 @@ public class SteamCache {
 					}
 				}
 			}
-			InternalLogger.print("[STEAM] Cached " + this.titles.size() + " release titles.");
+			InternalLogger.print("Cached " + this.titles.size() + " steam release titles.");
 			titlesFetched = true;
 		} catch (IOException e) {
 			e.printStackTrace();

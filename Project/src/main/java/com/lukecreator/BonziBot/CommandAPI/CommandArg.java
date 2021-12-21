@@ -26,7 +26,8 @@ public abstract class CommandArg {
 		Enum(OptionType.STRING, false),
 		Choice(OptionType.STRING, false),
 		Channel(OptionType.CHANNEL, false),
-		Array(OptionType.UNKNOWN, false);
+		Array(OptionType.UNKNOWN, false),
+		Emoji(OptionType.STRING, true);
 		
 		public OptionType nativeOption;	// Input information for slash commands.
 		public boolean formatValidate;	// Use bonzi-sided input validation for slash command arguments.

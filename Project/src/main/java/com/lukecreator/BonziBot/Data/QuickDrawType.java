@@ -12,6 +12,7 @@ import com.lukecreator.BonziBot.Graphics.Image;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 public class QuickDrawType extends QuickDraw {
@@ -40,6 +41,10 @@ public class QuickDrawType extends QuickDraw {
 			if(draw != null)
 				draw.dispose();
 		}
+	}
+	@Override
+	public MessageAction constructWinnerMessage(User winner, int coinsGained, TextChannel channel) {
+		return channel.sendMessage(winner.getAsMention() + "` won the Quick Draw!` `+" + coinsGained + " coins!`");
 	}
 	
 	@Override
