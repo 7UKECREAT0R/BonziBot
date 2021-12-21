@@ -6,26 +6,23 @@ import java.util.Date;
 public class InternalLogger {
 	
 	public enum Severity {
-		MINOR,
+		WARN,
 		ERROR,
 		FATAL,
 	}
 	
-	static SimpleDateFormat fmt = new SimpleDateFormat("HH:mm:ss");
+	static SimpleDateFormat fmt = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
 	
 	public static void print(String message) {
-		String time = fmt.format(new Date
-			(System.currentTimeMillis()));
-		System.out.println(time + " [INFO] " + message);
+		String time = fmt.format(new Date(System.currentTimeMillis()));
+		System.out.println(time + " > " + message);
 	}
 	public static void printError(String message, Severity s) {
-		String time = fmt.format(new Date
-			(System.currentTimeMillis()));
+		String time = fmt.format(new Date(System.currentTimeMillis()));
 		System.err.println(time + " [" + s.toString() + "] " + message);
 	}
 	public static void printError(Exception exc) {
-		String time = fmt.format(new Date
-			(System.currentTimeMillis()));
+		String time = fmt.format(new Date(System.currentTimeMillis()));
 		System.out.println(time + " [ERROR] " + exc.getMessage());
 		exc.printStackTrace();
 	}

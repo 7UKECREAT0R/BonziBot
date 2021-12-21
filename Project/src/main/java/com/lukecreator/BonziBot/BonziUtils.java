@@ -79,27 +79,26 @@ public class BonziUtils {
 	private static final Random randomInstance = new Random(System.currentTimeMillis());
 	
 	public static final MessageEmbed TERMS = new EmbedBuilder()
-		.setTitle("BonziBot Terms of Use")
+		.setTitle("BonziBot Terms of Use & Privacy Policy")
 		.setDescription("If you do not agree to any listed information being stored, refusal to participate in the use of BonziBot is enough unless stated otherwise.")
 		
-		.addField("Publicity", "Your name (not including discriminator), premium status, and developer-assigned status may be expressed to the public domain in places like leaderboards."
-				+ " If you no longer share any servers with BonziBot, you and your name will be removed from all leaderboards.", false)
+		.addField("Publicity", "Your name (not including discriminator), premium status, and developer-assigned status may be expressed to the public domain in places like leaderboards "
+				+ "under the circumstance that you meet the required standards to appear there."
+				+ " If you no longer share any servers with BonziBot, you and your information will be removed from all leaderboards.", false)
 		
 		.addField("Tag Content", "Any tags created by you with the tag privacy server setting set to \"Public\" will be visible and usable for all users who use BonziBot. Your user-name at the time will"
 				+ " appear under the tag information if viewed by a user. Keeping tag privacy to \"Private\" will only allow users in the Server of which it was created to view this information.", false)
 		
-		.addField("Profiles", "Any data you input into your BonziBot profile will be kept for an indefinite period of time until manually removed. This includes images, bio, birthday,"
+		.addField("Profiles", "Any data you input into your BonziBot profile will be kept for an indefinite period of time until manually removed, either by user or developer. This includes images, bio, birthday,"
 				+ " time zone, and anything else that can be inputted into the social profile. By using the profiles feature, you agree to having that data be made public.", false)
 		
 		.addField("Direct Messages", "If an action or command is performed in the direct messages between you and BonziBot, you agree to being generally messaged when appropriate."
-				+ " Actions such as being banned may send you an unsolicited direct message and can be turned off by running `/privacy dm false`.", false)
+				+ " Actions such as being banned may send you an unsolicited direct message and can be turned off by running `/privacy DMs false`.", false)
 		
-		.addField("Expose", "The special shop-based command \"expose\" recovers the last deleted message sent by a user in the server it was executed in. This means that a deleted message"
-				+ " can be recovered for an undefined period of time. While fun, you can still opt out of this by running `/privacy expose false`. This does not guarantee that the contents"
-				+ " of deleted messages will not be recoverable through moderator logging features present in BonziBot.", false)
-		
-		.addField("Pins", "If a user adds your message to their personal pins, a short preview of its content will be stored there indefinitely until the source user unpins it themselves. "
-				+ "Even after the message is deleted, this preview will remain. If you do not want this, opting out of expose via `/privacy expose false` will prevent this.", false)
+		.addField("Message Content", "If a user adds your message to their personal pins, a short preview of its content will be stored there indefinitely until the source user unpins it themselves."
+				+ " The special command \"expose\" recovers the last deleted message sent by a user in the server it was executed in. This means that a deleted message's content"
+				+ " can be recovered until 100 messages are sent after the source message. You can opt-out of this by running `/privacy Messages false`. This guarantees that the contents"
+				+ " of deleted messages will not be recoverable through any medium accessible by users or BonziBot developers.", false)
 		.build();
 	
 	private static final String[] birthdayMessages = new String[] {
@@ -111,14 +110,14 @@ public class BonziUtils {
 		"hey, it's {user}'s birthday today!"
 	};
 	private static final String[] welcomeBackMessages = new String[] {
-			"welcome back, {user}!",
-			"hey, welcome back {user}!",
-			"{user} is back!",
-			"{user} has returned!",
-			"{user} is back and ready to game",
-			"whoa look {user} came back!",
-			"alright guys {user} is back!"
-		};
+		"welcome back, {user}!",
+		"hey, welcome back {user}!",
+		"{user} is back!",
+		"{user} has returned!",
+		"{user} is back and ready to game",
+		"whoa look {user} came back!",
+		"alright guys {user} is back!"
+	};
 	public static String getBirthdayMessage() {
 		return birthdayMessages[randomInstance.nextInt(birthdayMessages.length)];
 	}
@@ -135,17 +134,76 @@ public class BonziUtils {
 		return randomInstance.nextBoolean();
 	}
 	
-	// Colors
+	/**
+	 * The classic BonziBot purple color.
+	 */
 	public static final Color COLOR_BONZI_PURPLE = new Color(161, 86, 184);
 	
 	/**
-	 * Append an S to the end of a word if the
-	 * count is higher than 1. English is weird.
+	 * Split an input by spaces unless inside unescaped quotations.
+	 *    (this is basically just a super fancy argument parser)
+	 * @param input
+	 * @return
+	 */
+	public static String[] args(String input) {
+		List<String> strings = new ArrayList<String>();
+		StringBuilder word = new StringBuilder();
+		char[] chars = input.toCharArray();
+		
+		int escape = 0;
+		boolean quotes = false;
+		int i = 0;
+		
+		while(i < chars.length) {
+			char c = chars[i++];
+			escape--;
+			
+			// if backslash, try to escape the next character
+			if(c == '\\') {
+				escape = 2;
+				continue;
+			}
+			
+			if(c == '"') {
+				if(escape < 1)
+					quotes = !quotes;
+			}
+			
+			// if whitespace and not in quotes, go to next word
+			if(Character.isWhitespace(c) && !quotes) {
+				
+				// get word and ignore if empty
+				String temp = word.toString();
+				word = new StringBuilder();
+				if(temp.length() < 1)
+					continue;
+				
+				// add to strings
+				strings.add(temp);
+				continue;
+			}
+			
+			// append character to word
+			word.append(c);
+		}
+		
+		// append final word to buffer, if any
+		String temp = word.toString();
+		word = new StringBuilder();
+		if(temp.length() > 0)
+			strings.add(temp);
+		
+		// return words as array
+		return (String[])strings.toArray(new String[strings.size()]);
+	}
+	/**
+	 * Make a word plural (add s to end) depending on a count.
 	 */
 	public static String plural(String s, int count) {
-		if(count>1||count==0||count<-1)
-			s += "s";
-		return s;
+		if(count==1 || count==-1)
+			return s;
+		else
+			return s + "s";
 	}
 	/**
 	 * Similar to String.valueOf(int) but
@@ -596,31 +654,37 @@ public class BonziUtils {
 		return i;
 	}
 	public static String getPrefixOrDefault(CommandExecutionInfo info) {
-		if(info.isGuildMessage)
+		/*if(info.isGuildMessage)
 			if(info.settings == null)
 				return info.bonzi.guildSettings.getSettings(info.guild).getPrefix();
 			else return info.settings.getPrefix();
-		else return Constants.DEFAULT_PREFIX;
+		else return Constants.DEFAULT_PREFIX;*/
+		return "/";
 	}
 	public static String getPrefixOrDefault(Guild guild, BonziBot bb) {
-		return bb.guildSettings.getSettings(guild).getPrefix();
+		//return bb.guildSettings.getSettings(guild).getPrefix();
+		return "/";
 	}
 	public static String getPrefixOrDefault(GuildMessageReceivedEvent info, BonziBot bonzi) {
-		return bonzi.guildSettings.getSettings(info.getGuild()).getPrefix();
+		//return bonzi.guildSettings.getSettings(info.getGuild()).getPrefix();
+		return "/";
 	}
 	public static String getPrefixOrDefault(PrivateMessageReceivedEvent info, BonziBot bonzi) {
-		return Constants.DEFAULT_PREFIX;
+		//return Constants.DEFAULT_PREFIX;
+		return "/";
 	}
 	public static String getShortTimeStringMs(long ms) {
-		if(ms < 1000) return "0s";
-		
 		int secs = (int)Math.round
 			(((double)ms)/1000.0);
 		
+		if(secs < 1)
+			return "0s";
+		
 		// Less than one minute.
-		if(ms < 60000) {
+		if(ms < 60000)
 			return secs + "s";
-		}
+		
+		List<String> parts = new ArrayList<String>();
 		
 		int mins = (int)Math.floor
 			(((double)secs)/60.0);
@@ -628,7 +692,9 @@ public class BonziUtils {
 		// Less than one hour.
 		if(ms < 3600000) {
 			int rem_secs = secs % 60;
-			return mins + "m, " + rem_secs + "s";
+			parts.add(mins + "m");
+			if(rem_secs > 0) parts.add(rem_secs + "s");
+			return String.join("", parts);
 		}
 		
 		int hours = (int)Math.floor
@@ -638,27 +704,35 @@ public class BonziUtils {
 		if(ms < 86400000) {
 			int rem_secs = secs % 60;
 			int rem_mins = mins % 60;
-			return hours + "h, " + rem_mins + "m, " + rem_secs + "s";
+			parts.add(hours + "h");
+			if(rem_mins > 0) parts.add(rem_mins + "m");
+			if(rem_secs > 0) parts.add(rem_secs + "s");
+			return String.join("", parts);
 		}
 		
 		// Over a day, simply round down.
-		int days = (int)Math.floor
-			(((double)hours)/24.0);
+		int days = hours / 24;
 		int rem_secs = secs % 60;
 		int rem_mins = mins % 60;
 		int rem_hours = hours % 24;
-		return days + "d, " + rem_hours + "h, " + rem_mins + "m, " + rem_secs + "s";
+		parts.add(days + "d");
+		if(rem_hours > 0) parts.add(rem_hours + "h");
+		if(rem_mins > 0) parts.add(rem_mins + "m");
+		if(rem_secs > 0) parts.add(rem_secs + "s");
+		return String.join("", parts);
 	}
 	public static String getLongTimeStringMs(long ms) {
-		if(ms < 1000) return "0 seconds";
-		
 		int secs = (int)Math.round
 			(((double)ms)/1000.0);
 		
+		if(secs < 1)
+			return "Now";
+		
 		// Less than one minute.
-		if(ms < 60000) {
-			return secs + plural(" second", secs);
-		}
+		if(ms < 60000)
+			return secs + BonziUtils.plural(" second", secs);
+		
+		List<String> parts = new ArrayList<String>();
 		
 		int mins = (int)Math.floor
 			(((double)secs)/60.0);
@@ -666,8 +740,9 @@ public class BonziUtils {
 		// Less than one hour.
 		if(ms < 3600000) {
 			int rem_secs = secs % 60;
-			return mins + plural(" minute", mins) +
-				", " + rem_secs + plural(" second", secs);
+			parts.add(mins + BonziUtils.plural(" minute", mins));
+			if(rem_secs > 0) parts.add(rem_secs + BonziUtils.plural(" second", rem_secs));
+			return String.join(", ", parts);
 		}
 		
 		int hours = (int)Math.floor
@@ -677,21 +752,22 @@ public class BonziUtils {
 		if(ms < 86400000) {
 			int rem_secs = secs % 60;
 			int rem_mins = mins % 60;
-			return hours + plural(" hour", hours) +
-				", " + rem_mins + plural(" minute", rem_mins) +
-				", " + rem_secs + plural(" second", secs);
+			parts.add(hours + BonziUtils.plural(" hour", hours));
+			if(rem_mins > 0) parts.add(rem_mins + BonziUtils.plural(" minute", rem_mins));
+			if(rem_secs > 0) parts.add(rem_secs + BonziUtils.plural(" second", rem_secs));
+			return String.join(", ", parts);
 		}
 		
 		// Over a day, simply round down.
-		int days = (int)Math.floor
-			(((double)hours)/24.0);
+		int days = hours / 24;
 		int rem_secs = secs % 60;
 		int rem_mins = mins % 60;
 		int rem_hours = hours % 24;
-		return days + plural(" day", days) +
-			", " + rem_hours + plural(" hour", rem_hours) +
-			", " + rem_mins + plural(" minute", rem_mins) +
-			", " + rem_secs + plural(" second", secs);
+		parts.add(days + BonziUtils.plural(" day", days));
+		if(rem_hours > 0) parts.add(rem_hours + BonziUtils.plural(" hour", rem_hours));
+		if(rem_mins > 0) parts.add(rem_mins + BonziUtils.plural(" minute", rem_mins));
+		if(rem_secs > 0) parts.add(rem_secs + BonziUtils.plural(" second", rem_secs));
+		return String.join(", ", parts);
 	}
 	public static String[] splitByLength(String s, int length) {
 		if(s.length() <= length)
@@ -878,10 +954,10 @@ public class BonziUtils {
 			return in;
 		if(gui.elements == null)
 			return in;
-		GuiElement[] buttons = (GuiElement[]) gui.elements.toArray(new GuiElement[gui.elements.size()]);
-		if(buttons.length < 1)
+		GuiElement[] elements = (GuiElement[]) gui.elements.toArray(new GuiElement[gui.elements.size()]);
+		if(elements.length < 1)
 			return in;
-		return appendComponents(in, buttons, gui.isDisabled());
+		return appendComponents(in, elements, gui.isDisabled());
 	}
 	public static MessageAction appendComponents(MessageAction in, GuiElement[] elements, boolean allDisable) {
 		List<ActionRow> rows = new ArrayList<ActionRow>();
@@ -901,6 +977,9 @@ public class BonziUtils {
 				toAdd = element.asEnabled(false).toDiscord();
 			else
 				toAdd = element.toDiscord();
+			
+			if(toAdd == null)
+				continue;
 			
 			// Width of this element more or less.
 			int width = 5 / toAdd.getMaxPerRow();
@@ -1208,6 +1287,7 @@ public class BonziUtils {
 	public static Modifier[] getModifiers(String _topic) {
 		if(_topic == null) return new Modifier[0];
 		if(_topic.length() < 2) return new Modifier[0];
+		
 		String topic = _topic
 			.replaceAll(Constants.WHITESPACE_REGEX, "")
 			.toUpperCase();

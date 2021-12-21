@@ -1,15 +1,12 @@
 package com.lukecreator.BonziBot;
 
-import java.awt.Color;
 import java.io.EOFException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.regex.Matcher;
 
 import javax.security.auth.login.LoginException;
 
@@ -23,12 +20,11 @@ import com.lukecreator.BonziBot.CommandAPI.ChoiceArg;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArg;
 import com.lukecreator.BonziBot.CommandAPI.CommandArg.ArgType;
-import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.CommandAPI.EnumArg;
-import com.lukecreator.BonziBot.Data.BanAppeal;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.EmoteCache;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.GenericReactionEvent;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.IStorableData;
@@ -38,9 +34,17 @@ import com.lukecreator.BonziBot.Data.StringProvider;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Data.UsernameGenerator;
 import com.lukecreator.BonziBot.Graphics.FontLoader;
+import com.lukecreator.BonziBot.Handling.AnonymousMessageHandler;
+import com.lukecreator.BonziBot.Handling.CountingMessageHandler;
+import com.lukecreator.BonziBot.Handling.DefaultMessageHandler;
+import com.lukecreator.BonziBot.Handling.MessageHandler;
+import com.lukecreator.BonziBot.Handling.PicturesOnlyMessageHandler;
+import com.lukecreator.BonziBot.Handling.PremiumOnlyMessageHandler;
+import com.lukecreator.BonziBot.Handling.RPGMessageHandler;
 import com.lukecreator.BonziBot.Managers.AppealsManager;
 import com.lukecreator.BonziBot.Managers.BanManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
+import com.lukecreator.BonziBot.Managers.CountingManager;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.FunnyChannelManager;
 import com.lukecreator.BonziBot.Managers.GridManager;
@@ -53,12 +57,20 @@ import com.lukecreator.BonziBot.Managers.QuickDrawManager;
 import com.lukecreator.BonziBot.Managers.ReactionManager;
 import com.lukecreator.BonziBot.Managers.RepManager;
 import com.lukecreator.BonziBot.Managers.RewardManager;
+import com.lukecreator.BonziBot.Managers.ScriptCache;
+import com.lukecreator.BonziBot.Managers.ScriptManager;
 import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
 import com.lukecreator.BonziBot.Managers.TagManager;
 import com.lukecreator.BonziBot.Managers.TodoListManager;
 import com.lukecreator.BonziBot.Managers.UpgradeManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import com.lukecreator.BonziBot.NoUpload.Constants;
+import com.lukecreator.BonziBot.Script.Model.InvocationMethod;
+import com.lukecreator.BonziBot.Script.Model.InvocationMethod.Implementation;
+import com.lukecreator.BonziBot.Script.Model.Script;
+import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
+import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
+import com.lukecreator.BonziBot.Script.Model.ScriptPackage;
 import com.lukecreator.BonziBot.Wrappers.RedditClient;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -70,9 +82,7 @@ import net.dv8tion.jda.api.audit.AuditLogChange;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.audit.AuditLogKey;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
@@ -105,7 +115,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.ComponentLayout;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -119,6 +128,10 @@ public class BonziBot extends ListenerAdapter {
 	public boolean adminBypassing = false;
 	public boolean test = false;
 	
+	/** This is the default handler for messages. It does text commands, XP, etc. */
+	public static MessageHandler DEFAULT_MESSAGE_HANDLER = new DefaultMessageHandler();
+	
+	MessageHandler[] messageHandlers = new MessageHandler[0];
 	List<IStorableData> storableData = new ArrayList<IStorableData>();
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
 	public GuildSettingsManager guildSettings = new GuildSettingsManager();
@@ -129,12 +142,14 @@ public class BonziBot extends ListenerAdapter {
 	public ReactionManager reactions = new ReactionManager();
 	public CooldownManager cooldowns = new CooldownManager();
 	public TodoListManager todolists = new TodoListManager();
+	public CountingManager counting = new CountingManager();
 	public UpgradeManager upgrades = new UpgradeManager();
 	public AppealsManager appeals = new AppealsManager();
 	public StringProvider strings = new StringProvider();
 	public LotteryManager lottery = new LotteryManager();
 	public LoggingManager logging = new LoggingManager();
 	public RewardManager rewards = new RewardManager();
+	public ScriptManager scripts = new ScriptManager();
 	public RedditClient reddit = new RedditClient();
 	public RepManager reputation = new RepManager();
 	public MuteManager mutes = new MuteManager();
@@ -168,7 +183,9 @@ public class BonziBot extends ListenerAdapter {
 			Constants.BOT_TOKEN;
 		builder.setToken(token).addEventListeners(this);
 	}
+	
 	public void start() throws InterruptedException, LoginException {
+		setupMessageHandlers();
 		setupStorableData();
 		loadData();
 		JDA bot = setupBot();
@@ -183,6 +200,7 @@ public class BonziBot extends ListenerAdapter {
 	public void slashCommands(JDA jda) {
 		CommandListUpdateAction action = jda.updateCommands();
 		List<Command> allCommands = commands.getRegisteredCommands();
+		
 		for(Command command: allCommands) {
 			if(!command.isRegisterable())
 				continue;
@@ -194,7 +212,7 @@ public class BonziBot extends ListenerAdapter {
 				for(CommandArg arg: command.args.getArgs()) {
 					OptionData option = new OptionData(arg.type.nativeOption,
 						arg.argName.toLowerCase().replace(' ', '-'), arg.isOptional() ?
-						"Optional argument." : "Required argument.",
+						"optional" : "required",
 						!arg.isOptional());
 					
 					if(arg.type == ArgType.Enum) {
@@ -223,37 +241,52 @@ public class BonziBot extends ListenerAdapter {
 				}
 			}
 			data.addOptions(allArgs);
-			InternalLogger.print("[SLASH] REGISTER " + data.toData().toString());
+			InternalLogger.print("Register command: " + data.toData().toString());
 			action = action.addCommands(data);
 		}
 		action.queue();
 	}
 	
+	void setupMessageHandlers() {
+		this.messageHandlers = new MessageHandler[] {
+				// auxilliary handlers
+			new CountingMessageHandler(),		// Counting Game Modifier
+			new RPGMessageHandler(),			// RPG Modifier
+			new PicturesOnlyMessageHandler(),	// Pictures Only Modifier
+			new PremiumOnlyMessageHandler(),	// Premium Only Modifier
+			new AnonymousMessageHandler(),		// Anonymous Modifier
+			
+				// default
+			DEFAULT_MESSAGE_HANDLER				// Fallback Handler (99% of all messages go here)
+		};
+	}
 	void setupStorableData() {
-		storableData.clear();
-		storableData.add(accounts);
-		storableData.add(guildSettings);
-		storableData.add(tags);
-		storableData.add(upgrades);
-		storableData.add(lottery);
-		storableData.add(rewards);
-		storableData.add(logging);
-		storableData.add(reputation);
-		storableData.add(quickDraw);
-		storableData.add(appeals);
-		storableData.add(mutes);
-		storableData.add(bans);
-		storableData.add(todolists);
-		storableData.add(grid);
+		this.storableData.clear();
+		this.storableData.add(accounts);
+		this.storableData.add(guildSettings);
+		this.storableData.add(tags);
+		this.storableData.add(upgrades);
+		this.storableData.add(lottery);
+		this.storableData.add(rewards);
+		this.storableData.add(logging);
+		this.storableData.add(reputation);
+		this.storableData.add(quickDraw);
+		this.storableData.add(appeals);
+		this.storableData.add(mutes);
+		this.storableData.add(bans);
+		this.storableData.add(todolists);
+		this.storableData.add(grid);
+		this.storableData.add(scripts);
+		this.storableData.add(counting);
 		
-		int len = storableData.size();
-		InternalLogger.print("[IO] Populated storable data with " + len + " elements.");
+		int len = this.storableData.size();
+		InternalLogger.print("Populated storable data with " + len + " elements.");
 	}
 	JDA setupBot() throws InterruptedException, LoginException {
 		JDA bot = builder.build();
-		InternalLogger.print("[STATUS] Starting bot...");
+		InternalLogger.print("Starting bot...");
 		bot.awaitReady();
-		InternalLogger.print("[STATUS] Bot is ready!");
+		InternalLogger.print("Bot is ready!");
 		return bot;
 	}
 	void setupExecutors(JDA jda) {
@@ -262,14 +295,14 @@ public class BonziBot extends ListenerAdapter {
 			reflectionsInstance.getSubTypesOf(AutoRepeat.class);
 		
 		int count = toBeExecuted.size(), i = 0;
-		InternalLogger.print("[EXE] Located " + count + " executors. Starting...");
+		InternalLogger.print("Located " + count + " executors. Starting...");
 		
 		boolean error = false;
 		try {
 			for(Class<? extends AutoRepeat> execute: toBeExecuted) {
 				String name = execute.getName();
 				String status = "[" + (++i) + "/" + count +"]";
-				InternalLogger.print("[EXE] Starting " + name + " " + status);
+				InternalLogger.print("Starting thread for " + name + " " + status);
 				
 				AutoRepeat info = execute.newInstance();
 				BonziBot singleton = this;
@@ -291,9 +324,9 @@ public class BonziBot extends ListenerAdapter {
 			error = true;
 		} finally {
 			if(error)
-				InternalLogger.print("[EXE/ERROR] Could not start all executors.");
+				InternalLogger.print("Could not start all executors.");
 			else
-				InternalLogger.print("[EXE] All executors started.");
+				InternalLogger.print("All executors started.");
 		}
 	}
 	void loadFonts() {
@@ -304,48 +337,63 @@ public class BonziBot extends ListenerAdapter {
 	}
 	void postSetup(JDA jda) {
 		
-		// Anything else that needs to be done.
+		// anything else that needs to be done
 		
 		try {
+			// compile regex patterns
 			Constants.compileRegex();
+			
+			// initialize command cooldowns system
 			cooldowns.initialize(commands);
+			
+			// download the stuff for the username generator
 			UsernameGenerator.init();
 			
-			Guild bonziGuild = BonziUtils.getBonziGuild(jda);
-			EmoteCache.appendGuildEmotes(bonziGuild);
+			// prefetch all guild emotes
+			for(Guild guild: jda.getGuilds())
+				EmoteCache.appendGuildEmotes(guild);
 			
+			// register all scripts into the cache
+			ScriptCache.registerAll(this.scripts, jda);
+			
+			// download and parse emoji shortcodes
+			GenericEmoji.initializeShortcode();
+			
+			// download and parse steam titles
 			steam = new SteamCache();
 			steam.fetchTitles();
 			
-			InternalLogger.print("[GIT] Connecting to GitHub...");
-			github = new GitHubBuilder().withOAuthToken(Constants.GITHUB_TOKEN).build();
-			InternalLogger.print("[GIT] Connected");
+			InternalLogger.print("Connecting to GitHub...");
+			github = new GitHubBuilder()
+				.withOAuthToken(Constants.GITHUB_TOKEN)
+				.build();
+			InternalLogger.print("Connected");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	public void saveData() {
-		InternalLogger.print("[IO] Saving data...");
+		InternalLogger.print("Saving data...");
 		if(DataSerializer.backup) {
-			InternalLogger.print("[IO] Cancelled due to backup in progress...");
+			InternalLogger.print("Cancelled due to backup in progress...");
 			return;
 		}
 		for(IStorableData data: storableData) {
 			data.saveData();
 		}
-		InternalLogger.print("[IO] Saved data!");
+		InternalLogger.print("Saved data!");
 	}
 	public void saveDataBackup() {
-		InternalLogger.print("[IO] Saving data (BACKUP)...");
+		InternalLogger.print("Saving data (BACKUP)...");
 		if(DataSerializer.backup) {
-			InternalLogger.print("[IO] Cancelled due to backup in progress...");
+			InternalLogger.print("Cancelled due to backup in progress...");
 			return;
 		}
 		DataSerializer.backup = true;
 		for(IStorableData data: storableData) {
 			data.saveData();
 		}
-		InternalLogger.print("[IO] Saved data (BACKUP)!");
+		InternalLogger.print("Saved data (BACKUP)!");
 		DataSerializer.backup = false;
 	}
 	public void loadData() {
@@ -353,14 +401,14 @@ public class BonziBot extends ListenerAdapter {
 		int total = storableData.size();
 		
 		for(IStorableData data: storableData) {
-			InternalLogger.print("[IO] Loading " + data.getClass().getName() + "... [" + ++progress + "/" + total + "]");
+			InternalLogger.print("Loading " + data.getClass().getName() + "... [" + ++progress + "/" + total + "]");
 			try {
 				data.loadData();
 			} catch(EOFException exc) {
-				InternalLogger.printError("[IO/ERROR] Could not load file into: " + data.getClass().getName(), Severity.FATAL);
+				InternalLogger.printError("Could not load file into: " + data.getClass().getName(), Severity.FATAL);
 			}
 		}
-		InternalLogger.print("[IO] Loaded all data!");
+		InternalLogger.print("Loaded all data!");
 	}
 	public void loadDataBackup() {
 		int progress = 0;
@@ -368,159 +416,40 @@ public class BonziBot extends ListenerAdapter {
 		
 		DataSerializer.backup = true;
 		for(IStorableData data: storableData) {
-			InternalLogger.print("[IO] Loading backup For " + data.getClass().getName() + "... [" + ++progress + "/" + total + "]");
+			InternalLogger.print("Loading backup For " + data.getClass().getName() + "... [" + ++progress + "/" + total + "]");
 			try {
 				data.loadData();
 			} catch(EOFException exc) {
-				InternalLogger.printError("[IO/ERROR] Could not load backup file into: " + data.getClass().getName(), Severity.FATAL);
+				InternalLogger.printError("Could not load backup file into: " + data.getClass().getName(), Severity.FATAL);
 			}
 		}
-		InternalLogger.print("[IO] Loaded all backup data!");
+		InternalLogger.print("Loaded all backup data!");
 		DataSerializer.backup = false;
 	}
 	
 	// Events
 	@Override
 	public void onSlashCommand(SlashCommandEvent event) {
-		commands.onInput(event, this);
+		if(ScriptCache.shouldCheckScripts(event)) {
+			if(this.scripts.onScriptTrigger(event, this))
+				return;
+		}
+		this.commands.onInput(event, this);
 	}
 	@Override
 	public void onButtonClick(ButtonClickEvent event) {
 		String id = event.getComponentId();
 		
+		// Script call
+		if(id.startsWith("::")) {
+			this.scripts.onScriptTrigger(event, this);
+			return;
+		}
+		
 		// Check for hardcoded protocols
 		String[] parts = id.split(":");
 		if(parts[0].equals("_appeal")) {
-			if(parts[1].equals("request")) {
-				final long gid = Long.parseLong(parts[2]);
-				final long uid = event.getUser().getIdLong();
-				
-				if(!this.appeals.hasMercy(gid, uid)) {
-					event.reply("You have already appealed.").setEphemeral(true).queue();
-					return;
-				}
-				
-				event.replyEmbeds(BonziUtils.quickEmbed("Appeal",
-					"Send a message containing your ban appeal.").build()).queue();
-				this.eventWaiter.waitForResponse(uid, appealMessage -> {
-					String content = appealMessage.getContentRaw();
-					MessageChannel channel = appealMessage.getChannel();
-					List<Attachment> attachments = appealMessage.getAttachments();
-					
-					for(Attachment file: attachments)
-						content += "\n" + file.getUrl();
-					
-					Guild guild = appealMessage.getJDA().getGuildById(gid);
-					GuildSettings settings = this.guildSettings.getSettings(guild);
-					if(settings == null)
-						return; // what the heck
-					
-					if(!settings.banAppeals) {
-						channel.sendMessageEmbeds(BonziUtils.failureEmbed("Ban appeals have been disabled. Sorry.")).queue();
-						return;
-					}
-					
-					long appealsChannelId = settings.banAppealsChannel;
-					TextChannel appealsChannel = guild.getTextChannelById(appealsChannelId);
-					if(appealsChannel == null) {
-						channel.sendMessageEmbeds(BonziUtils.failureEmbed("Ban appeals have been disabled. Sorry.")).queue();
-						return;
-					}
-					
-					BanAppeal appeal = new BanAppeal(appealMessage.getAuthor(), content);
-					appeal.sendMessage(appealsChannel, success -> {
-						this.appeals.noMercy(gid, uid);
-						this.appeals.addAppeal(gid, appeal);
-						EmbedBuilder eb = new EmbedBuilder();
-						eb.setColor(Color.pink);
-						switch(BonziUtils.randomInt(7)) {
-						case 0:
-							eb.setTitle("Success!");
-							eb.setDescription("Your appeal has been beamed up to HQ.");
-							break;
-						case 1:
-							eb.setTitle("Completed!");
-							eb.setDescription("Your appeal has been received by the staff team.");
-							break;
-						case 2:
-							eb.setTitle("Appeal Sent!");
-							eb.setDescription("The staff team are mid-debate right now. Good luck?");
-							break;
-						case 3:
-							eb.setTitle("Success!");
-							eb.setDescription("Your appeal has been received and is being considered by the greatest staff team on the planet *as we speak*.");
-							break;
-						case 4:
-							eb.setTitle("Request Received!");
-							eb.setDescription("The staff team is on lunch break right now, they'll get to you in a minute.");
-							break;
-						case 5:
-							eb.setTitle("Unban Awaiting!");
-							eb.setDescription("Or maybe not. We'll see.");
-							break;
-						case 6:
-							eb.setTitle("Appeal Delivered!");
-							eb.setDescription("via the fanciest pneumatic tubing you've ever seen.");
-							break;
-						}
-						channel.sendMessageEmbeds(eb.build()).queue();
-					}, failure -> {
-						channel.sendMessageEmbeds(BonziUtils.failureEmbed("Something went wrong when processing your appeal.", failure.toString())).queue();
-						return;
-					});
-				});
-			}
-			if(parts[1].equals("accept")) {
-				final long bannedUser = Long.parseLong(parts[2]);
-				Guild guild = event.getGuild();
-				Member mod = event.getMember();
-				
-				if(!mod.hasPermission(Permission.BAN_MEMBERS)) {
-					event.replyEmbeds(BonziUtils.failureEmbed("Insufficient permission.", "You must be able to manage bans to do this!")).setEphemeral(true).queue();
-					return;
-				}
-				
-				BanAppeal appeal = this.appeals.getAppeal(guild, bannedUser);
-				String tag = mod.getUser().getAsTag();
-				
-				if(appeal == null) {
-					event.replyEmbeds(BonziUtils.failureEmbed("Appeal has already been responded to.")).setEphemeral(true).queue();
-					return;
-				}
-				
-				guild.unban(String.valueOf(bannedUser)).reason
-					("Appeal Accepted by Moderator " + mod.getUser().getAsTag()).queue();
-				
-				event.replyEmbeds(BonziUtils.successEmbed("Appeal Accepted", appeal.username + "'s appeal has been accepted by " + tag +
-					"\nThis user will not be notified that their appeal was accepted. Reach out to them if you wish to invite them back.")).queue();
-				event.getHook().editOriginalComponents(new ArrayList<ComponentLayout>()).queue();
-				this.appeals.removeAppeal(guild, bannedUser);
-				return;
-			}
-			if(parts[1].equals("reject")) {
-				final long bannedUser = Long.parseLong(parts[2]);
-				Guild guild = event.getGuild();
-				Member mod = event.getMember();
-				
-				if(!mod.hasPermission(Permission.BAN_MEMBERS)) {
-					event.replyEmbeds(BonziUtils.failureEmbed("You don't have permission to do that.")).setEphemeral(true).queue();
-					return;
-				}
-				
-				BanAppeal appeal = this.appeals.getAppeal(guild, bannedUser);
-				String tag = mod.getUser().getAsTag();
-				
-				if(appeal == null) {
-					event.replyEmbeds(BonziUtils.failureEmbed("Appeal has already been responded to.")).setEphemeral(true).queue();
-					return;
-				}
-				
-				event.replyEmbeds(BonziUtils.failureEmbed("Appeal Denied", appeal.username + "'s appeal has been denied by " + tag +
-					"\nThis user will not be notified that their appeal was accepted. Reach out to them if you wish to invite them back.")).queue();
-				event.getHook().editOriginalComponents(new ArrayList<ComponentLayout>()).queue();
-				this.appeals.removeAppeal(guild, bannedUser);
-				return;
-			}
+			this.appeals.processButtonEvent(parts, this, event);
 			return;
 		}
 		
@@ -533,104 +462,87 @@ public class BonziBot extends ListenerAdapter {
 		this.guis.onSelectionMenu(event);
 	}
 	public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
-		// Execute commands and chat-related things.
-		if(e.getAuthor().isBot()) return;
-		if(tags.receiveMessage(e, this)) return;
-		Message msg = e.getMessage();
-		if(eventWaiter.onMessage(e.getMessage())) return;
-		GuildSettings settings = this.guildSettings.getSettings(e.getGuild());
+		MessageChannel channel = e.getChannel();
+		Modifier[] modifiers = BonziUtils.getChannelModifiers(channel);
 		
-		// Scan for tokens.
-		if(settings.tokenScanning) {
-			String content = msg.getContentRaw();
-			Matcher matcher = Constants.TOKEN_REGEX_COMPILED.matcher(content);
-			if(matcher.find()) {
-				String token = matcher.group();
-				try {
-					github.createGist().file("invalidate.txt", "Token was accidentally leaked: " + token).public_(true).create();
-					EmbedBuilder eb = BonziUtils.quickEmbed("⚠️ BOT TOKEN DETECTED!",
-						"I reset your bot token for you. Be more careful next time!", Color.red);
-					e.getChannel().sendMessageEmbeds(eb.build()).queue();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-					msg.delete().queue();
-					e.getChannel().sendMessage("Whoa, hold on! Your bot token was in that message.\nI couldn't invalidate it, but I deleted the message for you.\n\nDeveloper portal: https://discord.com/developers/applications").queue();
-				}
-				return;
-			}
-			matcher = Constants.PASTEBIN_REGEX_COMPILED.matcher(content);
-			if(matcher.find()) {
-				try {
-					String full = matcher.group(0);
-					String paste = matcher.group(2);
-					boolean haste = full.contains("hastebin");
-					paste = (haste ? "https://hastebin.com/raw/" : "https://pastebin.com/raw/") + paste;
-					String download = BonziUtils.getStringFrom(paste);
-					matcher = Constants.TOKEN_REGEX_COMPILED.matcher(download);
-					if(matcher.find()) {
-						String token = matcher.group();
-						github.createGist().file("invalidate.txt", "Token was accidentally leaked VIA " +
-							(haste ? "hastebin: " : "pastebin: ") + token).public_(true).create();
-						EmbedBuilder eb = BonziUtils.quickEmbed("⚠️ BOT TOKEN DETECTED!",
-							"I reset your bot token for you. Be more careful next time!", Color.red);
-						e.getChannel().sendMessageEmbeds(eb.build()).queue();
-					}
-				} catch (FileNotFoundException e1) {
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-					msg.delete().queue();
-					e.getChannel().sendMessage(e.getAuthor().getAsMention() + ", **Reset your token AS SOON AS POSSIBLE!**\nYour bot token was in that pastebin.\n"
-						+ "I couldn't invalidate it, but I deleted the message for you.\n\nDeveloper portal: https://discord.com/developers/applications").queue();
-				}
-				return;
-			}
-		}
-		
-		// Scan for BAD WORd
-		if(!settings.testMessageInFilter(e.getMessage())) {
-			logging.addMessageToHistory(e.getMessage(), e.getGuild());
-			e.getMessage().delete().queue(null, fail -> {});
-			e.getChannel().sendMessageEmbeds(BonziUtils.failureEmbed(
-				"You can't say that, " + e.getAuthor().getName() + "!")).queue();
+		for(MessageHandler handler: this.messageHandlers) {
+			if(!handler.appliesInChannel(channel))
+				continue;
+			if(!handler.appliesInModifiers(modifiers))
+				continue;
+			handler.handleGuildMessage(this, e, modifiers);
 			return;
 		}
-		
-		logging.addMessageToHistory(e.getMessage(), e.getGuild());
-		CommandExecutionInfo info = new CommandExecutionInfo(e);
-		
-		if(commands.onInput(info.setBonziBot(this)))
-			return;
-		
-		// Everything from here on is not a command.
-		
-		// These are intentionally guild-only.
-		BonziUtils.sendMentionMessage(e, this);
-		BonziUtils.disableAfk(e.getAuthor(), e.getChannel(), this);
-		reputation.checkMessage(e.getMessage(), this); // ok i lied this is kinda a command
-		quickDraw.messageReceived(e.getAuthor(), e.getMessage(), this);
 	}
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
-		if(e.getAuthor().isBot()) return;
-		if(tags.receiveMessage(e)) return;
-		if(eventWaiter.onMessage(e.getMessage())) return;
-		CommandExecutionInfo info = new CommandExecutionInfo(e);
-		commands.onInput(info.setBonziBot(this)); // dont return
+		MessageChannel channel = e.getChannel();
 		
-		// Cache the channel for future use.
-		// (used in BonziUtils.messageUser)
-		long pcid = e.getChannel().getIdLong();
-		long uid = e.getAuthor().getIdLong();
-		BonziUtils.userPrivateChannels.put(uid, pcid);
+		for(MessageHandler handler: this.messageHandlers) {
+			if(!handler.appliesInChannel(channel))
+				continue;
+			handler.handlePrivateMessage(this, e);
+		}
 	}
 	public void onGuildJoin(GuildJoinEvent e) {
-		// Give off the opening speech.
+		// ahhhHH
 	}
 	public void onGuildMemberJoin(GuildMemberJoinEvent e) {
+		
+		long guildId = e.getGuild().getIdLong();
+		if(ScriptCache.shouldCheckJoinScripts(guildId)) {
+			List<ScriptPackage> packages = this.scripts.getPackages(guildId);
+			for(ScriptPackage pkg: packages) {
+				if(!pkg.isEnabled())
+					continue;
+				for(Script script: pkg.getScripts()) {
+					InvocationMethod _method = script.method;
+					if(_method.getImplementation() != Implementation.JOIN)
+						continue;
+					
+					ScriptExecutor executor = script.code.createExecutor();
+					int member = executor.memory.createObjectReference(e.getMember());
+					executor.memory.writeExistingObjRef("member", member);
+					
+					GuildSettings settings = this.guildSettings.getSettings(guildId);
+					ScriptContextInfo context = new ScriptContextInfo(null, null, null, null, null, null,
+						e.getJDA(), this, e.getUser(), e.getMember(), e.getGuild(), settings);
+					
+					executor.run(context);
+					return;
+				}
+			}
+		}
+		
 		// Give join role and join message (if any).
 		this.guildSettings.memberJoined(this, e);
 	}
 	public void onGuildMemberRemove(GuildMemberRemoveEvent e) {
+		
+		long guildId = e.getGuild().getIdLong();
+		if(ScriptCache.shouldCheckJoinScripts(guildId)) {
+			List<ScriptPackage> packages = this.scripts.getPackages(guildId);
+			for(ScriptPackage pkg: packages) {
+				if(!pkg.isEnabled())
+					continue;
+				for(Script script: pkg.getScripts()) {
+					InvocationMethod _method = script.method;
+					if(_method.getImplementation() != Implementation.LEAVE)
+						continue;
+					
+					ScriptExecutor executor = script.code.createExecutor();
+					int member = executor.memory.createObjectReference(e.getMember());
+					executor.memory.writeExistingObjRef("member", member);
+					
+					GuildSettings settings = this.guildSettings.getSettings(guildId);
+					ScriptContextInfo context = new ScriptContextInfo(null, null, null, null, null, null,
+						e.getJDA(), this, e.getUser(), e.getMember(), e.getGuild(), settings);
+					
+					executor.run(context);
+					return;
+				}
+			}
+		}
+		
 		// Send a leave message.
 		this.guildSettings.memberLeft(this, e);
 	}
