@@ -2,7 +2,6 @@ package com.lukecreator.BonziBot.Managers;
 
 import java.io.EOFException;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
@@ -10,6 +9,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Data.UserAccount;
+import com.lukecreator.BonziBot.Handling.DefaultMessageHandler;
 import com.lukecreator.BonziBot.Legacy.UserAccountLegacyLoader;
 
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -23,7 +23,7 @@ public class UserAccountManager implements IStorableData {
 	HashMap<Long, UserAccount> accounts;
 	
 	public UserAccountManager() {
-		accounts = new HashMap<Long, UserAccount>();
+		this.accounts = new HashMap<Long, UserAccount>();
 	}
 	/**
 	 * Returns if the user levelled up.
@@ -33,48 +33,62 @@ public class UserAccountManager implements IStorableData {
 		UserAccount account = this.getUserAccount(info.executor.getIdLong());
 		
 		if(account.incrementXP()) {
-			MessageEmbed me = BonziUtils.quickEmbed("Level up!",
-				info.executor.getAsMention() + ", you're now level `" + account.calculateLevel() + "`!")
-				.setColor(info.member.getColor()).build();
+			int level = account.calculateLevel();
+			int coins = level * 10 + 10;
+			coins += BonziUtils.randomInt(coins);
+			account.addCoins(coins);
 			
-			info.channel.sendMessageEmbeds(me).queue(msg -> {
-				msg.delete().queueAfter(5, TimeUnit.SECONDS);
-			});
+			String userName = info.executor.getName();
+			String title;
+			
+			if(level < 101) {
+				if(level > 94)
+					userName = userName.toUpperCase();
+				title = DefaultMessageHandler
+					.LEVEL_UPS[level - 1]
+					.replace("{user}", userName);
+			} else {
+				title = userName + " is now level " + level + "!";
+			}
+			
+			MessageEmbed me = BonziUtils.quickEmbed(title, "`+" + coins + " coins!`")
+				.setColor(info.member.getColor()).build();
+			info.channel.sendMessageEmbeds(me).queue();
 		}
 	}
 	public UserAccount getUserAccount(User u) {
-		return getUserAccount(u.getIdLong());
+		return this.getUserAccount(u.getIdLong());
 	}
 	public void setUserAccount(User u, UserAccount acct) {
-		setUserAccount(u.getIdLong(), acct);
+		this.setUserAccount(u.getIdLong(), acct);
 	}
 	public UserAccount getUserAccount(long id) {
-		if(!accounts.containsKey(id))
-			accounts.put(id, new UserAccount());
-		return accounts.get(id);
+		if(!this.accounts.containsKey(id))
+			this.accounts.put(id, new UserAccount());
+		return this.accounts.get(id);
 	}
 	public void setUserAccount(long id, UserAccount acct) {
-		accounts.put(id, acct);
+		this.accounts.put(id, acct);
 	}
 	public HashMap<Long, UserAccount> getAccounts() {
-		return accounts;
+		return this.accounts;
 	}
 	
 	// Data
 	public void loadLegacy() {
-		accounts = UserAccountLegacyLoader.execute();
+		this.accounts = UserAccountLegacyLoader.execute();
 		InternalLogger.print("Loaded legacy user accounts.");
 	}
 	@Override
 	public void saveData() {
-		DataSerializer.writeObject(accounts, "modernaccounts");
+		DataSerializer.writeObject(this.accounts, "modernaccounts");
 	}
 	@SuppressWarnings("unchecked")
 	@Override
 	public void loadData() throws EOFException {
 		Object o = DataSerializer.retrieveObject("modernaccounts");
 		if(o != null) {
-			accounts = (HashMap<Long, UserAccount>) o;
+			this.accounts = (HashMap<Long, UserAccount>) o;
 		}
 	}
 	

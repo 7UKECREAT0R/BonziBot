@@ -1,12 +1,16 @@
 package com.lukecreator.BonziBot.Handling;
 
 import com.lukecreator.BonziBot.BonziBot;
+import com.lukecreator.BonziBot.BonziUtils;
+import com.lukecreator.BonziBot.Data.Achievement;
 import com.lukecreator.BonziBot.Data.Modifier;
 
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 
@@ -21,11 +25,15 @@ public class CountingMessageHandler implements MessageHandler {
 		int nextNumber = bb.counting.getNextNumber(guildId);
 		String content = message.getContentRaw().trim();
 		
-		System.out.println(nextNumber + " == " + content);
-		
 		if(!String.valueOf(nextNumber).equals(content)) {
 			message.delete().queue(null, COLLISION_IGNORE);
 			return;
+		}
+		
+		if(nextNumber % 1000 == 0) {
+			TextChannel channel = e.getChannel();
+			User author = e.getAuthor();
+			BonziUtils.tryAwardAchievement(channel, bb, author, Achievement.MILESTONER);
 		}
 		
 		nextNumber++;

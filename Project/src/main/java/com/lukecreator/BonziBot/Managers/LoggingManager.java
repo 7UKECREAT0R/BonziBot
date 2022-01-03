@@ -2,7 +2,9 @@ package com.lukecreator.BonziBot.Managers;
 
 import java.awt.Color;
 import java.io.EOFException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
@@ -10,24 +12,29 @@ import com.lukecreator.BonziBot.Data.AllocationList;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.IStorableData;
-import com.lukecreator.BonziBot.Data.LogEntry;
 import com.lukecreator.BonziBot.Data.Modifier;
+import com.lukecreator.BonziBot.Logging.LogButtons;
+import com.lukecreator.BonziBot.Logging.LogEntry;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 /**
  * Manages the logs for all guilds including
- *   the storage, reactions, and messages.
+ *   the storage, buttons, and messages.
  */
 public class LoggingManager implements IStorableData {
 	
-	public static final String FILE_ENTRIES = "log_entries";
-	public static final int MSG_HISTORY_LEN = 250;
-	public static final int LOG_HISTORY_LEN = 100;
+	public static final String FILE_ENTRIES = "log_entries_new";
+	public static final int MSG_HISTORY_LEN = 50;
+	public static final int LOG_HISTORY_LEN = 50;
 	HashMap<Long, Message> exposeData = new HashMap<Long, Message>();
 	HashMap<Long, AllocationList<Message>> messages = new HashMap<Long, AllocationList<Message>>();
 	HashMap<Long, AllocationList<LogEntry>> entries = new HashMap<Long, AllocationList<LogEntry>>();
@@ -80,11 +87,83 @@ public class LoggingManager implements IStorableData {
 			return g.getTextChannelById(id);
 		} else return null;
 	}
+	/**
+	 * Returns the cached channel of this guild.
+	 * Returns null if deleted, uncached, or disabled.
+	 */
+	public TextChannel getLoggingChannel(long guildId, BonziBot bb, JDA jda) {
+		GuildSettings settings = bb.guildSettings.getSettings(guildId);
+		if(settings.loggingEnabled) {
+			long id = settings.loggingChannelCached;
+			Guild guild = jda.getGuildById(guildId);
+			if(id == 0) {
+				// Try to relocate.
+				if(guild != null) {
+					id = this.findLoggingChannel(guild);
+					settings.loggingChannelCached = id;
+					bb.guildSettings.setSettings(guildId, settings);
+				}
+			}
+			return guild.getTextChannelById(id);
+		} else return null;
+	}
 	
-	AllocationList<LogEntry> getAllocation(Guild g) {
+	public void tryLog(Guild guild, BonziBot bb, LogEntry entry) {
+		TextChannel channel = this.getLoggingChannel(guild, bb);
+		if(channel == null)
+			return;
+		
+		System.out.println("Attempting to log: " + entry.toString());
+		this.log(channel, entry);
+	}
+	public void tryLog(long guildId, BonziBot bb, LogEntry entry, JDA jda) {
+		TextChannel channel = this.getLoggingChannel(guildId, bb, jda);
+		if(channel == null)
+			return;
+		
+		System.out.println("Attempting to log: " + entry.toString());
+		this.log(channel, entry);
+	}
+	
+	public void log(TextChannel channel, LogEntry entry) {
+		long flags = entry.getButtonFlags();
+		List<Button> row = new ArrayList<Button>();
+		
+		if((flags & LogButtons.UNDO.flag) != 0)
+			row.add(LogButtons.UNDO_BUTTON);
+		if((flags & LogButtons.WARN.flag) != 0)
+			row.add(LogButtons.WARN_BUTTON);
+		if((flags & LogButtons.MUTE.flag) != 0)
+			row.add(LogButtons.MUTE_BUTTON);
+		if((flags & LogButtons.KICK.flag) != 0)
+			row.add(LogButtons.KICK_BUTTON);
+		if((flags & LogButtons.BAN.flag) != 0)
+			row.add(LogButtons.BAN_BUTTON);
+		
+		EmbedBuilder eb = new EmbedBuilder();
+		eb.setColor(entry.type.color.javaColor);
+		MessageEmbed me = entry.toEmbed(eb);
+		
+		final long guildId = channel.getGuild().getIdLong();
+		final AllocationList<LogEntry> list = this.getAllocation(guildId);
+		
+		// set message id for log entry and add to list
+		
+		MessageAction action = channel.sendMessageEmbeds(me);
+		
+		if(!row.isEmpty())
+			action = action.setActionRow(row);
+		
+		action.queue(msg -> {
+			long id = msg.getIdLong();
+			list.add(entry.withMessageId(id));
+		});
+	}
+	
+	public AllocationList<LogEntry> getAllocation(Guild g) {
 		return getAllocation(g.getIdLong());
 	}
-	AllocationList<LogEntry> getAllocation(long guildId) {
+	public AllocationList<LogEntry> getAllocation(long guildId) {
 		if(entries.containsKey(guildId))
 			return entries.get(guildId);
 		AllocationList<LogEntry> list = new
@@ -145,9 +224,6 @@ public class LoggingManager implements IStorableData {
 		return exposeData.put(guildId, m);
 	}
 	
-	public void log(LogEntry entry, Guild guild, BonziBot bb) {
-		
-	}
 	public void changeLogChannel(TextChannel potential, BonziBot bb, User executor) {
 		Guild guild = potential.getGuild();
 		
@@ -160,14 +236,13 @@ public class LoggingManager implements IStorableData {
 				potential.sendMessageEmbeds(BonziUtils.failureEmbed("Alright, cancelled.")).queue();
 				return;
 			} else {
-				String prefix = bb.guildSettings.getSettings(guild).getPrefix();
 				GuildSettings gs = bb.guildSettings.getSettings(guild);
 				gs.loggingEnabled = true;
 				gs.loggingChannelCached = potential.getIdLong();
 				bb.guildSettings.setSettings(guild, gs);
 				potential.sendMessageEmbeds(BonziUtils.successEmbed(
 					"Alright, this channel is officially the new logging channel!",
-					"pro tip: you can do `" + prefix + "serversettings` to change this at any time.")).queue();
+					"pro tip: you can do `/serversettings` to change this at any time.")).queue();
 			}
 		});
 	}

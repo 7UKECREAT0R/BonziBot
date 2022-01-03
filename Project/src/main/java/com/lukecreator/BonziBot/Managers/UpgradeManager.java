@@ -8,7 +8,7 @@ import java.util.List;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.IStorableData;
 
-import net.dv8tion.jda.api.entities.Invite.Guild;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 

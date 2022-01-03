@@ -38,7 +38,6 @@ public class GuiEditEntryText extends GuiEditEntry {
 	public CommandArg getParser() {
 		return this.parser;
 	}
-	
 	public boolean isWordParsable(String word, Guild theGuild) {
 		return this.parser.isWordParsable(word, theGuild);
 	}

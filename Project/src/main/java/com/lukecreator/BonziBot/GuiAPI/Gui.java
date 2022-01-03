@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
+import com.lukecreator.BonziBot.Async.GuiAnimationService;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -19,6 +20,53 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 
 
 public abstract class Gui {
+	
+	private boolean animation = false;
+	private int animationInterval = 0;
+	private int _untilRedraw = 0;
+	private int animationExpires = 0;
+	
+	/**
+	 * Makes this GUI get redrawn every <code>seconds</code> seconds.
+	 * If the expiry is hit, then animation will be frozen until this method is called again.
+	 * You can call this method every time a redraw or interaction is done to implement this functionality.
+	 * @param seconds The interval in seconds of which to redraw this Gui.
+	 * @param expiry The number of seconds until the animation pauses. 
+	 */
+	protected void enableAnimation(int seconds, int expiry) throws UnsupportedOperationException {
+		if(this.parent.isDm)
+			throw new UnsupportedOperationException("Cannot animate GUIs in user private messages.");
+		this.animation = true;
+		this.animationInterval = seconds;
+		this._untilRedraw = seconds;
+		
+		this.animationExpires = expiry;
+		GuiAnimationService.setEventTarget(this.parent.guildId, this);
+	}
+	protected void disableAnimation() {
+		if(this.parent.isDm)
+			return;
+		GuiAnimationService.removeEventTarget(this.parent.guildId);
+	}
+	/**
+	 * Called by the GuiAnimationService to check if a Gui needs a redraw.
+	 */
+	public boolean pollAnimation() {
+		if(!this.animation)
+			return false;
+		if(this.animationExpires < 1)
+			return false;
+		
+		this._untilRedraw--;
+		this.animationExpires--;
+		
+		if(this._untilRedraw <= 0) {
+			this._untilRedraw = this.animationInterval;
+			return true;
+		}
+		
+		return false;
+	}
 	
 	// never override or modify these
 	protected String prefixOfLocation;
@@ -52,10 +100,10 @@ public abstract class Gui {
 	}
 	
 	public static final MessageEmbed EMPTY = new EmbedBuilder()
-			.setTitle("No Content")
-			.setDescription("I guess luke forgot to include a draw implemention...")
-			.setColor(BonziUtils.COLOR_BONZI_PURPLE)
-			.build();
+		.setTitle("No Content")
+		.setDescription("i guess luke forgot to include a draw implemention...")
+		.setColor(BonziUtils.COLOR_BONZI_PURPLE)
+		.build();
 	
 	public Gui(GuiContainer parent, JDA jda, Guild g, BonziBot b) {
 		elements = new ArrayList<GuiElement>();
@@ -140,6 +188,10 @@ public abstract class Gui {
 	 * @param jda
 	 */
 	public void initialize(JDA jda) {}
+	/**
+	 * Called before this GUI is routinely redrawn, granted that animation is enabled.
+	 */
+	public void onAnimationTick() {}
 	/**
 	 * Called when a button is clicked in this GUI.
 	 * @param buttonId The ID of the button that was clicked.

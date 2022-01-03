@@ -210,6 +210,8 @@ public class ScriptCache {
 			
 			if(!existingCommands.containsKey(guildId)) {
 				Guild guild = jda.getGuildById(guildId);
+				if(guild == null)
+					continue;
 				try {
 					List<Command> fetch = guild.retrieveCommands().complete();
 					existingCommands.put(guildId, fetch);

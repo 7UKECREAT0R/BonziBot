@@ -3,8 +3,10 @@ package com.lukecreator.BonziBot.Managers;
 import java.io.EOFException;
 import java.util.HashMap;
 
+import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.IStorableData;
+import com.lukecreator.BonziBot.Legacy.CountingLegacyLoader;
 
 import net.dv8tion.jda.api.entities.Guild;
 
@@ -41,5 +43,14 @@ public class CountingManager implements IStorableData {
 		Object o = DataSerializer.retrieveObject(FILE);
 		if(o != null)
 			this.nextNumbers = (HashMap<Long, Integer>)o;
+	}
+	
+	public void loadLegacy() {
+		CountingLegacyLoader cll = new CountingLegacyLoader();
+		cll.execute();
+		
+		this.nextNumbers = cll.result;
+		
+		InternalLogger.print("Loaded legacy custom commands.");
 	}
 }

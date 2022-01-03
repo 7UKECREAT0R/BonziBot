@@ -47,11 +47,13 @@ public class ReactionManager {
 	
 	public void onReaction(GenericReactionEvent e, BonziBot bb) {
 		long reactor = e.userIdLong;
-		if(Constants.isBonziBot(reactor)) return;
 		
-		checkPins(e, bb);
-		checkStars(e, bb);
-		checkPolls(e);
+		if(Constants.isBonziBot(reactor))
+			return;
+		
+		this.checkPins(e, bb);
+		this.checkStars(e, bb);
+		this.checkPolls(e);
 	}
 	void checkPins(GenericReactionEvent e, BonziBot bb) {
 		// cant pin in non-guilds
