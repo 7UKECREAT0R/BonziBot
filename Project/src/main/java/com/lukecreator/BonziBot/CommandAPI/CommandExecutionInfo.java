@@ -1,6 +1,7 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
 import java.awt.Color;
+import java.util.concurrent.TimeUnit;
 
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.Data.GuildSettings;
@@ -126,20 +127,48 @@ public class CommandExecutionInfo {
 	 * Generic method to send a message depending on general context.
 	 * @param content
 	 */
-	public void sendMessage(String content) {
-		if(this.isSlashCommand)
+	public void reply(String content) {
+		if(this.isSlashCommand && !this.slashCommand.isAcknowledged())
 			this.slashCommand.reply(content).queue();
 		else
 			this.channel.sendMessage(content).queue();
 	}
 	/**
+	 * Generic method to send a temporary message depending on general context.
+	 * @param content
+	 */
+	public void reply(int seconds, String content) {
+		if(this.isSlashCommand && !this.slashCommand.isAcknowledged())
+			this.slashCommand.reply(content).queue(interaction -> {
+				interaction.deleteOriginal().queueAfter(seconds, TimeUnit.SECONDS);
+			});
+		else
+			this.channel.sendMessage(content).queue(msg -> {
+				msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+			});
+	}
+	/**
 	 * Generic method to send a message depending on general context.
 	 * @param embed
 	 */
-	public void sendMessageEmbeds(MessageEmbed embed) {
-		if(this.isSlashCommand)
+	public void reply(MessageEmbed embed) {
+		if(this.isSlashCommand && !this.slashCommand.isAcknowledged())
 			this.slashCommand.replyEmbeds(embed).queue();
 		else
 			this.channel.sendMessageEmbeds(embed).queue();
+	}
+	/**
+	 * Generic method to send a temporary message depending on general context.
+	 * @param embed
+	 */
+	public void reply(int seconds, MessageEmbed embed) {
+		if(this.isSlashCommand && !this.slashCommand.isAcknowledged())
+			this.slashCommand.replyEmbeds(embed).queue(interaction -> {
+				interaction.deleteOriginal().queueAfter(seconds, TimeUnit.SECONDS);
+			});
+		else
+			this.channel.sendMessageEmbeds(embed).queue(msg -> {
+				msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+			});
 	}
 }

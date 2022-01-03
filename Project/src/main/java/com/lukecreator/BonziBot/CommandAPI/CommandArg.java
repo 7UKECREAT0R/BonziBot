@@ -64,7 +64,7 @@ public abstract class CommandArg {
 	 *   parsed by this CommandArg.
 	 *  
 	 * Expect theGuild to be null.
-	 * @param theGuild TODO
+	 * @param theGuild The guild that this was run in.
 	 */
 	public boolean isWordParsable(String word, Guild theGuild) {
 		return false;
