@@ -1,5 +1,7 @@
 package com.lukecreator.BonziBot.Script.Model.Messages;
 
+import java.util.function.Consumer;
+
 import com.lukecreator.BonziBot.CommandAPI.EmojiArg;
 import com.lukecreator.BonziBot.Data.EmoteCache;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
@@ -59,16 +61,34 @@ public class StatementAddReaction implements ScriptStatement {
 	@Override
 	public void execute(ScriptContextInfo info, ScriptExecutor context) {
 		
-		if(!info.hasMessage) {
-			ScriptExecutor.raiseError(new ScriptError("No message is present.", this));
+		// called when a normal message is being reacted to.
+		Consumer<?> regularMessage = something -> {
+			if(!info.hasMessage) {
+				ScriptExecutor.raiseError(new ScriptError("No message is present to react to.", this));
+				return;
+			}
+			
+			Message message = info.msg;
+			
+			if(this.reaction.getIsGeneric())
+				message.addReaction(this.reaction.getGenericEmoji()).queue(null, fail -> {});
+			else
+				message.addReaction(EmoteCache.getEmoteById(this.reaction.getGuildEmojiId())).queue(null, fail -> {});
+		};
+		
+		// If this interaction was responded to, react to that.
+		if(info.hasSlashCommand) {
+			info.slashCommand.getHook().retrieveOriginal().queue(msg -> {
+				if(this.reaction.getIsGeneric())
+					msg.addReaction(this.reaction.getGenericEmoji()).queue(null, fail -> {});
+				else
+					msg.addReaction(EmoteCache.getEmoteById(this.reaction.getGuildEmojiId())).queue(null, fail -> {});
+			}, fail -> {
+				regularMessage.accept(null);
+			});
 			return;
 		}
 		
-		Message message = info.msg;
-		
-		if(this.reaction.getIsGeneric())
-			message.addReaction(this.reaction.getGenericEmoji()).queue(null, fail -> {});
-		else
-			message.addReaction(EmoteCache.getEmoteById(this.reaction.getGuildEmojiId())).queue(null, fail -> {});
+		regularMessage.accept(null);
 	}
 }

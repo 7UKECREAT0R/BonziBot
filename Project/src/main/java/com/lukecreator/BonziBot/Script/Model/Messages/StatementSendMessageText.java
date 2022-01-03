@@ -74,10 +74,10 @@ public class StatementSendMessageText implements ScriptStatement {
 		
 		if(info.hasSlashCommand && !info.slashCommand.isAcknowledged()) {
 			if(channel.getIdLong() == info.slashCommand.getChannel().getIdLong())
-				info.slashCommand.reply(send).queue(null, fail -> {});
+				info.slashCommand.reply(send).complete();
 			else {
 				info.slashCommand.reply(channel.getAsMention()).setEphemeral(true).queue(null, fail -> {});
-				channel.sendMessage(send).queue(null, fail -> {});
+				channel.sendMessage(send).complete();
 			}
 		} else
 			channel.sendMessage(send).queue(null, fail -> {});

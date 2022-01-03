@@ -117,7 +117,7 @@ public class ScriptContextInfo {
 	 * @param content
 	 */
 	public void sendMessage(String content) {
-		if(this.hasSlashCommand)
+		if(this.hasSlashCommand && !this.slashCommand.isAcknowledged())
 			this.slashCommand.reply(content).queue();
 		else
 			this.channel.sendMessage(content).queue();
@@ -127,7 +127,7 @@ public class ScriptContextInfo {
 	 * @param content
 	 */
 	public void sendMessage(int seconds, String content) {
-		if(this.hasSlashCommand)
+		if(this.hasSlashCommand && !this.slashCommand.isAcknowledged())
 			this.slashCommand.reply(content).queue(interaction -> {
 				interaction.deleteOriginal().queueAfter(seconds, TimeUnit.SECONDS);
 			});
@@ -141,7 +141,7 @@ public class ScriptContextInfo {
 	 * @param embed
 	 */
 	public void sendMessageEmbeds(MessageEmbed embed) {
-		if(this.hasSlashCommand)
+		if(this.hasSlashCommand && !this.slashCommand.isAcknowledged())
 			this.slashCommand.replyEmbeds(embed).queue();
 		else
 			this.channel.sendMessageEmbeds(embed).queue();
@@ -151,7 +151,7 @@ public class ScriptContextInfo {
 	 * @param embed
 	 */
 	public void sendMessageEmbeds(int seconds, MessageEmbed embed) {
-		if(this.hasSlashCommand)
+		if(this.hasSlashCommand && !this.slashCommand.isAcknowledged())
 			this.slashCommand.replyEmbeds(embed).queue(interaction -> {
 				interaction.deleteOriginal().queueAfter(seconds, TimeUnit.SECONDS);
 			});

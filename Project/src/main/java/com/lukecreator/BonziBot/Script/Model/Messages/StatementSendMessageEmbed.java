@@ -132,7 +132,7 @@ public class StatementSendMessageEmbed implements ScriptStatement {
 		
 		if(info.hasSlashCommand && !info.slashCommand.isAcknowledged()) {
 			if(channel.getIdLong() == info.slashCommand.getChannel().getIdLong())
-				info.slashCommand.replyEmbeds(eb.build()).queue(null, fail -> {});
+				info.slashCommand.replyEmbeds(eb.build()).complete();
 			else {
 				info.slashCommand.reply(channel.getAsMention()).setEphemeral(true).queue(null, fail -> {});
 				channel.sendMessageEmbeds(eb.build()).queue(null, fail -> {});

@@ -19,6 +19,7 @@ import com.lukecreator.BonziBot.Script.Model.Data.StatementRoleGet;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementRoleGetFromID;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementRoleGetFromName;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementServerGet;
+import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitChannel;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitCompare;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitOwner;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitPermission;
@@ -104,8 +105,9 @@ public class EditorCategories {
 		new StatementDescriptor(StatementLimitRole.class, "Require Role", "Require user to have role to continue past this statement."),
 		new StatementDescriptor(StatementLimitOwner.class, "Require Owner", "Require user to be owner of server to continue past this statement."),
 		new StatementDescriptor(StatementLimitCompare.class, "Require Comparison", "Only continue the code if a comparison passes."),
-	  //new StatementDescriptor(StatementLimitHasData.class, "Require Data", "Require a key of data in storage to be present to continue."), removed due to useless
+	 // new StatementDescriptor(StatementLimitHasData.class, "Require Data", "Require a key of data in storage to be present to continue."), removed due to useless
 		new StatementDescriptor(StatementLimitUser.class, "Require User", "Require the executor to have a name or ID to continue."),
+		new StatementDescriptor(StatementLimitChannel.class, "Require Channel", "Require the script to be run in a specific channel to continue."),
 	};
 	static final StatementDescriptor[] MESSAGING = {
 		new StatementDescriptor(StatementSendMessageText.class, "Send Message (text)", "Send a plain-text message."),
@@ -115,7 +117,7 @@ public class EditorCategories {
 		new StatementDescriptor(StatementAddReaction.class, "Add Reaction", "Add a reaction to the sent message, if any."),
 	};
 	static final StatementDescriptor[] ROLES = {
-		
+			
 	};
 	static final StatementDescriptor[] ACTIONS = {
 		
