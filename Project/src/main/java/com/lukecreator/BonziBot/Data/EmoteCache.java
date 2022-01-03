@@ -23,43 +23,39 @@ public class EmoteCache {
 	}
 	
 	public static String getEmoteNameById(long id) {
-		for(Emote e: collection) {
-			if(e.getIdLong() == id) {
+		for(Emote e: collection)
+			if(e.getIdLong() == id)
 				return e.getName();
-			}
-		}
 		return null;
 	}
 	public static Emote getEmoteById(long id) {
-		for(Emote e: collection) {
-			if(e.getIdLong() == id) {
+		for(Emote e: collection)
+			if(e.getIdLong() == id)
 				return e;
-			}
-		}
+		return null;
+	}
+	public static String mentionEmoteById(long id) {
+		for(Emote e: collection)
+			if(e.getIdLong() == id)
+				return e.getAsMention();
 		return null;
 	}
 	public static String mentionEmoteByName(String name) {
-		for(Emote e: collection) {
-			if(e.getName().equalsIgnoreCase(name)) {
+		for(Emote e: collection)
+			if(e.getName().equalsIgnoreCase(name))
 				return e.getAsMention();
-			}
-		}
 		return null;
 	}
 	public static Emote getEmoteByName(String name) {
-		for(Emote e: collection) {
-			if(e.getName().equalsIgnoreCase(name)) {
+		for(Emote e: collection)
+			if(e.getName().equalsIgnoreCase(name))
 				return e;
-			}
-		}
 		return null;
 	}
 	public static long getEmoteIdByName(String name) {
-		for(Emote e: collection) {
-			if(e.getName().equalsIgnoreCase(name)) {
+		for(Emote e: collection)
+			if(e.getName().equalsIgnoreCase(name))
 				return e.getIdLong();
-			}
-		}
 		return -1;
 	}
 }

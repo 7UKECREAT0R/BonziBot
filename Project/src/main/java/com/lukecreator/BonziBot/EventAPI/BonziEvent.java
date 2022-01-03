@@ -57,7 +57,7 @@ public abstract class BonziEvent implements Serializable {
 		UserAccount account = bb.accounts
 			.getUserAccount(member.getUser());
 		for(EventRequirement requirement: this.requirements) {
-			if(!requirement.qualifies(member, account))
+			if(!requirement.qualifies(member, account, bb))
 				return false;
 		}
 		return true;
@@ -72,7 +72,7 @@ public abstract class BonziEvent implements Serializable {
 		UserAccount account = bb.accounts
 			.getUserAccount(member.getUser());
 		for(EventRequirement requirement: this.requirements) {
-			if(!requirement.qualifies(member, account))
+			if(!requirement.qualifies(member, account, bb))
 				fails.add(requirement);
 		}
 		return fails;

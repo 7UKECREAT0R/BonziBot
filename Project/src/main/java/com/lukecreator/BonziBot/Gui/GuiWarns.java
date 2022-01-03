@@ -7,6 +7,7 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 
+import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.ModernWarn;
@@ -14,6 +15,8 @@ import com.lukecreator.BonziBot.Data.ModernWarnSort;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
 import com.lukecreator.BonziBot.GuiAPI.GuiPaging;
+import com.lukecreator.BonziBot.Logging.LogEntryRemoveWarn;
+import com.lukecreator.BonziBot.Logging.LogEntryRemoveWarn.RemoveWarnDataPacket;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -154,9 +157,19 @@ public class GuiWarns extends GuiPaging {
 				int page = this.currentPage - 1;
 				int pageOffset = page * PER_PAGE;
 				int index = pageOffset + this.removeCursor;
-				this.contents.remove(index);
+				ModernWarn warn = this.contents.remove(index);
 				account.setWarns(this.guildId, this.contents);
 				uam.setUserAccount(this.userId, account);
+				
+				// log it
+				if(warn != null) {
+					LogEntryRemoveWarn log = new LogEntryRemoveWarn();
+					RemoveWarnDataPacket packet = log.new RemoveWarnDataPacket(this.userId, executorId, warn.reason);
+					BonziBot bb = this.bonziReference;
+					log.loadData(packet, bb, entry -> {
+						bb.logging.tryLog(this.parent.guildId, bb, entry, jda);
+					}, null);
+				}
 				
 				if(this.contents.size() > 0) {
 					if(highBound == 1)

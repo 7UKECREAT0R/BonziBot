@@ -18,7 +18,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 
 /**
- * Used in GuiButton for generalizing emotes.
+ * Used for generalizing emotes/emojis into one object.
  */
 public class GenericEmoji implements Serializable {
 	
@@ -100,64 +100,108 @@ public class GenericEmoji implements Serializable {
 		return emoji.startsWith(":") && emoji.endsWith(":") && emoji.length() > 2;
 	}
 	
-	boolean isGeneric = false;
-	boolean isGuild = false;
+	boolean isEmoji = false;
+	boolean isEmote = false;
+	
 	String genericEmoji = null;
-	long guildEmojiId = -1;
+	
+	boolean animated = false;
+	long guildEmoteId = -1;
 	
 	public boolean getIsGeneric() {
-		return this.isGeneric;
+		return this.isEmoji;
 	}
 	public boolean getIsGuild() {
-		return this.isGuild;
+		return this.isEmote;
 	}
 	public String getGenericEmoji() {
 		return this.genericEmoji;
 	}
 	public long getGuildEmojiId() {
-		return this.guildEmojiId;
+		return this.guildEmoteId;
 	}
 	public boolean isEqual(ReactionEmote re) {
 		if(re.isEmote()) {
-			if(this.isGeneric) return false;
-			return re.getIdLong() == this.guildEmojiId;
+			if(this.isEmoji) return false;
+			return re.getIdLong() == this.guildEmoteId;
 		} else {
-			if(this.isGuild) return false;
+			if(this.isEmote) return false;
 			//System.out.println(re.getEmoji() + " vs " + this.genericEmoji);
 			return re.getEmoji().equals(this.genericEmoji);
 		}
 	}
+	/**
+	 * React to this message with the appropriate type.
+	 * @param msg
+	 */
 	public void react(Message msg) {
-		if(isGeneric) {
-			msg.addReaction(genericEmoji).queue();
+		if(this.isEmoji) {
+			msg.addReaction(this.genericEmoji).queue();
 		} else {
-			Emote e = EmoteCache.getEmoteById(guildEmojiId);
+			Emote e = EmoteCache.getEmoteById(this.guildEmoteId);
 			msg.addReaction(e).queue();
 		}
 	}
 	
 	@Override
 	public String toString() {
-		if(this.isGeneric)
+		if(this.isEmoji)
 			return this.genericEmoji;
 		else {
-			Emote e = EmoteCache.getEmoteById(this.guildEmojiId);
+			Emote e = EmoteCache.getEmoteById(this.guildEmoteId);
 			return (e == null) ? "invalid" : e.getAsMention();
 		}
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (this.animated ? 1231 : 1237);
+		result = prime * result + ((this.genericEmoji == null) ? 0 : this.genericEmoji.hashCode());
+		result = prime * result + (int) (this.guildEmoteId ^ (this.guildEmoteId >>> 32));
+		result = prime * result + (this.isEmoji ? 1231 : 1237);
+		result = prime * result + (this.isEmote ? 1231 : 1237);
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (this.getClass() != obj.getClass())
+			return false;
+		GenericEmoji other = (GenericEmoji) obj;
+		if (this.animated != other.animated)
+			return false;
+		if (this.genericEmoji == null) {
+			if (other.genericEmoji != null)
+				return false;
+		} else if (!this.genericEmoji.equals(other.genericEmoji))
+			return false;
+		if (this.guildEmoteId != other.guildEmoteId)
+			return false;
+		if (this.isEmoji != other.isEmoji)
+			return false;
+		if (this.isEmote != other.isEmote)
+			return false;
+		return true;
+	}
 	public Emoji toEmoji() {
-		if(this.isGeneric)
+		if(this.isEmoji)
 			return Emoji.fromUnicode(this.genericEmoji);
-		else return Emoji.fromEmote(EmoteCache.getEmoteById(guildEmojiId));
+		else return Emoji.fromEmote(EmoteCache.getEmoteById(this.guildEmoteId));
 	}
 	
 	private GenericEmoji(String genericEmoji) {
-		this.isGeneric = true;
+		this.isEmoji = true;
 		this.genericEmoji = genericEmoji;
 	}
-	private GenericEmoji(long guildEmojiId) {
-		this.isGuild = true;
-		this.guildEmojiId = guildEmojiId;
+	private GenericEmoji(long guildEmojiId, boolean animated) {
+		this.isEmote = true;
+		this.guildEmoteId = guildEmojiId;
+		this.animated = animated;
 	}
 	
 	/**
@@ -181,25 +225,37 @@ public class GenericEmoji implements Serializable {
 		return fromJDAEmoji(discordEmoji);
 	}
 	
+	public static GenericEmoji fromEmote(long emoteId, boolean animated) {
+		return new GenericEmoji(emoteId, animated);
+	}
 	public static GenericEmoji fromEmote(Emote emote) {
-		return new GenericEmoji(emote.getIdLong());
+		return new GenericEmoji(emote.getIdLong(), emote.isAnimated());
 	}
 	public static GenericEmoji fromJDAEmoji(Emoji emote) {
 		if(emote.isCustom())
-			return new GenericEmoji(emote.getIdLong());
+			return new GenericEmoji(emote.getIdLong(), emote.isAnimated());
 		else
 			return new GenericEmoji(emote.getName());
 	}
 	public static GenericEmoji parseEmote(String emote) {
+		if(emote == null)
+			return null;
+		if(emote.length() == 0)
+			return null;
 		// <:script_system:901183464123039754>
+		// <a:script_system:901183464123039754>
 		String[] parts = emote.split(":");
-		String _id = parts[2];
+		boolean animated = parts[0].equals("<a");
+		String _id = parts[animated ? 3 : 2];
 		_id = _id.substring(0, _id.length() - 1);
-		return new GenericEmoji(Long.parseLong(_id));
+		long id = Long.parseLong(_id);
+		
+		return new GenericEmoji(id, animated);
 	}
 	public static GenericEmoji fromReaction(ReactionEmote emote) {
 		if(emote.isEmote()) {
-			return new GenericEmoji(emote.getEmote().getIdLong());
+			Emote e = emote.getEmote();
+			return new GenericEmoji(e.getIdLong(), e.isAnimated());
 		} else {
 			return new GenericEmoji(emote.getEmoji());
 		}

@@ -25,7 +25,6 @@ public class GuiGuildSettings extends Gui {
 	static List<GuiComplex<GuildSettings>> createOptionList(GuildSettings data, long guildId) {
 		
 		List<GuiComplex<GuildSettings>> list = new ArrayList<GuiComplex<GuildSettings>>();
-		// TODO port settings code
 		
 		// Filter Level
 		/*
@@ -36,7 +35,7 @@ public class GuiGuildSettings extends Gui {
 			}));
 		list.add(new GuiComplex<GuildSettings>(data, new GuiButton(GenericEmoji.fromEmoji("🗒️"), "Custom Filter", GuiButton.ButtonColor.BLUE, "filter")));*/
 			
-		// [TODO] Ill work on porting this some other day but for now I'm running out of time
+		// TODO Ill work on porting this some other day but for now I'm running out of time
 		
 		
 		

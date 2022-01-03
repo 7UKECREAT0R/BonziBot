@@ -27,16 +27,12 @@ public class Achievement implements Serializable {
 		this.rarity = rarity;
 	}
 	
-	public static final Achievement GENEROUS = new Achievement(
-		"Generous", "Upgrade someone's server.", GenericEmoji.fromEmoji("😇"), 1); // TODO
 	public static final Achievement MILESTONER = new Achievement(
-		"Milestoner", "Count a thousandth number in counting game.", GenericEmoji.fromEmoji("⌨️"), 3); // TODO
+		"Milestoner", "Count a thousandth number in counting game.", GenericEmoji.fromEmoji("⌨️"), 3);
 	public static final Achievement LUCKY = new Achievement(
 		"Lucky", "Win a chance command with 1,000 coins or more.", GenericEmoji.fromEmoji("🪙"), 3);
 	public static final Achievement LUCK_MASTER = new Achievement(
 		"Luck Master", "Win a chance command with 10,000 coins or more!", GenericEmoji.fromEmoji("⌨️"), 4);
-	public static final Achievement GOOD_ADMIN = new Achievement(
-		"Good Admin", "Backup a server.", GenericEmoji.fromEmoji("👮"), 1); // TODO
 	public static final Achievement SNAZZY = new Achievement(
 		"Snazzy", "Update your profile!", GenericEmoji.fromEmoji("🤩"), 1);
 	public static final Achievement RPG_PLAYER = new Achievement(

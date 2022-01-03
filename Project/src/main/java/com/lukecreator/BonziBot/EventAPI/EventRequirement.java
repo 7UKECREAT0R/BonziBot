@@ -3,6 +3,7 @@ package com.lukecreator.BonziBot.EventAPI;
 import java.io.Serializable;
 import java.util.List;
 
+import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Data.UserAccount;
 
@@ -83,7 +84,7 @@ public class EventRequirement implements Serializable {
 		return new EventRequirement(RequirementType.ROLEORHIGHER, true, roleId);
 	}
 	
-	public boolean qualifies(Member member, UserAccount account) {
+	public boolean qualifies(Member member, UserAccount account, BonziBot bb) {
 		Guild guild = member.getGuild();
 		Role boosterRole = guild.getBoostRole();
 		
@@ -122,8 +123,13 @@ public class EventRequirement implements Serializable {
 			boolean hasRoleHigher = role.getPosition() >= this.value;
 			return this.inverted ? !hasRoleHigher : hasRoleHigher;
 		case UPGRADER:
-			// TODO
-			break;
+			List<Long> upgraders = bb.upgrades.getUpgradersForGuild(guild);
+			long userId = member.getUser().getIdLong();
+			for(long upgrader: upgraders) {
+				if(upgrader == userId)
+					return this.inverted ? false : true;
+			}
+			return this.inverted ? true : false;
 		default:
 			break;
 		}

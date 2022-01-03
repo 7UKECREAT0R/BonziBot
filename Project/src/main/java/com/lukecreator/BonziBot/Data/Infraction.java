@@ -3,6 +3,8 @@ package com.lukecreator.BonziBot.Data;
 import com.lukecreator.BonziBot.TimeSpan;
 
 /**
+ * OBSOLETE
+ * 
  * Represents an infraction level and an action attached to it.
  * Was going to be used for moderation manuals, but they were removed.
  * @author Lukec

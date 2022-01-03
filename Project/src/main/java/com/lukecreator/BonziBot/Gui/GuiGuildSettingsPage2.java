@@ -39,7 +39,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 	@Override
 	public void initialize(JDA jda) {
 		GuildSettingsManager mgr = this.bonziReference.guildSettings;
-		GuildSettings settings = mgr.getSettings(guildId);
+		GuildSettings settings = mgr.getSettings(this.guildId);
 		this.reinitialize(settings);
 	}
 	public void reinitialize(GuildSettings settings) {
@@ -69,10 +69,10 @@ public class GuiGuildSettingsPage2 extends Gui {
 			BonziUtils.COLOR_BONZI_PURPLE);
 		
 		GuildSettings settings = this.bonziReference
-			.guildSettings.getSettings(guildId);
+			.guildSettings.getSettings(this.guildId);
 		
 		String prefix = settings.getPrefix();
-		menu.addField("↪️ Prefix: `" + prefix + "`", "Set the prefix I use in this server.", false);
+		menu.addField("↪️ Prefix: `" + prefix + "`", "Set the alternate prefix I use in this server besides `/`.", false);
 		
 		Rules rules = settings.getRules();
 		menu.addField("📖 Rules", rules.toString() + "\nEdit/Add rules to your server. Automatically updates your rules message!", false);
@@ -121,7 +121,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		GuildSettingsManager gsm = this
 			.bonziReference.guildSettings;
-		GuildSettings settings = gsm.getSettings(guildId);
+		GuildSettings settings = gsm.getSettings(this.guildId);
 		
 		if(actionId.equals("lastpage")) {
 			Gui next = new GuiGuildSettingsPage1(this.guildId, this.guildName);
@@ -132,8 +132,8 @@ public class GuiGuildSettingsPage2 extends Gui {
 		if(actionId.equals("prefix")) {
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
 			MessageChannel mc = this.parent.getChannel(jda);
-			mc.sendMessageEmbeds(BonziUtils.quickEmbed("Setting Prefix...",
-				"Send the new prefix here (max " + Constants.MAX_PREFIX_LENGTH + " characters):", Color.gray).build()).queue(sent -> {
+			mc.sendMessageEmbeds(BonziUtils.quickEmbed("Setting Alternate Prefix...",
+				"Send the new alt-prefix here (max " + Constants.MAX_PREFIX_LENGTH + " characters):", Color.gray).build()).queue(sent -> {
 					long sentId = sent.getIdLong();
 					ewm.waitForResponse(this.parent.ownerId, msg -> {
 						mc.deleteMessageById(sentId).queue();
@@ -142,11 +142,10 @@ public class GuiGuildSettingsPage2 extends Gui {
 						if(nPrefix.length() > Constants.MAX_PREFIX_LENGTH)
 							nPrefix = nPrefix.substring(0, 32);
 						settings.setPrefix(nPrefix.trim());
-						gsm.setSettings(guildId, settings);
+						gsm.setSettings(this.guildId, settings);
 						this.parent.redrawMessage(jda);
 						mc.sendMessageEmbeds(BonziUtils.successEmbedIncomplete
-							("Prefix set!", "The new prefix will now be:\n`" + nPrefix + "`")
-							.setFooter("Forget the prefix? Type b:stuck!").build()).queue();
+							("Alt-prefix set!", "It'll will now be:\n`" + nPrefix + "`").build()).queue();
 					});
 				});
 			return;
@@ -163,13 +162,13 @@ public class GuiGuildSettingsPage2 extends Gui {
 		}
 		if(actionId.equals("quickdraw")) {
 			settings.quickDraw = !settings.quickDraw;
-			gsm.setSettings(guildId, settings);
+			gsm.setSettings(this.guildId, settings);
 			
 			QuickDrawManager qdm = this.bonziReference.quickDraw;
 			if(settings.quickDraw)
-				qdm.tryOptGuild(guildId);
+				qdm.tryOptGuild(this.guildId);
 			else
-				qdm.tryUnoptGuild(guildId);
+				qdm.tryUnoptGuild(this.guildId);
 			
 			this.reinitialize(settings);
 			this.parent.redrawMessage(jda);
@@ -179,7 +178,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 			if(settings.banAppeals) {
 				settings.banAppeals = false;
 				settings.banAppealsChannel = 0l;
-				gsm.setSettings(guildId, settings);
+				gsm.setSettings(this.guildId, settings);
 				this.reinitialize(settings);
 				this.parent.redrawMessage(jda);
 			} else {
@@ -193,7 +192,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 						TextChannel channel = (TextChannel)object;
 						settings.banAppeals = true;
 						settings.banAppealsChannel = channel.getIdLong();
-						gsm.setSettings(guildId, settings);
+						gsm.setSettings(this.guildId, settings);
 						this.reinitialize(settings);
 						this.parent.redrawMessage(jda);
 						BonziUtils.sendTempMessage(mc, BonziUtils.successEmbed("Users are now able to appeal bans!"), 4);
@@ -206,7 +205,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 			if(settings.banMessage) {
 				settings.banMessage = false;
 				settings.banMessageString = null;
-				gsm.setSettings(guildId, settings);
+				gsm.setSettings(this.guildId, settings);
 				this.reinitialize(settings);
 				this.parent.redrawMessage(jda);
 			} else {
@@ -223,7 +222,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 						sent.delete().queue();
 						settings.banMessage = true;
 						settings.banMessageString = msg.getContentRaw();
-						gsm.setSettings(guildId, settings);
+						gsm.setSettings(this.guildId, settings);
 						this.reinitialize(settings);
 						this.parent.redrawMessage(jda);
 						BonziUtils.sendTempMessage(mc, BonziUtils.successEmbed("Users will now be messaged upon being banned."), 4);
@@ -234,7 +233,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 		}
 		if(actionId.equals("tokenscan")) {
 			settings.tokenScanning = !settings.tokenScanning;
-			gsm.setSettings(guildId, settings);
+			gsm.setSettings(this.guildId, settings);
 			this.reinitialize(settings);
 			this.parent.redrawMessage(jda);
 			return;

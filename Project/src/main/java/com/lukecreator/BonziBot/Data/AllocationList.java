@@ -2,6 +2,7 @@ package com.lukecreator.BonziBot.Data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 /**
  * A list with a limited size and will eliminate
@@ -17,6 +18,13 @@ public class AllocationList<T> implements Serializable {
 	public AllocationList(int size) {
 		this.list = new ArrayList<T>(size);
 		this.size = size;
+	}
+	public T search(Function<T, Boolean> predicate) {
+		for(T t: list) {
+			if(predicate.apply(t))
+				return t;
+		}
+		return null;
 	}
 	
 	/**

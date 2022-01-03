@@ -24,16 +24,14 @@ import com.lukecreator.BonziBot.Commands.TodoListCommand;
  */
 public enum PremiumItem {
 	
-	// TODO link the actual premium commands.
-	
 	// classic
 	NICK_ALL(		NickAllCommand.class, 		2000, 	true),
 	RAINBOW_ROLE(	JokeCommand.class, 			5000, 	false), // disabled due to TOS
-	SUPER_PLAY(		LotteryCommand.class, 		3000, 	true),
+	SUPER_PLAY(		LotteryCommand.class, 		3000, 	false), // annoying and hard to impl
 	EXPOSE(			ExposeCommand.class, 		1000,	true),
 	PROFILE_PIC(	ProfilePicCommand.class,	500, 	true),
 	TROLL(			SlotsCommand.class, 		10000, 	false), // not viable
-	COMMENT(		GuildSettingsCommand.class, 1500, 	true),
+	COMMENT(		GuildSettingsCommand.class, 1500, 	false), // this is dumb
 	
 	// newer
 	CALCULATOR(		CalculatorCommand.class,	750,	true),
@@ -71,7 +69,8 @@ public enum PremiumItem {
 		if(cachedPremiumPrice == -1) {
 			int p = 0;
 			for(PremiumItem item: values())
-				p += item.price;
+				if(item.enabled)
+					p += item.price;
 			cachedPremiumPrice = (int) (p * 0.75);
 		}
 		return cachedPremiumPrice;
