@@ -30,6 +30,7 @@ import com.lukecreator.BonziBot.Data.AfkData;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.Modifier;
+import com.lukecreator.BonziBot.Data.ReactionRole;
 import com.lukecreator.BonziBot.Data.Rules;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
@@ -158,7 +159,6 @@ public class BonziUtils {
 			char c = chars[i++];
 			escape--;
 			
-			// if backslash, try to escape the next character
 			if(c == '\\') {
 				escape = 2;
 				continue;
@@ -1033,12 +1033,19 @@ public class BonziUtils {
 		return in.addActionRows(rows);
 	}
 	public static void sendGui(CommandExecutionInfo info, Gui gui) {
-		if(info.isSlashCommand && !info.slashCommand.isAcknowledged())
-			info.slashCommand.reply(":envelope_with_arrow: `Opening GUI...`").setEphemeral(false).queue();
+		if(info.isSlashCommand && !info.slashCommand.isAcknowledged()) {
+			info.slashCommand.reply(":envelope_with_arrow: `Opening GUI...`")
+				.setEphemeral(false).queue(success -> sendGuiRaw(info, gui));
+			return;
+		}
 		
+		sendGuiRaw(info, gui);
+	}
+	private static void sendGuiRaw(CommandExecutionInfo info, Gui gui) {
 		if(info.isGuildMessage)
 			info.bonzi.guis.sendAndCreateGui(info.tChannel, info.executor, gui, info.bonzi);
-		else info.bonzi.guis.sendAndCreateGui(info.pChannel, gui, info.bonzi);
+		else
+			info.bonzi.guis.sendAndCreateGui(info.pChannel, gui, info.bonzi);
 	}
 	public static void sendTempMessage(MessageChannel c, CharSequence cs, int seconds) {
 		c.sendMessage(cs).queue(msg -> {
@@ -1097,8 +1104,8 @@ public class BonziUtils {
 	public static void sendUserNeedsPerms(Command cmd, CommandExecutionInfo info) {
 		Permission[] perms = cmd.userRequiredPermissions;
 		String msg = perms.length > 1 ?
-			"You need the following permissions to execute this command:":
-			"You need the following permission to execute this command:";
+			"whoah bro you need these permissions:":
+			"whoah bro hold up, you need this permission:";
 		StringBuilder sb = new StringBuilder();
 		for(Permission perm: cmd.userRequiredPermissions) {
 			String ps = perm.getName();
@@ -1107,7 +1114,7 @@ public class BonziUtils {
 		sb = sb.deleteCharAt(sb.length() - 1);
 		String desc = sb.toString();
 		
-		EmbedBuilder send = quickEmbed(msg, desc, Color.orange);
+		EmbedBuilder send = quickEmbed(msg, desc, Color.red);
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(send.build()).queue();
 		else
@@ -1122,8 +1129,8 @@ public class BonziUtils {
 			info.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 	public static void sendNotPurchased(Command cmd, CommandExecutionInfo info, String prefix) {
-		EmbedBuilder eb = quickEmbed("You don't own this command yet!",
-				"Check out the `" + prefix + "shop` to buy it.", Color.red);
+		EmbedBuilder eb = quickEmbed("you don't own this command!",
+				"check out the `" + prefix + "shop` to buy it", Color.red);
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(eb.build()).queue();
 		else
@@ -1131,8 +1138,8 @@ public class BonziUtils {
 	}
 	public static void sendAdminOnly(Command cmd, CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed(
-			"This command is reserved for admins.",
-			"Admins are usually developers of BonziBot or very well known contributors.",
+			"this command is reserved for admins",
+			"admins are usually developers of BonziBot or well known contributors",
 			Color.orange);
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(eb.build()).queue();
@@ -1145,12 +1152,12 @@ public class BonziUtils {
 		long timeLeftMs = cdm.getUserCooldown(cmd, userId);
 		String msg;
 		if(timeLeftMs < 100) { // or -1
-			msg = "Command is no longer on cooldown.";
+			msg = "command is no longer on cooldown";
 		} else {
-			msg = "Command is on cooldown!";
+			msg = "command is on cooldown!";
 		}
 		String ts = getShortTimeStringMs(timeLeftMs);
-		String desc = ts + " Remaining";
+		String desc = ts + " remaining";
 		EmbedBuilder embed = quickEmbed(msg, desc, Color.yellow);
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(embed.build()).queue();
@@ -1159,15 +1166,15 @@ public class BonziUtils {
 		return;
 	}
 	public static void sendDoesntWorkDms(Command cmd, CommandExecutionInfo info) {
-		EmbedBuilder eb = quickEmbed("This command doesn't work in DMs!",
-				"Try running the command in a server instead!", Color.orange);
+		EmbedBuilder eb = quickEmbed("this command doesnt work in DMs!",
+				"protip: try running the command in a server", Color.orange);
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(eb.build()).queue();
 		else
 			info.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 	public static void sendCommandDisabled(Command cmd, CommandExecutionInfo info) {
-		MessageEmbed me = failureEmbed("This command is disabled here.");
+		MessageEmbed me = failureEmbed("this command is disabled here.");
 		if(info.isSlashCommand)
 			info.slashCommand.replyEmbeds(me).queue();
 		else
@@ -1254,6 +1261,20 @@ public class BonziUtils {
 			}
 		}
 		eb.appendDescription("\n[Jump to Message](" + msg.getJumpUrl() + ")");
+		return eb.build();
+	}
+	public static MessageEmbed createReactionRolesMenu(String text, ReactionRole[] roles) {
+		EmbedBuilder eb = new EmbedBuilder();
+		eb.setColor(BonziUtils.COLOR_BONZI_PURPLE);
+		
+		if(text.length() <= MessageEmbed.TITLE_MAX_LENGTH)
+			eb.setTitle(text);
+		else
+			eb.setDescription(text);
+		
+		String fieldDesc = stringJoinArbitrary("\n", roles);
+		eb.addField("Roles:", fieldDesc, false);
+		
 		return eb.build();
 	}
 	

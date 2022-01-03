@@ -1,6 +1,6 @@
 package com.lukecreator.BonziBot;
 
-import javax.security.auth.login.LoginException;
+import java.security.GeneralSecurityException;
 
 public class App {
 	
@@ -20,9 +20,12 @@ public class App {
 		Premium // Gives all special commands in a single package + all bonzibot premium perks. Can be bought with irl money, or coins.
 	}
 	
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 	
-	public static void main(String[] args) throws LoginException, InterruptedException {
+	public static void main(String[] args) throws InterruptedException, GeneralSecurityException {
+		String tmp = System.getProperty("java.io.tmpdir");
+		InternalLogger.print("java.io.tmpdir: " + tmp);
+		
 		new BonziBot(DEBUG).start();
 	}
 }

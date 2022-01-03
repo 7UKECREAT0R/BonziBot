@@ -10,6 +10,21 @@ public class TimeSpan implements Serializable {
 	public transient static final Pattern SINGLE_LETTER = Pattern.compile(REGEX_SINGLE_LETTER);
 	public transient static final TimeSpan ZERO = new TimeSpan(0);
 	
+	public enum TimestampStyle {
+		SHORT_TIME("t"),
+		LONG_TIME("T"),
+		SHORT_DATE("d"),
+		LONG_DATE("D"),
+		SHORT_DATE_TIME("f"),
+		LONG_DATE_TIME("F"),
+		RELATIVE("R");
+		
+		final String style;
+		TimestampStyle(String style) {
+			this.style = style;
+		}
+	}
+	
 	public final long ms;
 	private TimeSpan(long ms) {
 		this.ms = ms;
@@ -93,11 +108,39 @@ public class TimeSpan implements Serializable {
 		return getHours() / 24;
 	}
 	
+	/**
+	 * Convert this TimeSpan to a short string.
+	 * 2h, 10m, 50s
+	 * @return
+	 */
 	public String toShortString() {
 		return BonziUtils.getShortTimeStringMs(ms);
 	}
+	/**
+	 * Convert this TimeSpan to a long string.
+	 * 2 hours, 10 minutes, 50 seconds
+	 * @return
+	 */
 	public String toLongString() {
 		return BonziUtils.getLongTimeStringMs(ms);
+	}
+	/**
+	 * Convert this TimeSpan to a markdown timestamp offset by the current time.
+	 * For example, if this TimeSpan represented an hour, it would point to the
+	 * current time + an hour.
+	 * @return
+	 */
+	public String toTimeMarkdown(TimestampStyle format) {
+		long time = this.ms + System.currentTimeMillis();
+		return "<t:" + time + ':' + format.style + '>';
+	}
+	/**
+	 * Shorthand for {@link #toTimeMarkdown(TimestampStyle)}.
+	 * Uses <code>TimestampStyle.RELATIVE</code> for its style.
+	 * @return
+	 */
+	public String toTimeMarkdown() {
+		return this.toTimeMarkdown(TimestampStyle.RELATIVE);
 	}
 	@Override
 	public String toString() {

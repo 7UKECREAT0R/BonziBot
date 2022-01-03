@@ -2,6 +2,7 @@ package com.lukecreator.BonziBot;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,11 @@ import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.reflections.Reflections;
 
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.youtube.YouTube;
 import com.lukecreator.BonziBot.InternalLogger.Severity;
 import com.lukecreator.BonziBot.Async.AutoRepeat;
 import com.lukecreator.BonziBot.CommandAPI.ChoiceArg;
@@ -22,6 +28,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArg;
 import com.lukecreator.BonziBot.CommandAPI.CommandArg.ArgType;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
 import com.lukecreator.BonziBot.CommandAPI.EnumArg;
+import com.lukecreator.BonziBot.Data.AllocationList;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.EmoteCache;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
@@ -41,6 +48,18 @@ import com.lukecreator.BonziBot.Handling.MessageHandler;
 import com.lukecreator.BonziBot.Handling.PicturesOnlyMessageHandler;
 import com.lukecreator.BonziBot.Handling.PremiumOnlyMessageHandler;
 import com.lukecreator.BonziBot.Handling.RPGMessageHandler;
+import com.lukecreator.BonziBot.Logging.LogButtons;
+import com.lukecreator.BonziBot.Logging.LogEntry;
+import com.lukecreator.BonziBot.Logging.LogEntryBan;
+import com.lukecreator.BonziBot.Logging.LogEntryDeletedMessage;
+import com.lukecreator.BonziBot.Logging.LogEntryNicknameChange;
+import com.lukecreator.BonziBot.Logging.LogEntryTextChannelCreate;
+import com.lukecreator.BonziBot.Logging.LogEntryTextChannelRemove;
+import com.lukecreator.BonziBot.Logging.LogEntryUnban;
+import com.lukecreator.BonziBot.Logging.LogEntryUserJoined;
+import com.lukecreator.BonziBot.Logging.LogEntryUserLeft;
+import com.lukecreator.BonziBot.Logging.LogEntryVoiceChannelCreate;
+import com.lukecreator.BonziBot.Logging.LogEntryVoiceChannelRemove;
 import com.lukecreator.BonziBot.Managers.AppealsManager;
 import com.lukecreator.BonziBot.Managers.BanManager;
 import com.lukecreator.BonziBot.Managers.CooldownManager;
@@ -52,9 +71,11 @@ import com.lukecreator.BonziBot.Managers.GuiManager;
 import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 import com.lukecreator.BonziBot.Managers.LoggingManager;
 import com.lukecreator.BonziBot.Managers.LotteryManager;
+import com.lukecreator.BonziBot.Managers.MusicManager;
 import com.lukecreator.BonziBot.Managers.MuteManager;
 import com.lukecreator.BonziBot.Managers.QuickDrawManager;
 import com.lukecreator.BonziBot.Managers.ReactionManager;
+import com.lukecreator.BonziBot.Managers.ReactionRoleManager;
 import com.lukecreator.BonziBot.Managers.RepManager;
 import com.lukecreator.BonziBot.Managers.RewardManager;
 import com.lukecreator.BonziBot.Managers.ScriptCache;
@@ -64,6 +85,7 @@ import com.lukecreator.BonziBot.Managers.TagManager;
 import com.lukecreator.BonziBot.Managers.TodoListManager;
 import com.lukecreator.BonziBot.Managers.UpgradeManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
+import com.lukecreator.BonziBot.Music.MusicQueue;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 import com.lukecreator.BonziBot.Script.Model.InvocationMethod;
 import com.lukecreator.BonziBot.Script.Model.InvocationMethod.Implementation;
@@ -72,6 +94,9 @@ import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptPackage;
 import com.lukecreator.BonziBot.Wrappers.RedditClient;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -81,13 +106,17 @@ import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogChange;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.audit.AuditLogKey;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
 import net.dv8tion.jda.api.events.channel.text.update.TextChannelUpdateTopicEvent;
@@ -100,6 +129,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.events.guild.update.GuildUpdateNameEvent;
+import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
@@ -135,6 +165,7 @@ public class BonziBot extends ListenerAdapter {
 	List<IStorableData> storableData = new ArrayList<IStorableData>();
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
 	public GuildSettingsManager guildSettings = new GuildSettingsManager();
+	public ReactionRoleManager reactionRoles = new ReactionRoleManager();
 	public EventWaiterManager eventWaiter = new EventWaiterManager();
 	public SpecialPeopleManager special = new SpecialPeopleManager();
 	public UserAccountManager accounts = new UserAccountManager();
@@ -152,19 +183,23 @@ public class BonziBot extends ListenerAdapter {
 	public ScriptManager scripts = new ScriptManager();
 	public RedditClient reddit = new RedditClient();
 	public RepManager reputation = new RepManager();
+	public MusicManager music = new MusicManager();
 	public MuteManager mutes = new MuteManager();
 	public GridManager grid = new GridManager();
 	public BanManager bans = new BanManager();
 	public GuiManager guis = new GuiManager();
 	public TagManager tags = new TagManager();
 	
+	public JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+	public AudioPlayerManager audioPlayerManager = new DefaultAudioPlayerManager();
 	Reflections reflectionsInstance = new Reflections("com.lukecreator.BonziBot");
-	public CommandSystem commands = new CommandSystem(reflectionsInstance);
+	public CommandSystem commands = new CommandSystem(this.reflectionsInstance);
 	public GitHub github;
 	public SteamCache steam;
+	public YouTube youtube;
 	
 	public BonziBot(boolean test) throws LoginException {
-		builder = JDABuilder.create(
+		this.builder = JDABuilder.create(
 			GatewayIntent.GUILD_BANS,
 			GatewayIntent.GUILD_VOICE_STATES,
 			GatewayIntent.GUILD_MEMBERS,
@@ -181,25 +216,25 @@ public class BonziBot extends ListenerAdapter {
 		String token = test ?
 			Constants.BOT_TOKEN_TEST :
 			Constants.BOT_TOKEN;
-		builder.setToken(token).addEventListeners(this);
+		this.builder.setToken(token);
 	}
 	
-	public void start() throws InterruptedException, LoginException {
-		setupMessageHandlers();
-		setupStorableData();
-		loadData();
-		JDA bot = setupBot();
-		setupExecutors(bot);
-		loadFonts();
+	public void start() throws InterruptedException, GeneralSecurityException {
+		this.setupMessageHandlers();
+		this.setupStorableData();
+		this.loadData();
+		JDA bot = this.setupBot();
+		this.setupExecutors(bot);
+		this.loadFonts();
 		
 		if(this.test)
-			slashCommands(bot);
+			this.slashCommands(bot);
 		
-		postSetup(bot);
+		this.postSetup(bot);
 	}
 	public void slashCommands(JDA jda) {
 		CommandListUpdateAction action = jda.updateCommands();
-		List<Command> allCommands = commands.getRegisteredCommands();
+		List<Command> allCommands = this.commands.getRegisteredCommands();
 		
 		for(Command command: allCommands) {
 			if(!command.isRegisterable())
@@ -262,37 +297,39 @@ public class BonziBot extends ListenerAdapter {
 	}
 	void setupStorableData() {
 		this.storableData.clear();
-		this.storableData.add(accounts);
-		this.storableData.add(guildSettings);
-		this.storableData.add(tags);
-		this.storableData.add(upgrades);
-		this.storableData.add(lottery);
-		this.storableData.add(rewards);
-		this.storableData.add(logging);
-		this.storableData.add(reputation);
-		this.storableData.add(quickDraw);
-		this.storableData.add(appeals);
-		this.storableData.add(mutes);
-		this.storableData.add(bans);
-		this.storableData.add(todolists);
-		this.storableData.add(grid);
-		this.storableData.add(scripts);
-		this.storableData.add(counting);
+		this.storableData.add(this.accounts);
+		this.storableData.add(this.guildSettings);
+		this.storableData.add(this.tags);
+		this.storableData.add(this.upgrades);
+		this.storableData.add(this.lottery);
+		this.storableData.add(this.rewards);
+		this.storableData.add(this.logging);
+		this.storableData.add(this.reputation);
+		this.storableData.add(this.quickDraw);
+		this.storableData.add(this.appeals);
+		this.storableData.add(this.mutes);
+		this.storableData.add(this.bans);
+		this.storableData.add(this.todolists);
+		this.storableData.add(this.grid);
+		this.storableData.add(this.scripts);
+		this.storableData.add(this.counting);
+		this.storableData.add(this.reactionRoles);
 		
 		int len = this.storableData.size();
-		InternalLogger.print("Populated storable data with " + len + " elements.");
+		InternalLogger.print("registered " + len + " elements of IStorableData");
 	}
 	JDA setupBot() throws InterruptedException, LoginException {
-		JDA bot = builder.build();
+		JDA bot = this.builder.build();
 		InternalLogger.print("Starting bot...");
 		bot.awaitReady();
-		InternalLogger.print("Bot is ready!");
+		bot.addEventListener(this);
+		InternalLogger.print("Bot is ready! Events enabled.");
 		return bot;
 	}
 	void setupExecutors(JDA jda) {
 		
 		Set<Class<? extends AutoRepeat>> toBeExecuted =
-			reflectionsInstance.getSubTypesOf(AutoRepeat.class);
+			this.reflectionsInstance.getSubTypesOf(AutoRepeat.class);
 		
 		int count = toBeExecuted.size(), i = 0;
 		InternalLogger.print("Located " + count + " executors. Starting...");
@@ -335,16 +372,19 @@ public class BonziBot extends ListenerAdapter {
 		FontLoader.registerFont(FontLoader.EMOJI_FONT_FILE);
 		FontLoader.registerFont(FontLoader.SEGOE_FONT_FILE);
 	}
-	void postSetup(JDA jda) {
+	void postSetup(JDA jda) throws GeneralSecurityException {
 		
 		// anything else that needs to be done
 		
 		try {
+			// setup audio
+			AudioSourceManagers.registerRemoteSources(this.audioPlayerManager);
+			
 			// compile regex patterns
 			Constants.compileRegex();
 			
 			// initialize command cooldowns system
-			cooldowns.initialize(commands);
+			this.cooldowns.initialize(this.commands);
 			
 			// download the stuff for the username generator
 			UsernameGenerator.init();
@@ -359,15 +399,26 @@ public class BonziBot extends ListenerAdapter {
 			// download and parse emoji shortcodes
 			GenericEmoji.initializeShortcode();
 			
-			// download and parse steam titles
-			steam = new SteamCache();
-			steam.fetchTitles();
+			// setup youtube api
+			InternalLogger.print("Setting up YouTube API...");
+			NetHttpTransport httpTransport = 
+				GoogleNetHttpTransport.newTrustedTransport();
+			this.youtube = new YouTube.Builder
+				(httpTransport, this.jsonFactory, null)
+				.setApplicationName(Constants.YTAPI_APP_NAME)
+				.build();
+			InternalLogger.print("Connected to YouTube: " + this.youtube.getApplicationName());
 			
+			// connect to github
 			InternalLogger.print("Connecting to GitHub...");
-			github = new GitHubBuilder()
+			this.github = new GitHubBuilder()
 				.withOAuthToken(Constants.GITHUB_TOKEN)
 				.build();
-			InternalLogger.print("Connected");
+			InternalLogger.print("Connected to GitHub: " + this.github.getApiUrl());
+			
+			// download and parse steam titles
+			this.steam = new SteamCache();
+			this.steam.fetchTitles();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -378,7 +429,7 @@ public class BonziBot extends ListenerAdapter {
 			InternalLogger.print("Cancelled due to backup in progress...");
 			return;
 		}
-		for(IStorableData data: storableData) {
+		for(IStorableData data: this.storableData) {
 			data.saveData();
 		}
 		InternalLogger.print("Saved data!");
@@ -390,7 +441,7 @@ public class BonziBot extends ListenerAdapter {
 			return;
 		}
 		DataSerializer.backup = true;
-		for(IStorableData data: storableData) {
+		for(IStorableData data: this.storableData) {
 			data.saveData();
 		}
 		InternalLogger.print("Saved data (BACKUP)!");
@@ -398,9 +449,9 @@ public class BonziBot extends ListenerAdapter {
 	}
 	public void loadData() {
 		int progress = 0;
-		int total = storableData.size();
+		int total = this.storableData.size();
 		
-		for(IStorableData data: storableData) {
+		for(IStorableData data: this.storableData) {
 			InternalLogger.print("Loading " + data.getClass().getName() + "... [" + ++progress + "/" + total + "]");
 			try {
 				data.loadData();
@@ -412,10 +463,10 @@ public class BonziBot extends ListenerAdapter {
 	}
 	public void loadDataBackup() {
 		int progress = 0;
-		int total = storableData.size();
+		int total = this.storableData.size();
 		
 		DataSerializer.backup = true;
-		for(IStorableData data: storableData) {
+		for(IStorableData data: this.storableData) {
 			InternalLogger.print("Loading backup For " + data.getClass().getName() + "... [" + ++progress + "/" + total + "]");
 			try {
 				data.loadData();
@@ -453,6 +504,51 @@ public class BonziBot extends ListenerAdapter {
 			return;
 		}
 		
+		MessageChannel channel = event.getChannel();
+		
+		if(channel.getType() == ChannelType.TEXT) {
+			Guild guild = event.getGuild();
+			GuildSettings settings = this.guildSettings.getSettings(guild);
+			if(settings.loggingEnabled && channel.getIdLong() == settings.loggingChannelCached) {
+				// yes this is probably a logging button
+				// unless someone decides the logging channel is the best place to use a gui lmao
+				long msgId = event.getMessageIdLong();
+				AllocationList<LogEntry> entries = this.logging.getAllocation(guild);
+				
+				LogEntry entry = entries.search(e -> {
+					return e.messageId == msgId;
+				});
+				
+				if(entry != null) {
+					String actionId = event.getComponentId();
+					
+					boolean wasLoggingButton = true;
+					if(actionId.equals(LogButtons.UNDO.protocol)) {
+						event.deferEdit().queue();
+						entry.performActionUndo(this, event);
+					} else if(actionId.equals(LogButtons.WARN.protocol)) {
+						event.deferEdit().queue();
+						entry.performActionWarn(this, event);
+					} else if(actionId.equals(LogButtons.MUTE.protocol)) {
+						event.deferEdit().queue();
+						entry.performActionMute(this, event);
+					} else if(actionId.equals(LogButtons.KICK.protocol)) {
+						event.deferEdit().queue();
+						entry.performActionKick(this, event);
+					} else if(actionId.equals(LogButtons.BAN.protocol)) {
+						event.deferEdit().queue();
+						entry.performActionBan(this, event);
+					} else
+						wasLoggingButton = false;
+					
+					if(wasLoggingButton) {
+						event.editButton(event.getButton().asDisabled()).queue();
+						return;
+					}
+				}
+			}
+		}
+		
 		if(this.eventWaiter.onClick(event))
 			return; // acknowledged already
 		this.guis.onButtonClick(event);
@@ -461,7 +557,11 @@ public class BonziBot extends ListenerAdapter {
 	public void onSelectionMenu(SelectionMenuEvent event) {
 		this.guis.onSelectionMenu(event);
 	}
+	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
+		if(e.getAuthor().isBot())
+			return;
+		
 		MessageChannel channel = e.getChannel();
 		Modifier[] modifiers = BonziUtils.getChannelModifiers(channel);
 		
@@ -474,6 +574,7 @@ public class BonziBot extends ListenerAdapter {
 			return;
 		}
 	}
+	@Override
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
 		MessageChannel channel = e.getChannel();
 		
@@ -483,9 +584,11 @@ public class BonziBot extends ListenerAdapter {
 			handler.handlePrivateMessage(this, e);
 		}
 	}
+	@Override
 	public void onGuildJoin(GuildJoinEvent e) {
 		// ahhhHH
 	}
+	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent e) {
 		
 		long guildId = e.getGuild().getIdLong();
@@ -513,11 +616,16 @@ public class BonziBot extends ListenerAdapter {
 			}
 		}
 		
+		LogEntryUserJoined ban = new LogEntryUserJoined();
+		ban.loadData(e, this, entry -> {
+			this.logging.tryLog(e.getGuild(), this, entry);
+		}, null);
+		
 		// Give join role and join message (if any).
 		this.guildSettings.memberJoined(this, e);
 	}
+	@Override
 	public void onGuildMemberRemove(GuildMemberRemoveEvent e) {
-		
 		long guildId = e.getGuild().getIdLong();
 		if(ScriptCache.shouldCheckJoinScripts(guildId)) {
 			List<ScriptPackage> packages = this.scripts.getPackages(guildId);
@@ -543,52 +651,62 @@ public class BonziBot extends ListenerAdapter {
 			}
 		}
 		
+		LogEntryUserLeft ban = new LogEntryUserLeft();
+		ban.loadData(e, this, entry -> {
+			this.logging.tryLog(e.getGuild(), this, entry);
+		}, null);
+		
 		// Send a leave message.
 		this.guildSettings.memberLeft(this, e);
 	}
+	@Override
 	public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent e) {
-		// Send a message to and update GUIs. (outdated)
-		//guis.onReactionAdd(e);
+		// reaction roles
+		this.reactionRoles.handleEvent(e, this);
 		
-		// General reaction manager. (polls, pins, etc...)
-		reactions.reactionAddGuild(e, this);
+		// general reaction manager (polls, pins, etc...)
+		this.reactions.reactionAddGuild(e, this);
 		
-		// Continue any reaction event waiters.
-		eventWaiter.onReaction(new GenericReactionEvent(e));
+		// continue any reaction event waiters (changed to buttons)
+		this.eventWaiter.onReaction(new GenericReactionEvent(e));
 		
-		// Quick draw minigame
-		quickDraw.reactionReceived(e.getUser(), e, this);
+		// quick draw minigame
+		this.quickDraw.reactionReceived(e.getUser(), e, this);
 	}
+	@Override
 	public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent e) {
 		// Send a message to and update GUIs. (UNUSED)
-		guis.onReactionRemove(e);
+		this.guis.onReactionRemove(e);
+		
+		this.reactionRoles.handleEvent(e, this);
 		
 		// General reaction manager. (polls, etc...)
-		reactions.reactionRemoveGuild(e, this);
+		this.reactions.reactionRemoveGuild(e, this);
 	}
+	@Override
 	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent e) {
 		// Send a message to and update GUIs. (outdated)
 		//guis.onReactionAdd(e);
 		
 		// General reaction manager.
-		reactions.reactionAddPrivate(e, this);
+		this.reactions.reactionAddPrivate(e, this);
 		
 		// Continue any reaction event waiters.
-		eventWaiter.onReaction(new GenericReactionEvent(e));
+		this.eventWaiter.onReaction(new GenericReactionEvent(e));
 	}
+	@Override
 	public void onPrivateMessageReactionRemove(PrivateMessageReactionRemoveEvent e) {
 		// Send a message to and update GUIs. (UNUSED)
-		guis.onReactionRemove(e);
+		this.guis.onReactionRemove(e);
 		
 		// General reaction manager.
-		reactions.reactionRemovePrivate(e, this);
+		this.reactions.reactionRemovePrivate(e, this);
 	}
+	@Override
 	public void onGuildVoiceUpdate(GuildVoiceUpdateEvent e) {
 		FunnyChannelManager.funnyChannels(this, e);
-		
-		// Leave the music channel if no more users are in it.
-		
 	}
+	@Override
 	public void onTextChannelUpdateTopic(TextChannelUpdateTopicEvent e) {
 		String topic = e.getNewTopic();
 		Modifier[] mods = BonziUtils.getModifiers(topic);
@@ -616,6 +734,7 @@ public class BonziBot extends ListenerAdapter {
 			}
 		}
 	}
+	@Override
 	public void onGuildUpdateName(GuildUpdateNameEvent e) {
 		// Update the rule message, if any.
 		String name = e.getNewName();
@@ -630,9 +749,32 @@ public class BonziBot extends ListenerAdapter {
 			edit.editMessageEmbeds(newRules).queue();
 		}, null); // deletion is already handled
 	}
+	@Override
+	public void onGenericGuildVoice(GenericGuildVoiceEvent e) {
+    	Guild guild = e.getGuild();
+    	Member self = guild.getSelfMember();
+    	GuildVoiceState state = self.getVoiceState();
+    	
+    	if(!state.inVoiceChannel())
+    		return;
+    	
+    	VoiceChannel channel = state.getChannel();
+    	List<Member> session = channel.getMembers();
+    	int usersInVoice = session.size();
+    	
+    	if(usersInVoice > 1)
+    		return;
+    	
+    	// only bonzi is left
+    	guild.getAudioManager().closeAudioConnection();
+    	MusicQueue queue = this.music.getQueue(guild, this.audioPlayerManager);
+    	queue.stop();
+    }
 	
 	// Logging Events
 	public static HashMap<Long, List<Long>> banCache = new HashMap<Long, List<Long>>();
+	public static List<Long> dontLogDeletion = new ArrayList<Long>();
+	@Override
 	public void onGuildBan(GuildBanEvent e) {
 		long id = e.getGuild().getIdLong();
 		if(banCache.containsKey(id)) {
@@ -644,7 +786,13 @@ public class BonziBot extends ListenerAdapter {
 			bans.add(e.getUser().getIdLong());
 			banCache.put(id, bans);
 		}
+		
+		LogEntryBan ban = new LogEntryBan();
+		ban.loadData(e, this, entry -> {
+			this.logging.tryLog(e.getGuild(), this, entry);
+		}, null);
 	}
+	@Override
 	public void onGuildUnban(GuildUnbanEvent e) {
 		long id = e.getGuild().getIdLong();
 		if(this.bans.isBanned(e.getGuild(), e.getUser()))
@@ -654,23 +802,45 @@ public class BonziBot extends ListenerAdapter {
 			bans.remove(e.getUser().getIdLong());
 			banCache.put(id, bans);
 		}
-	}
-	public void onGuildMessageDelete(GuildMessageDeleteEvent e) {
 		
+		LogEntryUnban ban = new LogEntryUnban();
+		ban.loadData(e, this, entry -> {
+			this.logging.tryLog(e.getGuild(), this, entry);
+		}, null);
+	}
+	@Override
+	public void onGuildMessageDelete(GuildMessageDeleteEvent e) {
 		Message fetched = this.logging.getMessageById
 			(e.getMessageIdLong(), e.getGuild());
 		
-		if(fetched != null && !fetched.getAuthor().isBot()) {
+		if(fetched == null)
+			return;
+		
+		if(fetched.isFromGuild()) {
+			Guild guild = fetched.getGuild();
+			User author = fetched.getAuthor();
+			if(banCache.containsKey(guild.getIdLong())) {
+				List<Long> bans = banCache.get(guild.getIdLong());
+				if(bans.contains(author.getIdLong()))
+					return;
+			}
+		}
+		
+		if(dontLogDeletion.remove(fetched.getIdLong()))
+			return;
+		
+		if(!fetched.getAuthor().isBot()) {
+			LogEntryDeletedMessage log = new LogEntryDeletedMessage();
+			log.loadData(fetched, this, entry -> {
+				this.logging.tryLog(e.getGuild(), this, entry);
+			}, null);
+			
 			String topic = e.getChannel().getTopic();
 			Modifier[] modifiers = BonziUtils.getModifiers(topic);
-			boolean noExpose = false;
-			for(Modifier m: modifiers) {
-				if(m == Modifier.NO_EXPOSE) {
-					noExpose = true;
-					break;
-				}
-			}
-			if(!noExpose) {
+			boolean canExpose = true;
+			for(Modifier m: modifiers)
+				canExpose &= (m != Modifier.NO_EXPOSE);
+			if(canExpose) {
 				long author = fetched.getAuthor().getIdLong();
 				UserAccount account = this.accounts.getUserAccount(author);
 				if(!account.optOutExpose)
@@ -678,6 +848,7 @@ public class BonziBot extends ListenerAdapter {
 			}
 		}
 	}
+	@Override
 	public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent e) {
 		String nick = e.getNewNickname();
 		if(nick == null)
@@ -687,14 +858,25 @@ public class BonziBot extends ListenerAdapter {
 		if(!gc.testMessageInFilter(nick)) {
 			String old = e.getOldNickname();
 			e.getMember().modifyNickname(old).queue(null, fail -> { /* no permission */ });
+		} else {
+			LogEntryNicknameChange log = new LogEntryNicknameChange();
+			log.loadData(e, this, entry -> {
+				this.logging.tryLog(e.getGuild(), this, entry);
+			}, null);
 		}
 	}
+	@Override
 	public void onTextChannelCreate(TextChannelCreateEvent e) {
 		TextChannel tc = e.getChannel();
 		Guild guild = e.getGuild();
 		GuildSettings settings = this
 			.guildSettings.getSettings(guild);
 		long mutedRole = settings.mutedRole;
+		
+		LogEntryTextChannelCreate ban = new LogEntryTextChannelCreate();
+		ban.loadData(e, this, entry -> {
+			this.logging.tryLog(e.getGuild(), this, entry);
+		}, null);
 		
 		if(mutedRole != 0) {
 			Role muted = guild.getRoleById(mutedRole);
@@ -711,13 +893,25 @@ public class BonziBot extends ListenerAdapter {
 			}
 		}
 	}
+	@Override
 	public void onTextChannelDelete(TextChannelDeleteEvent e) {
-		
+		LogEntryTextChannelRemove ban = new LogEntryTextChannelRemove();
+		ban.loadData(e, this, entry -> {
+			this.logging.tryLog(e.getGuild(), this, entry);
+		}, null);
 	}
+	@Override
 	public void onVoiceChannelCreate(VoiceChannelCreateEvent e) {
-		
+		LogEntryVoiceChannelCreate ban = new LogEntryVoiceChannelCreate();
+		ban.loadData(e, this, entry -> {
+			this.logging.tryLog(e.getGuild(), this, entry);
+		}, null);
 	}
+	@Override
 	public void onVoiceChannelDelete(VoiceChannelDeleteEvent e) {
-		
+		LogEntryVoiceChannelRemove ban = new LogEntryVoiceChannelRemove();
+		ban.loadData(e, this, entry -> {
+			this.logging.tryLog(e.getGuild(), this, entry);
+		}, null);
 	}
 }

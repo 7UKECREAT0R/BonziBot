@@ -11,11 +11,11 @@ public class InternalLogger {
 		FATAL,
 	}
 	
-	static SimpleDateFormat fmt = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
+	static SimpleDateFormat fmt = new SimpleDateFormat("MM/dd hh:mm aa");
 	
 	public static void print(String message) {
 		String time = fmt.format(new Date(System.currentTimeMillis()));
-		System.out.println(time + " > " + message);
+		System.out.println(time + " | " + message);
 	}
 	public static void printError(String message, Severity s) {
 		String time = fmt.format(new Date(System.currentTimeMillis()));
