@@ -17,6 +17,7 @@ public class LoadLegacyFilesCommand extends Command {
 	public void run(CommandExecutionInfo e) {
 		e.bonzi.accounts.loadLegacy();
 		e.bonzi.tags.loadLegacy();
+		e.bonzi.counting.loadLegacy();
 		e.message.addReaction("👍").queue();
 	}
 }

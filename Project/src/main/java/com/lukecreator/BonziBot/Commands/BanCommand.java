@@ -17,6 +17,8 @@ import com.lukecreator.BonziBot.CommandAPI.UserArg;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
+import com.lukecreator.BonziBot.Logging.LogEntryTempBan;
+import com.lukecreator.BonziBot.Logging.LogEntryTempBan.TempBanDataPacket;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -68,7 +70,7 @@ public class BanCommand extends Command {
 			return;
 		}
 		if(!bonzi.canInteract(target)) {
-			MessageEmbed send = BonziUtils.failureEmbed("Help!",
+			MessageEmbed send = BonziUtils.failureEmbed("help",
 				"This person is either an administrator, owner, or higher up than me so I can't ban them.");
 			if(e.isSlashCommand)
 				e.slashCommand.replyEmbeds(send).queue();
@@ -88,6 +90,14 @@ public class BanCommand extends Command {
 			if(temporary) {
 				long ends = System.currentTimeMillis() + time.ms;
 				e.bonzi.bans.ban(guildId, tId, ends);
+				
+				long bannerId = e.executor.getIdLong();
+				LogEntryTempBan tempBan = new LogEntryTempBan();
+				
+				TempBanDataPacket packet = tempBan.new TempBanDataPacket(bannerId, tId, time);
+				tempBan.loadData(packet, e.bonzi, entry -> {
+					e.bonzi.logging.tryLog(e.guild, e.bonzi, entry);
+				}, null);
 			}
 			try {
 				e.guild.ban(target, 1, reason).queue(null, fail -> {

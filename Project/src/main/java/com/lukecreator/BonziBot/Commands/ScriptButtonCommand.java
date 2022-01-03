@@ -40,7 +40,7 @@ public class ScriptButtonCommand extends Command {
 		String bodyText = e.args.getString("body text");
 		
 		if(packages.isEmpty()) {
-			e.sendMessageEmbeds(BonziUtils.failureEmbed("There are no packages in this server."));
+			e.reply(BonziUtils.failureEmbed("There are no packages in this server."));
 			return;
 		}
 		
@@ -62,7 +62,7 @@ public class ScriptButtonCommand extends Command {
 		}
 		
 		if(find == null) {
-			e.sendMessageEmbeds(BonziUtils.failureEmbed("No button-triggered script found with that name."));
+			e.reply(BonziUtils.failureEmbed("No button-triggered script found with that name."));
 			return;
 		}
 		

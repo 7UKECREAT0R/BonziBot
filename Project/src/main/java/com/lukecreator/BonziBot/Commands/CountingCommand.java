@@ -44,7 +44,7 @@ public class CountingCommand extends Command {
 		}
 		
 		if(counting == null) {
-			e.sendMessageEmbeds(BonziUtils.failureEmbed
+			e.reply(BonziUtils.failureEmbed
 				("No counting channel in this server!",
 				"To make a counting channel, put the words \"counting game\" in your channel topic."));
 			return;
@@ -53,7 +53,7 @@ public class CountingCommand extends Command {
 		int next = e.bonzi.counting.getNextNumber(guild);
 		String description = counting.getAsMention() + " `NEXT NUMBER IS " + next + "`";
 		EmbedBuilder eb = BonziUtils.quickEmbed("Counting Game", description, BonziUtils.COLOR_BONZI_PURPLE);
-		e.sendMessageEmbeds(eb.build());
+		e.reply(eb.build());
 	}
 	
 }

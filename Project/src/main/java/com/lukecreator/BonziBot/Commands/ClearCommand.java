@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
@@ -11,6 +12,8 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Logging.LogEntryClearCommand;
+import com.lukecreator.BonziBot.Logging.LogEntryClearCommand.ClearCommandDataPacket;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
@@ -40,11 +43,11 @@ public class ClearCommand extends Command {
 		long messageId = channel.getLatestMessageIdLong();
 		
 		if(amount < 0) {
-			e.sendMessageEmbeds(BonziUtils.failureEmbed("you cant bring messages back 😔"));
+			e.reply(BonziUtils.failureEmbed("you cant bring messages back 😔"));
 			return;
 		}
 		if(amount > 100) {
-			e.sendMessageEmbeds(BonziUtils.failureEmbed("Max limit is 100."));
+			e.reply(BonziUtils.failureEmbed("Max limit is 100."));
 			return;
 		}
 		
@@ -67,7 +70,17 @@ public class ClearCommand extends Command {
 			} else {
 				BonziUtils.sendTempMessage(e.channel, BonziUtils.successEmbed("Clearing " + amount + " messages..."), 3);
 			}
+			
+			BonziBot.dontLogDeletion.addAll(msgs.stream().map(Message::getIdLong).collect(Collectors.toList()));
+			
 			channel.purgeMessages(msgs);
+			
+			LogEntryClearCommand logCommand = new LogEntryClearCommand();
+			long eId = e.executor.getIdLong();
+			ClearCommandDataPacket packet = logCommand.new ClearCommandDataPacket(eId, amount);
+			logCommand.loadData(packet, e.bonzi, entry -> {
+				e.bonzi.logging.tryLog(e.guild, e.bonzi, entry);
+			}, null);
 		});
 	}
 }
