@@ -16,12 +16,12 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
-import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
+import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
+import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildBanEvent;
 import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
+import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 
 /**
  * Legacy LogEntry redone before release for a more abstracted version.
@@ -113,7 +113,7 @@ public class OldLogEntry {
 	 * Extra Strings: none, none
 	 * Extra Data:    none, none
 	 */
-	public static void fromEvent(BonziBot bb, TextChannelCreateEvent event, Consumer<OldLogEntry> entryOutput) {
+	public static void fromEvent(BonziBot bb, ChannelCreateEvent event, Consumer<OldLogEntry> entryOutput) {
 		event.getGuild()
 		.retrieveAuditLogs()
 		.limit(1)
@@ -143,7 +143,7 @@ public class OldLogEntry {
 	 * Extra Strings: Text Channel Name, Text Channel Topic
 	 * Extra Data:    Text Channel Slowmode, none
 	 */
-	public static void fromEvent(BonziBot bb, TextChannelDeleteEvent event, Consumer<OldLogEntry> entryOutput) {
+	public static void fromEvent(BonziBot bb, ChannelDeleteEvent event, Consumer<OldLogEntry> entryOutput) {
 		event.getGuild()
 		.retrieveAuditLogs()
 		.limit(1)
@@ -155,7 +155,7 @@ public class OldLogEntry {
 				if(entry.getUser() != null)
 					userId = entry.getUser().getIdLong();
 			}
-			TextChannel tc = event.getChannel();
+			TextChannel tc = (TextChannel)event.getChannel();
 			entryOutput.accept(new OldLogEntry(
 				LogEntry.Type.TEXTCHANNELREMOVE,
 				LogButtons.UNDO.flag,
@@ -191,7 +191,7 @@ public class OldLogEntry {
 	 * Extra Strings: Message Content, Message Author Tag
 	 * Extra Data:    Message Attachment Length, Message Author ID
 	 */
-	public static void fromEvent(BonziBot bb, GuildMessageDeleteEvent event, Consumer<OldLogEntry> entryOutput) {
+	public static void fromEvent(BonziBot bb, MessageDeleteEvent event, Consumer<OldLogEntry> entryOutput) {
 		long messageId = event.getMessageIdLong();
 		long guildId = event.getGuild().getIdLong();
 		Message cached = bb.logging.getMessageById(messageId, guildId);

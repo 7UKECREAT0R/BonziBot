@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 
 /**
  * A user submitted ban appeal awaiting review from a moderator.
@@ -41,7 +42,7 @@ public class BanAppeal implements Serializable {
 	}
 	public void sendMessage(TextChannel tc, Consumer<Message> completion, Consumer<Throwable> failure) {
 		Guild guild = tc.getGuild();
-		guild.retrieveBanById(userId).queue(ban -> {
+		guild.retrieveBan(UserSnowflake.fromId(this.userId)).queue(ban -> {
 			String reason = ban.getReason();
 			if(reason == null)
 				reason = "unspecified";
