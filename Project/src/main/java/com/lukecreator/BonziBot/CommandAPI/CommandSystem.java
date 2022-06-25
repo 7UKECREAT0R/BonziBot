@@ -23,7 +23,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 /**
@@ -34,7 +34,7 @@ public class CommandSystem {
 	List<Command> commands;
 	
 	public CommandSystem(Reflections refs) {
-		commands = new ArrayList<Command>();
+		this.commands = new ArrayList<Command>();
 		
 		try {
 			Set<Class<? extends Command>> classes = refs.getSubTypesOf(Command.class);
@@ -42,13 +42,13 @@ public class CommandSystem {
 				Command inst = c.newInstance();
 				inst.id = inst.name.hashCode();
 				InternalLogger.print("Register " + inst.getFilteredCommandName() + ":" + inst.id);
-				commands.add(inst);
+				this.commands.add(inst);
 			}
 		} catch (InstantiationException | IllegalAccessException e) {
 			InternalLogger.printError(e);
 		}
 		
-		InternalLogger.print("Registered " + commands.size() + " commands.");
+		InternalLogger.print("Registered " + this.commands.size() + " commands.");
 	}
 	
 	/**
@@ -126,14 +126,14 @@ public class CommandSystem {
 		System.arraycopy(finalArgs, 0, resizedArgs, 0, written);
 		
 		// Send it to the right command.
-		return directCommand(info, commandName, resizedArgs);
+		return this.directCommand(info, commandName, resizedArgs);
 	}
 	/**
 	 * Parse slash-command input and redirect it to the right command.
 	 * @param event
 	 * @return
 	 */
-	public boolean onInput(SlashCommandEvent event, BonziBot bb) {
+	public boolean onInput(SlashCommandInteractionEvent event, BonziBot bb) {
 		String name = event.getName();
 		List<OptionMapping> _args = event.getOptions();
 		OptionMapping[] args = new OptionMapping[_args.size()];
@@ -148,7 +148,7 @@ public class CommandSystem {
 			info.setModifiers();
 		}
 		
-		for(Command cmd: commands) {
+		for(Command cmd: this.commands) {
 			
 			if(!cmd.getSlashCommandName().equals(name))
 				continue;
@@ -207,7 +207,7 @@ public class CommandSystem {
 			
 			info.setCommandData(cmd.getFilteredCommandName(), new String[args.length], cpa);
 			
-			if(!checkQualifications(cmd, info))
+			if(!this.checkQualifications(cmd, info))
 				return false;
 			
 			// Set cooldown.
@@ -224,11 +224,11 @@ public class CommandSystem {
 		return false;
 	}
 	public List<Command> getRegisteredCommands() {
-		return commands;
+		return this.commands;
 	}
 	public List<Command> getCommandsWithCategory(CommandCategory cat) {
 		ArrayList<Command> list = new ArrayList<Command>();
-		for(Command cmd: commands) {
+		for(Command cmd: this.commands) {
 			if(cmd.category == cat)
 				list.add(cmd);
 		}
@@ -236,7 +236,7 @@ public class CommandSystem {
 	}
 	public Command getCommandByName(String name) {
 		Command find = null;
-		for(Command cmd: commands) {
+		for(Command cmd: this.commands) {
 			if(cmd.name.equalsIgnoreCase(name))
 				find = cmd;
 			if(find == null && cmd
@@ -249,7 +249,7 @@ public class CommandSystem {
 		return find;
 	}
 	public Command getCommandById(int id) {
-		for(Command cmd: commands) {
+		for(Command cmd: this.commands) {
 			if(cmd.id == id)
 				return cmd;
 		}
@@ -257,7 +257,7 @@ public class CommandSystem {
 	}
 	
 	boolean directCommand(CommandExecutionInfo info, String commandName, String[] inputArgs) {
-		for(Command cmd: commands) {
+		for(Command cmd: this.commands) {
 			String cmdName = cmd.getFilteredCommandName();
 			
 			if(!commandName.equalsIgnoreCase(cmdName))
@@ -295,7 +295,7 @@ public class CommandSystem {
 			}
 			info.setCommandData(commandName, inputArgs, cpa);
 			
-			if(!checkQualifications(cmd, info))
+			if(!this.checkQualifications(cmd, info))
 				return false;
 			
 			// Set cooldown.

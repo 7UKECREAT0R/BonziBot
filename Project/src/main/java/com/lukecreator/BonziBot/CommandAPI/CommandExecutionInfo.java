@@ -18,48 +18,49 @@ import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 /**
  * Everything you need to execute a command.
  */
 public class CommandExecutionInfo {
 	
-	public CommandExecutionInfo(GuildMessageReceivedEvent e) {
-		bot = e.getJDA();
-		isGuildMessage = true;
-		executor = e.getAuthor();
-		channel = e.getChannel();
-		tChannel = e.getChannel();
-		guild = e.getGuild();
-		member = e.getMember();
-		message = e.getMessage();
-		fullText = message.getContentRaw();
+	public CommandExecutionInfo(MessageReceivedEvent e) {
+		if(e.isFromType(ChannelType.TEXT)) {
+			this.bot = e.getJDA();
+			this.isGuildMessage = true;
+			this.executor = e.getAuthor();
+			this.channel = e.getChannel();
+			this.tChannel = (TextChannel)e.getTextChannel();
+			this.guild = e.getGuild();
+			this.member = e.getMember();
+			this.message = e.getMessage();
+			this.fullText = this.message.getContentRaw();
+		} else if(e.isFromType(ChannelType.PRIVATE)) {
+			this.bot = e.getJDA();
+			this.isDirectMessage = true;
+			this.executor = e.getAuthor();
+			this.channel = e.getChannel();
+			this.pChannel = e.getPrivateChannel();
+			this.message = e.getMessage();
+			this.fullText = this.message.getContentRaw();
+		}
+
 	}
-	public CommandExecutionInfo(PrivateMessageReceivedEvent e) {
-		bot = e.getJDA();
-		isDirectMessage = true;
-		executor = e.getAuthor();
-		channel = e.getChannel();
-		pChannel = e.getChannel();
-		message = e.getMessage();
-		fullText = message.getContentRaw();
-	}
-	public CommandExecutionInfo(SlashCommandEvent e) {
-		isSlashCommand = true;
-		slashCommand = e;
-		bot = e.getJDA();
-		isGuildMessage = e.isFromGuild();
-		executor = e.getUser();
-		channel = e.getChannel();
+	public CommandExecutionInfo(SlashCommandInteractionEvent e) {
+		this.isSlashCommand = true;
+		this.slashCommand = e;
+		this.bot = e.getJDA();
+		this.isGuildMessage = e.isFromGuild();
+		this.executor = e.getUser();
+		this.channel = e.getChannel();
 		if(e.getChannelType() == ChannelType.TEXT)
-			tChannel = e.getTextChannel();
-		else pChannel = e.getPrivateChannel();
-		guild = e.getGuild();
-		member = e.getMember();
-		message = null; // beware
+			this.tChannel = e.getTextChannel();
+		else this.pChannel = e.getPrivateChannel();
+		this.guild = e.getGuild();
+		this.member = e.getMember();
+		this.message = null; // beware
 	}
 	public CommandExecutionInfo setCommandData(String commandName, String[] inputArgs, CommandParsedArgs args) {
 		this.commandName = commandName;
@@ -97,7 +98,7 @@ public class CommandExecutionInfo {
 	}
 	
 	public boolean isSlashCommand = false;
-	public SlashCommandEvent slashCommand = null;
+	public SlashCommandInteractionEvent slashCommand = null;
 	
 	public boolean isGuildMessage = false;
 	public boolean isDirectMessage = false;

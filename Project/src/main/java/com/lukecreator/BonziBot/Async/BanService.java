@@ -11,6 +11,7 @@ import com.lukecreator.BonziBot.Tuple;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 
 /**
  * Iterate over all temp-banned users and check if they can be unbanned.
@@ -74,7 +75,7 @@ public class BanService extends AutoRepeat {
 		
 		if(!toUnban.isEmpty()) {
 			for(Tuple<Guild, String> unban: toUnban) {
-				unban.getA().unban(unban.getB()).reason
+				unban.getA().unban(UserSnowflake.fromId(unban.getB())).reason
 					("User's temporary ban expired.").queue();
 			}
 		}

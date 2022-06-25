@@ -14,6 +14,7 @@ import com.lukecreator.BonziBot.Managers.MuteManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 
 /**
  * Iterate over all muted users and check if they can be unmuted.
@@ -63,7 +64,7 @@ public class MuteService extends AutoRepeat {
 				if(timeEnds > now)
 					continue;
 				
-				guild.removeRoleFromMember(userId, mutedRole).queue(null, fail -> {});
+				guild.removeRoleFromMember(UserSnowflake.fromId(userId), mutedRole).queue(null, fail -> {});
 				toRemove.add(new Tuple<Long, Long>(guild.getIdLong(), userId));
 			}
 		}
