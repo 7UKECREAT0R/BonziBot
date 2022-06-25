@@ -7,15 +7,13 @@ import com.lukecreator.BonziBot.Data.Modifier;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class AnonymousMessageHandler implements MessageHandler {
 	
-	
-	
 	@Override
-	public void handleGuildMessage(BonziBot bb, GuildMessageReceivedEvent e, Modifier[] modifiers) {
+	public void handleGuildMessage(BonziBot bb, MessageReceivedEvent e, Modifier[] modifiers) {
 		Message msg = e.getMessage();
 		msg.delete().queue(null, COLLISION_IGNORE);
 		
@@ -23,12 +21,13 @@ public class AnonymousMessageHandler implements MessageHandler {
 		
 		if(settings.testMessageInFilter(msg)) {
 			String content = e.getMessage().getContentRaw();
-			e.getChannel().sendMessage(content);
+			TextChannel channel = (TextChannel)e.getChannel();
+			channel.sendMessage(content).queue();
 		}
 	}
 
 	@Override
-	public void handlePrivateMessage(BonziBot bb, PrivateMessageReceivedEvent e) {
+	public void handlePrivateMessage(BonziBot bb, MessageReceivedEvent e) {
 		return;
 	}
 

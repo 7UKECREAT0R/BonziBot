@@ -28,8 +28,7 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 /**
  * The default message handler. Gets all events related to messages.
@@ -144,7 +143,7 @@ public class DefaultMessageHandler implements MessageHandler {
 	};
 	
 	@Override
-	public void handleGuildMessage(BonziBot bb, GuildMessageReceivedEvent e, Modifier[] modifiers) {
+	public void handleGuildMessage(BonziBot bb, MessageReceivedEvent e, Modifier[] modifiers) {
 		// Execute commands and chat-related things.
 		if(e.getAuthor().isBot())
 			return;
@@ -172,7 +171,7 @@ public class DefaultMessageHandler implements MessageHandler {
 					String content = msg.getContentRaw();
 					if(method.isInText(content)) {
 						ScriptExecutor executor = script.code.createExecutor();
-						TextChannel tc = e.getChannel();
+						TextChannel tc = (TextChannel)e.getChannel();
 						int member = executor.memory.createObjectReference(e.getMember());
 						int channel = executor.memory.createObjectReference((GuildChannel)tc);
 						executor.memory.writeExistingObjRef("member", member);
@@ -270,14 +269,14 @@ public class DefaultMessageHandler implements MessageHandler {
 		
 		// These are intentionally guild-only.
 		BonziUtils.sendMentionMessage(e, bb);
-		BonziUtils.disableAfk(e.getAuthor(), e.getChannel(), bb);
+		BonziUtils.disableAfk(e.getAuthor(), (TextChannel)e.getChannel(), bb);
 		bb.reputation.checkMessage(e.getMessage(), bb);
 		bb.quickDraw.messageReceived(e.getAuthor(), e.getMessage(), bb);
 	}
 	@Override
-	public void handlePrivateMessage(BonziBot bb, PrivateMessageReceivedEvent e) {
+	public void handlePrivateMessage(BonziBot bb, MessageReceivedEvent e) {
 		if(e.getAuthor().isBot()) return;
-		if(bb.tags.receiveMessage(e)) return;
+		if(bb.tags.receiveMessage(e, bb)) return;
 		if(bb.eventWaiter.onMessage(e.getMessage())) return;
 		
 		// cache the channel ID for future use

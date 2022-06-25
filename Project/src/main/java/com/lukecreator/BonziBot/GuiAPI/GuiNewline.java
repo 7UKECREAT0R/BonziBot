@@ -1,6 +1,6 @@
 package com.lukecreator.BonziBot.GuiAPI;
 
-import net.dv8tion.jda.api.interactions.components.Component;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
 
 /**
  * Explicitly tells the GUI compiler to place a newline.
@@ -12,7 +12,7 @@ public class GuiNewline extends GuiElement {
 	public GuiNewline() {}
 	
 	@Override
-	public Component toDiscord(boolean enabled) {
+	public ItemComponent toDiscord(boolean enabled) {
 		return null;
 	}
 

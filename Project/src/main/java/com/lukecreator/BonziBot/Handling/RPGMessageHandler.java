@@ -8,14 +8,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class RPGMessageHandler implements MessageHandler {
 	
 	@Override
-	public void handleGuildMessage(BonziBot bb, GuildMessageReceivedEvent e, Modifier[] modifiers) {
-		TextChannel tc = e.getChannel();
+	public void handleGuildMessage(BonziBot bb, MessageReceivedEvent e, Modifier[] modifiers) {
+		TextChannel tc = (TextChannel)e.getChannel();
 		
 		EmbedBuilder eb = new EmbedBuilder()
 			.setTitle("RPG Status")
@@ -27,7 +26,7 @@ public class RPGMessageHandler implements MessageHandler {
 		tc.sendMessageEmbeds(eb.build()).queue();
 	}
 	@Override
-	public void handlePrivateMessage(BonziBot bb, PrivateMessageReceivedEvent e) {
+	public void handlePrivateMessage(BonziBot bb, MessageReceivedEvent e) {
 		return; // impossible
 	}
 

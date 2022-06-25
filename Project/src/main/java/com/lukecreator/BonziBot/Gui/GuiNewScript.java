@@ -23,7 +23,6 @@ import com.lukecreator.BonziBot.Script.Model.InvocationPhrase;
 import com.lukecreator.BonziBot.Script.Model.InvocationTimed;
 import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatementCollection;
-import com.lukecreator.BonziBot.Script.Model.ScriptStorage;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -31,7 +30,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 public class GuiNewScript extends Gui {
 	
@@ -123,16 +122,17 @@ public class GuiNewScript extends Gui {
 		
 		switch(selected.getImplementation()) {
 		case BUTTON:
-			this.elements.add(new GuiButton("Button Text", ButtonColor.BLUE, "button_text"));
-			this.elements.add(new GuiButton("Button Color", ButtonColor.BLUE, "button_color"));
+			this.elements.add(new GuiButton("Set Text", ButtonColor.BLUE, "button_text"));
+			this.elements.add(new GuiButton("Set Color", ButtonColor.BLUE, "button_color"));
 			break;
 		case COMMAND:
 			InvocationCommand cmd = (InvocationCommand)selected;
-			this.elements.add(new GuiButton("Command Name", ButtonColor.BLUE, "command_name"));
+			this.elements.add(new GuiButton("Set Name", ButtonColor.BLUE, "command_name"));
+			this.elements.add(new GuiButton("Set Description", ButtonColor.BLUE, "command_desc"));
 			int size = cmd.argNames.size();
 			if(size > 0) {
 				for(int i = 0; i < size; i++)
-					this.elements.add(new GuiButton("Arg" + (i + 1), ButtonColor.BLUE, "command_arg_" + i));
+					this.elements.add(new GuiButton("Set Arg" + (i + 1), ButtonColor.BLUE, "command_arg_" + i));
 			}
 			this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➖"), "command_dec").asEnabled(size > 0));
 			this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("➕"), "command_inc").asEnabled(size < MAX_ARGS));
@@ -198,7 +198,6 @@ public class GuiNewScript extends Gui {
 			}
 			
 			this.script.code = new ScriptStatementCollection(this.script);
-			this.script.storage = new ScriptStorage();
 			this.previous.thePackage.addScript(this.script);
 			this.previous.scriptChooser.addItem(new DropdownItem(this.script, this.script.name));
 			
@@ -274,6 +273,25 @@ public class GuiNewScript extends Gui {
 				});
 			});
 		}
+		if(buttonId.equals("command_desc")) {
+			MessageEmbed me = BonziUtils.quickEmbed("Command Description",
+				"Type the description that will show up for this command.", Color.orange).build();
+			channel.sendMessageEmbeds(me).queue(msg -> {
+				ewm.waitForArgument(id, new StringArg(""), _str -> {
+					String str = ((String)_str).replaceAll("\\s+", " ");
+					if(str.length() > 100)
+						str = str.substring(0, 100);
+					msg.delete().queue();
+					
+					((InvocationCommand)this.script.method).commandDescription = str;
+					
+					this.setFields[1].set(str);
+					
+					this.reinitialize();
+					this.parent.redrawMessage(jda);
+				});
+			});
+		}
 		if(buttonId.startsWith("command_arg_")) {
 			String _num = buttonId.substring(12);
 			int num = Integer.parseInt(_num); // this is 0-based
@@ -290,7 +308,7 @@ public class GuiNewScript extends Gui {
 					
 					((InvocationCommand)this.script.method).argNames.set(num, str);
 					
-					this.setFields[num + 1].set(str);
+					this.setFields[num + 2].set(str);
 					
 					this.reinitialize();
 					this.parent.redrawMessage(jda);
@@ -307,13 +325,14 @@ public class GuiNewScript extends Gui {
 			
 			// Resize setFields.
 			int size = cmd.argNames.size();
-			SetterField[] newFields = new SetterField[1 + size];
+			SetterField[] newFields = new SetterField[2 + size];
 			newFields[0] = this.setFields[0];
+			newFields[1] = this.setFields[1];
 			for(int i = 0; i < size; i++) {
-				if(i + 1 < this.setFields.length)
-					newFields[i + 1] = this.setFields[i + 1];
+				if(i + 2 < this.setFields.length)
+					newFields[i + 2] = this.setFields[i + 2];
 				else
-					newFields[i + 1] = new SetterField("Arg" + (i + 1));
+					newFields[i + 2] = new SetterField("Arg" + (i + 1));
 			}
 			
 			this.setFields = newFields;
@@ -329,10 +348,11 @@ public class GuiNewScript extends Gui {
 			
 			// Resize setFields.
 			int size = cmd.argNames.size();
-			SetterField[] newFields = new SetterField[1 + size];
+			SetterField[] newFields = new SetterField[2 + size];
 			newFields[0] = this.setFields[0];
+			newFields[1] = this.setFields[1];
 			for(int i = 0; i < size; i++) {
-				newFields[i + 1] = this.setFields[i + 1];
+				newFields[i + 2] = this.setFields[i + 2];
 			}
 			
 			this.setFields = newFields;
@@ -400,10 +420,11 @@ public class GuiNewScript extends Gui {
 		case COMMAND:
 			InvocationCommand cmd = (InvocationCommand)selected;
 			int size = cmd.argNames.size();
-			this.setFields = new SetterField[1 + size];
-			this.setFields[0] = new SetterField("Command Name");
+			this.setFields = new SetterField[2 + size];
+			this.setFields[0] = new SetterField("Name");
+			this.setFields[1] = new SetterField("Description");
 			for(int i = 0; i < size; i++)
-				this.setFields[i + 1] = new SetterField("Arg" + (i + 1));
+				this.setFields[i + 2] = new SetterField("Arg" + (i + 1));
 			break;
 		case PHRASE:
 			this.setFields = new SetterField[1];

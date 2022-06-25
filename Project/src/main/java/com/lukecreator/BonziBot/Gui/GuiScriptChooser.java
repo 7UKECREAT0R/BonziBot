@@ -1,9 +1,17 @@
 package com.lukecreator.BonziBot.Gui;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
+import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.GuiAPI.DropdownItem;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
@@ -13,6 +21,8 @@ import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.ScriptCache;
 import com.lukecreator.BonziBot.Script.Model.InvocationCommand;
+import com.lukecreator.BonziBot.Script.Model.PackageStorage;
+import com.lukecreator.BonziBot.Script.Model.PackageStorage.StorageEntry;
 import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptPackage;
 
@@ -28,9 +38,12 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
  */
 public class GuiScriptChooser extends Gui {
 	
+	public static final String EXPORTS_FOLDER = "exports/";
+	
 	public ScriptPackage thePackage;
 	public GuiDropdown scriptChooser;
 	GuiScriptPackages previous;
+	long nextStorageReport = 0l;
 	
 	public GuiScriptChooser(ScriptPackage pkg, GuiScriptPackages previous) {
 		this.scriptChooser = new GuiDropdown("Choose a Script...", "script", false);
@@ -65,9 +78,11 @@ public class GuiScriptChooser extends Gui {
 		this.elements.add(new GuiButton("Delete", ButtonColor.RED, "delete").asEnabled(allowAction));
 		
 		if(this.thePackage.isEnabled())
-			this.elements.add(new GuiButton("Disable Package", ButtonColor.RED, "toggle"));
+			this.elements.add(new GuiButton("Disable", ButtonColor.RED, "toggle"));
 		else
-			this.elements.add(new GuiButton("Enable Package", ButtonColor.GREEN, "toggle"));
+			this.elements.add(new GuiButton("Enable", ButtonColor.GREEN, "toggle"));
+		
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📦"), "Export Storage", ButtonColor.GRAY, "storageexport"));
 	}
 	
 	@Override
@@ -98,8 +113,8 @@ public class GuiScriptChooser extends Gui {
 		MessageChannel channel = this.parent.getChannel(jda);
 		
 		if(buttonId.equals("back")) {
-			previous.initialize(jda); // reset selection box
-			this.parent.setActiveGui(previous, jda);
+			this.previous.initialize(jda); // reset selection box
+			this.parent.setActiveGui(this.previous, jda);
 			return;
 		}
 		if(buttonId.equals("new")) {
@@ -125,6 +140,35 @@ public class GuiScriptChooser extends Gui {
 			this.thePackage.toggleEnabled();
 			this.reinitialize();
 			this.parent.redrawMessage(jda);
+			return;
+		}
+		if(buttonId.equals("storageexport")) {
+			if(this.nextStorageReport > System.currentTimeMillis()) {
+				channel.sendMessageEmbeds(BonziUtils.failureEmbed("Please wait a bit before exporting storage again.")).queue();
+				return;
+			}
+			if(this.thePackage.storage.isEmpty()) {
+				channel.sendMessageEmbeds(BonziUtils.failureEmbed("There's no data to export for this package just yet.")).queue();
+				return;
+			}
+			
+			channel.sendMessageEmbeds(BonziUtils.quickEmbed("Exporting storage data...","This may take a couple seconds.", Color.orange).build()).queue(msg -> {
+				msg.delete().queueAfter(5, TimeUnit.SECONDS);
+			});
+			
+			File file = this.exportStorage();
+			if(file == null) {
+				channel.sendMessageEmbeds(BonziUtils.failureEmbed("Export failed. Contact a developer.")).queue();
+				return;
+			}
+			
+			channel.sendFile(file).queue(finished -> {
+				this.nextStorageReport = System.currentTimeMillis() + 5000; // 5s
+				file.delete();
+			}, failed -> {
+				this.nextStorageReport = System.currentTimeMillis() + 5000; // 5s
+				file.delete();
+			});
 			return;
 		}
 		
@@ -160,5 +204,45 @@ public class GuiScriptChooser extends Gui {
 	public void onDropdownChanged(GuiDropdown dropdown, long clickerId, JDA jda) {
 		this.reinitialize();
 		this.parent.redrawMessage(jda);
+	}
+	
+	/**
+	 * Export this package's storage to a text file. Returns the file, if any.
+	 * @param invokerId
+	 * @return
+	 */
+	public File exportStorage() {
+		PrintWriter file = null;
+		String packageName = BonziUtils.stripText(this.thePackage.packageName);
+		String fileNameWithoutExt = System.currentTimeMillis() + "_" + packageName + ".txt";
+		String fileName = DataSerializer.baseDataPath + EXPORTS_FOLDER + fileNameWithoutExt;
+		
+		try {
+			file = new PrintWriter(fileName, "UTF-8");
+			PackageStorage storage = this.thePackage.storage;
+			Set<Map.Entry<Long, StorageEntry>> rows = storage.storage.entrySet();
+			
+			for(Map.Entry<Long, StorageEntry> row: rows) {
+				StorageEntry item = row.getValue();
+				file.print(item.key);
+				file.print(':');
+				file.print(item.type.name());
+				file.print(':');
+				file.println(item.data.toString());
+			}
+			
+			file.close();
+			return new File(fileName);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} finally {
+			if(file != null) {
+				file.close();
+				return new File(fileName);
+			}
+		}
+		return null;
 	}
 }

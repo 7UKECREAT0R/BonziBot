@@ -2,7 +2,8 @@ package com.lukecreator.BonziBot.GuiAPI;
 
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 /**
  * A button in a GUI. Can have colors, be enabled/disabled, or act as a newline.
@@ -47,32 +48,32 @@ public class GuiButton extends GuiElement {
 	}
 	
 	@Override
-	public Button toDiscord() {
-		return this.toDiscord(enabled);
+	public ItemComponent toDiscord() {
+		return this.toDiscord(this.enabled);
 	}
 	@Override
-	public Button toDiscord(boolean enabled) {
+	public ItemComponent toDiscord(boolean enabled) {
 		Button button = null;
-		switch(color) {
+		switch(this.color) {
 		case BLUE:
-			button = (text == null) ? Button.primary(id, icon.toEmoji()) : Button.primary(id, text);
+			button = (this.text == null) ? Button.primary(this.id, this.icon.toEmoji()) : Button.primary(this.id, this.text);
 			break;
 		case GRAY:
-			button = (text == null) ? Button.secondary(id, icon.toEmoji()) : Button.secondary(id, text);
+			button = (this.text == null) ? Button.secondary(this.id, this.icon.toEmoji()) : Button.secondary(this.id, this.text);
 			break;
 		case GREEN:
-			button = (text == null) ? Button.success(id, icon.toEmoji()) : Button.success(id, text);
+			button = (this.text == null) ? Button.success(this.id, this.icon.toEmoji()) : Button.success(this.id, this.text);
 			break;
 		case RED:
-			button = (text == null) ? Button.danger(id, icon.toEmoji()) : Button.danger(id, text);
+			button = (this.text == null) ? Button.danger(this.id, this.icon.toEmoji()) : Button.danger(this.id, this.text);
 			break;
 		default:
-			button = (text == null) ? Button.primary(id, icon.toEmoji()) : Button.primary(id, text);
+			button = (this.text == null) ? Button.primary(this.id, this.icon.toEmoji()) : Button.primary(this.id, this.text);
 		}
 		if(!enabled)
 			button = button.asDisabled();
-		if(icon != null)
-			button = button.withEmoji(icon.toEmoji());
+		if(this.icon != null)
+			button = button.withEmoji(this.icon.toEmoji());
 		
 		return button;
 	}

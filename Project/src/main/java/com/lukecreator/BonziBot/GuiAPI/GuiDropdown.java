@@ -3,7 +3,8 @@ package com.lukecreator.BonziBot.GuiAPI;
 import java.util.Collection;
 import java.util.function.Function;
 
-import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 
 /**
  * A dropdown menu in a GUI. Supports single or multi-select.
@@ -98,7 +99,7 @@ public class GuiDropdown extends GuiElement {
 		return 1;
 	}
 	public int getMaxItems() {
-		return Math.max(1, this.multiselect ? _items.size() : 1);
+		return Math.max(1, this.multiselect ? this._items.size() : 1);
 	}
 	
 	public GuiDropdown(String placeholder, String id, boolean multiselect) {
@@ -149,10 +150,10 @@ public class GuiDropdown extends GuiElement {
 	}
 	
 	@Override
-	public SelectionMenu toDiscord(boolean enabled) {
+	public ItemComponent toDiscord(boolean enabled) {
 		if(this._items.isEmpty())
 			return null;
-		SelectionMenu menu = SelectionMenu.create(this.id)
+		SelectMenu menu = SelectMenu.create(this.id)
 			.setPlaceholder(this.placeholder)
 			.setDisabled(!enabled)
 			.addOptions(this._items.toDiscord())

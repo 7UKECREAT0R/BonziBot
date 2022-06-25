@@ -77,13 +77,21 @@ public class GuiScriptEditor extends Gui {
 		eb.setTitle("Editing Script " + this.script.name);
 		eb.appendDescription("```\n");
 		
+		if(this.selection == -1)
+			eb.appendDescription(ARROW + " \n");
+		
 		ScriptStatementCollection ssc = this.script.code;
 		
 		ssc.seek(0);
 		int i = 0;
+		StatementCategory lastCategory = null;
 		if(!ssc.isEmpty()) {
 			while(ssc.hasNext()) {
 				ScriptStatement statement = ssc.next();
+				StatementCategory category = statement.getCategory();
+				if(lastCategory != null && lastCategory != category)
+					eb.appendDescription("\n");
+				lastCategory = category;
 				if(i++ == this.selection)
 					eb.appendDescription(ARROW + " ");
 				eb.appendDescription(statement.getAsCode() + '\n');
@@ -97,13 +105,13 @@ public class GuiScriptEditor extends Gui {
 	public void onButtonClick(String buttonId, long clickerId, JDA jda) {
 		
 		if(buttonId.equals("return")) {
-			this.parent.setActiveGui(previous, jda);
+			this.parent.setActiveGui(this.previous, jda);
 			return;
 		}
 		
 		if(buttonId.equals("up")) {
 			this.selection--;
-			if(this.selection < 0)
+			if(this.selection < -1)
 				this.selection = this.script.code.size() - 1;
 			this.reinitialize();
 			this.parent.redrawMessage(jda);
@@ -112,7 +120,7 @@ public class GuiScriptEditor extends Gui {
 		if(buttonId.equals("down")) {
 			this.selection++;
 			if(this.selection >= this.script.code.size())
-				this.selection = 0;
+				this.selection = -1;
 			this.reinitialize();
 			this.parent.redrawMessage(jda);
 			return;
@@ -183,6 +191,8 @@ public class GuiScriptEditor extends Gui {
 		}
 		
 		if(buttonId.equals("remove")) {
+			if(this.selection < 0)
+				return;
 			if(this.script.code.size() < 1)
 				return;
 			this.script.code.remove(this.selection--);

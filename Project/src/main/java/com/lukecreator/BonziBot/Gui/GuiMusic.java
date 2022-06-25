@@ -52,8 +52,8 @@ public class GuiMusic extends Gui {
 	
 	static final String[] STOPPED_MESSAGES = {
 		"listening party's over!",
-		"music player gone",
-		"okay you guys can go home now",
+		"music player gone!",
+		"okay you guys can go home now!",
 		"alright yall i gotta take a break",
 		"music is gone",
 		"no more songz (ono)"
@@ -249,7 +249,7 @@ public class GuiMusic extends Gui {
 		}
 		
 		if(this.lastAction != null) {
-			eb.setFooter(lastAction, iconUrl);
+			eb.setFooter(this.lastAction, this.iconUrl);
 		}
 		return eb.build();
 	}
@@ -264,10 +264,10 @@ public class GuiMusic extends Gui {
 		
 		Member selfMember = guild.getSelfMember();
 		GuildVoiceState currentState = selfMember.getVoiceState();
-		if(!currentState.inVoiceChannel()) {
+		if(!currentState.inAudioChannel()) {
 			this.iconUrl = selfMember.getEffectiveAvatarUrl();
-			this.lastAction = "im no longer in the voice chat :(";
-			close(jda);
+			this.lastAction = "im no longer in the voice chat";
+			this.close(jda);
 			return;
 		}
 		
@@ -350,7 +350,7 @@ public class GuiMusic extends Gui {
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
 				ewm.waitForResponse(clickerId, response -> {
 					msg1.delete().queue();
-					response.delete().queue();
+					response.delete().queue(null, fail -> {});
 					
 					String url = response.getContentRaw();
 					AudioPlayerManager apm = this.bonziReference.audioPlayerManager;
@@ -468,7 +468,7 @@ public class GuiMusic extends Gui {
 				}
 				
 				this.lastAction = userName + " closed the music player.";
-				close(jda);
+				this.close(jda);
 				return;
 			});
 		}

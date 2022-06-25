@@ -99,7 +99,7 @@ public class GuiCalculator extends Gui {
 			mc.sendMessageEmbeds(BonziUtils.quickEmbed("Mention somebody!", "Add your bros to the calculator session!",
 					BonziUtils.COLOR_BONZI_PURPLE).build()).queue(deleteSoon -> {
 				ewm.waitForResponse(this.parent.ownerId, response -> {
-					List<User> add = response.getMentionedUsers();
+					List<User> add = response.getMentions().getUsers();
 					response.delete().queue(null, fail -> {});
 					deleteSoon.delete().queue(null, fail -> {});
 					if(this.addedFriends.size() + add.size() > 24) {
@@ -123,12 +123,12 @@ public class GuiCalculator extends Gui {
 			return;
 		}
 		if(actionId.equals("clear")) {
-			hasValue = false;
-			value = 0;
-			buffer = 0;
-			dot = false;
-			dotLevel = 0;
-			operation = OpType.NONE;
+			this.hasValue = false;
+			this.value = 0;
+			this.buffer = 0;
+			this.dot = false;
+			this.dotLevel = 0;
+			this.operation = OpType.NONE;
 			this.parent.redrawMessage(jda);
 			return;
 		}
@@ -166,7 +166,7 @@ public class GuiCalculator extends Gui {
 		}
 		
 		if(actionId.equals("equ")) {
-			combineValues();
+			this.combineValues();
 			this.parent.redrawMessage(jda);
 			return;
 		}
@@ -188,7 +188,7 @@ public class GuiCalculator extends Gui {
 	void changeMode(OpType type) {
 		if(this.operation == OpType.NONE) {
 			if(this.hasValue) {
-				combineValues();
+				this.combineValues();
 				return;
 			} else {
 				this.hasValue = true;
@@ -246,13 +246,13 @@ public class GuiCalculator extends Gui {
 		return eb.build();
 	}
 	public String drawDesc() {
-		String buf = doubleFmt(this.buffer);
+		String buf = this.doubleFmt(this.buffer);
 		if(this.dot && this.dotLevel == 0)
 			buf += ".";
 		
 		if(this.operation == OpType.NONE)
 			return buf;
-		String ret = doubleFmt(this.value) + " " +
+		String ret = this.doubleFmt(this.value) + " " +
 			this.operationChar() + " " + buf;
 		return ret;
 	}

@@ -18,8 +18,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 /**
@@ -445,7 +445,7 @@ public class GuiContainer {
 			return;
 		gui.receiveReaction(emote);
 	}*/
-	public void onAction(ButtonClickEvent event) {
+	public void onAction(ButtonInteractionEvent event) {
 		if(!this.enabled) {
 			event.reply(":x: `This GUI has been disabled.`").setEphemeral(true).queue();
 			return;
@@ -464,7 +464,7 @@ public class GuiContainer {
 		event.deferEdit().queue();
 		this.gui.receiveActionButton(event.getComponentId(), event.getUser().getIdLong(), event.getJDA());
 	}
-	public void onAction(SelectionMenuEvent event) {
+	public void onAction(SelectMenuInteractionEvent event) {
 		if(!this.enabled) {
 			event.reply(":x: `This GUI has been disabled.`").setEphemeral(true).queue();
 			return;

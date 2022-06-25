@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 
 /**
  * Limit one per Entity, represents a imited
@@ -28,7 +28,7 @@ public class AllocGuiList {
 	 * @param index
 	 */
 	public void front(int index) {
-		guis.add(guis.remove(index));
+		this.guis.add(this.guis.remove(index));
 	}
 	public boolean hasMessageId(long mid) {
 		for(GuiContainer gui: this.guis) {
@@ -63,7 +63,7 @@ public class AllocGuiList {
 			guiContainer.onReaction(react, executor);
 		}
 	}*/
-	public void handleInteraction(ButtonClickEvent event, long messageId, User executor) {
+	public void handleInteraction(ButtonInteractionEvent event, long messageId, User executor) {
 		
 		for(int i = 0; i < this.guis.size(); i++) {
 			GuiContainer gui = this.guis.get(i);
@@ -78,7 +78,7 @@ public class AllocGuiList {
 			return;
 		}
 	}
-	public void handleInteraction(SelectionMenuEvent event, long messageId, User executor) {
+	public void handleInteraction(SelectMenuInteractionEvent event, long messageId, User executor) {
 		for(int i = 0; i < this.guis.size(); i++) {
 			GuiContainer gui = this.guis.get(i);
 			if(!gui.hasSentMessage)

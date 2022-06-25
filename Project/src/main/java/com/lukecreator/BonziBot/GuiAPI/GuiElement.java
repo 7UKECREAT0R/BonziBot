@@ -1,6 +1,6 @@
 package com.lukecreator.BonziBot.GuiAPI;
 
-import net.dv8tion.jda.api.interactions.components.Component;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
 
 /**
  * A base GUI element.
@@ -24,7 +24,7 @@ public abstract class GuiElement {
 	 * element's current enabled state. Not really meant to be overridden.
 	 * @return
 	 */
-	public Component toDiscord() {
+	public ItemComponent toDiscord() {
 		return this.toDiscord(this.enabled);
 	}
 	
@@ -32,6 +32,6 @@ public abstract class GuiElement {
 	 * Convert this BonziBot GUI element to a Discord Message Component.
 	 * @return
 	 */
-	public abstract Component toDiscord(boolean enabled);
+	public abstract ItemComponent toDiscord(boolean enabled);
 	
 }

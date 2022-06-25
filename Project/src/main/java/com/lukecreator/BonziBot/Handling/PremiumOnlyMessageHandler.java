@@ -9,13 +9,12 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class PremiumOnlyMessageHandler implements MessageHandler {
 
 	@Override
-	public void handleGuildMessage(BonziBot bb, GuildMessageReceivedEvent e, Modifier[] modifiers) {
+	public void handleGuildMessage(BonziBot bb, MessageReceivedEvent e, Modifier[] modifiers) {
 		
 		User user = e.getAuthor();
 		UserAccountManager uam = bb.accounts;
@@ -31,7 +30,7 @@ public class PremiumOnlyMessageHandler implements MessageHandler {
 	}
 
 	@Override
-	public void handlePrivateMessage(BonziBot bb, PrivateMessageReceivedEvent e) {
+	public void handlePrivateMessage(BonziBot bb, MessageReceivedEvent e) {
 		return;
 	}
 

@@ -11,13 +11,12 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class CountingMessageHandler implements MessageHandler {
 	int count = 0;
 	@Override
-	public void handleGuildMessage(BonziBot bb, GuildMessageReceivedEvent e, Modifier[] modifiers) {
+	public void handleGuildMessage(BonziBot bb, MessageReceivedEvent e, Modifier[] modifiers) {
 		Message message = e.getMessage();
 		Guild guild = e.getGuild();
 		long guildId = guild.getIdLong();
@@ -31,7 +30,7 @@ public class CountingMessageHandler implements MessageHandler {
 		}
 		
 		if(nextNumber % 1000 == 0) {
-			TextChannel channel = e.getChannel();
+			TextChannel channel = (TextChannel)e.getChannel();
 			User author = e.getAuthor();
 			BonziUtils.tryAwardAchievement(channel, bb, author, Achievement.MILESTONER);
 		}
@@ -40,7 +39,7 @@ public class CountingMessageHandler implements MessageHandler {
 		bb.counting.setNextNumber(guildId, nextNumber);
 	}
 	@Override
-	public void handlePrivateMessage(BonziBot bb, PrivateMessageReceivedEvent e) {
+	public void handlePrivateMessage(BonziBot bb, MessageReceivedEvent e) {
 		return;
 	}
 
