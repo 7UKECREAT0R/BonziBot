@@ -19,7 +19,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class BuyCommand extends Command {
 
@@ -125,11 +125,11 @@ public class BuyCommand extends Command {
 					uam.setUserAccount(e.executor, account);
 					uam.setUserAccount(giftId, giftAccount);
 					if(e.isSlashCommand) {
-						sendGiftSuccess(e.slashCommand, giftReceiver.getName());
-						sendGiftDM(e.executor, giftReceiver, itemDisplay);
+						this.sendGiftSuccess(e.slashCommand, giftReceiver.getName());
+						this.sendGiftDM(e.executor, giftReceiver, itemDisplay);
 					} else {
-						sendGiftSuccess(e.channel, giftReceiver.getName());
-						sendGiftDM(e.executor, giftReceiver, itemDisplay);
+						this.sendGiftSuccess(e.channel, giftReceiver.getName());
+						this.sendGiftDM(e.executor, giftReceiver, itemDisplay);
 					}
 					return;
 				}
@@ -213,11 +213,11 @@ public class BuyCommand extends Command {
 					uam.setUserAccount(e.executor, account);
 					uam.setUserAccount(giftId, giftAccount);
 					if(e.isSlashCommand) {
-						sendGiftSuccess(e.slashCommand, giftReceiver.getName());
-						sendGiftDM(e.executor, giftReceiver, "BonziBot Premium 👑");
+						this.sendGiftSuccess(e.slashCommand, giftReceiver.getName());
+						this.sendGiftDM(e.executor, giftReceiver, "BonziBot Premium 👑");
 					} else {
-						sendGiftSuccess(e.channel, giftReceiver.getName());
-						sendGiftDM(e.executor, giftReceiver, "BonziBot Premium 👑");
+						this.sendGiftSuccess(e.channel, giftReceiver.getName());
+						this.sendGiftDM(e.executor, giftReceiver, "BonziBot Premium 👑");
 					}
 					return;
 				}
@@ -249,7 +249,7 @@ public class BuyCommand extends Command {
 			.setColor(Color.magenta);
 		BonziUtils.messageUser(user, eb.build());
 	}
-	void sendGiftSuccess(SlashCommandEvent command, String receiverName) {
+	void sendGiftSuccess(SlashCommandInteractionEvent command, String receiverName) {
 		MessageEmbed me = BonziUtils.successEmbed
 				("Success! Your gift to " + receiverName + " is on its way!");
 		command.getHook().editOriginalEmbeds(me).queue();

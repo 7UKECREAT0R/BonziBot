@@ -8,10 +8,10 @@ import com.lukecreator.BonziBot.Gui.GuiMusic;
 import com.lukecreator.BonziBot.Music.MusicQueue;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
+import net.dv8tion.jda.api.entities.AudioChannel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 
 public class MusicCommand extends Command {
@@ -32,15 +32,15 @@ public class MusicCommand extends Command {
 		GuildVoiceState vc = member.getVoiceState();
 		Guild guild = e.guild;
 		
-		if(!vc.inVoiceChannel()) {
-			e.reply(BonziUtils.failureEmbed("You need to be in a voice channel."));
+		if(!vc.inAudioChannel()) {
+			e.reply(BonziUtils.failureEmbed("You need to be in an audio channel."));
 			return;
 		}
 		
-		VoiceChannel channel = vc.getChannel();
+		AudioChannel channel = vc.getChannel();
 		
 		if(channel == null) {
-			e.reply(BonziUtils.failureEmbed("i have no idea what just happened.", "channel == null"));
+			e.reply(BonziUtils.failureEmbed("i have no idea what just happened.", "channel was null"));
 			return;
 		}
 		

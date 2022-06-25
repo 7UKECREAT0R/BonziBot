@@ -47,7 +47,7 @@ public class UnmuteCommand extends Command {
 		}
 		
 		mutes.unmute(e.guild, target);
-		e.guild.removeRoleFromMember(target.getIdLong(), role).queue();
+		e.guild.removeRoleFromMember(target, role).queue();
 		
 		if(e.isSlashCommand)
 			e.slashCommand.replyEmbeds(BonziUtils.successEmbed("Unmuted user successfully.", "User: `" + target.getAsTag() + "`")).queue();
