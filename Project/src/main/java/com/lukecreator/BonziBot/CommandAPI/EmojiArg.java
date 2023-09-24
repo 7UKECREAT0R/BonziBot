@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
+import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 import net.dv8tion.jda.api.JDA;
@@ -28,7 +29,7 @@ public class EmojiArg extends CommandArg {
 		try {
 			this.object = GenericEmoji.parseEmoji(word);
 		} catch (Exception e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		}
 		return;
 	}

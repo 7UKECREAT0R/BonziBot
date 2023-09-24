@@ -53,7 +53,7 @@ public class CommandArgCollection {
 	 */
 	public void testValidity() throws IllegalArgumentException {
 		boolean foundOptional = false; 
-		for(CommandArg arg: args) {
+		for(CommandArg arg: this.args) {
 			if(arg.optional && !foundOptional) {
 				foundOptional = true;
 				continue;
@@ -63,7 +63,7 @@ public class CommandArgCollection {
 		}
 	}
 	public int size() {
-		return args.length;
+		return this.args.length;
 	}
 	
 	/**
@@ -88,13 +88,13 @@ public class CommandArgCollection {
 		// Build possible results and store in allUsages.
 		String start = '`' + prefix + commandName;
 		for(int x = 0; x < combinations; x++) {
-			int argLength = args.length - x;
+			int argLength = this.args.length - x;
 			String localStart = start;
 			if(argLength > 0)
 				localStart += ' ';
 			String[] buffer = new String[argLength];
 			for(int y = 0; y < argLength; y++)
-				buffer[y] = args[y].getUsageTerm().replace('_', ' ');
+				buffer[y] = this.args[y].getUsageTerm().replace('_', ' ');
 			allUsages[x] = localStart + String.join(" ", buffer) + '`';
 		}
 		
@@ -102,7 +102,7 @@ public class CommandArgCollection {
 		if(hasUO) {
 			for(int ex = 0; ex < extraComb; ex++) {
 				int fIndex = baseIndex + ex;
-				String override = usageOverride[ex];
+				String override = this.usageOverride[ex];
 				allUsages[fIndex] = start + ' ' + override + '`';
 			}
 		}
@@ -168,7 +168,7 @@ public class CommandArgCollection {
 				cmd.object = mapping.getAsBoolean();
 				break;
 			case CHANNEL:
-				cmd.object = mapping.getAsGuildChannel();
+				cmd.object = mapping.getAsChannel();
 				break;
 			case INTEGER:
 				cmd.object = mapping.getAsLong();
@@ -195,14 +195,14 @@ public class CommandArgCollection {
 	 */
 	public CommandParsedArgs parse(String[] words, JDA jda, User exec, Guild g) {
 		
-		int argCount = args.length;
-		for(CommandArg a: args)
+		int argCount = this.args.length;
+		for(CommandArg a: this.args)
 			if(a.optional) argCount--;
 		if(words.length < argCount) {
 			return new CommandParsedArgs(null, true);
 		}
 		
-		CommandArg[] clone = args.clone();
+		CommandArg[] clone = this.args.clone();
 		for(int i = 0; i < clone.length; i++) {
 			CommandArg cmd = clone[i];
 			if(cmd.optional) {
@@ -217,7 +217,7 @@ public class CommandArgCollection {
 			String word = words[i];
 			
 			if(cmd.type == ArgType.StringRem) {
-				String s = buildRemainder(words, i);
+				String s = this.buildRemainder(words, i);
 				cmd.object = s;
 				clone[i] = cmd;
 				break;

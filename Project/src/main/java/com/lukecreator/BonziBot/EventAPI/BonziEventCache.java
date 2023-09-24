@@ -21,7 +21,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 /**
  * List of active events. Used in the BonziEventManager.
@@ -45,10 +45,10 @@ public class BonziEventCache implements Serializable {
 	public BonziEventCache() {
 		this.unstartedEvents = new ArrayList<BonziEvent>();
 		this.startedEvents = new ArrayList<BonziEvent>();
-		executor = new ScheduledThreadPoolExecutor(0);
-		executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-		executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-		executor.setRemoveOnCancelPolicy(true);
+		this.executor = new ScheduledThreadPoolExecutor(0);
+		this.executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+		this.executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+		this.executor.setRemoveOnCancelPolicy(true);
 	}
 	/**
 	 * Start all executors based off of active events.
@@ -81,7 +81,7 @@ public class BonziEventCache implements Serializable {
 			this.executorEntries.put(event.id, future);
 	}
 	public void stopExecutorFor(BonziEvent event) {
-		Long id = new Long(event.id);
+		Long id = Long.valueOf(event.id);
 		if(!this.executorEntries.containsKey(id))
 			return;
 		ScheduledFuture<?> cancel = this.executorEntries.get(id);
@@ -113,7 +113,10 @@ public class BonziEventCache implements Serializable {
 		event.sentTextChannel = channel.getIdLong();
 		if(event.autoStart) {
 			MessageEmbed me = event.onEventStarted();
-			if(me == null) me = BonziUtils.failureEmbed("no starting embed was given.");
+			
+			if(me == null)
+				me = BonziUtils.failureEmbed("no starting embed was given.");
+			
 			channel.sendMessageEmbeds(me).queue(sent -> {
 				sent.addReaction(BonziEvent.JOIN_BUTTON).queue();
 				long id = sent.getIdLong();
@@ -137,8 +140,8 @@ public class BonziEventCache implements Serializable {
 		return event.id;
 	}
 	public void stopEventsByType(Class<? extends BonziEvent> type, Guild guild) {
-		for(int i = 0; i < startedEvents.size(); i++) {
-			BonziEvent event = startedEvents.get(i);
+		for(int i = 0; i < this.startedEvents.size(); i++) {
+			BonziEvent event = this.startedEvents.get(i);
 			if(type.isInstance(event)) {
 				event.eventEnded = true;
 				MessageEmbed embed = event.onEventEnded();
@@ -146,14 +149,14 @@ public class BonziEventCache implements Serializable {
 					TextChannel tc = guild.getTextChannelById(event.sentTextChannel);
 					tc.editMessageEmbedsById(event.sentMessageId, embed).queue();
 				}
-				startedEvents.remove(i--);
+				this.startedEvents.remove(i--);
 				return;
 			}
 		}
 		
 		// Non-started events. (psst its the same thing)
-		for(int i = 0; i < unstartedEvents.size(); i++) {
-			BonziEvent event = unstartedEvents.get(i);
+		for(int i = 0; i < this.unstartedEvents.size(); i++) {
+			BonziEvent event = this.unstartedEvents.get(i);
 			if(type.isInstance(event)) {
 				event.eventEnded = true;
 				MessageEmbed embed = event.onEventEnded();
@@ -161,14 +164,14 @@ public class BonziEventCache implements Serializable {
 					TextChannel tc = guild.getTextChannelById(event.sentTextChannel);
 					tc.editMessageEmbedsById(event.sentMessageId, embed).queue();
 				}
-				unstartedEvents.remove(i--);
+				this.unstartedEvents.remove(i--);
 				return;
 			}
 		}
 	}
 	public void stopRunningEvent(BonziEvent event, Guild guild) {
-		for(int i = 0; i < startedEvents.size(); i++) {
-			BonziEvent test = startedEvents.get(i);
+		for(int i = 0; i < this.startedEvents.size(); i++) {
+			BonziEvent test = this.startedEvents.get(i);
 			if(test.id == event.id) {
 				event.eventEnded = true;
 				MessageEmbed embed = event.onEventEnded();
@@ -176,7 +179,7 @@ public class BonziEventCache implements Serializable {
 					TextChannel tc = guild.getTextChannelById(event.sentTextChannel);
 					tc.editMessageEmbedsById(event.sentMessageId, embed).queue();
 				}
-				startedEvents.remove(i--);
+				this.startedEvents.remove(i--);
 				return;
 			}
 		}

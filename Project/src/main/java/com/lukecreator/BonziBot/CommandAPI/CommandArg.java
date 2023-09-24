@@ -3,6 +3,8 @@ package com.lukecreator.BonziBot.CommandAPI;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import com.lukecreator.BonziBot.InternalLogger;
+
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
@@ -77,7 +79,7 @@ public abstract class CommandArg {
 	 * Expect theGuild to be null.
 	 */
 	public void parseWord(String word, JDA jda, User user, Guild theGuild) {
-		object = word;
+		this.object = word;
 	}
 	
 	/**
@@ -87,7 +89,7 @@ public abstract class CommandArg {
 	public String getUsageTerm() {
 		char a = this.optional ? '[' : '<';
 		char b = this.optional ? ']' : '>';
-		return a + argName + b;
+		return a + this.argName + b;
 	}
 	/**
 	 * Same goes for this. Put an example or something.
@@ -115,14 +117,14 @@ public abstract class CommandArg {
 	public CommandArg createNew() {
 		Class<? extends CommandArg> clazz = this.getClass();
 		try {
-			if(type == ArgType.Enum) {
+			if(this.type == ArgType.Enum) {
 				EnumArg selfEnum = (EnumArg)this;
 				Constructor<?> cnst = clazz.getConstructor(String.class, Class.class);
 				CommandArg arg = (CommandArg)cnst.newInstance(this.argName, selfEnum.baseClass);
 				arg.optional = this.optional;
 				arg.object = null; // default
 				return arg;
-			} else if(type == ArgType.Choice) {
+			} else if(this.type == ArgType.Choice) {
 				String[] choices = ((ChoiceArg)this).choices;
 				String[] copy = new String[choices.length];
 				for(int i = 0; i < choices.length; i++)
@@ -140,17 +142,17 @@ public abstract class CommandArg {
 				return arg;
 			}
 		} catch (InstantiationException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		} catch (SecurityException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		}
 		return null;
 	}

@@ -15,8 +15,9 @@ public class SUser implements Serializable {
 	
 	public final String name;
 	public final String discriminator;
+	
 	public String getFullName() {
-		return name + "#" + discriminator;
+		return this.name;
 	}
 	public String getAsMention() {
 		return "<@" + this.id + ">";
@@ -27,7 +28,7 @@ public class SUser implements Serializable {
 	
 	public SUser(User user) {
 		this.name = user.getName();
-		this.discriminator = user.getDiscriminator();
+		this.discriminator = "0000";
 		this.id = user.getIdLong();
 		this.avatarUrl = user.getEffectiveAvatarUrl();
 	}

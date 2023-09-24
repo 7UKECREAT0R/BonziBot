@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
@@ -202,7 +202,7 @@ public class OldLogEntry {
 		String reason = "Sent a message: \"" + cached.getContentDisplay() + "\"";
 		entryOutput.accept(new OldLogEntry(LogEntry.Type.DELETEDMESSAGE,
 			LogButtons.WARN.flag | LogButtons.KICK.flag, 0l, messageId, reason,
-			cached.getContentRaw(), cached.getAuthor().getAsTag(),
+			cached.getContentRaw(), cached.getAuthor().getName(),
 			cached.getAttachments().size(), cached.getAuthor().getIdLong()));
 	}
 	
@@ -230,8 +230,8 @@ public class OldLogEntry {
 					? 0l : executor.getIdLong();
 				long bannedId = target.getIdLong();
 				String executorName = (executor == null)
-					? "Couldn't find name." : executor.getAsTag();
-				String targetName = target.getAsTag();
+					? "Couldn't find name." : executor.getName();
+				String targetName = target.getName();
 				entryOutput.accept(new OldLogEntry(
 						LogEntry.Type.BAN,
 						LogButtons.UNDO.flag,
@@ -249,7 +249,7 @@ public class OldLogEntry {
 					0l, // Executor
 					target.getIdLong(), // Target
 					"Error getting information.", // Reason
-					"Can't find the banner.", target.getAsTag(), // Extra Strings
+					"Can't find the banner.", target.getName(), // Extra Strings
 					0l, 0l)); // Extra Longs
 			return;
 		});
@@ -268,7 +268,7 @@ public class OldLogEntry {
 				0l, // Executor
 				event.getUser().getIdLong(), // Target
 				null, // Reason
-				event.getUser().getAsTag(), null, // Extra Strings
+				event.getUser().getName(), null, // Extra Strings
 				0l, 0l)); // Extra Longs
 		return;
 	}

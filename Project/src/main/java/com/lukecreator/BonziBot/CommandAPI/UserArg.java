@@ -15,10 +15,11 @@ public class UserArg extends CommandArg {
 	}
 
 	boolean isMention(String s) {
-		if(s.startsWith("<@") && s.endsWith(">") &&
-			(s.length() >= 20 && s.length() <= 22)) {
+		int len = s.length();
+		if(s.startsWith("<@") && s.endsWith(">") && len > 20 && len < 23)
 			return true;
-		}
+		if(s.startsWith("<@!") && s.endsWith(">") && len > 21 && len < 24)
+			return true;
 		else return false;
 	}
 	long getMentionId(String mention) {
@@ -34,11 +35,11 @@ public class UserArg extends CommandArg {
 		
 	}
 	boolean isValidId(String s) {
+		int len = s.length();
 		try {
 			Long.parseLong(s);
-			if(s.length() == 17 || s.length() == 18) {
+			if(len >= 17 && len <= 19)
 				return true;
-			}
 		} catch(NumberFormatException nfe) {}
 		return false;
 	}
@@ -49,9 +50,9 @@ public class UserArg extends CommandArg {
 			return false;
 		if(word.equalsIgnoreCase("me"))
 			return true;
-		if(isMention(word))
+		if(this.isMention(word))
 			return true;
-		if(isValidId(word))
+		if(this.isValidId(word))
 			return true;
 		
 		if(theGuild != null) {
@@ -76,8 +77,8 @@ public class UserArg extends CommandArg {
 		
 		// Mention case.
 		// <@!214183045278728202>
-		if(isMention(word)) {
-			long id = getMentionId(word);
+		if(this.isMention(word)) {
+			long id = this.getMentionId(word);
 			User u = jda.getUserById(id);
 			this.object = u;
 			return;
@@ -85,7 +86,7 @@ public class UserArg extends CommandArg {
 		
 		// ID Case
 		// 214183045278728202
-		if(isValidId(word)) {
+		if(this.isValidId(word)) {
 			long id = Long.parseLong(word);
 			User u = jda.getUserById(id);
 			this.object = u;
@@ -110,9 +111,9 @@ public class UserArg extends CommandArg {
 	@Override
 	public String getUsageTerm() {
 		if(this.optional)
-			return "[@" + argName + "]";
+			return "[@" + this.argName + "]";
 		else
-			return "<@" + argName + ">";
+			return "<@" + this.argName + ">";
 	}
 	
 	@Override

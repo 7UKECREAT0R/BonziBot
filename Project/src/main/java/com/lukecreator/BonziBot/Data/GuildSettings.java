@@ -8,9 +8,9 @@ import java.util.regex.Pattern;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 
 public class GuildSettings implements Serializable {
 	
@@ -63,6 +63,7 @@ public class GuildSettings implements Serializable {
 	
 	// Bot Commands (for the botcommands modifier)
 	public boolean botCommandsEnabled = true;
+	public boolean levellingEnabled = true;
 	public boolean loggingEnabled = false;
 	public long loggingChannelCached = 0l;
 	
@@ -95,23 +96,23 @@ public class GuildSettings implements Serializable {
 	 * Cycles the filter option. Returns the new value.
 	 */
 	public FilterLevel cycleFilter() {
-		switch(filter) {
+		switch(this.filter) {
 		case NONE:
-			filter = FilterLevel.SLURS;
+			this.filter = FilterLevel.SLURS;
 			break;
 		case SLURS:
-			filter = FilterLevel.SWEARS;
+			this.filter = FilterLevel.SWEARS;
 			break;
 		case SWEARS:
-			filter = FilterLevel.SENSITIVE;
+			this.filter = FilterLevel.SENSITIVE;
 			break;
 		case SENSITIVE:
-			filter = FilterLevel.NONE;
+			this.filter = FilterLevel.NONE;
 			break;
 		default:
 			break;
 		}
-		return filter;
+		return this.filter;
 	}
 	/**
 	 * Tests the message in the filter. Returns if it's good.
@@ -123,7 +124,7 @@ public class GuildSettings implements Serializable {
 		String text = msg.getContentStripped();
 		text = BonziUtils.stripText(text);
 		
-		if(!customFilter.isEmpty()) {
+		if(!this.customFilter.isEmpty()) {
 			String upper = text.toUpperCase();
 			String attach = null;
 			if(!msg.getAttachments().isEmpty()) {
@@ -132,7 +133,7 @@ public class GuildSettings implements Serializable {
 					.getFileName());
 			}
 			
-			for(String _item: customFilter) {
+			for(String _item: this.customFilter) {
 				String item = _item.toUpperCase();
 				if(upper.contains(item))
 					return false; // NOT GOOD
@@ -141,15 +142,15 @@ public class GuildSettings implements Serializable {
 			}
 		}
 		
-		switch(filter) {
+		switch(this.filter) {
 		case NONE:
 			return true;
 		case SLURS:
-			return testMessageSlurs(text);
+			return this.testMessageSlurs(text);
 		case SWEARS:
-			return testMessageSwears(text);
+			return this.testMessageSwears(text);
 		case SENSITIVE:
-			return testMessageSensitive(msg, text);
+			return this.testMessageSensitive(msg, text);
 		default:
 			return true;
 		}
@@ -163,25 +164,25 @@ public class GuildSettings implements Serializable {
 		
 		msg = BonziUtils.stripText(msg);
 		
-		if(!customFilter.isEmpty()) {
+		if(!this.customFilter.isEmpty()) {
 			String upper = msg.toUpperCase();
 			
-			for(String _item: customFilter) {
+			for(String _item: this.customFilter) {
 				String item = _item.toUpperCase();
 				if(upper.contains(item))
 					return false; // NOT GOOD
 			}
 		}
 		
-		switch(filter) {
+		switch(this.filter) {
 		case NONE:
 			return true;
 		case SLURS:
-			return testMessageSlurs(msg);
+			return this.testMessageSlurs(msg);
 		case SWEARS:
-			return testMessageSwears(msg);
+			return this.testMessageSwears(msg);
 		case SENSITIVE:
-			return testMessageSwears(msg);
+			return this.testMessageSwears(msg);
 		default:
 			return true;
 		}
@@ -225,9 +226,9 @@ public class GuildSettings implements Serializable {
 	 */
 	public boolean addCustomFilter(String word) {
 		String s = word.toUpperCase();
-		if(customFilter.contains(s))
+		if(this.customFilter.contains(s))
 			return false;
-		customFilter.add(s);
+		this.customFilter.add(s);
 		return true;
 	}
 	/**
@@ -235,14 +236,14 @@ public class GuildSettings implements Serializable {
 	 */
 	public boolean removeCustomFilter(String word) {
 		String s = word.toUpperCase();
-		return customFilter.remove(s);
+		return this.customFilter.remove(s);
 	}
 	public String[] getCustomFilter() {
-		return (String[]) customFilter.toArray
-			(new String[customFilter.size()]);
+		return (String[]) this.customFilter.toArray
+			(new String[this.customFilter.size()]);
 	}
 	public void clearCustomFilter() {
-		customFilter.clear();
+		this.customFilter.clear();
 	}
 	
 	public String getPrefix() {

@@ -9,9 +9,9 @@ import com.lukecreator.BonziBot.GuiAPI.GuiButton;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 /**
  * A user submitted ban appeal awaiting review from a moderator.
@@ -22,7 +22,7 @@ public class BanAppeal implements Serializable {
 	
 	private static final long serialVersionUID = 7838786200973148685L;
 	
-	public String username; // this is a complete tag btw (ABC#0001)
+	public String username;
 	public String avatarUrl;
 	public long userId;
 	public String content;
@@ -31,7 +31,7 @@ public class BanAppeal implements Serializable {
 	public long sentMessage = 0l;
 	
 	public BanAppeal(User user, String content) {
-		this.username = user.getAsTag();
+		this.username = user.getName() + " (" + user.getEffectiveName() + ")";
 		this.avatarUrl = user.getEffectiveAvatarUrl();
 		this.userId = user.getIdLong();
 		this.content = content;
@@ -50,7 +50,7 @@ public class BanAppeal implements Serializable {
 			EmbedBuilder eb = BonziUtils.quickEmbed("Ban Appeal",
 				"Banned for: `" + reason + "`\n```" +
 				this.content + "```", BonziUtils.COLOR_BONZI_PURPLE);
-			eb.setAuthor(username, null, avatarUrl);
+			eb.setAuthor(this.username, null, this.avatarUrl);
 			eb.setFooter("Should this user be unbanned?");
 			
 			GuiButton[] buttons = new GuiButton[] {
@@ -61,6 +61,6 @@ public class BanAppeal implements Serializable {
 			BonziUtils.appendComponents(tc.sendMessageEmbeds(eb.build()), buttons, false).queue(success -> {
 				completion.accept(success);
 			}, failure);
-		}, fail -> { /* Ban not valid. */});
+		}, fail -> { /* Ban not valid. */ });
 	}
 }

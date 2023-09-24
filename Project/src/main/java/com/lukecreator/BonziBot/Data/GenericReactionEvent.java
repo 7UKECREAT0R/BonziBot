@@ -1,13 +1,13 @@
 package com.lukecreator.BonziBot.Data;
 
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.entities.emoji.EmojiUnion;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -15,13 +15,13 @@ import net.dv8tion.jda.api.requests.RestAction;
 public class GenericReactionEvent {
 	public final JDA jda;
 	public final boolean added; // added/removed
-	public final MessageChannel channel;
+	public final MessageChannelUnion channel;
 	public final Guild guild;
 	public final User user;
 	public final long userIdLong;
 	public final long messageIdLong;
 	public final MessageReaction reaction;
-	public final ReactionEmote reactionEmote;
+	public final EmojiUnion reactionEmote;
 	public final long responseNumber;
 	
 	public GenericReactionEvent(MessageReactionAddEvent e) {
@@ -34,7 +34,7 @@ public class GenericReactionEvent {
 			this.userIdLong = this.user.getIdLong();
 			this.messageIdLong = e.getMessageIdLong();
 			this.reaction = e.getReaction();
-			this.reactionEmote = e.getReactionEmote();
+			this.reactionEmote = e.getEmoji();
 			this.responseNumber = e.getResponseNumber();
 		} else if(e.isFromType(ChannelType.PRIVATE)) {
 			this.jda = e.getJDA();
@@ -45,7 +45,7 @@ public class GenericReactionEvent {
 			this.userIdLong = this.user.getIdLong();
 			this.messageIdLong = e.getMessageIdLong();
 			this.reaction = e.getReaction();
-			this.reactionEmote = e.getReactionEmote();
+			this.reactionEmote = e.getEmoji();
 			this.responseNumber = e.getResponseNumber();
 		} else {
 			this.jda = null;
@@ -70,7 +70,7 @@ public class GenericReactionEvent {
 			this.userIdLong = this.user.getIdLong();
 			this.messageIdLong = e.getMessageIdLong();
 			this.reaction = e.getReaction();
-			this.reactionEmote = e.getReactionEmote();
+			this.reactionEmote = e.getEmoji();
 			this.responseNumber = e.getResponseNumber();
 		} else if(e.isFromType(ChannelType.PRIVATE)) {
 			this.jda = e.getJDA();
@@ -81,7 +81,7 @@ public class GenericReactionEvent {
 			this.userIdLong = this.user.getIdLong();
 			this.messageIdLong = e.getMessageIdLong();
 			this.reaction = e.getReaction();
-			this.reactionEmote = e.getReactionEmote();
+			this.reactionEmote = e.getEmoji();
 			this.responseNumber = e.getResponseNumber();
 		} else {
 			this.jda = null;

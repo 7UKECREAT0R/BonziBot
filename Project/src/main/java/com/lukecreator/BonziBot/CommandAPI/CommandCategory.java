@@ -11,7 +11,7 @@ public enum CommandCategory {
 	MODERATION("Moderation Commands"),
 	UTILITIES("Utility Commands"),
 	MUSIC("Music Commands"),
-	UPGRADE("Upgrade Commands");
+	TECHNICAL("Technical Commands");
 
 	public final String name;
 	private CommandCategory(String string) {

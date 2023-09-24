@@ -13,6 +13,7 @@ import com.lukecreator.BonziBot.Data.UserAccount;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 
 /**
  * The abstraction of a server-wide event.
@@ -24,7 +25,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
  */
 public abstract class BonziEvent implements Serializable {
 	
-	public static final String JOIN_BUTTON = "🔘";
+	public static final Emoji JOIN_BUTTON = Emoji.fromUnicode("🔘");
 	private static final long serialVersionUID = 1L;
 	
 	// Data

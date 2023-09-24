@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.text.similarity.LevenshteinDistance;
+
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
 
@@ -15,9 +17,33 @@ public class SteamCache {
 	
 	public class Release {
 		public int appID;
+		public String appSearch;
 		public String appName;
 	}
 	
+	public static final char[] STANDARD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".toCharArray();
+	
+	public static String filterStringForSteamCache(String input) {
+		input = input.toUpperCase();
+		char[] characters = input.toCharArray();
+		
+		int resultIndex = 0;
+		char[] result = new char[input.length()];
+		
+		for(int i = 0; i < characters.length; i++) {
+			char current = characters[i];
+			for(char check: STANDARD_CHARS) {
+				if(current == check) {
+					result[resultIndex++] = current;
+					break;
+				}
+			}
+		}
+		
+		return new String(result, 0, resultIndex);
+	}
+	
+	private static final LevenshteinDistance DISTANCE = new LevenshteinDistance();
 	private static final String DATA_START = "{\"applist\":{\"apps\":[";
 	public static final String STORE_URL = "https://store.steampowered.com/app/";
 	boolean titlesFetched = false;
@@ -28,7 +54,7 @@ public class SteamCache {
 	}
 	public void fetchTitles() {
 		
-		if(titlesFetched)
+		if(this.titlesFetched)
 			return;
 		
 		InternalLogger.print("Fetching steam titles...");
@@ -59,7 +85,9 @@ public class SteamCache {
 					}
 				} else {
 					try {
-						current.appName = part.substring(8, part.length() - 2).toUpperCase();
+						current.appName = part.substring(8, part.length() - 2);
+						current.appSearch = filterStringForSteamCache(current.appName);
+						
 						this.titles.add(current);
 						current = new Release();
 					} catch(StringIndexOutOfBoundsException sioobe) {
@@ -69,25 +97,33 @@ public class SteamCache {
 				}
 			}
 			InternalLogger.print("Cached " + this.titles.size() + " steam release titles.");
-			titlesFetched = true;
+			this.titlesFetched = true;
 		} catch (IOException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		}
 	}
 	String downloadTitles() throws IOException {
 		return BonziUtils.requestGet("http://api.steampowered.com/ISteamApps/GetAppList/v0002/");
 	}
-
-	public Release[] searchForTitles(String search) {
+	
+	public Release searchForTitle(String search) {
+		Release bestTitle = null;
+		int bestDistance = 10000;
 		
-		search = search.toUpperCase();
-		List<Release> found = new ArrayList<Release>();
+		search = filterStringForSteamCache(search);
 		
 		for(Release release: this.titles) {
-			if(release.appName.contains(search))
-				found.add(release);
+			// calculates the levenshtein distance
+			short distance = DISTANCE.apply(search, release.appSearch).shortValue();
+			
+			// cache this release if its better
+			if(distance < bestDistance) {
+				bestDistance = distance;
+				bestTitle = release;
+				InternalLogger.print("Narrowed search to " + distance + ", title: " + release.appSearch);
+			}
 		}
 		
-		return (Release[]) found.toArray(new Release[found.size()]);
+		return bestTitle;
 	}
 }

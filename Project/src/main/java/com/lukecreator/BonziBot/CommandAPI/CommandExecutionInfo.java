@@ -8,16 +8,16 @@ import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.Modifier;
 
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -27,26 +27,26 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class CommandExecutionInfo {
 	
 	public CommandExecutionInfo(MessageReceivedEvent e) {
-		if(e.isFromType(ChannelType.TEXT)) {
-			this.bot = e.getJDA();
+		this.executor = e.getAuthor();
+		this.channel = e.getChannel();
+		this.guild = e.getGuild();
+		this.member = e.getMember();
+		this.message = e.getMessage();
+		this.fullText = this.message.getContentRaw();
+		this.bot = e.getJDA();
+		
+		if(this.channel.getType() == ChannelType.TEXT)
+			this.tChannel = this.channel.asTextChannel();
+		if(this.channel.getType() == ChannelType.PRIVATE)
+			this.pChannel = this.channel.asPrivateChannel();
+		
+		if(e.isFromType(ChannelType.TEXT) || e.isFromType(ChannelType.VOICE) || e.isFromType(ChannelType.GUILD_PUBLIC_THREAD)) {
+			this.isDirectMessage = false;
 			this.isGuildMessage = true;
-			this.executor = e.getAuthor();
-			this.channel = e.getChannel();
-			this.tChannel = (TextChannel)e.getTextChannel();
-			this.guild = e.getGuild();
-			this.member = e.getMember();
-			this.message = e.getMessage();
-			this.fullText = this.message.getContentRaw();
 		} else if(e.isFromType(ChannelType.PRIVATE)) {
-			this.bot = e.getJDA();
 			this.isDirectMessage = true;
-			this.executor = e.getAuthor();
-			this.channel = e.getChannel();
-			this.pChannel = e.getPrivateChannel();
-			this.message = e.getMessage();
-			this.fullText = this.message.getContentRaw();
+			this.isGuildMessage = false;
 		}
-
 	}
 	public CommandExecutionInfo(SlashCommandInteractionEvent e) {
 		this.isSlashCommand = true;
@@ -55,12 +55,14 @@ public class CommandExecutionInfo {
 		this.isGuildMessage = e.isFromGuild();
 		this.executor = e.getUser();
 		this.channel = e.getChannel();
-		if(e.getChannelType() == ChannelType.TEXT)
-			this.tChannel = e.getTextChannel();
-		else this.pChannel = e.getPrivateChannel();
 		this.guild = e.getGuild();
 		this.member = e.getMember();
 		this.message = null; // beware
+		
+		if(this.channel.getType() == ChannelType.TEXT)
+			this.tChannel = this.channel.asTextChannel();
+		if(this.channel.getType() == ChannelType.PRIVATE)
+			this.pChannel = this.channel.asPrivateChannel();
 	}
 	public CommandExecutionInfo setCommandData(String commandName, String[] inputArgs, CommandParsedArgs args) {
 		this.commandName = commandName;
@@ -113,7 +115,7 @@ public class CommandExecutionInfo {
 	public BonziBot bonzi = null;
 	public User executor = null;
 	public Message message = null; // if isSlashCommand, this is null. be careful.
-	public MessageChannel channel = null;
+	public MessageChannelUnion channel = null;
 	
 	// Null if isDirectMessage
 	public Guild guild = null;
@@ -129,47 +131,85 @@ public class CommandExecutionInfo {
 	 * @param content
 	 */
 	public void reply(String content) {
-		if(this.isSlashCommand && !this.slashCommand.isAcknowledged())
-			this.slashCommand.reply(content).queue();
-		else
-			this.channel.sendMessage(content).queue();
+		if(this.isSlashCommand) {
+			if(this.slashCommand.isAcknowledged()) {
+				this.channel.sendMessage(content).queue();
+			} else {
+				this.slashCommand.reply(content).queue();
+			}
+		} else {
+			this.message.reply(content).queue(null, fail -> {
+				// message might have been deleted
+				this.channel.sendMessage(content).queue();
+			});
+		}
 	}
 	/**
 	 * Generic method to send a temporary message depending on general context.
 	 * @param content
 	 */
 	public void reply(int seconds, String content) {
-		if(this.isSlashCommand && !this.slashCommand.isAcknowledged())
-			this.slashCommand.reply(content).queue(interaction -> {
-				interaction.deleteOriginal().queueAfter(seconds, TimeUnit.SECONDS);
-			});
-		else
-			this.channel.sendMessage(content).queue(msg -> {
+		if(this.isSlashCommand) {
+			if(this.slashCommand.isAcknowledged()) {
+				this.channel.sendMessage(content).queue(msg -> {
+					msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+				});
+			} else {
+				this.slashCommand.reply(content).queue(interaction -> {
+					interaction.deleteOriginal().queueAfter(seconds, TimeUnit.SECONDS);
+				});
+			}
+		} else {
+			this.message.reply(content).queue(msg -> {
 				msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+			}, fail -> {
+				this.channel.sendMessage(content).queue(msg -> {
+					msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+				});
 			});
+		}
 	}
 	/**
 	 * Generic method to send a message depending on general context.
 	 * @param embed
 	 */
 	public void reply(MessageEmbed embed) {
-		if(this.isSlashCommand && !this.slashCommand.isAcknowledged())
-			this.slashCommand.replyEmbeds(embed).queue();
-		else
-			this.channel.sendMessageEmbeds(embed).queue();
+		if(this.isSlashCommand) {
+			if(this.slashCommand.isAcknowledged()) {
+				this.channel.sendMessageEmbeds(embed).queue();
+			} else {
+				this.slashCommand.replyEmbeds(embed).queue();
+			}
+		} else {
+			this.message.replyEmbeds(embed).queue(null, fail -> {
+				// message might have been deleted
+				this.channel.sendMessageEmbeds(embed).queue();
+			});
+		}
 	}
 	/**
 	 * Generic method to send a temporary message depending on general context.
 	 * @param embed
 	 */
 	public void reply(int seconds, MessageEmbed embed) {
-		if(this.isSlashCommand && !this.slashCommand.isAcknowledged())
-			this.slashCommand.replyEmbeds(embed).queue(interaction -> {
-				interaction.deleteOriginal().queueAfter(seconds, TimeUnit.SECONDS);
-			});
-		else
-			this.channel.sendMessageEmbeds(embed).queue(msg -> {
+		if(this.isSlashCommand) {
+			if(this.slashCommand.isAcknowledged()) {
+				this.channel.sendMessageEmbeds(embed).queue(msg -> {
+					msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+				});
+			} else {
+				this.slashCommand.replyEmbeds(embed).queue(interaction -> {
+					interaction.deleteOriginal().queueAfter(seconds, TimeUnit.SECONDS);
+				});
+			}
+		} else {
+			this.message.replyEmbeds(embed).queue(msg -> {
 				msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+			}, fail -> {
+				this.channel.sendMessageEmbeds(embed).queue(msg -> {
+					msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
+				});
 			});
+		}
 	}
 }

@@ -13,8 +13,8 @@ public class RoleArg extends CommandArg {
 	}
 
 	boolean isMention(String s) {
-		if(s.startsWith("<@&") && s.endsWith(">") &&
-			(s.length() == 21 || s.length() == 22)) {
+		int len = s.length();
+		if(s.startsWith("<@&") && s.endsWith(">") && len > 21 && len < 24) {
 			return true;
 		}
 		else return false;
@@ -25,9 +25,10 @@ public class RoleArg extends CommandArg {
 		return Long.parseLong(s);
 	}
 	boolean isValidId(String s) {
+		int len = s.length();
 		try {
 			Long.parseLong(s);
-			if(s.length() == 17 || s.length() == 18)
+			if(len >= 17 && len <= 19)
 				return true;
 		} catch(NumberFormatException nfe) {}
 		return false;
@@ -35,9 +36,9 @@ public class RoleArg extends CommandArg {
 	
 	@Override
 	public boolean isWordParsable(String word, Guild theGuild) {
-		if(isMention(word))
+		if(this.isMention(word))
 			return true;
-		if(isValidId(word))
+		if(this.isValidId(word))
 			return true;
 		return false;
 	}
@@ -45,8 +46,8 @@ public class RoleArg extends CommandArg {
 	public void parseWord(String word, JDA jda, User user, Guild theGuild) {
 		// Mention case.
 		// <@&562661671957561365>
-		if(isMention(word)) {
-			long id = getMentionId(word);
+		if(this.isMention(word)) {
+			long id = this.getMentionId(word);
 			Role r = jda.getRoleById(id);
 			this.object = r;
 			return;
@@ -54,7 +55,7 @@ public class RoleArg extends CommandArg {
 		
 		// ID Case
 		// 562661671957561365
-		if(isValidId(word)) {
+		if(this.isValidId(word)) {
 			long id = Long.parseLong(word);
 			Role r = jda.getRoleById(id);
 			this.object = r;
@@ -65,9 +66,9 @@ public class RoleArg extends CommandArg {
 	@Override
 	public String getUsageTerm() {
 		if(this.optional)
-			return "[@" + argName + "]";
+			return "[@" + this.argName + "]";
 		else
-			return "<@" + argName + ">";
+			return "<@" + this.argName + ">";
 	}
 	
 	@Override

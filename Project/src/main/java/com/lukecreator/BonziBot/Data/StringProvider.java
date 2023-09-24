@@ -37,7 +37,7 @@ public class StringProvider {
 			InternalLogger.print("Loaded " + jokes.length + " jokes.");
 		} catch (FileNotFoundException e) {
 			InternalLogger.printError("JOKES FILE NOT LOADED, IS IT MISSING?", InternalLogger.Severity.FATAL);
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		}
 		
 		loader.clear();
@@ -55,7 +55,7 @@ public class StringProvider {
 			InternalLogger.print("Loaded " + dictionary.length + " words into dictionary.");
 		} catch (FileNotFoundException e) {
 			InternalLogger.printError("DICTIONARY FILE NOT LOADED, IS IT MISSING?", InternalLogger.Severity.FATAL);
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		}
 	}
 	public String getJoke() {

@@ -4,35 +4,44 @@ import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 
 public class QuickDrawMath extends QuickDraw {
 	
 	public String problem;
+	public boolean twentyOne;
 	public String answer;
 	
 	public QuickDrawMath(BonziBot bb) {
-		this.reward = 25 + BonziUtils.randomInt(50);
+		this.reward = BonziUtils.randomInt(25, 50);
 		
 		int mode = BonziUtils.randomInt(3);
-		boolean smallDigits = mode > 1; // mul
-		int a = BonziUtils.randomInt(smallDigits ? 11 : 101);
-		int b = BonziUtils.randomInt(smallDigits ? 11 : 101);
+		boolean smallDigits = mode == 2; // mul
+		int a = BonziUtils.randomInt(smallDigits ? 6 : 26);
+		int b = BonziUtils.randomInt(smallDigits ? 6 : 26);
+		
+		// swap
+		if(mode == 1 && b > a) {
+			int t = a;
+			a = b;
+			b = t;
+		}
 		
 		char p;
 		switch(mode) {
 		case 0:
-			if(a == 9 && b == 10)
+			if(a == 9 && b == 10) {
 				this.answer = "21";
-			else
+				this.reward += 100;
+				this.twentyOne = true;
+			} else
 				this.answer = String.valueOf(a + b);
 			p = '+';
 			break;
 		case 1:
-			this.answer = String.valueOf(
-				(a < b) ? (b - a) : (a - b));
+			this.answer = String.valueOf(a - b);
 			p = '-';
 			break;
 		case 2:
@@ -40,33 +49,39 @@ public class QuickDrawMath extends QuickDraw {
 			p = '*';
 			break;
 		default:
-			this.answer = "-1";
+			this.answer = "wtf";
 			p = '?';
 			break;
 		}
 		
-		if(a < b && mode == 1)
-			this.problem = b + " " + p + " " + a;
-		else
-			this.problem = a + " " + p + " " + b;
+		this.problem = a + " " + p + " " + b;
 	}
 
 	@Override
-	public MessageAction constructMessage(TextChannel channel) {
-		return channel.sendMessage("`Quick Draw!` Answer this: `" + this.problem + "`");
+	public MessageCreateAction constructMessage(TextChannel channel) {
+		return channel.sendMessage("` Quick Draw! ` How fast can you math: ` " + this.problem + " `");
 	}
 	@Override
-	public MessageAction constructWinnerMessage(User winner, int coinsGained, TextChannel channel) {
-		return channel.sendMessage(winner.getAsMention() + "` won the Quick Draw! The answer was " + this.answer + ".` `+" + coinsGained + " coins!`");
+	public MessageCreateAction constructWinnerMessage(User winner, int coinsGained, TextChannel channel) {
+		return channel.sendMessage(winner.getAsMention() + "` won the Quick Draw! The answer was " + this.answer + ". ` ` +" + coinsGained + " coins! `");
 	}
 	
 	@Override
 	public boolean tryInput(Message message) {
 		String input = message.getContentStripped().trim();
+		
 		if(input.equals(this.answer)) {
 			message.delete().queue(null, fail -> {});
 			return true;
 		}
+		
+		// failsafe incase they dont know
+		if(this.twentyOne && input.equals("19")) {
+			this.reward = 0;
+			message.delete().queue(null, fail -> {});
+			return true;
+		}
+		
 		return false;
 	}
 }

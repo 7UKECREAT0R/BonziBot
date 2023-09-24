@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot.CommandAPI;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -21,8 +22,8 @@ import com.lukecreator.BonziBot.NoUpload.Constants;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
@@ -39,12 +40,20 @@ public class CommandSystem {
 		try {
 			Set<Class<? extends Command>> classes = refs.getSubTypesOf(Command.class);
 			for(Class<? extends Command> c: classes) {
-				Command inst = c.newInstance();
+				Command inst = c.getDeclaredConstructor().newInstance();
 				inst.id = inst.name.hashCode();
 				InternalLogger.print("Register " + inst.getFilteredCommandName() + ":" + inst.id);
 				this.commands.add(inst);
 			}
 		} catch (InstantiationException | IllegalAccessException e) {
+			InternalLogger.printError(e);
+		} catch (IllegalArgumentException e) {
+			InternalLogger.printError(e);
+		} catch (InvocationTargetException e) {
+			InternalLogger.printError(e);
+		} catch (NoSuchMethodException e) {
+			InternalLogger.printError(e);
+		} catch (SecurityException e) {
 			InternalLogger.printError(e);
 		}
 		
@@ -58,6 +67,7 @@ public class CommandSystem {
 	public boolean onTextInput(CommandExecutionInfo info) {
 		
 		String text = info.fullText;
+		
 		if(BonziUtils.isWhitespace(text))
 			return false;
 		
@@ -340,8 +350,12 @@ public class CommandSystem {
 		BonziBot bot = info.bonzi;
 		SpecialPeopleManager am = bot.special;
 		boolean admin = am.getIsAdmin(ex);
+		boolean bro = admin || am.getIsBro(ex);
 		if(cmd.adminOnly && !admin) {
 			BonziUtils.sendAdminOnly(cmd, info);
+			return false;
+		} else if(cmd.brosOnly && !bro) {
+			BonziUtils.sendBrosOnly(cmd, info);
 			return false;
 		}
 		
@@ -379,8 +393,8 @@ public class CommandSystem {
 			}
 		}
 		
-		// Check user permissions.
-		if(info.isGuildMessage && cmd.userRequiredPermissions != null) {
+		// Check user permissions (if this is not an interaction).
+		if(!info.isSlashCommand && info.isGuildMessage && cmd.userRequiredPermissions != null) {
 			if(!(info.bonzi.adminBypassing && admin)) {
 				Member executor = info.member;
 				if(!executor.isOwner()) {

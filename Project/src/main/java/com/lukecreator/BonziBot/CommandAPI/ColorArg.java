@@ -3,6 +3,7 @@ package com.lukecreator.BonziBot.CommandAPI;
 import java.awt.Color;
 
 import com.lukecreator.BonziBot.BonziUtils;
+import com.lukecreator.BonziBot.InternalLogger;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -66,11 +67,11 @@ public class ColorArg extends CommandArg {
 			return true;
 		
 		// RGB color case.
-		boolean anyParen = hasParenthesis(word);
+		boolean anyParen = this.hasParenthesis(word);
 		int commaCount = BonziUtils.countChars(word, ',');
 		boolean validCommas = (commaCount == 2);
 		if(anyParen & validCommas) {
-			String strip = stripParenthesis(word);
+			String strip = this.stripParenthesis(word);
 			String[] parts = strip.split(",");
 			if(parts.length < 3)
 				return false;
@@ -110,14 +111,14 @@ public class ColorArg extends CommandArg {
 					col = new Color(254, 254, 254); // Pure white doesn't display right on embeds.
 				this.object = col;
 			} catch(NumberFormatException nfe) {
-				nfe.printStackTrace();
+				InternalLogger.printError(nfe);
 				this.object = null;
 			}
 			return;
 		}
 		
-		if(hasParenthesis(word)) {
-			String strip = stripParenthesis(word);
+		if(this.hasParenthesis(word)) {
+			String strip = this.stripParenthesis(word);
 			String[] parts = strip.split(",");
 			if(parts.length < 3) {
 				this.object = null;

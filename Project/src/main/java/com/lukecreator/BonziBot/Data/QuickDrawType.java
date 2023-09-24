@@ -6,14 +6,16 @@ import java.io.IOException;
 
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
+import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Graphics.FontLoader;
 import com.lukecreator.BonziBot.Graphics.FontStyle;
 import com.lukecreator.BonziBot.Graphics.Image;
 
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 public class QuickDrawType extends QuickDraw {
 	
@@ -21,30 +23,31 @@ public class QuickDrawType extends QuickDraw {
 	File file = null;
 	
 	QuickDrawType(BonziBot bb) {
-		this.reward = BonziUtils.randomInt(30) + 25;
+		this.reward = BonziUtils.randomInt(25, 50);
 		this.word = bb.strings.getWord();
 	}
 	
 	@Override
-	public MessageAction constructMessage(TextChannel channel) {
+	public MessageCreateAction constructMessage(TextChannel channel) {
 		Image draw = new Image(720, 240, false);
 		draw.fill(new Color(24, 24, 24));
 		draw.setFont(FontLoader.BEBAS_FONT, FontStyle.NORMAL, 72);
-		draw.drawCenteredString(word, Color.white);
+		draw.drawCenteredString(this.word, Color.white);
 		try {
 			this.file = draw.save("qdt" + channel.getIdLong() + ".jpg", false);
-			return channel.sendFile(this.file).append("`Quick Draw!` Type this word:");
+			FileUpload upload = FileUpload.fromData(this.file, this.file.toPath().getFileName().toString());
+			return channel.sendFiles(upload).setContent("` Quick Draw! ` Type this word:");
 		} catch (IOException e) {
-			e.printStackTrace();
-			return channel.sendMessage("`Quick Draw!` Type '" + this.word + "'");
+			InternalLogger.printError(e);
+			return channel.sendMessage("` Quick Draw! ` (fallback) Type '" + this.word + "'");
 		} finally {
 			if(draw != null)
 				draw.dispose();
 		}
 	}
 	@Override
-	public MessageAction constructWinnerMessage(User winner, int coinsGained, TextChannel channel) {
-		return channel.sendMessage(winner.getAsMention() + "` won the Quick Draw!` `+" + coinsGained + " coins!`");
+	public MessageCreateAction constructWinnerMessage(User winner, int coinsGained, TextChannel channel) {
+		return channel.sendMessage(winner.getAsMention() + "` won the Quick Draw! ` ` +" + coinsGained + " coins! `");
 	}
 	
 	@Override

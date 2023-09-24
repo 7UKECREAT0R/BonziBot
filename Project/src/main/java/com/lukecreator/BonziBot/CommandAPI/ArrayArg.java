@@ -3,6 +3,8 @@ package com.lukecreator.BonziBot.CommandAPI;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 
+import com.lukecreator.BonziBot.InternalLogger;
+
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
@@ -32,7 +34,7 @@ public class ArrayArg extends CommandArg {
 				.newInstance(name);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 			return;
 		}
 	}
@@ -64,13 +66,13 @@ public class ArrayArg extends CommandArg {
 		}
 		
 		String[] parts = word.split(DELIMITER);
-		uInstance.parseWord(parts[0], jda, user, theGuild);
-		Class<?> aType = uInstance.object.getClass();
+		this.uInstance.parseWord(parts[0], jda, user, theGuild);
+		Class<?> aType = this.uInstance.object.getClass();
 		Object[] abstractArray = (Object[])Array.newInstance
 			(aType, parts.length);
 		for(int i = 0; i < parts.length; i++) {
-			uInstance.parseWord(parts[i].trim(), jda, user, theGuild);
-			abstractArray[i] = uInstance.object;
+			this.uInstance.parseWord(parts[i].trim(), jda, user, theGuild);
+			abstractArray[i] = this.uInstance.object;
 		}
 		this.object = abstractArray;
 		return;
@@ -85,7 +87,7 @@ public class ArrayArg extends CommandArg {
 	public String getUsageTerm() {
 		String a = this.optional ? "[list: " : "<list: ";
 		String b = this.optional ? "]" : ">";
-		return a + argName + b;
+		return a + this.argName + b;
 	}
 	
 	@Override

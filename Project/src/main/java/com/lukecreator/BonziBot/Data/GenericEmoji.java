@@ -2,7 +2,9 @@ package com.lukecreator.BonziBot.Data;
 
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -12,10 +14,12 @@ import org.json.simple.parser.ParseException;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.InternalLogger;
 
-import net.dv8tion.jda.api.entities.Emoji;
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
+import net.dv8tion.jda.api.entities.emoji.CustomEmoji;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.entities.emoji.Emoji.Type;
+import net.dv8tion.jda.api.entities.emoji.EmojiUnion;
+import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 
 /**
  * Used for generalizing emotes/emojis into one object.
@@ -53,6 +57,20 @@ public class GenericEmoji implements Serializable {
 			return;
 		}
 		InternalLogger.print("Parsed " + SHORTCODE_TRANSLATOR.size() + " shortcodes.");
+	}
+	/**
+	 * Returns a set of all shortcode names.
+	 * @return
+	 */
+	public static Set<String> getShortcodeNames() {
+		return SHORTCODE_TRANSLATOR.keySet();
+	}
+	/**
+	 * Returns a collection of all shortcode characters (utf-8 emoji).
+	 * @return
+	 */
+	public static Collection<String> getShortcodeCharacters() {
+		return SHORTCODE_TRANSLATOR.values();
 	}
 	/**
 	 * Remove extra characters surrounding shortcode (colons) and convert to lower case.
@@ -120,14 +138,15 @@ public class GenericEmoji implements Serializable {
 	public long getGuildEmojiId() {
 		return this.guildEmoteId;
 	}
-	public boolean isEqual(ReactionEmote re) {
-		if(re.isEmote()) {
-			if(this.isEmoji) return false;
-			return re.getIdLong() == this.guildEmoteId;
+	public boolean isEqual(EmojiUnion re) {
+		if(re.getType() == Type.CUSTOM) {
+			if(this.isEmoji)
+				return false;
+			return (re.asCustom()).getIdLong() == this.guildEmoteId;
 		} else {
-			if(this.isEmote) return false;
-			//System.out.println(re.getEmoji() + " vs " + this.genericEmoji);
-			return re.getEmoji().equals(this.genericEmoji);
+			if(this.isEmote)
+				return false;
+			return (re.asUnicode()).getName().equals(this.genericEmoji);
 		}
 	}
 	/**
@@ -136,9 +155,9 @@ public class GenericEmoji implements Serializable {
 	 */
 	public void react(Message msg) {
 		if(this.isEmoji) {
-			msg.addReaction(this.genericEmoji).queue();
+			msg.addReaction(this.toEmoji()).queue();
 		} else {
-			Emote e = EmoteCache.getEmoteById(this.guildEmoteId);
+			RichCustomEmoji e = EmoteCache.getEmoteById(this.guildEmoteId);
 			msg.addReaction(e).queue();
 		}
 	}
@@ -148,7 +167,7 @@ public class GenericEmoji implements Serializable {
 		if(this.isEmoji)
 			return this.genericEmoji;
 		else {
-			Emote e = EmoteCache.getEmoteById(this.guildEmoteId);
+			RichCustomEmoji e = EmoteCache.getEmoteById(this.guildEmoteId);
 			return (e == null) ? "invalid" : e.getAsMention();
 		}
 	}
@@ -191,7 +210,8 @@ public class GenericEmoji implements Serializable {
 	public Emoji toEmoji() {
 		if(this.isEmoji)
 			return Emoji.fromUnicode(this.genericEmoji);
-		else return Emoji.fromEmote(EmoteCache.getEmoteById(this.guildEmoteId));
+		else
+			return Emoji.fromCustom(EmoteCache.getEmoteById(this.guildEmoteId));
 	}
 	
 	private GenericEmoji(String genericEmoji) {
@@ -218,24 +238,29 @@ public class GenericEmoji implements Serializable {
 			return ret;
 		}
 		
-		Emoji discordEmoji = Emoji.fromMarkdown(thing);
-		if(discordEmoji.isUnicode())
+		Emoji discordEmoji = Emoji.fromFormatted(thing);
+		
+		if(discordEmoji.getType() == Type.UNICODE) {
 			if(discordEmoji.getName() == null)
 				throw new Exception("Invalid markdown emoji.");
+		}
+		
 		return fromJDAEmoji(discordEmoji);
 	}
 	
 	public static GenericEmoji fromEmote(long emoteId, boolean animated) {
 		return new GenericEmoji(emoteId, animated);
 	}
-	public static GenericEmoji fromEmote(Emote emote) {
+	public static GenericEmoji fromEmote(RichCustomEmoji emote) {
 		return new GenericEmoji(emote.getIdLong(), emote.isAnimated());
 	}
 	public static GenericEmoji fromJDAEmoji(Emoji emote) {
-		if(emote.isCustom())
-			return new GenericEmoji(emote.getIdLong(), emote.isAnimated());
-		else
+		if(emote.getType() == Type.CUSTOM) {
+			CustomEmoji custom = (CustomEmoji)emote;
+			return new GenericEmoji(custom.getIdLong(), custom.isAnimated());
+		} else {
 			return new GenericEmoji(emote.getName());
+		}
 	}
 	public static GenericEmoji parseEmote(String emote) {
 		if(emote == null)
@@ -252,12 +277,12 @@ public class GenericEmoji implements Serializable {
 		
 		return new GenericEmoji(id, animated);
 	}
-	public static GenericEmoji fromReaction(ReactionEmote emote) {
-		if(emote.isEmote()) {
-			Emote e = emote.getEmote();
+	public static GenericEmoji fromReaction(EmojiUnion emote) {
+		if(emote.getType() == Type.CUSTOM) {
+			CustomEmoji e = emote.asCustom();
 			return new GenericEmoji(e.getIdLong(), e.isAnimated());
 		} else {
-			return new GenericEmoji(emote.getEmoji());
+			return new GenericEmoji(emote.asUnicode().getName());
 		}
 	}
 	public static GenericEmoji fromEmoji(String emoji) {

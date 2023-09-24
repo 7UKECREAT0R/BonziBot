@@ -91,8 +91,10 @@ public class DataSerializer {
     		toReturn = objectIn.readObject();
     	} catch(IOException exc) {
     		InternalLogger.printError("Failed to read file \"" + fileName + "\". Most likely doesn't exist.", Severity.ERROR);
+    		exc.printStackTrace();
     	} catch (ClassNotFoundException exc) {
     		InternalLogger.printError("Failed to read file \"" + fileName + "\". Class not found?", Severity.FATAL);
+    		exc.printStackTrace();
 		} finally {
 			safelyCloseStreams(fileIn, objectIn);
 		}
