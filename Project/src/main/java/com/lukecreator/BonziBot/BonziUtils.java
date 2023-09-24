@@ -29,6 +29,7 @@ import com.lukecreator.BonziBot.Data.Achievement;
 import com.lukecreator.BonziBot.Data.AfkData;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.GuildSettings;
+import com.lukecreator.BonziBot.Data.Mention;
 import com.lukecreator.BonziBot.Data.Modifier;
 import com.lukecreator.BonziBot.Data.ReactionRole;
 import com.lukecreator.BonziBot.Data.Rules;
@@ -43,22 +44,24 @@ import com.lukecreator.BonziBot.NoUpload.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Mentions;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.PrivateChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Component;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 /**
  * utility methods for just about everything. this
@@ -77,10 +80,13 @@ public class BonziUtils {
 	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36 Edg/86.0.622.69";
 	public static final DateTimeFormatter MMddyy = DateTimeFormatter.ofPattern("MM/dd/yy");
 	public static final DateTimeFormatter MMdd = DateTimeFormatter.ofPattern("MM/dd");
+	public static final DateTimeFormatter DH_YMD = DateTimeFormatter.ofPattern("yyMMdd");
+	public static final DateTimeFormatter DH_MDY = DateTimeFormatter.ofPattern("MMddyy");
+	public static final DateTimeFormatter DH_DMY = DateTimeFormatter.ofPattern("ddMMyy");
 	private static final Random randomInstance = new Random(System.currentTimeMillis());
 	
 	public static final MessageEmbed TERMS = new EmbedBuilder()
-		.setTitle("BonziBot Terms of Use & Privacy Policy")
+		.setTitle("BonziBot Privacy Policy")
 		.setDescription("If you do not agree to any listed information being stored, refusal to participate in the use of BonziBot is enough unless stated otherwise.")
 		
 		.addField("Publicity", "Your name (not including discriminator), premium status, and developer-assigned status may be expressed to the public domain in places like leaderboards "
@@ -130,6 +136,10 @@ public class BonziUtils {
 	}
 	public static int randomInt(int bound) {
 		return randomInstance.nextInt(bound);
+	}
+	public static int randomInt(int lowerInclusive, int upperInclusive) {
+		int diff = (upperInclusive - lowerInclusive) + 1;
+		return lowerInclusive + randomInstance.nextInt(diff);
 	}
 	public static boolean randomBoolean() {
 		return randomInstance.nextBoolean();
@@ -203,7 +213,64 @@ public class BonziUtils {
 		if(count==1 || count==-1)
 			return s;
 		else
-			return s + "s";
+			return pluralForm(s);
+	}
+	static String[] postfixes = new String[] { "s", "sh", "ch", "x", "z", "o" };
+	static char[] vowels = new char[] { 'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y' };
+	
+	/**
+	 * Returns if a character is an English vowel, regardless of case.
+	 * @param c
+	 * @return
+	 */
+	public static boolean isVowel(char c) {
+		for(char vowel: vowels)
+			if(c == vowel)
+				return true;
+		return false;
+	}
+	/**
+	 * Returns if a character is an English consonant, regardless of case.
+	 * @param c
+	 * @return
+	 */
+	public static boolean isConsonant(char c) {
+		for(char vowel: vowels)
+			if(c == vowel)
+				return false;
+		return true;
+	}
+	/**
+	 * Get the plural form of a string. Doesn't take exception words into account.
+	 * Ducky -> Duckies
+	 * Thing -> Things
+	 * Tax -> Taxes
+	 */
+	public static String pluralForm(String s) {
+		if(isWhitespace(s))
+			return s;
+		
+		int len = s.length();
+		
+		if(len == 1)
+			return s + "'s"; // A's, G's, etc..
+		
+		String comp = s.toLowerCase();
+		
+		for(String postfix: postfixes) {
+			if(comp.endsWith(postfix))
+				return s + "es";
+		}
+		
+		
+		char last = Character.toLowerCase(s.charAt(len - 1));
+		
+		if(last == 'y') {
+			if(!isVowel(s.charAt(len - 2)))
+				return s.substring(0, s.length() - 1) + "ies";
+		}
+		
+		return s + "s";
 	}
 	/**
 	 * Similar to String.valueOf(int) but
@@ -213,16 +280,24 @@ public class BonziUtils {
 		return NumberFormat.getInstance().format(num);
 	}
 	/**
-	 * Similar to String.valueOf(int) but
+	 * Similar to String.valueOf(long) but
 	 *    places commas where needed.
 	 */
 	public static String comma(long num) {
 		return NumberFormat.getInstance().format(num);
 	}
 	/**
-	 * Checks if a string is complete whitespace.
+	 * Similar to String.valueOf(double) but
+	 *    places commas where needed.
+	 */
+	public static String comma(double num) {
+		return NumberFormat.getInstance().format(num);
+	}
+	/**
+	 * Checks if a string is complete whitespace, empty, or null.
 	 */
 	public static boolean isWhitespace(String s) {
+		if(s == null) return true;
 		if(s.isEmpty()) return true;
 		return s.chars().allMatch(Character::isWhitespace);
 	}
@@ -285,6 +360,25 @@ public class BonziUtils {
 		return new String(changed);
 	}
 	/**
+	 * CONVERTS_CODE_NAMING -> converts code naming
+	 */
+	public static String titleStringLower(String input) {
+		char[] original = input.toCharArray();
+		char[] changed = new char[original.length];
+		
+		for(int i = 0; i < original.length; i++) {
+			char c = original[i];
+			if(c == '_' || Character.isWhitespace(c)) {
+				changed[i] = ' ';
+				continue;
+			}
+			
+			char nChar = Character.toLowerCase(c);
+			changed[i] = nChar;
+		}
+		return new String(changed);
+	}
+	/**
 	 * Cuts off string if it gets too l...
 	 */
 	public static String cutOffString(String s, int maxLength) {
@@ -308,13 +402,61 @@ public class BonziUtils {
 			return in;
 		
 		char[] c = in.toCharArray();
+		int repetitionRetries = 0;
+		
 		for(int i = 0; i < iterations; i++) {
-			int swap = randomInt(c.length);
-			char carry = c[i];
-			c[i] = c[swap];
-			c[swap] = carry;
+			while(true) {
+				int swap = randomInt(c.length);
+				char carry = c[i];
+				
+				if(carry == c[swap]) {
+					repetitionRetries++;
+					if(repetitionRetries < 100)
+						continue;
+				}
+				
+				c[i] = c[swap];
+				c[swap] = carry;
+				break;
+			}
 		}
 		return new String(c);
+	}
+	/**
+	 * Parse a mention. Identical to Mention.parse(...)
+	 * @param mention
+	 * @return The mentioned entity, otherwise <b>null</b>.
+	 */
+	public static Mention parseMention(String mention) {
+		mention = mention.trim();
+		if(!mention.startsWith("<")) 
+			return null;
+		if(!mention.endsWith(">"))
+			return null;
+		
+		int length = mention.length() - 2;
+		mention = mention.substring(1, length + 1);
+		
+		if(mention.startsWith("@&")) {
+			// Role Mention
+			long roleId = Long.parseLong(mention.substring(2));
+			return Mention.role(roleId);
+		} else if(mention.startsWith("#")) {
+			// Channel Mention
+			long channelId = Long.parseLong(mention.substring(1));
+			return Mention.channel(channelId);
+		} else if(mention.startsWith("@")) {
+			if(mention.charAt(1) == '!')
+				mention = mention.substring(2);
+			else
+				mention = mention.substring(1);
+			
+			long userId = Long.parseLong(mention);
+			return Mention.user(userId);
+		}
+		
+		// invalid mention
+		return null;
 	}
 	
 	/**
@@ -430,10 +572,10 @@ public class BonziUtils {
 		return String.join(delimiter, convert);
 	}
 	/**
-	 * Returns the user's name and discriminator formatted.
+	 * Returns the user's name and (deprecated: discriminator) formatted.
 	 */
 	public static String fullName(User u) {
-		return u.getName() + "#" + u.getDiscriminator();
+		return u.getName();
 	}
 	/**
 	 * Returns the roman numeral representation of a number.
@@ -474,7 +616,6 @@ public class BonziUtils {
 	 */
 	public static String joinLeaveVariables(String in, User u, Guild g) {
 		String user = u.getName();
-		String tag = u.getAsTag();
 		String server = g.getName();
 		String members = BonziUtils.comma(g.getMemberCount());
 		String date = LocalDateTime.now().format(MMddyy);
@@ -482,12 +623,10 @@ public class BonziUtils {
 		
 		return in
 			.replaceAll("(?i)\\(user\\)", user)
-			.replaceAll("(?i)\\(tag\\)", tag)
 			.replaceAll("(?i)\\(server\\)", server)
 			.replaceAll("(?i)\\(members\\)", members)
 			.replaceAll("(?i)\\(date\\)", date)
 			.replaceAll("(?i)\\(created\\)", created);
-			
 	}
 	/**
 	 * Generate a pseudo-random long that represents a unique ID.
@@ -665,13 +804,11 @@ public class BonziUtils {
 		//return bb.guildSettings.getSettings(guild).getPrefix();
 		return "/";
 	}
-	public static String getPrefixOrDefault(GuildMessageReceivedEvent info, BonziBot bonzi) {
-		//return bonzi.guildSettings.getSettings(info.getGuild()).getPrefix();
-		return "/";
-	}
-	public static String getPrefixOrDefault(PrivateMessageReceivedEvent info, BonziBot bonzi) {
-		//return Constants.DEFAULT_PREFIX;
-		return "/";
+	public static String getPrefixOrDefault(MessageReceivedEvent info, BonziBot bonzi) {
+		if(info.isFromGuild())
+			return "/";
+		else
+			return "/";
 	}
 	public static String getShortTimeStringMs(long ms) {
 		int secs = (int)Math.round
@@ -949,7 +1086,7 @@ public class BonziUtils {
 		return eb;
 	}
 	
-	public static MessageAction appendComponents(MessageAction in, Gui gui) {
+	public static MessageCreateAction appendComponents(MessageCreateAction in, Gui gui) {
 		if(gui == null)
 			return in;
 		if(gui.elements == null)
@@ -959,9 +1096,9 @@ public class BonziUtils {
 			return in;
 		return appendComponents(in, elements, gui.isDisabled());
 	}
-	public static MessageAction appendComponents(MessageAction in, GuiElement[] elements, boolean allDisable) {
+	public static MessageCreateAction appendComponents(MessageCreateAction in, GuiElement[] elements, boolean allDisable) {
 		List<ActionRow> rows = new ArrayList<ActionRow>();
-		List<Component> row = new ArrayList<Component>();
+		List<ItemComponent> row = new ArrayList<ItemComponent>();
 		int rowWidth = 0;
 		
 		for(int i = 0; i < elements.length; i++) {
@@ -972,7 +1109,7 @@ public class BonziUtils {
 				rowWidth = 0;
 				continue;
 			}
-			Component toAdd;
+			ItemComponent toAdd;
 			if(allDisable)
 				toAdd = element.asEnabled(false).toDiscord();
 			else
@@ -997,11 +1134,21 @@ public class BonziUtils {
 		if(row.size() > 0)
 			rows.add(ActionRow.of(row));
 		
-		return in.setActionRows(rows);
+		return in.setComponents(rows);
 	}
-	public static ReplyAction appendComponents(ReplyAction in, GuiElement[] elements) {
+	public static MessageEditAction appendComponents(MessageEditAction in, Gui gui) {
+		if(gui == null)
+			return in;
+		if(gui.elements == null)
+			return in;
+		GuiElement[] elements = (GuiElement[]) gui.elements.toArray(new GuiElement[gui.elements.size()]);
+		if(elements.length < 1)
+			return in;
+		return appendComponents(in, elements, gui.isDisabled());
+	}
+	public static MessageEditAction appendComponents(MessageEditAction in, GuiElement[] elements, boolean allDisable) {
 		List<ActionRow> rows = new ArrayList<ActionRow>();
-		List<Component> row = new ArrayList<Component>();
+		List<ItemComponent> row = new ArrayList<ItemComponent>();
 		int rowWidth = 0;
 		
 		for(int i = 0; i < elements.length; i++) {
@@ -1012,7 +1159,14 @@ public class BonziUtils {
 				rowWidth = 0;
 				continue;
 			}
-			Component toAdd = element.toDiscord();
+			ItemComponent toAdd;
+			if(allDisable)
+				toAdd = element.asEnabled(false).toDiscord();
+			else
+				toAdd = element.toDiscord();
+			
+			if(toAdd == null)
+				continue;
 			
 			// Width of this element more or less.
 			int width = 5 / toAdd.getMaxPerRow();
@@ -1030,7 +1184,57 @@ public class BonziUtils {
 		if(row.size() > 0)
 			rows.add(ActionRow.of(row));
 		
-		return in.addActionRows(rows);
+		return in.setComponents(rows);
+	}
+	public static ReplyCallbackAction appendComponents(ReplyCallbackAction in, Gui gui) {
+		if(gui == null)
+			return in;
+		if(gui.elements == null)
+			return in;
+		GuiElement[] elements = (GuiElement[]) gui.elements.toArray(new GuiElement[gui.elements.size()]);
+		if(elements.length < 1)
+			return in;
+		return appendComponents(in, elements, gui.isDisabled());
+	}
+	public static ReplyCallbackAction appendComponents(ReplyCallbackAction in, GuiElement[] elements, boolean allDisable) {
+		List<ActionRow> rows = new ArrayList<ActionRow>();
+		List<ItemComponent> row = new ArrayList<ItemComponent>();
+		int rowWidth = 0;
+		
+		for(int i = 0; i < elements.length; i++) {
+			GuiElement element = elements[i];
+			if(element instanceof GuiNewline) {
+				rows.add(ActionRow.of(row));
+				row.clear();
+				rowWidth = 0;
+				continue;
+			}
+			ItemComponent toAdd;
+			if(allDisable)
+				toAdd = element.asEnabled(false).toDiscord();
+			else
+				toAdd = element.toDiscord();
+			
+			if(toAdd == null)
+				continue;
+			
+			// Width of this element more or less.
+			int width = 5 / toAdd.getMaxPerRow();
+			
+			if(rowWidth + width > 5) {
+				rows.add(ActionRow.of(row));
+				row.clear();
+				rowWidth = 0;
+			}
+			
+			row.add(toAdd);
+			rowWidth += width;
+		}
+		
+		if(row.size() > 0)
+			rows.add(ActionRow.of(row));
+		
+		return in.setComponents(rows);
 	}
 	public static void sendGui(CommandExecutionInfo info, Gui gui) {
 		if(info.isSlashCommand && !info.slashCommand.isAcknowledged()) {
@@ -1058,7 +1262,7 @@ public class BonziUtils {
 		});
 	}
 	public static void sendTempMessage(MessageChannel c, Message m, int seconds) {
-		c.sendMessage(m).queue(msg -> {
+		c.sendMessage(MessageCreateData.fromMessage(m)).queue(msg -> {
 			msg.delete().queueAfter(seconds, TimeUnit.SECONDS);
 		});
 	}
@@ -1069,6 +1273,7 @@ public class BonziUtils {
 		} else if(tooFew) {
 			msg = "Too few arguments!";
 		}
+		
 		MessageChannel channel = info.channel;
 		
 		String prefix = BonziUtils.getPrefixOrDefault(info);
@@ -1145,7 +1350,16 @@ public class BonziUtils {
 			info.slashCommand.replyEmbeds(eb.build()).queue();
 		else
 			info.channel.sendMessageEmbeds(eb.build()).queue();
-				
+	}
+	public static void sendBrosOnly(Command cmd, CommandExecutionInfo info) {
+		EmbedBuilder eb = quickEmbed(
+			"this command is reserved for admins/admins friends",
+			"admins are usually developers of BonziBot or well known contributors; friends of the admins are also allowed to use this command.",
+			Color.orange);
+		if(info.isSlashCommand)
+			info.slashCommand.replyEmbeds(eb.build()).queue();
+		else
+			info.channel.sendMessageEmbeds(eb.build()).queue();
 	}
 	public static void sendOnCooldown(Command cmd, CommandExecutionInfo info, CooldownManager cdm) {
 		long userId = info.executor.getIdLong();
@@ -1190,16 +1404,18 @@ public class BonziUtils {
 		else
 			info.channel.sendMessageEmbeds(eb.build()).queue();
 	}
-	public static void sendMentionMessage(GuildMessageReceivedEvent e, BonziBot bb) {
+	public static void sendMentionMessage(MessageReceivedEvent e, BonziBot bb) {
+		if(!e.isFromGuild())
+			return;
 		if(!e.getMessage().getContentRaw().contains("<@"))
 			return;
 		
-		List<User> mentioned = e.getMessage().getMentionedUsers();
+		Mentions mentioned = e.getMessage().getMentions();
 		long executor = e.getAuthor().getIdLong();
 		UserAccountManager uam = bb.accounts;
 		
 		List<String> content = new ArrayList<String>();
-		for(User mention: mentioned) {
+		for(User mention: mentioned.getUsers()) {
 			if(mention.getIdLong() == executor)
 				continue;
 			content.clear();
@@ -1284,11 +1500,6 @@ public class BonziUtils {
 		boolean hasAlready = account.hasAchievement(a);
 		
 		if(!hasAlready) {
-			// wtf
-			String prefix = (channel.getType() == ChannelType.TEXT)?
-				bb.guildSettings.getSettings(((TextChannel)channel).getGuild()).getPrefix() :
-				Constants.DEFAULT_PREFIX;
-				
 			account.awardAchievement(a);
 			uam.setUserAccount(u, account);
 			EmbedBuilder builder = new EmbedBuilder();
@@ -1296,7 +1507,7 @@ public class BonziUtils {
 			builder.setAuthor("Achievement Unlocked!", null, u.getEffectiveAvatarUrl());
 			builder.setTitle(a.icon.toString() + " " + a.name);
 			builder.setDescription(a.desc);
-			builder.setFooter("You can see your achievements with `" + prefix + "achievements`");
+			builder.setFooter("You can see your achievements with `/achievements`");
 			channel.sendMessageEmbeds(builder.build()).queue();
 		}
 	}
@@ -1360,20 +1571,6 @@ public class BonziUtils {
 			});
 		}
 	}
-	public static void messageUser(User user, Message msg) {
-		long id = user.getIdLong();
-		if(user.hasPrivateChannel() && userPrivateChannels.containsKey(id)) {
-			long cId = userPrivateChannels.get(id);
-			PrivateChannel pc = user.getJDA().getPrivateChannelById(cId);
-			pc.sendMessage(msg).queue();
-		} else {
-			user.openPrivateChannel().queue(p -> {
-				long privateChannelId = p.getIdLong();
-				userPrivateChannels.put(id, privateChannelId);
-				p.sendMessage(msg).queue();
-			});
-		}
-	}
 	public static PrivateChannel getCachedPrivateChannel(User user) {
 		long userId = user.getIdLong();
 		if(user.hasPrivateChannel() && userPrivateChannels.containsKey(userId)) {
@@ -1414,7 +1611,7 @@ public class BonziUtils {
 				if(br != null)
 					br.close();
 			} catch(IOException e) { 
-				e.printStackTrace();
+				InternalLogger.printError(e);
 			}
 		}
 		// Remove trailing newline character.
