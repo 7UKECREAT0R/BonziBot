@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Wrappers.RedditClient;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -22,7 +23,7 @@ public class MemeCommand extends Command {
 		this.name = "Meme";
 		this.description = "I'll post a spicy (or cringe) meme!";
 		this.category = CommandCategory.FUN;
-		this.unicodeIcon = "😹";
+		this.icon = GenericEmoji.fromEmoji("😹");
 	}
 	
 	@Override

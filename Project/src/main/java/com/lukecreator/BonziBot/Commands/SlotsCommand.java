@@ -9,6 +9,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
@@ -33,7 +34,7 @@ public class SlotsCommand extends Command {
 	public SlotsCommand() {
 		this.subCategory = 1;
 		this.name = "Slots";
-		this.unicodeIcon = "🎰";
+		this.icon = GenericEmoji.fromEmoji("🎰");
 		this.description = "Play slots, what else needs to be explained?";
 		this.args = new CommandArgCollection(new IntArg("amount"));
 		this.category = CommandCategory.COINS;
@@ -77,10 +78,10 @@ public class SlotsCommand extends Command {
 		int psLen = possibleSlots.length;
 		
 		for(int i = 0; i < 9; i++) {
-			picks[i] = possibleSlots[rand.nextInt(psLen)];
+			picks[i] = possibleSlots[this.rand.nextInt(psLen)];
 		}
 		
-		int wins = getWins(picks);
+		int wins = this.getWins(picks);
 		double mult = 1.5 * wins;
 		double dTotalWon = amount * mult;
 		int totalWon = (int)Math.round(dTotalWon);

@@ -3,6 +3,7 @@ package com.lukecreator.BonziBot.Commands;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 public class JokeCommand extends Command {
 	
@@ -12,7 +13,7 @@ public class JokeCommand extends Command {
 		this.name = "joke";
 		this.description = "I'll make a cheesy dad joke...";
 		this.category = CommandCategory.FUN;
-		this.unicodeIcon = "🤣";
+		this.icon = GenericEmoji.fromEmoji("🤣");
 	}
 	
 	@Override

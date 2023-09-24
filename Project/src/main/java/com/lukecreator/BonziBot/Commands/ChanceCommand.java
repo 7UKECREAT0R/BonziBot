@@ -10,6 +10,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
 import com.lukecreator.BonziBot.Data.Achievement;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
@@ -23,7 +24,7 @@ public class ChanceCommand extends Command {
 	public ChanceCommand() {
 		this.subCategory = 1;
 		this.name = "Chance";
-		this.unicodeIcon = "🎲";
+		this.icon = GenericEmoji.fromEmoji("🎲");
 		this.description = "You'll have a 50/50 chance to double your input or lose it all!";
 		this.args = new CommandArgCollection(new IntArg("amount"));
 		this.category = CommandCategory.COINS;
@@ -70,7 +71,7 @@ public class ChanceCommand extends Command {
 			return;
 		}
 		
-		boolean win = random.nextBoolean();
+		boolean win = this.random.nextBoolean();
 		
 		long newCoins = balance;
 		if(win) {

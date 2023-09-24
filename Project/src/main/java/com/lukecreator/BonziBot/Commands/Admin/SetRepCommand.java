@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
@@ -17,7 +18,7 @@ public class SetRepCommand extends Command {
 	public SetRepCommand() {
 		this.subCategory = 0;
 		this.name = "Set Rep";
-		this.unicodeIcon = "♾️";
+		this.icon = GenericEmoji.fromEmoji("♾️");
 		this.description = "set reputation of user";
 		this.args = new CommandArgCollection(new UserArg("target"), new IntArg("new rep"));
 		this.category = CommandCategory._HIDDEN;

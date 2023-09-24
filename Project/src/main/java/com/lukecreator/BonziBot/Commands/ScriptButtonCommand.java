@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
 import com.lukecreator.BonziBot.Managers.ScriptManager;
 import com.lukecreator.BonziBot.Script.Model.InvocationButton;
@@ -23,7 +24,7 @@ public class ScriptButtonCommand extends Command {
 	public ScriptButtonCommand() {
 		this.subCategory = 1;
 		this.name = "Script Button";
-		this.unicodeIcon = "🖱️";
+		this.icon = GenericEmoji.fromEmoji("🖱️");
 		this.description = "Create a message that will trigger a script that is invoked using a button.";
 		this.args = new CommandArgCollection(new StringArg("script"), new StringArg("body text"));
 		this.worksInDms = false;

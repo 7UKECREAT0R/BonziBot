@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -18,7 +19,7 @@ public class ProfilePicCommand extends Command {
 	public ProfilePicCommand() {
 		this.subCategory = 0;
 		this.name = "Profile Pic";
-		this.unicodeIcon = "🖼️";
+		this.icon = GenericEmoji.fromEmoji("🖼️");
 		this.description = "Get your own or somebody else's profile picture!";
 		this.args = new CommandArgCollection(new UserArg("target").optional());
 		this.category = CommandCategory._SHOP_COMMAND;

@@ -5,6 +5,7 @@ import java.util.Random;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 public class CoinflipCommand extends Command {
@@ -17,12 +18,12 @@ public class CoinflipCommand extends Command {
 		this.name = "Coin Flip";
 		this.description = "Literally just flip a coin.";
 		this.category = CommandCategory.FUN;
-		this.unicodeIcon = "🌑";
+		this.icon = GenericEmoji.fromEmoji("🌑");
 	}
 	
 	@Override
 	public void run(CommandExecutionInfo e) {
-		int side = rand.nextInt(2);
+		int side = this.rand.nextInt(2);
 		String msg = (side == 0) ?
 			Constants.COINFLIP_H:
 			Constants.COINFLIP_T;

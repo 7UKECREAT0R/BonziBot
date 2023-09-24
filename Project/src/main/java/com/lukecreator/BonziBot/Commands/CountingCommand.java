@@ -6,18 +6,19 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.Modifier;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 public class CountingCommand extends Command {
 	
 	public CountingCommand() {
 		this.subCategory = 0;
 		this.name = "Counting";
-		this.unicodeIcon = "🎰";
+		this.icon = GenericEmoji.fromEmoji("🎰");
 		this.description = "View the current counting game number in this server.";
 		this.args = null;
 		this.worksInDms = false;

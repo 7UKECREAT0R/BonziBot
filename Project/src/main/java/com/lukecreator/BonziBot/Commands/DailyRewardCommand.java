@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.TimeSpan;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Managers.RewardManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -18,7 +19,7 @@ public class DailyRewardCommand extends Command {
 	public DailyRewardCommand() {
 		this.subCategory = 1;
 		this.name = "Daily";
-		this.unicodeIcon = "☀️";
+		this.icon = GenericEmoji.fromEmoji("☀️");
 		this.description = "Claim your daily coins reward! You get extra coins every day that you keep a streak.";
 		this.category = CommandCategory.COINS;
 	}

@@ -4,6 +4,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Gui.GuiXpLeaderboard;
 
 public class XpLeaderboardCommand extends Command {
@@ -11,7 +12,7 @@ public class XpLeaderboardCommand extends Command {
 	public XpLeaderboardCommand() {
 		this.subCategory = 2;
 		this.name = "XP Leaderboard";
-		this.unicodeIcon = "🎓🏆";
+		this.icon = GenericEmoji.fromEmoji("🎓🏆");
 		this.description = "See who's climbed to the top of the rank ladder!";
 		this.category = CommandCategory.FUN;
 	}

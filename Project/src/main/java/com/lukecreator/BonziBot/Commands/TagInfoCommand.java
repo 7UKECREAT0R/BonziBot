@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.TagData;
 import com.lukecreator.BonziBot.Gui.GuiTagEditing;
 
@@ -19,7 +20,7 @@ public class TagInfoCommand extends Command {
 	public TagInfoCommand() {
 		this.subCategory = 1;
 		this.name = "Tag Info";
-		this.unicodeIcon = "📜❓";
+		this.icon = GenericEmoji.fromEmoji("📜❓");
 		this.description = "View information about a tag, or modify it if it's your own.";
 		this.args = CommandArgCollection.single("tag_name");
 		this.category = CommandCategory.FUN;

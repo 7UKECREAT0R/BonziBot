@@ -6,13 +6,14 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 public class LoadFilesCommand extends Command {
 
 	public LoadFilesCommand() {
 		this.subCategory = 0;
 		this.name = "Load Files";
-		this.unicodeIcon = "⬆️";
+		this.icon = GenericEmoji.fromEmoji("⬆️");
 		this.description = "Load data. Can optionally load backup files.";
 		this.args = new CommandArgCollection(new BooleanArg("backup").optional());
 		this.adminOnly = true;

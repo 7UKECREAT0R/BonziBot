@@ -4,13 +4,14 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 public class TermsCommand extends Command {
 
 	public TermsCommand() {
 		this.subCategory = 2;
 		this.name = "Terms";
-		this.unicodeIcon = "🔒";
+		this.icon = GenericEmoji.fromEmoji("🔒");
 		this.description = "Make sure you agree on how I use your information.";
 		this.args = null;
 		this.forcedCommand = true;

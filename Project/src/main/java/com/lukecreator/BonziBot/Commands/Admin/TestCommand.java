@@ -1,10 +1,13 @@
 package com.lukecreator.BonziBot.Commands.Admin;
 
-import com.lukecreator.BonziBot.BonziUtils;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
-import com.lukecreator.BonziBot.Gui.GuiTestMenu;
+import com.lukecreator.BonziBot.Data.GuildSettings;
+import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 
 public class TestCommand extends Command {
 
@@ -16,11 +19,21 @@ public class TestCommand extends Command {
 		this.adminOnly = false;
 	}
 	
+	public void setAllSettings(CommandExecutionInfo e) {
+		
+		GuildSettingsManager gsm = e.bonzi.guildSettings;
+		Set<Entry<Long, GuildSettings>> set = gsm.settings.entrySet();
+		
+		for(Entry<Long, GuildSettings> entry: set) {
+			GuildSettings settings = entry.getValue();
+			settings.levellingEnabled = true;
+		}
+		
+		e.reply("All levelling has been enabled.");
+	}
+	
 	@Override
 	public void run(CommandExecutionInfo e) {
-		
-		GuiTestMenu test = new GuiTestMenu();
-		BonziUtils.sendGui(e, test);
-		
+		this.setAllSettings(e);
 	}
 }

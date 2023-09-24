@@ -4,6 +4,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Gui.GuiGuildSettingsPage1;
 
 import net.dv8tion.jda.api.Permission;
@@ -17,7 +18,7 @@ public class GuildSettingsCommand extends Command {
 		this.name = "Server Settings";
 		this.description = "Manage your BonziBot server settings.";
 		this.category = CommandCategory.UTILITIES;
-		this.unicodeIcon = "⚙️";
+		this.icon = GenericEmoji.fromEmoji("⚙️");
 		this.worksInDms = false;
 		this.userRequiredPermissions = new Permission[] { Permission.MANAGE_SERVER };
 		this.forcedCommand = true; // Cannot disable and can always open.

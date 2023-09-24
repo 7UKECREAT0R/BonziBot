@@ -12,19 +12,20 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Logging.LogEntryClearCommand;
 import com.lukecreator.BonziBot.Logging.LogEntryClearCommand.ClearCommandDataPacket;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 public class ClearCommand extends Command {
 
 	public ClearCommand() {
 		this.subCategory = 0;
 		this.name = "Clear";
-		this.unicodeIcon = "💢";
+		this.icon = GenericEmoji.fromEmoji("💢");
 		this.description = "Bulk delete a set of messages. You can also specify a user to limit the clear to.";
 		this.args = new CommandArgCollection(new IntArg("amount"), new UserArg("limit").optional());
 		this.worksInDms = false;

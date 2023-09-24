@@ -5,18 +5,19 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.SteamCache;
 import com.lukecreator.BonziBot.Data.SteamCache.Release;
 
+import net.dv8tion.jda.api.entities.MessageEmbed;
+
 public class SteamCommand extends Command {
-	
-	public static final String EMOJI = "<:steam:889252340123713576>";
 	
 	public SteamCommand() {
 		this.subCategory = 0;
 		this.name = "Steam";
-		this.unicodeIcon = EMOJI;
-		this.description = "Look up a game on steam.";
+		this.icon = GenericEmoji.fromEmote(889252340123713576L, false);
+		this.description = "Look up a game on steam. Supports fuzzy matching.";
 		this.args = CommandArgCollection.single("game title");
 		this.category = CommandCategory.UTILITIES;
 		this.setCooldown(10000);
@@ -24,34 +25,25 @@ public class SteamCommand extends Command {
 
 	@Override
 	public void run(CommandExecutionInfo e) {
-		
-		// How release names are stored.
-		String title = e.args.getString("game title").toUpperCase();
+		String title = e.args.getString("game title");
 		SteamCache steam = e.bonzi.steam;
+		Release release = steam.searchForTitle(title);
 		
-		Release closestMatch = null;
-		Release[] releases = steam.searchForTitles(title);
-		
-		if(releases.length < 1) {
+		if(release == null) {
+			MessageEmbed noneFound = BonziUtils.failureEmbed("No steam games found.");
 			if(e.isSlashCommand)
-				e.slashCommand.replyEmbeds(BonziUtils.failureEmbed("No steam games found.")).queue();
-			else e.channel.sendMessageEmbeds(BonziUtils.failureEmbed("No steam games found.")).queue();
+				e.slashCommand.replyEmbeds(noneFound).queue();
+			else
+				e.channel.sendMessageEmbeds(noneFound).queue();
 			return;
 		}
 		
-		for(Release release: releases) {
-			if(release.appName.equals(title)) {
-				closestMatch = release;
-				break;
-			}
-		}
+		String url = SteamCache.STORE_URL + release.appID;
 		
-		if(closestMatch == null)
-			closestMatch = releases[0];
-		
-		String url = SteamCache.STORE_URL + closestMatch.appID;
-		if(e.isSlashCommand)
+		if(e.isSlashCommand) {
 			e.slashCommand.reply(url).queue();
-		else e.channel.sendMessage(url).queue();
+		} else {
+			e.channel.sendMessage(url).queue();
+		}
 	}
 }

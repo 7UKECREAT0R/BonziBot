@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 /**
  * This is hidden. Don't use this in servers because it can have some pretty terrible content.
@@ -22,35 +23,29 @@ public class LightshotCommand extends Command {
 	public LightshotCommand() {
 		this.subCategory = 0;
 		this.name = "Lightshot";
-		this.unicodeIcon = "🖼️";
-		this.description = "(FRIENDS ONLY) Pull a random image from lightshot.";
+		this.icon = GenericEmoji.fromEmoji("🖼️");
+		this.description = "Pull a random image from lightshot.";
 		this.args = new CommandArgCollection(new IntArg("amount").optional());
 		this.category = CommandCategory._HIDDEN;
 		this.random = new Random();
 		this.buffer = new char[ID_LENGTH];
+		this.brosOnly = true;
 	}
 	
 	Random random;
 	char[] buffer;
 	private String buildUrlID() {
 		for(int i = 0; i < ID_LENGTH; i++)
-			buffer[i] = CHARS[random.nextInt(CHARS.length)];
-		if(buffer[0] == '1' || buffer[0] == '2') {
-			buffer[0] = CHARS[random.nextInt(CHARS.length)];
-			return "1" + new String(buffer);
+			this.buffer[i] = CHARS[this.random.nextInt(CHARS.length)];
+		if(this.buffer[0] == '1' || this.buffer[0] == '2') {
+			this.buffer[0] = CHARS[this.random.nextInt(CHARS.length)];
+			return "1" + new String(this.buffer);
 		}
-		else return new String(buffer);
+		else return new String(this.buffer);
 	}
 	
 	@Override
 	public void run(CommandExecutionInfo e) {
-		
-		long id = e.executor.getIdLong();
-		if(!e.bonzi.special.getIsBro(id) && !e.bonzi.special.getIsAdmin(id)) {
-			e.channel.sendMessage("Only luke's bros can use this!").queue();
-			return;
-		}
-		
 		int count = e.args.argSpecified("amount") ? e.args.getInt("amount") : 1;
 		
 		if(PROGRESS) {

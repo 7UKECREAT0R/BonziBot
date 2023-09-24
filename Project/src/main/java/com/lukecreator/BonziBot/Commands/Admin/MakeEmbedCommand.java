@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.GuiAPI.DropdownItem;
 import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditDialog;
@@ -22,7 +23,7 @@ public class MakeEmbedCommand extends Command {
 	public MakeEmbedCommand() {
 		this.name = "makeembed";
 		this.description = "Tests the GuiDialog system.";
-		this.unicodeIcon = "✅";
+		this.icon = GenericEmoji.fromEmoji("✅");
 		this.category = CommandCategory._HIDDEN;
 		this.adminOnly = false; // u guys go wild and use it lmao
 	}

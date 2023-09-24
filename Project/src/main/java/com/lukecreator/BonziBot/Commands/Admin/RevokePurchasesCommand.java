@@ -5,6 +5,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
@@ -16,7 +17,7 @@ public class RevokePurchasesCommand extends Command {
 	public RevokePurchasesCommand() {
 		this.subCategory = 1; // moderation commands for admin-level
 		this.name = "Revoke Purchases";
-		this.unicodeIcon = "💸";
+		this.icon = GenericEmoji.fromEmoji("💸");
 		this.description = "Revoke all of a user's purchases and restore the coins to them.";
 		this.args = new CommandArgCollection(new UserArg("target").optional());
 		this.category = CommandCategory._HIDDEN;

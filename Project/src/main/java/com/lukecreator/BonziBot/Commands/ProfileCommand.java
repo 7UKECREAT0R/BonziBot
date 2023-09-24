@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Gui.GuiProfile;
 
 import net.dv8tion.jda.api.entities.User;
@@ -32,7 +33,7 @@ public class ProfileCommand extends Command {
 	public ProfileCommand() {
 		this.subCategory = 3;
 		this.name = "Profile";
-		this.unicodeIcon = "📔";
+		this.icon = GenericEmoji.fromEmoji("📔");
 		this.description = "View yours or someone else's profile. Completely customizable!";
 		this.args = new CommandArgCollection(new UserArg("target").optional());
 		this.category = CommandCategory.FUN;

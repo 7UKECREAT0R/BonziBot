@@ -11,6 +11,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Graphics.FontLoader;
 import com.lukecreator.BonziBot.Graphics.FontStyle;
@@ -19,6 +20,8 @@ import com.lukecreator.BonziBot.Graphics.Rect;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.utils.AttachedFile;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 public class XpCommand extends Command {
 	
@@ -33,7 +36,7 @@ public class XpCommand extends Command {
 	public XpCommand() {
 		this.subCategory = 2;
 		this.name = "XP";
-		this.unicodeIcon = "🎓";
+		this.icon = GenericEmoji.fromEmoji("🎓");
 		this.description = "View your xp or someone else's xp.";
 		this.args = new CommandArgCollection(new UserArg("target").optional());
 		this.category = CommandCategory.FUN;
@@ -127,7 +130,8 @@ public class XpCommand extends Command {
 				
 				try {
 					File saved = image.save("xpImages/xp_" + target.getId() + ".png", true);
-					r.editOriginal(saved, "xp_" + target.getId() + ".png").queue(finished -> {
+					AttachedFile file = AttachedFile.fromData(saved);
+					r.editOriginalAttachments(file).queue(finished -> {
 						saved.delete();
 					}, fail -> {
 						saved.delete();
@@ -192,7 +196,8 @@ public class XpCommand extends Command {
 		
 		try {
 			File saved = image.save("xpImages/xp_" + target.getId() + ".png", true);
-			e.channel.sendFile(saved).queue(finished -> {
+			FileUpload upload = FileUpload.fromData(saved, saved.toPath().getFileName().toString());
+			e.channel.sendFiles(upload).queue(finished -> {
 				saved.delete();
 			}, fail -> {
 				saved.delete();

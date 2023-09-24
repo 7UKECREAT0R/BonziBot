@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
@@ -19,7 +20,7 @@ public class CoinsCommand extends Command {
 	public CoinsCommand() {
 		this.subCategory = 0;
 		this.name = "Coins";
-		this.unicodeIcon = "🟡";
+		this.icon = GenericEmoji.fromEmoji("🟡");
 		this.description = "See how many coins you or someone else has.";
 		this.args = new CommandArgCollection(new UserArg("target").optional());
 		this.category = CommandCategory.COINS;

@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
@@ -19,7 +20,7 @@ public class ShopCommand extends Command {
 	public ShopCommand() {
 		this.subCategory = 2;
 		this.name = "Shop";
-		this.unicodeIcon = "🛒";
+		this.icon = GenericEmoji.fromEmoji("🛒");
 		this.description = "Buy extra fancy commands that normal users can't use!";
 		this.args = null;
 		this.category = CommandCategory.COINS;
@@ -55,7 +56,7 @@ public class ShopCommand extends Command {
 				String title = BonziUtils.titleString(item.name());
 				String cost = "\n`" + BonziUtils.comma(item.price) + " coins`";
 				String desc = linked.description + cost;
-				String icon = linked.unicodeIcon;
+				String icon = linked.icon.toString();
 				title = icon + " " + title;
 				
 				if(account.hasItem(item))

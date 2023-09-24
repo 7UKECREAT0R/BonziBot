@@ -6,6 +6,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Managers.MuteManager;
 
 import net.dv8tion.jda.api.Permission;
@@ -17,7 +18,7 @@ public class UnmuteCommand extends Command {
 	public UnmuteCommand() {
 		this.subCategory = 2;
 		this.name = "Unmute";
-		this.unicodeIcon = "🗣️";
+		this.icon = GenericEmoji.fromEmoji("🗣️");
 		this.description = "Allow a user to talk again.";
 		this.args = new CommandArgCollection(new UserArg("target"));
 		this.userRequiredPermissions = new Permission[] { Permission.MANAGE_ROLES };
@@ -50,8 +51,8 @@ public class UnmuteCommand extends Command {
 		e.guild.removeRoleFromMember(target, role).queue();
 		
 		if(e.isSlashCommand)
-			e.slashCommand.replyEmbeds(BonziUtils.successEmbed("Unmuted user successfully.", "User: `" + target.getAsTag() + "`")).queue();
+			e.slashCommand.replyEmbeds(BonziUtils.successEmbed("Unmuted user successfully.", "User: `" + target.getName() + "`")).queue();
 		else
-			e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Unmuted user successfully.", "User: `" + target.getAsTag() + "`")).queue();
+			e.channel.sendMessageEmbeds(BonziUtils.successEmbed("Unmuted user successfully.", "User: `" + target.getName() + "`")).queue();
 	}
 }

@@ -2,6 +2,7 @@ package com.lukecreator.BonziBot.Commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 
@@ -14,6 +15,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.StringRemainderArg;
 import com.lukecreator.BonziBot.CommandAPI.TimeSpanArg;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.GuildSettings;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
@@ -25,8 +27,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 
 public class BanCommand extends Command {
@@ -34,7 +37,7 @@ public class BanCommand extends Command {
 	public BanCommand() {
 		this.subCategory = 0;
 		this.name = "Ban";
-		this.unicodeIcon = "🔨";
+		this.icon = GenericEmoji.fromEmoji("🔨");
 		this.description = "Ban a user. This allows the user to appeal as well (if enabled).";
 		this.args = new CommandArgCollection(new UserArg("target"),
 			new TimeSpanArg("time").optional(),
@@ -100,7 +103,9 @@ public class BanCommand extends Command {
 				}, null);
 			}
 			try {
-				e.guild.ban(target, 1, reason).queue(null, fail -> {
+				e.guild.ban(UserSnowflake.fromId(target.getIdLong()), 1, TimeUnit.DAYS)
+						.reason(reason)
+						.queue(null, fail -> {
 					e.bonzi.bans.unban(target);
 					if(e.isSlashCommand)
 						e.slashCommand.getHook().editOriginal("Something went seriously wrong and I couldn't ban the user... Maybe this will help:\n```" + fail.toString() + "```").queue();

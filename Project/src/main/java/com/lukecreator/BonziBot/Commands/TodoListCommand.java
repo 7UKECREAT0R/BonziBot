@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.StringRemainderArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Data.TodoFolder;
 import com.lukecreator.BonziBot.Data.TodoList;
@@ -20,7 +21,7 @@ public class TodoListCommand extends Command {
 	public TodoListCommand() {
 		this.subCategory = 0;
 		this.name = "Todo List";
-		this.unicodeIcon = "🗒️";
+		this.icon = GenericEmoji.fromEmoji("🗒️");
 		this.description = "Create or view your to-do lists!";
 		this.args = new CommandArgCollection(new StringRemainderArg("folder").optional());
 		this.setCooldown(2000);

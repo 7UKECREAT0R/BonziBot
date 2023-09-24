@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -17,9 +18,9 @@ public class TagCommand extends Command {
 	public TagCommand() {
 		this.subCategory = 1;
 		this.name = "Tag";
-		this.unicodeIcon = "📜";
+		this.icon = GenericEmoji.fromEmoji("📜");
 		this.description = "Access a huge library of \"tags\" made by other bonzibot users!";
-		this.args = CommandArgCollection.single("tag_name");
+		this.args = CommandArgCollection.single("tag name");
 		this.category = CommandCategory.FUN;
 	}
 	
@@ -39,7 +40,7 @@ public class TagCommand extends Command {
 		
 		boolean isPrivate = (e.settings == null) ? false : e.settings.privateTags;
 		
-		String tagName = e.args.getString("tag_name");
+		String tagName = e.args.getString("tag name");
 		String resp;
 		if(isPrivate)
 			resp = e.bonzi.tags.usePrivateTagByName(tagName, g);

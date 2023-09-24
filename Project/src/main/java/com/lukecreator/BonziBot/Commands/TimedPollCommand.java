@@ -11,8 +11,10 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.StringRemainderArg;
 import com.lukecreator.BonziBot.CommandAPI.TimeSpanArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 
 /**
  *    leeches off of the other poll command's
@@ -28,7 +30,7 @@ public class TimedPollCommand extends Command {
 	public TimedPollCommand() {
 		this.subCategory = 0;
 		this.name = "Timed Poll";
-		this.unicodeIcon = "⏰";
+		this.icon = GenericEmoji.fromEmoji("⏰");
 		this.description = "Similar to the poll command, but ends at a certain time.";
 		this.args = new CommandArgCollection(new TimeSpanArg("length"), new StringRemainderArg("question"));
 		this.category = CommandCategory.FUN;
@@ -53,8 +55,8 @@ public class TimedPollCommand extends Command {
 			e.slashCommand.reply(":white_check_mark: `Created poll for " + BonziUtils.getLongTimeStringMs(time.ms) + "!`").setEphemeral(true).queue();
 		
 		e.channel.sendMessageEmbeds(eb.build()).queue(msg -> {
-			msg.addReaction("👍").queue();
-			msg.addReaction("👎").queue();
+			msg.addReaction(Emoji.fromUnicode("👍")).queue();
+			msg.addReaction(Emoji.fromUnicode("👎")).queue();
 		});
 	}
 }

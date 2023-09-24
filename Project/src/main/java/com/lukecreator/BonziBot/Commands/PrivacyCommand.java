@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.EnumArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -21,7 +22,7 @@ public class PrivacyCommand extends Command {
 	public PrivacyCommand() {
 		this.subCategory = 2;
 		this.name = "Privacy";
-		this.unicodeIcon = "🔏";
+		this.icon = GenericEmoji.fromEmoji("🔏");
 		this.description = "Manage personal privacy settings. (see /terms)";
 		this.args = new CommandArgCollection(new EnumArg("setting", PrivacySetting.class), new BooleanArg("enable"));
 		this.forcedCommand = true;

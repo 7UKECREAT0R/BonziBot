@@ -6,6 +6,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Gui.GuiScriptPackages;
 import com.lukecreator.BonziBot.Script.Model.ScriptPackage;
 
@@ -16,7 +17,7 @@ public class ScriptingCommand extends Command {
 	public ScriptingCommand() {
 		this.subCategory = 1;
 		this.name = "Scripting";
-		this.unicodeIcon = "📜";
+		this.icon = GenericEmoji.fromEmoji("📜");
 		this.description = "Manage the scripts in your server.";
 		this.userRequiredPermissions = new Permission[] { Permission.ADMINISTRATOR };
 		this.args = null;

@@ -9,6 +9,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.StringRemainderArg;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.ModernWarn;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Logging.LogEntryWarn;
@@ -26,7 +27,7 @@ public class WarnCommand extends Command {
 	public WarnCommand() {
 		this.subCategory = 1;
 		this.name = "Warn";
-		this.unicodeIcon = "⚠️";
+		this.icon = GenericEmoji.fromEmoji("⚠️");
 		this.description = "Place a warning on a user that can be recalled later.";
 		this.args = new CommandArgCollection(new UserArg("target"), new StringRemainderArg("text"));
 		this.setCooldown(5000);

@@ -15,7 +15,6 @@ public class ProtocolButtonsCommand extends Command {
 	public ProtocolButtonsCommand() {
 		this.subCategory = 0;
 		this.name = "Protocol Buttons";
-		this.unicodeIcon = "";
 		this.description = "Buttons for Discord Protocol (messing around)";
 		this.args = null;
 		this.category = CommandCategory._HIDDEN;

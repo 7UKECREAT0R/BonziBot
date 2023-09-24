@@ -6,6 +6,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
@@ -16,7 +17,7 @@ public class SetCoinsCommand extends Command {
 	public SetCoinsCommand() {
 		this.subCategory = 1;
 		this.name = "Set Coins";
-		this.unicodeIcon = "🟡";
+		this.icon = GenericEmoji.fromEmoji("🟡");
 		this.description = "Set your current coins amount.";
 		this.args = new CommandArgCollection(new IntArg("amount"), new UserArg("target").optional());
 		this.category = CommandCategory._HIDDEN;

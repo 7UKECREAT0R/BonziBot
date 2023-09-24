@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -18,7 +19,7 @@ public class CommandInfoCommand extends Command {
 	public CommandInfoCommand() {
 		this.subCategory = 0;
 		this.name = "Command Info";
-		this.unicodeIcon = "📰";
+		this.icon = GenericEmoji.fromEmoji("📰");
 		this.description = "View information about a command.";
 		this.args = CommandArgCollection.single("command name");
 		this.category = CommandCategory.UTILITIES;
@@ -41,7 +42,7 @@ public class CommandInfoCommand extends Command {
 			int id = command.id;
 			String name = command.name;
 			String desc = command.description;
-			String icon = command.unicodeIcon;
+			String icon = command.icon.toString();
 			
 			PremiumItem item = command.premiumItem;
 			Permission[] bonziPermissions = command.neededPermissions;
@@ -102,7 +103,7 @@ public class CommandInfoCommand extends Command {
 			if(isForced)
 				eb.addField("Forced Command", "This is an important command. You cannot disable it and it's always available.", false);
 			
-			String source = getSourceCode(command);
+			String source = this.getSourceCode(command);
 			eb.addField("Developer Information",
 				"[Source Code](" + source + ")" +
 				"\nCommand ID: " + id +

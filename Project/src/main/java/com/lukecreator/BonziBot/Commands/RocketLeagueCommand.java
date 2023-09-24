@@ -10,6 +10,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.EnumArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 
@@ -23,7 +24,7 @@ public class RocketLeagueCommand extends Command {
 	public RocketLeagueCommand() {
 		this.subCategory = 0;
 		this.name = "Rocket League";
-		this.unicodeIcon = "<:rocketleague:889250974970044447>";
+		this.icon = GenericEmoji.fromEmote(889250974970044447L, false);
 		this.description = "View next rocket league tournament times.";
 		this.args = new CommandArgCollection(new EnumArg("region", RLRegion.class));
 		this.category = CommandCategory.UTILITIES;

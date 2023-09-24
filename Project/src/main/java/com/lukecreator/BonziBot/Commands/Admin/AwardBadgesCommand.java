@@ -6,6 +6,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.Data.Badge;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
@@ -15,7 +16,7 @@ public class AwardBadgesCommand extends Command {
 	public AwardBadgesCommand() {
 		this.subCategory = 0;
 		this.name = "Award Badges";
-		this.unicodeIcon = "🏆";
+		this.icon = GenericEmoji.fromEmoji("🏆");
 		this.description = "Award a badge to all predefined users.";
 		this.args = new CommandArgCollection(new BooleanArg("clear"), new BooleanArg("allbadges"));
 		this.category = CommandCategory._HIDDEN;

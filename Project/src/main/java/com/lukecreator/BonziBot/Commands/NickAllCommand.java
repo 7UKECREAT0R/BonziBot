@@ -12,6 +12,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.RoleArg;
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Data.UsernameGenerator;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
@@ -32,7 +33,7 @@ public class NickAllCommand extends Command {
 		protected CommandArg arg;
 		
 		CommandArg getArg() {
-			return arg;
+			return this.arg;
 		}
 		void setArg(CommandArg arg) {
 			this.arg = arg;
@@ -98,7 +99,7 @@ public class NickAllCommand extends Command {
 	public NickAllCommand() {
 		this.subCategory = 0;
 		this.name = "Nick All";
-		this.unicodeIcon = "🖋️";
+		this.icon = GenericEmoji.fromEmoji("🖋️");
 		this.description = "Rename everyone in the server! You can also specify a condition to select the users to rename.";
 		this.args = null;
 		this.userRequiredPermissions = new Permission[] { Permission.NICKNAME_MANAGE };

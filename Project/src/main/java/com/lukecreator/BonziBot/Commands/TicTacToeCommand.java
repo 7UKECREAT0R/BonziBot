@@ -22,7 +22,7 @@ public class TicTacToeCommand extends Command {
 	public TicTacToeCommand() {
 		this.subCategory = 0;
 		this.name = "Tic Tac Toe";
-		this.unicodeIcon = "❌⭕";
+		this.icon = GenericEmoji.fromEmoji("❌⭕");
 		this.description = "Play Tic-Tac-Toe with someone!";
 		this.args = new CommandArgCollection(new UserArg("opponent").optional());
 		this.category = CommandCategory.FUN;

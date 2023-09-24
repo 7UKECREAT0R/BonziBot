@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
@@ -19,7 +20,7 @@ public class PurchasesCommand extends Command {
 	public PurchasesCommand() {
 		this.subCategory = 2;
 		this.name = "Purchases";
-		this.unicodeIcon = "📦";
+		this.icon = GenericEmoji.fromEmoji("📦");
 		this.description = "See all your purchased/owned commands.";
 		this.args = null;
 		this.category = CommandCategory.COINS;
@@ -64,7 +65,7 @@ public class PurchasesCommand extends Command {
 			} else
 				desc = "`" + prefix + linked.getFilteredCommandName() + "`\n" + linked.description;
 			
-			String icon = linked.unicodeIcon;
+			String icon = linked.icon.toString();
 			title = icon + " " + title;
 			eb.addField(title, desc, false);
 		}

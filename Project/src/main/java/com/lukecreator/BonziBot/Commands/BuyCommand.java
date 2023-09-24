@@ -10,15 +10,16 @@ import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.EnumArg;
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class BuyCommand extends Command {
@@ -26,7 +27,7 @@ public class BuyCommand extends Command {
 	public BuyCommand() {
 		this.subCategory = 2;
 		this.name = "Buy";
-		this.unicodeIcon = "💸";
+		this.icon = GenericEmoji.fromEmoji("💸");
 		this.description = "Buy an item from the BonziBot shop for yourself, or gift it to someone else!";
 		this.args = new CommandArgCollection(new StringArg("item"), new UserArg("gift").optional());
 		this.category = CommandCategory.COINS;
@@ -105,7 +106,7 @@ public class BuyCommand extends Command {
 			EventWaiterManager waiter = e.bonzi.eventWaiter;
 			String itemDisplay = BonziUtils.titleString(item.name());
 			String title = gift ?
-				"Gifting " + itemDisplay + " to " + giftReceiver.getAsTag() + "...":
+				"Gifting " + itemDisplay + " to " + giftReceiver.getEffectiveName() + "...":
 				"Buying " + itemDisplay + "...";
 			if(e.isSlashCommand)
 				e.slashCommand.deferReply(false);
@@ -193,7 +194,7 @@ public class BuyCommand extends Command {
 			
 			EventWaiterManager waiter = e.bonzi.eventWaiter;
 			String title = gift ?
-				"Gifting BonziBot Premium to " + giftReceiver.getAsTag() + "...":
+				"Gifting BonziBot Premium to " + giftReceiver.getEffectiveName() + "...":
 				"Buying BonziBot Premium...";
 			if(e.isSlashCommand)
 				e.slashCommand.deferReply(false);
@@ -236,7 +237,7 @@ public class BuyCommand extends Command {
 		}
 	}
 	
-	void sendGiftSuccess(MessageChannel channel, String receiverName) {
+	void sendGiftSuccess(MessageChannelUnion channel, String receiverName) {
 		MessageEmbed me = BonziUtils.successEmbed
 				("Success! Your gift to " + receiverName + " is on its way!");
 		channel.sendMessageEmbeds(me).queue();

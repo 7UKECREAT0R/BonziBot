@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.Data.Achievement;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Managers.LoggingManager;
 
@@ -20,7 +21,7 @@ public class ExposeCommand extends Command {
 	public ExposeCommand() {
 		this.subCategory = 0;
 		this.name = "Expose";
-		this.unicodeIcon = "😮";
+		this.icon = GenericEmoji.fromEmoji("😮");
 		this.description = "Expose the last deleted message!";
 		this.args = null;
 		this.category = CommandCategory._SHOP_COMMAND;

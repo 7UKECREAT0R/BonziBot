@@ -5,6 +5,7 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Gui.GuiReactionRoles;
 
 import net.dv8tion.jda.api.Permission;
@@ -14,7 +15,7 @@ public class ReactionRolesCommand extends Command {
 	public ReactionRolesCommand() {
 		this.subCategory = 0;
 		this.name = "Reaction Roles";
-		this.unicodeIcon = "📋";
+		this.icon = GenericEmoji.fromEmoji("📋");
 		this.description = "Create a custom menu that lets users give themselves roles.";
 		this.args = CommandArgCollection.single("text");
 		this.category = CommandCategory.UTILITIES;

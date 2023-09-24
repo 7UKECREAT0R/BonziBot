@@ -10,6 +10,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.ModernWarn;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Gui.GuiWarns;
@@ -25,7 +26,7 @@ public class WarnsCommand extends Command {
 	public WarnsCommand() {
 		this.subCategory = 1;
 		this.name = "Warns";
-		this.unicodeIcon = "📜";
+		this.icon = GenericEmoji.fromEmoji("📜");
 		this.description = "View and manage a user's warns.";
 		this.args = new CommandArgCollection(new UserArg("target"));
 		this.setCooldown(5000);

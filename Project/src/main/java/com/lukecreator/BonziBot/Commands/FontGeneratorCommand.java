@@ -5,6 +5,7 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.PremiumItem;
 import com.lukecreator.BonziBot.Gui.GuiFontGenerator;
 
@@ -13,7 +14,7 @@ public class FontGeneratorCommand extends Command {
 	public FontGeneratorCommand() {
 		this.subCategory = 0;
 		this.name = "Font Generator";
-		this.unicodeIcon = "🖋️";
+		this.icon = GenericEmoji.fromEmoji("🖋️");
 		this.description = "Convert your text to tons of different unicode fonts!";
 		this.args = CommandArgCollection.single("text");
 		this.category = CommandCategory._SHOP_COMMAND;

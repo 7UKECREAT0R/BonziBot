@@ -4,6 +4,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 
@@ -12,7 +13,7 @@ public class GridCommand extends Command {
 	public GridCommand() {
 		this.subCategory = 4;
 		this.name = "Grid";
-		this.unicodeIcon = "🔳";
+		this.icon = GenericEmoji.fromEmoji("🔳");
 		this.description = "View the GRID, a grid of pixels where anyone can set one once per hour.";
 		this.args = null;
 		this.category = CommandCategory.FUN;

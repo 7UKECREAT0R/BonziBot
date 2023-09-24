@@ -6,13 +6,14 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 public class AdminBypassCommand extends Command {
 
 	public AdminBypassCommand() {
 		this.subCategory = 0;
 		this.name = "Admin Bypass";
-		this.unicodeIcon = "🖥️";
+		this.icon = GenericEmoji.fromEmoji("🖥️");
 		this.description = "Enable/Disable admins bypassing BonziBot permission limits.";
 		this.args = new CommandArgCollection(new BooleanArg("enable"));
 		this.category = CommandCategory._HIDDEN;

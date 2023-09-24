@@ -4,6 +4,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 public class HowToIdCommand extends Command {
@@ -11,7 +12,7 @@ public class HowToIdCommand extends Command {
 	public HowToIdCommand() {
 		this.subCategory = 0;
 		this.name = "How to ID";
-		this.unicodeIcon = "🆔";
+		this.icon = GenericEmoji.fromEmoji("🆔");
 		this.description = "Show how to get the ID of something.";
 		this.args = null;
 		this.setCooldown(10000);

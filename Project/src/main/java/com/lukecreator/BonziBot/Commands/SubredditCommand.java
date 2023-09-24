@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Wrappers.RedditClient;
 import com.lukecreator.BonziBot.Wrappers.SubredditInfo;
 import com.lukecreator.BonziBot.Wrappers.SubredditPostVideoData;
@@ -24,7 +25,7 @@ public class SubredditCommand extends Command {
 		this.description = "Slap a random recent subreddit post into chat!";
 		this.args = new CommandArgCollection(new StringArg("sub"));
 		this.category = CommandCategory.FUN;
-		this.unicodeIcon = "🇷";
+		this.icon = GenericEmoji.fromEmoji("🇷");
 		
 		this.setCooldown(5000);
 	}

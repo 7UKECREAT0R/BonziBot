@@ -7,6 +7,7 @@ import com.lukecreator.BonziBot.Tuple;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.LotteryManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
@@ -20,7 +21,7 @@ public class LotteryCommand extends Command {
 	public LotteryCommand() {
 		this.subCategory = 1;
 		this.name = "Lottery";
-		this.unicodeIcon = "🎟️";
+		this.icon = GenericEmoji.fromEmoji("🎟️");
 		this.description = "Pay " + LotteryManager.S_TICKET_COST + " coins and have a 1/" + LotteryManager.S_WIN_CHANCE + " chance to win the whole lot!";
 		this.category = CommandCategory.COINS;
 	}

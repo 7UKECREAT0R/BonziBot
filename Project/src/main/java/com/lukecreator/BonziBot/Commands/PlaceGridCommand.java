@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.EnumArg;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Managers.GridManager;
 import com.lukecreator.BonziBot.Managers.GridManager.TileType;
 
@@ -18,7 +19,7 @@ public class PlaceGridCommand extends Command {
 	public PlaceGridCommand() {
 		this.subCategory = 4;
 		this.name = "Place Grid";
-		this.unicodeIcon = "⬜";
+		this.icon = GenericEmoji.fromEmoji("⬜");
 		this.description = "Place a pixel on the grid.";
 		this.args = new CommandArgCollection(new IntArg("x"), new IntArg("y"), new EnumArg("pixel", GridManager.TileType.class));
 		this.category = CommandCategory.FUN;

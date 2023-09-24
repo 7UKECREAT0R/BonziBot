@@ -9,6 +9,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
 import com.lukecreator.BonziBot.Data.Achievement;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
@@ -20,7 +21,7 @@ public class AchievementsCommand extends Command {
 	public AchievementsCommand() {
 		this.subCategory = 3;
 		this.name = "Achievements";
-		this.unicodeIcon = "🔓";
+		this.icon = GenericEmoji.fromEmoji("🔓");
 		this.description = "Show yours or someone else's achievements!";
 		this.args = new CommandArgCollection(new UserArg("target").optional());
 		this.category = CommandCategory.FUN;

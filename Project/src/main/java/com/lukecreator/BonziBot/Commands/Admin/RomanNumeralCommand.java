@@ -6,13 +6,14 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 public class RomanNumeralCommand extends Command {
 
 	public RomanNumeralCommand() {
 		this.subCategory = 0;
 		this.name = "romannumeral";
-		this.unicodeIcon = "🐫";
+		this.icon = GenericEmoji.fromEmoji("🐫");
 		this.description = "convert an integer to roman numerals";
 		this.args = new CommandArgCollection(new IntArg("input"));
 		this.category = CommandCategory._HIDDEN;

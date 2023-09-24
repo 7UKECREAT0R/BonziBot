@@ -12,15 +12,18 @@ import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.CommandAPI.StringRemainderArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Graphics.FontStyle;
 import com.lukecreator.BonziBot.Graphics.Image;
+
+import net.dv8tion.jda.api.utils.FileUpload;
 
 public class TestImageCommand extends Command {
 
 	public TestImageCommand() {
 		this.subCategory = 0;
 		this.name = "Test Image";
-		this.unicodeIcon = "🖼️";
+		this.icon = GenericEmoji.fromEmoji("🖼️");
 		this.description = "Test the image API by constructing an image with text on it.";
 		this.args = new CommandArgCollection(
 			new ColorArg("BG Color"),
@@ -52,7 +55,8 @@ public class TestImageCommand extends Command {
 		
 		try {
 			File saved = image.save("tempImages/test.jpg", true);
-			e.channel.sendMessage("Finished in " + timeMs + "ms.").addFile(saved).queue();
+			FileUpload upload = FileUpload.fromData(saved, saved.toPath().getFileName().toString());
+			e.channel.sendMessage("Finished in " + timeMs + "ms.").addFiles(upload).queue();
 			
 		} catch(IOException exc) {
 			exc.printStackTrace();

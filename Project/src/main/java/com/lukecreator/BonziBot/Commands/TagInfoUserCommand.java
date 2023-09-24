@@ -6,6 +6,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Gui.GuiUserTags;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -17,7 +18,7 @@ public class TagInfoUserCommand extends Command {
 	public TagInfoUserCommand() {
 		this.subCategory = 1;
 		this.name = "User Tag Info";
-		this.unicodeIcon = "🥸";
+		this.icon = GenericEmoji.fromEmoji("🥸");
 		this.description = "See a user's most popular tags.";
 		this.args = new CommandArgCollection(new UserArg("user"));
 		this.category = CommandCategory.FUN;

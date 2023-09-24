@@ -7,8 +7,10 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandArgCollection;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 
 public class PollCommand extends Command {
 	
@@ -25,7 +27,7 @@ public class PollCommand extends Command {
 		this.description = "Make a poll people can vote on!";
 		this.args = CommandArgCollection.single("question");
 		this.category = CommandCategory.FUN;
-		this.unicodeIcon = "📑";
+		this.icon = GenericEmoji.fromEmoji("📑");
 	}
 	
 	@Override
@@ -45,8 +47,8 @@ public class PollCommand extends Command {
 			e.slashCommand.reply(":white_check_mark: `Created poll!`").setEphemeral(true).queue();
 		
 		e.channel.sendMessageEmbeds(eb.build()).queue(msg -> {
-			msg.addReaction("👍").queue();
-			msg.addReaction("👎").queue();
+			msg.addReaction(Emoji.fromUnicode("👍")).queue();
+			msg.addReaction(Emoji.fromUnicode("👎")).queue();
 		});
 	}
 }

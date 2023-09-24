@@ -11,6 +11,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.StringRemainderArg;
 import com.lukecreator.BonziBot.CommandAPI.TimeSpanArg;
 import com.lukecreator.BonziBot.Data.AfkData;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
@@ -21,7 +22,7 @@ public class AfkCommand extends Command {
 	public AfkCommand() {
 		this.subCategory = 3;
 		this.name = "AFK";
-		this.unicodeIcon = "❌⌨️";
+		this.icon = GenericEmoji.fromEmoji("❌⌨️");
 		this.description = "Set yourself as 'AFK' to let users know that you're not ghosting them!";
 		this.args = new CommandArgCollection(new TimeSpanArg("length"), new StringRemainderArg("reason"));
 		this.worksInDms = true;

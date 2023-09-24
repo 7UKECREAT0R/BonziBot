@@ -4,6 +4,8 @@ import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+
 public class LoadLegacyFilesCommand extends Command {
 	
 	public LoadLegacyFilesCommand() {
@@ -18,6 +20,6 @@ public class LoadLegacyFilesCommand extends Command {
 		e.bonzi.accounts.loadLegacy();
 		e.bonzi.tags.loadLegacy();
 		e.bonzi.counting.loadLegacy();
-		e.message.addReaction("👍").queue();
+		e.message.addReaction(Emoji.fromUnicode("👍")).queue();
 	}
 }

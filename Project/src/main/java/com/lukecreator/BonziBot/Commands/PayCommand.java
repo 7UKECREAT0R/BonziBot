@@ -8,6 +8,7 @@ import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.CommandAPI.IntArg;
 import com.lukecreator.BonziBot.CommandAPI.UserArg;
 import com.lukecreator.BonziBot.Data.Achievement;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
@@ -20,7 +21,7 @@ public class PayCommand extends Command {
 	public PayCommand() {
 		this.subCategory = 0;
 		this.name = "Pay";
-		this.unicodeIcon = "🎁";
+		this.icon = GenericEmoji.fromEmoji("🎁");
 		this.description = "Pay another user with coins!";
 		this.args = new CommandArgCollection(
 			new UserArg("receiver"),

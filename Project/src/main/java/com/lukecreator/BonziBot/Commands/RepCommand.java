@@ -4,6 +4,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.Command;
 import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
+import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 
@@ -12,7 +13,7 @@ public class RepCommand extends Command {
 	public RepCommand() {
 		this.subCategory = 3;
 		this.name = "Rep";
-		this.unicodeIcon = "🖲️";
+		this.icon = GenericEmoji.fromEmoji("🖲️");
 		this.description = "Learn how to increase or decrease people's reputation!";
 		this.args = null;
 		this.category = CommandCategory.FUN;
