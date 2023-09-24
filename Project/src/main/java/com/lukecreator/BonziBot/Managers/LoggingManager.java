@@ -21,10 +21,11 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 
 /**
  * Manages the logs for all guilds including
@@ -149,7 +150,7 @@ public class LoggingManager implements IStorableData {
 		
 		// set message id for log entry and add to list
 		
-		MessageAction action = channel.sendMessageEmbeds(me);
+		MessageCreateAction action = channel.sendMessageEmbeds(me);
 		
 		if(!row.isEmpty())
 			action = action.setActionRow(row);
@@ -161,25 +162,25 @@ public class LoggingManager implements IStorableData {
 	}
 	
 	public AllocationList<LogEntry> getAllocation(Guild g) {
-		return getAllocation(g.getIdLong());
+		return this.getAllocation(g.getIdLong());
 	}
 	public AllocationList<LogEntry> getAllocation(long guildId) {
-		if(entries.containsKey(guildId))
-			return entries.get(guildId);
+		if(this.entries.containsKey(guildId))
+			return this.entries.get(guildId);
 		AllocationList<LogEntry> list = new
 			AllocationList<LogEntry>(LOG_HISTORY_LEN);
-		entries.put(guildId, list);
+		this.entries.put(guildId, list);
 		return list;
 	}
 	AllocationList<Message> getMessageHistory(Guild g) {
-		return getMessageHistory(g.getIdLong());
+		return this.getMessageHistory(g.getIdLong());
 	}
 	AllocationList<Message> getMessageHistory(long guildId) {
-		if(messages.containsKey(guildId))
-			return messages.get(guildId);
+		if(this.messages.containsKey(guildId))
+			return this.messages.get(guildId);
 		AllocationList<Message> list = new
 			AllocationList<Message>(MSG_HISTORY_LEN);
-		messages.put(guildId, list);
+		this.messages.put(guildId, list);
 		return list;
 	}
 	public void addMessageToHistory(Message message, Guild g) {
@@ -191,7 +192,7 @@ public class LoggingManager implements IStorableData {
 		this.messages.put(guildId, history);
 	}
 	public Message getMessageById(long messageId, Guild g) {
-		return getMessageById(messageId, g.getIdLong());
+		return this.getMessageById(messageId, g.getIdLong());
 	}
 	public Message getMessageById(long messageId, long guildId) {
 		Message message = null;
@@ -212,16 +213,16 @@ public class LoggingManager implements IStorableData {
 		return message;
 	}
 	public Message getExposeData(Guild g) {
-		return getExposeData(g.getIdLong());
+		return this.getExposeData(g.getIdLong());
 	}
 	public Message getExposeData(long guildId) {
-		return exposeData.get(guildId);
+		return this.exposeData.get(guildId);
 	}
 	public Message setExposeData(Message m, Guild g) {
-		return setExposeData(m, g.getIdLong());
+		return this.setExposeData(m, g.getIdLong());
 	}
 	public Message setExposeData(Message m, long guildId) {
-		return exposeData.put(guildId, m);
+		return this.exposeData.put(guildId, m);
 	}
 	
 	public void changeLogChannel(TextChannel potential, BonziBot bb, User executor) {
@@ -231,7 +232,7 @@ public class LoggingManager implements IStorableData {
 			("Is this a logging channel?",
 			"Confirming will enable logging and change this server's logging channel to this one.",
 			executor, Color.orange);
-		bb.eventWaiter.getConfirmation(executor, potential, eb.build(), confirm -> {
+		bb.eventWaiter.getConfirmation(executor, (MessageChannelUnion)potential, eb.build(), confirm -> {
 			if(!confirm) {
 				potential.sendMessageEmbeds(BonziUtils.failureEmbed("Alright, cancelled.")).queue();
 				return;
@@ -249,13 +250,13 @@ public class LoggingManager implements IStorableData {
 	
 	@Override
 	public void saveData() {
-		DataSerializer.writeObject(entries, FILE_ENTRIES);
+		DataSerializer.writeObject(this.entries, FILE_ENTRIES);
 	}
 	@SuppressWarnings("unchecked")
 	@Override
 	public void loadData() throws EOFException {
 		Object o = DataSerializer.retrieveObject(FILE_ENTRIES);
 		if(o != null)
-			entries = (HashMap<Long, AllocationList<LogEntry>>)o;
+			this.entries = (HashMap<Long, AllocationList<LogEntry>>)o;
 	}
 }

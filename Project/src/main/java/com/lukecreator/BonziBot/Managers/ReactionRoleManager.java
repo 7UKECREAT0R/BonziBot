@@ -14,12 +14,14 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
+import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.EmojiUnion;
+import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 
 /**
  * Ties a set of reaction roles to a message ID.
@@ -43,7 +45,7 @@ public class ReactionRoleManager implements IStorableData {
 	 * @param emote
 	 * @return -1 if no role could be found.
 	 */
-	public long getRoleForReaction(Message msg, ReactionEmote emote) {
+	public long getRoleForReaction(Message msg, EmojiUnion emote) {
 		return this.getRoleForReaction(msg.getIdLong(), emote);
 	}
 	/**
@@ -52,7 +54,7 @@ public class ReactionRoleManager implements IStorableData {
 	 * @param emote
 	 * @return -1 if no role could be found.
 	 */
-	public long getRoleForReaction(long messageId, ReactionEmote emote) {
+	public long getRoleForReaction(long messageId, EmojiUnion emote) {
 		if(!this.messages.containsKey(messageId))
 			return -1;
 		
@@ -66,14 +68,20 @@ public class ReactionRoleManager implements IStorableData {
 		return -1;
 	}
 	
-	public void handleEvent(GuildMessageReactionAddEvent e, BonziBot bb) {
+	public void handleEvent(MessageReactionAddEvent e, BonziBot bb) {
+		if(!e.isFromType(ChannelType.TEXT))
+			return;
+		
 		Member m = e.getMember();
 		if(m != null && m.getUser().isBot())
 			return;
 		
 		this.handleEvent(e, bb, true);
 	}
-	public void handleEvent(GuildMessageReactionRemoveEvent e, BonziBot bb) {
+	public void handleEvent(MessageReactionRemoveEvent e, BonziBot bb) {
+		if(!e.isFromType(ChannelType.TEXT))
+			return;
+		
 		Member m = e.getMember();
 		if(m != null && m.getUser().isBot())
 			return;
@@ -81,9 +89,12 @@ public class ReactionRoleManager implements IStorableData {
 		this.handleEvent(e, bb, false);
 	}
 	
-	void handleEvent(GenericGuildMessageReactionEvent e, BonziBot bb, boolean add) {
+	void handleEvent(GenericMessageReactionEvent e, BonziBot bb, boolean add) {
+		if(!e.isFromType(ChannelType.TEXT))
+			return;
+		
 		long messageId = e.getMessageIdLong();
-		ReactionEmote re = e.getReactionEmote();
+		EmojiUnion re = e.getEmoji();
 		
 		long roleId = this.getRoleForReaction(messageId, re);
 		if(roleId == -1)
@@ -93,7 +104,7 @@ public class ReactionRoleManager implements IStorableData {
 		Role role = guild.getRoleById(roleId);
 		long userId = e.getUserIdLong();
 		
-		TextChannel channel = e.getChannel();
+		TextChannel channel = (TextChannel)e.getChannel();
 		
 		if(role == null) {
 			// fix this catastrophe
@@ -138,13 +149,13 @@ public class ReactionRoleManager implements IStorableData {
 			boolean hasRole = member.getRoles().stream().anyMatch(r -> r.getIdLong() == roleId);
 			
 			if(add && !hasRole)
-				guild.addRoleToMember(userId, role).queue(null, fail -> {
+				guild.addRoleToMember(UserSnowflake.fromId(userId), role).queue(null, fail -> {
 					channel.sendMessageEmbeds(failEmbed).queue(del -> {
 						del.delete().queueAfter(5, TimeUnit.SECONDS);
 					});
 				});
 			else if(!add && hasRole)
-				guild.removeRoleFromMember(userId, role).queue(null, fail -> {
+				guild.removeRoleFromMember(UserSnowflake.fromId(userId), role).queue(null, fail -> {
 					channel.sendMessageEmbeds(failEmbed).queue(del -> {
 						del.delete().queueAfter(5, TimeUnit.SECONDS);
 					});

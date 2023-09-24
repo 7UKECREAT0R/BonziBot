@@ -1,5 +1,7 @@
 package com.lukecreator.BonziBot.Script.Model.Limiting;
 
+import java.awt.Color;
+
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
@@ -11,7 +13,7 @@ import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 public class StatementLimitChannel implements ScriptStatement {
 	
@@ -61,11 +63,11 @@ public class StatementLimitChannel implements ScriptStatement {
 		try {
 			long id = Long.parseLong(this.thing);
 			if(info.channel.getIdLong() != id)
-				context.cancelExecution();
+				context.cancelExecution("This script can only be run in the <#" + id + "> channel.", Color.red);
 		} catch(NumberFormatException nfe) {
 			TextChannel channel = info.channel;
 			if(!channel.getName().equalsIgnoreCase(this.thing))
-				context.cancelExecution();
+				context.cancelExecution("This script can only be run in the <#" + channel.getId() + "> channel.", Color.red);
 		}
 		
 	}

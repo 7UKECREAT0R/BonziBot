@@ -5,6 +5,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import com.lukecreator.BonziBot.Data.SUser;
 import com.lukecreator.BonziBot.GuiAPI.DropdownItem;
 import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
@@ -20,14 +23,18 @@ public class Script implements Serializable {
 	
 	public static final int MAX_STATEMENTS = 50;
 	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 	
 	public static String asArgument(String in) {
+		if(in == null)
+			return "\"\"";
 		if(in.contains(" "))
 			return '\"' + in + '\"';
 		return in;
 	}
 	public static String asArgument(Color in) {
+		if(in == null)
+			return "[0,0,0]";
 		return "[" + in.getRed() + "," + in.getBlue() + "," + in.getGreen() + "]";
 	}
 	
@@ -37,12 +44,12 @@ public class Script implements Serializable {
 	public final long created;	// When the script was created.
 	public final String name;	// The name of the script.
 	
+	// The package that owns this script.
+	public transient ScriptPackage owningPackage;
+	
 	// Code information.
 	public InvocationMethod method;
 	public ScriptStatementCollection code;
-	
-	// Storage
-	public ScriptStorage storage;
 	
 	/**
 	 * Initialize a new Script with timestamp set to <code>System.currentTimeMillis();</code>
@@ -57,7 +64,7 @@ public class Script implements Serializable {
 		
 		// These are set in GuiNewScript#onButtonClicked
 		this.code = null;
-		this.storage = null;
+		this.owningPackage = null;
 	}
 	/**
 	 * Get all the variables that are present during this script's execution.
@@ -77,9 +84,9 @@ public class Script implements Serializable {
 		return list;
 	}
 	public GuiEditEntryChoice getVariableChoice() {
-		return this.getVariableChoice(null, "Variable", "The variable to be set/affected.");
+		return this.createVariableChoice(null, "Variable", "The variable to be set/affected.");
 	}
-	public GuiEditEntryChoice getVariableChoice(String emoji, String name, String description) {
+	public GuiEditEntryChoice createVariableChoice(@Nullable String emoji, @Nonnull String name, @Nonnull String description) {
 		List<String> vars = this.getAllVariables(); // might be more than 25... (let's hope its not)
 		GuiDropdown dd = new GuiDropdown("Variable", "variable", false)
 			.addItemsTransform(vars, item -> {

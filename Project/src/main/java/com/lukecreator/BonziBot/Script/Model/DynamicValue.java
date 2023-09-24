@@ -2,6 +2,8 @@ package com.lukecreator.BonziBot.Script.Model;
 
 import java.io.Serializable;
 
+import com.lukecreator.BonziBot.BonziUtils;
+
 /**
  * An automatically parsed multi-type value. This is meant to be a convenient means
  * of parsing unknown user input during submission of script-statement arguments.
@@ -150,11 +152,11 @@ public class DynamicValue implements Serializable {
 	public Object getAsObject(ScriptMemory objects) {
 		switch(this.type) {
 		case BOOLEAN:
-			return new Boolean(this.b);
+			return Boolean.valueOf(this.b);
 		case DECIMAL:
-			return new Double(this.d);
+			return Double.valueOf(this.d);
 		case INT:
-			return new Long(this.i);
+			return Long.valueOf(this.i);
 		case OBJREF:
 			return objects.getReferencedObject(this);
 		case STRING:
@@ -185,9 +187,9 @@ public class DynamicValue implements Serializable {
 		case BOOLEAN:
 			return String.valueOf(this.b);
 		case DECIMAL:
-			return String.valueOf(this.d);
+			return BonziUtils.comma(this.d);
 		case INT:
-			return String.valueOf(this.i);
+			return BonziUtils.comma(this.i);
 		case STRING:
 			return this.s;
 		case OBJREF:

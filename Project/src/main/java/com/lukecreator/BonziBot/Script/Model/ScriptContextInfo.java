@@ -11,9 +11,9 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 /**
  * Wraps a <code>CommandExecutionInfo</code> object but has better, more
@@ -39,7 +39,7 @@ public class ScriptContextInfo {
 	public final String[] inputArgs;
 	//public final CommandParsedArgs args;
 	public boolean hasSlashCommand;
-	public SlashCommandEvent slashCommand;
+	public SlashCommandInteractionEvent slashCommand;
 	
 	// hasMessage
 	public final Message msg;
@@ -87,7 +87,7 @@ public class ScriptContextInfo {
 		this.guild = info.guild;
 		this.settings = info.settings;
 	}
-	public ScriptContextInfo(String fullText, String commandName, String[] inputArgs, SlashCommandEvent slashCommand, Message msg,
+	public ScriptContextInfo(String fullText, String commandName, String[] inputArgs, SlashCommandInteractionEvent slashCommand, Message msg,
 			TextChannel channel, JDA jda, BonziBot bonzi, User user, Member member, Guild guild, GuildSettings settings) {
 		this.hasCommand = commandName != null;
 		this.hasMessage = msg != null;

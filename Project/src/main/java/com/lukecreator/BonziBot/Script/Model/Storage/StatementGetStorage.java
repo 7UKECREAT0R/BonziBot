@@ -5,18 +5,18 @@ import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue;
+import com.lukecreator.BonziBot.Script.Model.PackageStorage;
+import com.lukecreator.BonziBot.Script.Model.PackageStorage.StorageEntry;
 import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
 import com.lukecreator.BonziBot.Script.Model.ScriptError;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
-import com.lukecreator.BonziBot.Script.Model.ScriptStorage;
-import com.lukecreator.BonziBot.Script.Model.ScriptStorage.StorageEntry;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 
 public class StatementGetStorage implements ScriptStatement {
 	
@@ -37,7 +37,7 @@ public class StatementGetStorage implements ScriptStatement {
 	@Override
 	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			caller.getVariableChoice(null, "Key", "The key to get the data from."),
+			caller.createVariableChoice(null, "Key", "The key to get the data from."),
 			new GuiEditEntryText(new StringArg("dst"), null, "Destination", "The variable to store the retrieved data in.")
 		};
 	}
@@ -68,8 +68,8 @@ public class StatementGetStorage implements ScriptStatement {
 		}
 		
 		Object object = keyVar.getAsObject(context.memory);
-		long key = ScriptStorage.toKey(object);
-		StorageEntry entry = context._script.storage.getData(key);
+		long key = PackageStorage.toKey(object);
+		StorageEntry entry = context._script.owningPackage.storage.getData(key);
 		
 		if(entry == null) {
 			ScriptExecutor.raiseError(new ScriptError("The key \"" + object.toString() + "\" doesn't have any data.", this));

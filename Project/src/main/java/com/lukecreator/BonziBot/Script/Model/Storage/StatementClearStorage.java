@@ -42,6 +42,6 @@ public class StatementClearStorage implements ScriptStatement {
 	
 	@Override
 	public void execute(ScriptContextInfo info, ScriptExecutor context) {
-		context._script.storage.clearData();
+		context._script.owningPackage.storage.clearData();
 	}
 }

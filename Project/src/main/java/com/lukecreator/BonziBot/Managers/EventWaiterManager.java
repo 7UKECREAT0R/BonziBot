@@ -17,13 +17,14 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.entities.emoji.EmojiUnion;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 
 public class EventWaiterManager {
 	
@@ -51,16 +52,16 @@ public class EventWaiterManager {
 	
 	// Base methods used for raw event waiting.
 	public void waitForResponse(User user, Consumer<? super Message> onResponse) {
-		waiters.put(user.getIdLong(), onResponse);
+		this.waiters.put(user.getIdLong(), onResponse);
 	}
 	public void waitForResponse(long id, Consumer<? super Message> onResponse) {
-		waiters.put(id, onResponse);
+		this.waiters.put(id, onResponse);
 	}
 	public void stopWaitingForResponse(User user) {
-		waiters.remove(user.getIdLong());
+		this.waiters.remove(user.getIdLong());
 	}
 	public void stopWaitingForResponse(long id) {
-		waiters.remove(id);
+		this.waiters.remove(id);
 	}
 	
 	// Arg based waiters which will return a specific arg-type.
@@ -70,7 +71,7 @@ public class EventWaiterManager {
 	public void waitForArgument(long id, CommandArg type, Consumer<Object> onResponse) {
 		Tuple<CommandArg, Consumer<Object>> tuple = new Tuple
 			<CommandArg, Consumer<Object>>(type, onResponse);
-		argWaiters.put(id, tuple);
+		this.argWaiters.put(id, tuple);
 	}
 	public void stopWaitingForArgument(User user) {
 		this.argWaiters.remove(user.getIdLong());
@@ -83,7 +84,7 @@ public class EventWaiterManager {
 	// DEPRECATED as of 6-8-21. Use waitForAction(...)
 	@Deprecated
 	public void waitForReaction(User user, Message msg, GenericEmoji[] emoji, Consumer<Integer> consumer) {
-		waitForReaction(user.getIdLong(), msg, emoji, consumer);
+		this.waitForReaction(user.getIdLong(), msg, emoji, consumer);
 	}
 	@Deprecated
 	public void waitForReaction(long userId, Message msg, GenericEmoji[] emoji, Consumer<Integer> consumer) {
@@ -102,58 +103,70 @@ public class EventWaiterManager {
 	
 	// Button click waiters which return the action ID clicked.
 	// These return a MessageAction that is yet to be sent.
-	public MessageAction waitForAction(User user, MessageAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
-		return waitForAction(user.getIdLong(), msgAction, consumer, buttons);
+	public MessageCreateAction waitForAction(User user, MessageCreateAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
+		return this.waitForAction(user.getIdLong(), msgAction, consumer, buttons);
 	}
-	public MessageAction waitForAction(long userId, MessageAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
+	public MessageCreateAction waitForAction(long userId, MessageCreateAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
 		this.actionWaiters.put(userId, new Tuple<GuiButton[], Consumer<String>>(buttons, consumer));
 		return BonziUtils.appendComponents(msgAction, buttons, false);
 	}
-	public ReplyAction waitForAction(User user, ReplyAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
-		return waitForAction(user.getIdLong(), msgAction, consumer, buttons);
+	public MessageEditAction waitForAction(User user, MessageEditAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
+		return this.waitForAction(user.getIdLong(), msgAction, consumer, buttons);
 	}
-	public ReplyAction waitForAction(long userId, ReplyAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
+	public MessageEditAction waitForAction(long userId, MessageEditAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
 		this.actionWaiters.put(userId, new Tuple<GuiButton[], Consumer<String>>(buttons, consumer));
-		return BonziUtils.appendComponents(msgAction, buttons);
+		return BonziUtils.appendComponents(msgAction, buttons, false);
+	}
+	public ReplyCallbackAction waitForAction(User user, ReplyCallbackAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
+		return this.waitForAction(user.getIdLong(), msgAction, consumer, buttons);
+	}
+	public ReplyCallbackAction waitForAction(long userId, ReplyCallbackAction msgAction, Consumer<String> consumer, GuiButton... buttons) {
+		this.actionWaiters.put(userId, new Tuple<GuiButton[], Consumer<String>>(buttons, consumer));
+		return BonziUtils.appendComponents(msgAction, buttons, false);
 	}
 	public void stopWaitingForAction(User user) {
-		stopWaitingForAction(user.getIdLong());
+		this.stopWaitingForAction(user.getIdLong());
 	}
 	public void stopWaitingForAction(long userId) {
 		this.actionWaiters.remove(userId);
 	}
-	public void waitForGlobalAction(MessageAction msgAction, Consumer<Tuple<User, String>> consumer, GuiButton... buttons) {
+	public void waitForGlobalAction(MessageCreateAction msgAction, Consumer<Tuple<User, String>> consumer, GuiButton... buttons) {
 		BonziUtils.appendComponents(msgAction, buttons, false).queue(msg -> {
 			this.globalActionWaiters.put(msg.getIdLong(), new Tuple<GuiButton[], Consumer<Tuple<User, String>>>(buttons, consumer));
 		});
 	}
-	public void waitForGlobalAction(ReplyAction msgAction, Consumer<Tuple<User, String>> consumer, GuiButton... buttons) {
-		BonziUtils.appendComponents(msgAction, buttons).queue(hook -> {
+	public void waitForGlobalAction(MessageEditAction msgAction, Consumer<Tuple<User, String>> consumer, GuiButton... buttons) {
+		BonziUtils.appendComponents(msgAction, buttons, false).queue(msg -> {
+			this.globalActionWaiters.put(msg.getIdLong(), new Tuple<GuiButton[], Consumer<Tuple<User, String>>>(buttons, consumer));
+		});
+	}
+	public void waitForGlobalAction(ReplyCallbackAction msgAction, Consumer<Tuple<User, String>> consumer, GuiButton... buttons) {
+		BonziUtils.appendComponents(msgAction, buttons, false).queue(hook -> {
 			hook.retrieveOriginal().queue(msg -> {
 				this.globalActionWaiters.put(msg.getIdLong(), new Tuple<GuiButton[], Consumer<Tuple<User, String>>>(buttons, consumer));
 			});
 		});
 	}
 	public void stopWaitingForGlobalAction(Message msg) {
-		stopWaitingForGlobalAction(msg.getIdLong());
+		this.stopWaitingForGlobalAction(msg.getIdLong());
 	}
 	public void stopWaitingForGlobalAction(long messageId) {
 		this.globalActionWaiters.remove(messageId);
 	}
 	
 	// Allows a boolean response. Confirms something.
-	public void getConfirmation(User user, MessageChannel channel, String title, Consumer<Boolean> consumer) {
-		getConfirmation(user.getIdLong(), channel, title, consumer);
+	public void getConfirmation(User user, MessageChannelUnion channel, String title, Consumer<Boolean> consumer) {
+		this.getConfirmation(user.getIdLong(), channel, title, consumer);
 	}
-	public void getConfirmation(long id, MessageChannel channel, String title, Consumer<Boolean> consumer) {
+	public void getConfirmation(long id, MessageChannelUnion channel, String title, Consumer<Boolean> consumer) {
 		Consumer<String> wrapper = (str -> { consumer.accept(str.equals("_cyes")); });
 		EmbedBuilder eb = BonziUtils.quickEmbed(title, "<@" + id + ">, click yes or no to confirm.").setColor(Color.orange);
 		this.waitForAction(id, channel.sendMessageEmbeds(eb.build()), wrapper, CONFIRM_YES, CONFIRM_NO).queue();
 	}
-	public void getConfirmation(User user, MessageChannel channel, MessageEmbed me, Consumer<Boolean> consumer) {
-		getConfirmation(user.getIdLong(), channel, me, consumer);
+	public void getConfirmation(User user, MessageChannelUnion channel, MessageEmbed me, Consumer<Boolean> consumer) {
+		this.getConfirmation(user.getIdLong(), channel, me, consumer);
 	}
-	public void getConfirmation(long id, MessageChannel channel, MessageEmbed me, Consumer<Boolean> consumer) {
+	public void getConfirmation(long id, MessageChannelUnion channel, MessageEmbed me, Consumer<Boolean> consumer) {
 		Consumer<String> wrapper = (str -> { consumer.accept(str.equals("_cyes")); });
 		this.waitForAction(id, channel.sendMessageEmbeds(me), wrapper, CONFIRM_YES, CONFIRM_NO).queue();
 	}
@@ -189,14 +202,14 @@ public class EventWaiterManager {
 		User u = msg.getAuthor();
 		long id = u.getIdLong();
 		
-		if(waiters.containsKey(id)) {
-			Consumer<? super Message> event = waiters.remove(id);
+		if(this.waiters.containsKey(id)) {
+			Consumer<? super Message> event = this.waiters.remove(id);
 			event.accept(msg);
 			return true;
 		}
 		
-		if(argWaiters.containsKey(id)) {
-			onArgMessage(msg, id);
+		if(this.argWaiters.containsKey(id)) {
+			this.onArgMessage(msg, id);
 			return true;
 		}
 		
@@ -205,7 +218,7 @@ public class EventWaiterManager {
 	public void onArgMessage(Message msg, long id) {
 		
 		Tuple<CommandArg, Consumer<Object>> obj
-			= argWaiters.get(id);
+			= this.argWaiters.get(id);
 		
 		CommandArg arg = obj.getA();
 		Consumer<Object> event = obj.getB();
@@ -224,7 +237,7 @@ public class EventWaiterManager {
 		} else
 			deleteMessage = true;
 		
-		MessageChannel channel = msg.getChannel();
+		MessageChannelUnion channel = msg.getChannel();
 		Guild guild = msg.isFromGuild() ? msg.getGuild() : null;
 		JDA jda = msg.getJDA();
 		
@@ -239,7 +252,7 @@ public class EventWaiterManager {
 			return;
 		}
 		
-		argWaiters.remove(id);
+		this.argWaiters.remove(id);
 		arg.parseWord(content, jda, msg.getAuthor(), guild);
 		Object parsed = arg.object;
 		
@@ -268,7 +281,7 @@ public class EventWaiterManager {
 		Consumer<Integer> result = rData.getB();
 		
 		for(int i = 0; i < possible.length; i++) {
-			ReactionEmote emote = e.reactionEmote;
+			EmojiUnion emote = e.reactionEmote;
 			if(possible[i].isEqual(emote)) {
 				this.reactionWaiters.remove(uid);
 				result.accept(i);
@@ -284,7 +297,7 @@ public class EventWaiterManager {
 		this.reactionWaiters.remove(uid);
 		return;
 	}
-	public boolean onClick(ButtonClickEvent e) {
+	public boolean onClick(ButtonInteractionEvent e) {
 		long id = e.getUser().getIdLong();
 		long mid = e.getMessageIdLong();
 		

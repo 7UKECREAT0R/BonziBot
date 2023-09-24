@@ -35,6 +35,10 @@ public class ScriptExecutor {
 	boolean cancel = false;			// Whether to cancel the script.
 	boolean silentCancel = false;
 	
+	public boolean wasCancelledSilently() {
+		return this.cancel & this.silentCancel;
+	}
+	
 	/**
 	 * Cancel the running of this script with an embedded message and color.
 	 * @param message
@@ -42,7 +46,7 @@ public class ScriptExecutor {
 	 */
 	public void cancelExecution(String message, Color color) {
 		this.cancel = true;
-		this.cancelMessage = message;
+		this.cancelMessage = BonziUtils.cutOffString(message, 2000);
 		this.cancelColor = color;
 		this.silentCancel = false;
 	}
@@ -65,7 +69,7 @@ public class ScriptExecutor {
 	}
 	public void run(int startAt, ScriptContextInfo context) {
 		
-		if(statements.size() < 1)
+		if(this.statements.size() < 1)
 			return;
 		
 		this.statements.seek(0);
@@ -73,6 +77,9 @@ public class ScriptExecutor {
 		while(this.statements.hasNext()) {
 			
 			ScriptStatement current = this.statements.next();
+			
+			if(current instanceof ScriptGetter)
+				((ScriptGetter)current).bonziInstance = context.bonzi;
 			
 			try {
 				current.execute(context, this);

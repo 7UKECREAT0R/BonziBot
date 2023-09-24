@@ -1,5 +1,7 @@
 package com.lukecreator.BonziBot.Script.Model.Limiting;
 
+import java.awt.Color;
+
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.GuiAPI.DropdownItem;
 import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
@@ -25,6 +27,8 @@ public class StatementLimitCompare implements ScriptStatement {
 	Comparison comparison;
 	DynamicValue b;
 	
+	String errorMessage;
+	
 	@Override
 	public String getKeyword() {
 		return "require_comparison";
@@ -32,7 +36,8 @@ public class StatementLimitCompare implements ScriptStatement {
 
 	@Override
 	public String getAsCode() {
-		return "require_comparison " + Script.asArgument(this.a) + ' ' + comparison.symbol + ' ' + this.b.asArg();
+		return "require_comparison " + Script.asArgument(this.a) + ' ' + this.comparison.symbol +
+				' ' + this.b.asArg() + ' ' + Script.asArgument(this.errorMessage);
 	}
 
 	@Override
@@ -43,9 +48,10 @@ public class StatementLimitCompare implements ScriptStatement {
 		});
 		
 		return new GuiEditEntry[] {
-			caller.getVariableChoice(null, "A", "The variable to compare."),
+			caller.createVariableChoice(null, "A", "The variable to compare."),
 			new GuiEditEntryChoice(dropdown, null, "Comparison", "The comparison that needs to be satisfied."),
-			new GuiEditEntryText(new StringArg(""), null, "B", "The value or variable to compare with.")
+			new GuiEditEntryText(new StringArg("B"), null, "B", "The value or variable to compare with."),
+			new GuiEditEntryText(new StringArg("error"), "💬", "Error Message", "If the comparison fails, the message to show the user. Use {brackets} to denote variables.")
 		};
 	}
 
@@ -64,6 +70,7 @@ public class StatementLimitCompare implements ScriptStatement {
 		this.a = (String)inputs[0];
 		this.b = DynamicValue.parse((String)inputs[2]);
 		this.comparison = (Comparison)inputs[1];
+		this.errorMessage = (String)inputs[3];
 	}
 
 	@Override
@@ -88,22 +95,22 @@ public class StatementLimitCompare implements ScriptStatement {
 		final boolean satisfied;
 		
 		switch(this.comparison) {
-		case EQUALS:
+		case EQUAL_TO:
 			satisfied = comp == 0.0;
 			break;
-		case GREATER_OR_EQUAL:
+		case GREATER_OR_EQUAL_TO:
 			satisfied = comp >= 0.0;
 			break;
 		case GREATER_THAN:
 			satisfied = comp > 0.0;
 			break;
-		case LESS_OR_EQUAL:
+		case LESS_OR_EQUAL_TO:
 			satisfied = comp <= 0.0;
 			break;
 		case LESS_THAN:
 			satisfied = comp < 0.0;
 			break;
-		case NOT_EQUAL:
+		case NOT_EQUAL_TO:
 			satisfied = comp != 0;
 			break;
 		default:
@@ -112,7 +119,11 @@ public class StatementLimitCompare implements ScriptStatement {
 		}
 		
 		if(!satisfied) {
-			context.cancelExecution();
+			String baseError = this.errorMessage;
+			if(baseError == null)
+				baseError = "generic error message";
+			String msg = context.memory.replaceVariables(this.errorMessage);
+			context.cancelExecution(msg, Color.red);
 			return;
 		}
 	}

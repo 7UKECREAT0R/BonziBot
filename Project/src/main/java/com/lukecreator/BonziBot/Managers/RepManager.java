@@ -12,8 +12,9 @@ import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Data.UserAccount;
 
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 
 /**
  * Manages the delays and using of the rep "command."
@@ -25,7 +26,7 @@ public class RepManager implements IStorableData {
 	public static final long ONE_HOUR = 3600000;
 	public static final long ONE_DAY = ONE_HOUR * 24;
 	public static final String FILE_TIMES = "rep_timestamps";
-	public static final String DONE = "✅";
+	public static final Emoji DONE = Emoji.fromUnicode("✅");
 	
 	// User ID, UTC Timestamp of last rep
 	public HashMap<Long, Long> lastRep = new HashMap<Long, Long>();
@@ -39,12 +40,12 @@ public class RepManager implements IStorableData {
 		if(!this.canRep(executor)) {
 			long time = this.timeUntilRep(executor);
 			String timeString = BonziUtils.getLongTimeStringMs(time);
-			MessageChannel ch = msg.getChannel();
+			MessageChannelUnion ch = msg.getChannel();
 			BonziUtils.sendTempMessage(ch, BonziUtils.failureEmbed(
 				"You can't rep anyone yet!", timeString + " remaining"), 3);
 			return;
 		}
-		List<User> mentioned = msg.getMentionedUsers();
+		List<User> mentioned = msg.getMentions().getUsers();
 		if(mentioned.isEmpty())
 			this.repByHistory(msg, bb, positive);
 		else {
@@ -56,7 +57,7 @@ public class RepManager implements IStorableData {
 	}
 	public void repByHistory(Message sent, BonziBot bb, boolean add) {
 		long sender = sent.getAuthor().getIdLong();
-		lastRep.put(sender, System.currentTimeMillis());
+		this.lastRep.put(sender, System.currentTimeMillis());
 		
 		sent.getChannel().getHistoryBefore(sent, 3).queue(history -> {
 			if(history.isEmpty())
@@ -85,7 +86,7 @@ public class RepManager implements IStorableData {
 	}
 	public void repByExplicit(Message sent, BonziBot bb, boolean add, User target) {
 		long sender = sent.getAuthor().getIdLong();
-		lastRep.put(sender, System.currentTimeMillis());
+		this.lastRep.put(sender, System.currentTimeMillis());
 		
 		UserAccountManager uam = bb.accounts;
 		UserAccount account = uam.getUserAccount(target);
@@ -104,16 +105,16 @@ public class RepManager implements IStorableData {
 	}
 	
 	public boolean canRep(long executor) {
-		if(!lastRep.containsKey(executor))
+		if(!this.lastRep.containsKey(executor))
 			return true;
-		long timestamp = lastRep.get(executor);
+		long timestamp = this.lastRep.get(executor);
 		timestamp += ONE_DAY;
 		return System.currentTimeMillis() >= timestamp;
 	}
 	public long timeUntilRep(long executor) {
-		if(!lastRep.containsKey(executor))
+		if(!this.lastRep.containsKey(executor))
 			return 0l;
-		long timestamp = lastRep.get(executor);
+		long timestamp = this.lastRep.get(executor);
 		timestamp += ONE_DAY;
 		long diff = timestamp - System.currentTimeMillis();
 		if(diff < 0)
@@ -123,7 +124,7 @@ public class RepManager implements IStorableData {
 	
 	@Override
 	public void saveData() {
-		DataSerializer.writeObject(lastRep, FILE_TIMES);
+		DataSerializer.writeObject(this.lastRep, FILE_TIMES);
 	}
 	@SuppressWarnings("unchecked")
 	@Override
@@ -131,6 +132,6 @@ public class RepManager implements IStorableData {
 		Object o1 = DataSerializer.retrieveObject(FILE_TIMES);
 			
 		if(o1 != null)
-			lastRep = (HashMap<Long, Long>) o1;
+			this.lastRep = (HashMap<Long, Long>) o1;
 	}
 }

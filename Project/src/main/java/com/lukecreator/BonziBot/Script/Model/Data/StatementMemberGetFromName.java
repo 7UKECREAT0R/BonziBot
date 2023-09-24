@@ -1,8 +1,11 @@
 package com.lukecreator.BonziBot.Script.Model.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
+import com.lukecreator.BonziBot.Data.Mention;
+import com.lukecreator.BonziBot.Data.Mention.Type;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
@@ -31,9 +34,9 @@ public class StatementMemberGetFromName implements ScriptStatement {
 	@Override
 	public String getAsCode() {
 		if(this.name.contains(" ") && !this.name.startsWith("\""))
-			return "m_getbyname \"" + this.name + "\" " + dst;
+			return "m_getbyname \"" + this.name + "\" " + this.dst;
 		else
-			return "m_getbyname " + this.name + " " + dst;
+			return "m_getbyname " + this.name + " " + this.dst;
 		
 	}
 
@@ -74,7 +77,22 @@ public class StatementMemberGetFromName implements ScriptStatement {
 			return;
 		}
 		
-		List<Member> gotten = info.guild.getMembersByName(by, true);
+		List<Member> gotten = new ArrayList<Member>(info.guild.getMembersByName(by, true));
+		
+		if(gotten.isEmpty())
+			gotten = new ArrayList<Member>(info.guild.getMembersByNickname(by, true));
+		
+		if(gotten.isEmpty()) {
+			// Resolve mention maybe?
+			Mention mention = Mention.parse(by);
+			if(mention.type != Type.USER) {
+				ScriptExecutor.raiseError(new ScriptError("No members found named '" + by + "'", this));
+				return;
+			}
+			long id = mention.id;
+			Member mentioned = info.guild.getMemberById(id);
+			gotten.add(mentioned);
+		}
 		
 		if(gotten.isEmpty()) {
 			ScriptExecutor.raiseError(new ScriptError("No members found named '" + by + "'", this));

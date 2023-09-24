@@ -10,15 +10,15 @@ import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Data.UsernameGenerator;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 
@@ -52,9 +52,9 @@ public class FunnyChannelManager {
 		if(e.getEntity().getUser().isBot())
 			return;
 		
-		VoiceChannel vc = e.getChannelJoined();
+		AudioChannel vc = e.getChannelJoined();
 		
-		if(vc == null || e instanceof GuildVoiceLeaveEvent)
+		if(vc == null)
 			return;
 		
 		String chName = vc.getName();
@@ -111,7 +111,7 @@ public class FunnyChannelManager {
 	
 	public static void trapdoor(BonziBot bb, GenericGuildVoiceEvent e, String[] args) {
 		List<GuildChannel> channels = e.getGuild().getChannels();
-		VoiceChannel vc = e.getVoiceState().getChannel();
+		AudioChannel vc = e.getVoiceState().getChannel();
 		int currentPosition = 0;
 		for(int i = 0; i < channels.size(); i++) {
 			GuildChannel pTest = channels.get(i);
@@ -128,7 +128,7 @@ public class FunnyChannelManager {
 				String nameL = channel.getName().toLowerCase();
 				if(nameL.contains("~elevator") || nameL.contains("~ladder"))
 					continue;
-				guild.moveVoiceMember(member, (VoiceChannel)channel).queueAfter(750, TimeUnit.MILLISECONDS, null, fail);
+				guild.moveVoiceMember(member, (AudioChannel)channel).queueAfter(750, TimeUnit.MILLISECONDS, null, fail);
 				return;
 			}
 		}
@@ -149,7 +149,7 @@ public class FunnyChannelManager {
 			return;
 		
 		List<GuildChannel> channels = e.getGuild().getChannels();
-		VoiceChannel vc = e.getVoiceState().getChannel();
+		AudioChannel vc = e.getVoiceState().getChannel();
 		int currentPosition = 0;
 		for(int i = 0; i < channels.size(); i++) {
 			GuildChannel pTest = channels.get(i);
@@ -167,7 +167,7 @@ public class FunnyChannelManager {
 				String nameL = channel.getName().toLowerCase();
 				if(nameL.contains("~elevator") || nameL.contains("~ladder"))
 					continue;
-				guild.moveVoiceMember(member, (VoiceChannel)channel).queueAfter(750, TimeUnit.MILLISECONDS, null, fail);
+				guild.moveVoiceMember(member, (AudioChannel)channel).queueAfter(750, TimeUnit.MILLISECONDS, null, fail);
 				return;
 			}
 		}
@@ -175,7 +175,7 @@ public class FunnyChannelManager {
 	}
 	public static void ladder(BonziBot bb, GenericGuildVoiceEvent e, String[] args) {
 		List<GuildChannel> channels = e.getGuild().getChannels();
-		VoiceChannel vc = e.getVoiceState().getChannel();
+		AudioChannel vc = e.getVoiceState().getChannel();
 		int currentPosition = 0;
 		for(int i = 0; i < channels.size(); i++) {
 			GuildChannel pTest = channels.get(i);
@@ -192,7 +192,7 @@ public class FunnyChannelManager {
 				String nameL = channel.getName().toLowerCase();
 				if(nameL.contains("~trapdoor") || nameL.contains("~pitfall"))
 					continue;
-				guild.moveVoiceMember(member, (VoiceChannel)channel).queueAfter(750, TimeUnit.MILLISECONDS, null, fail);
+				guild.moveVoiceMember(member, (AudioChannel)channel).queueAfter(750, TimeUnit.MILLISECONDS, null, fail);
 				return;
 			}
 		}
@@ -213,7 +213,7 @@ public class FunnyChannelManager {
 			return;
 		
 		List<GuildChannel> channels = e.getGuild().getChannels();
-		VoiceChannel vc = e.getVoiceState().getChannel();
+		AudioChannel vc = e.getVoiceState().getChannel();
 		int currentPosition = 0;
 		for(int i = 0; i < channels.size(); i++) {
 			GuildChannel pTest = channels.get(i);
@@ -230,7 +230,7 @@ public class FunnyChannelManager {
 				String nameL = channel.getName().toLowerCase();
 				if(nameL.contains("~trapdoor") || nameL.contains("~pitfall"))
 					continue;
-				guild.moveVoiceMember(member, (VoiceChannel)channel).queueAfter(750, TimeUnit.MILLISECONDS, null, fail);
+				guild.moveVoiceMember(member, (AudioChannel)channel).queueAfter(750, TimeUnit.MILLISECONDS, null, fail);
 				return;
 			}
 		}
@@ -246,12 +246,12 @@ public class FunnyChannelManager {
 	public static void randomwarp(BonziBot bb, GenericGuildVoiceEvent e, String[] args) {
 		// disabled for fear of someone using loops to get the bot ratelimited
 		List<VoiceChannel> channels = e.getGuild().getVoiceChannels();
-		VoiceChannel current = e.getVoiceState().getChannel();
+		AudioChannel current = e.getVoiceState().getChannel();
 		
 		if(channels.size() <= 1)
 			return;
 		
-		VoiceChannel pick = null;
+		AudioChannel pick = null;
 		
 		do {
 			pick = channels.get(random.nextInt(channels.size()));
@@ -271,7 +271,7 @@ public class FunnyChannelManager {
 			return;
 		String name = args[0];
 		
-		VoiceChannel channel = e.getVoiceState().getChannel();
+		AudioChannel channel = e.getVoiceState().getChannel();
 		Guild guild = e.getGuild();
 		Member member = e.getMember();
 		
@@ -291,7 +291,7 @@ public class FunnyChannelManager {
 		Member member = e.getMember();
 		Guild guild = e.getGuild();
 		String guildName = guild.getName();
-		TextChannel tc = guild.getDefaultChannel();
+		TextChannel tc = (TextChannel)guild.getDefaultChannel();
 		String[] foodOptions = new String[] {
 			"Burger Shack", "Milkshakes", "Burgers", "Fries", "Fast Food Truck", "Tendies"
 		};
@@ -314,7 +314,7 @@ public class FunnyChannelManager {
 		if(matches.isEmpty())
 			return;
 		
-		VoiceChannel moveTo = matches.get(0);
+		AudioChannel moveTo = (AudioChannel)matches.get(0);
 		String nameL = moveTo.getName().toLowerCase();
 		if(nameL.contains("~trapdoor") || nameL.contains("~pitfall")
 		|| nameL.contains("~ladder") || nameL.contains("~elevator"))

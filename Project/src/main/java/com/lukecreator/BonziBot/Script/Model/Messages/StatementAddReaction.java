@@ -71,7 +71,7 @@ public class StatementAddReaction implements ScriptStatement {
 			Message message = info.msg;
 			
 			if(this.reaction.getIsGeneric())
-				message.addReaction(this.reaction.getGenericEmoji()).queue(null, fail -> {});
+				message.addReaction(this.reaction.toEmoji()).queue(null, fail -> {});
 			else
 				message.addReaction(EmoteCache.getEmoteById(this.reaction.getGuildEmojiId())).queue(null, fail -> {});
 		};
@@ -80,7 +80,7 @@ public class StatementAddReaction implements ScriptStatement {
 		if(info.hasSlashCommand) {
 			info.slashCommand.getHook().retrieveOriginal().queue(msg -> {
 				if(this.reaction.getIsGeneric())
-					msg.addReaction(this.reaction.getGenericEmoji()).queue(null, fail -> {});
+					msg.addReaction(this.reaction.toEmoji()).queue(null, fail -> {});
 				else
 					msg.addReaction(EmoteCache.getEmoteById(this.reaction.getGuildEmojiId())).queue(null, fail -> {});
 			}, fail -> {

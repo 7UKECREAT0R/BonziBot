@@ -36,7 +36,7 @@ public class StatementMemberGet extends ScriptGetter {
 			return ((Member)member).getEffectiveName();
 		}));
 		this.propertyBindings.add(new Binding("Full Name", member -> {
-			return ((Member)member).getUser().getAsTag();
+			return ((Member)member).getUser().getName();
 		}));
 		this.propertyBindings.add(new Binding("Color", member -> {
 			Color color = ((Member)member).getColor();

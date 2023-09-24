@@ -20,8 +20,8 @@ import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptPackage;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 /**
@@ -32,9 +32,9 @@ public class ScriptManager implements IStorableData {
 	
 	HashMap<Long, List<ScriptPackage>> packages = new HashMap<Long, List<ScriptPackage>>();
 	
-	public boolean onScriptTrigger(SlashCommandEvent event, BonziBot bb) {
+	public boolean onScriptTrigger(SlashCommandInteractionEvent event, BonziBot bb) {
 		long commandId = event.getCommandIdLong();
-		List<ScriptPackage> pkgs = packages.get(event.getGuild().getIdLong());
+		List<ScriptPackage> pkgs = this.packages.get(event.getGuild().getIdLong());
 		
 		if(pkgs == null)
 			return false;
@@ -80,26 +80,30 @@ public class ScriptManager implements IStorableData {
 				
 				GuildSettings settings = bb.guildSettings.getSettings(event.getGuild());
 				ScriptContextInfo context = new ScriptContextInfo(event.getCommandString(), event.getName(), inputArgs, event,
-					null, event.getTextChannel(), event.getJDA(), bb, event.getUser(), event.getMember(), event.getGuild(), settings);
+					null, event.getChannel().asTextChannel(), event.getJDA(), bb, event.getUser(), event.getMember(), event.getGuild(), settings);
 				
 				// run the script
 				executor.run(context);
 				
 				// if interaction hasn't been responded to make sure to do that
-				if(!event.isAcknowledged())
-					event.replyEmbeds(BonziUtils.successEmbed("Ran script successfully!")).queue();
+				if(!event.isAcknowledged()) {
+					if(executor.wasCancelledSilently())
+						event.replyEmbeds(BonziUtils.failureEmbed("Ran script successfully!")).setEphemeral(true).queue();
+					else
+						event.replyEmbeds(BonziUtils.successEmbed("Ran script successfully!")).setEphemeral(false).queue();
+				}
 				
 				return true;
 			}
 		}
 		return false;
 	}
-	public boolean onScriptTrigger(ButtonClickEvent event, BonziBot bb) {
+	public boolean onScriptTrigger(ButtonInteractionEvent event, BonziBot bb) {
 		String[] extract = extractScript(event.getComponentId());
 		String packageName = extract[0];
 		String scriptName = extract[1];
 		
-		List<ScriptPackage> pkgs = packages.get(event.getGuild().getIdLong());
+		List<ScriptPackage> pkgs = this.packages.get(event.getGuild().getIdLong());
 		
 		if(pkgs == null)
 			return false;
@@ -124,7 +128,7 @@ public class ScriptManager implements IStorableData {
 		
 		GuildSettings settings = bb.guildSettings.getSettings(event.getGuild());
 		ScriptContextInfo context = new ScriptContextInfo(null, null, new String[0], null, null,
-			event.getTextChannel(), event.getJDA(), bb, event.getUser(), event.getMember(), event.getGuild(), settings);
+			event.getChannel().asTextChannel(), event.getJDA(), bb, event.getUser(), event.getMember(), event.getGuild(), settings);
 		
 		// don't worry about replying
 		event.deferEdit().queue();
@@ -152,18 +156,18 @@ public class ScriptManager implements IStorableData {
 		return this.getPackages(guild.getIdLong());
 	}
 	public List<ScriptPackage> getPackages(long guildId) {
-		if(packages.containsKey(guildId))
-			return packages.get(guildId);
+		if(this.packages.containsKey(guildId))
+			return this.packages.get(guildId);
 		else {
 			List<ScriptPackage> ret = new ArrayList<ScriptPackage>(ScriptPackage.MAX_SCRIPTS);
-			packages.put(guildId, ret);
+			this.packages.put(guildId, ret);
 			return ret;
 		}
 	}
 	
 	@Override
 	public void saveData() {
-		DataSerializer.writeObject(packages, "scripts");
+		DataSerializer.writeObject(this.packages, "scripts");
 	}
 	@SuppressWarnings("unchecked")
 	@Override

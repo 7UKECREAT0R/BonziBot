@@ -1,5 +1,7 @@
 package com.lukecreator.BonziBot.Script.Editor;
 
+import java.lang.reflect.InvocationTargetException;
+
 import com.lukecreator.BonziBot.Script.Model.InvocationMethod;
 
 /**
@@ -17,7 +19,7 @@ public class InvocationDescriptor {
 		this.name = name;
 		this.desc = desc;
 	}
-	public InvocationMethod createNew() throws InstantiationException, IllegalAccessException {
-		return internalClass.newInstance();
+	public InvocationMethod createNew() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		return this.internalClass.getDeclaredConstructor().newInstance();
 	}
 }

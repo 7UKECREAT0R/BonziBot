@@ -1,15 +1,17 @@
 package com.lukecreator.BonziBot.Script.Model.Limiting;
 
+import java.awt.Color;
+
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue;
+import com.lukecreator.BonziBot.Script.Model.PackageStorage;
+import com.lukecreator.BonziBot.Script.Model.PackageStorage.StorageEntry;
 import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
 import com.lukecreator.BonziBot.Script.Model.ScriptError;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
-import com.lukecreator.BonziBot.Script.Model.ScriptStorage;
-import com.lukecreator.BonziBot.Script.Model.ScriptStorage.StorageEntry;
 
 import net.dv8tion.jda.api.entities.Guild;
 
@@ -25,13 +27,13 @@ public class StatementLimitHasData implements ScriptStatement {
 
 	@Override
 	public String getAsCode() {
-		return "require_has_data " + Script.asArgument(key);
+		return "require_has_data " + Script.asArgument(this.key);
 	}
 
 	@Override
 	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			caller.getVariableChoice(null, "Key", "The key to check for data from."),
+			caller.createVariableChoice(null, "Key", "The key to check for data from."),
 		};
 	}
 
@@ -59,11 +61,11 @@ public class StatementLimitHasData implements ScriptStatement {
 		}
 		
 		Object object = keyVar.getAsObject(context.memory);
-		long key = ScriptStorage.toKey(object);
-		StorageEntry entry = context._script.storage.getData(key);
+		long key = PackageStorage.toKey(object);
+		StorageEntry entry = context._script.owningPackage.storage.getData(key);
 		
 		if(entry == null) {
-			context.cancelExecution();
+			context.cancelExecution("No data under key `" + keyVar.getConcatString() + "`.", Color.red);
 			return;
 		}
 	}

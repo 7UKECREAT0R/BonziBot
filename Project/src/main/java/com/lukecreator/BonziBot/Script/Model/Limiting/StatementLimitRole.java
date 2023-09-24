@@ -34,7 +34,7 @@ public class StatementLimitRole implements ScriptStatement {
 
 	@Override
 	public String getAsCode() {
-		return "require_role " + roleId + " " + orHigher;
+		return "require_role " + this.roleId + " " + this.orHigher;
 	}
 
 	@Override
@@ -82,19 +82,19 @@ public class StatementLimitRole implements ScriptStatement {
 		List<Role> roles = member.getRoles();
 		
 		if(roles.isEmpty()) {
-			context.cancelExecution("Missing Role! You need to have <@&" + this.roleId + "> to run this script.", Color.orange);
+			context.cancelExecution("Missing Role! You need to have <@&" + this.roleId + "> to run this script.", Color.red);
 			return;
 		}
 		
 		if(this.orHigher) {
 			int position = info.guild.getRoleById(this.roleId).getPosition();
 			if(roles.get(0).getPosition() < position) {
-				context.cancelExecution("Missing Role! You need to have <@&" + this.roleId + "> or higher to run this script.", Color.orange);
+				context.cancelExecution("Missing Role! You need to have <@&" + this.roleId + "> or higher to run this script.", Color.red);
 				return;
 			}
 		} else {
 			if(!roles.stream().anyMatch(r -> r.getIdLong() == this.roleId)) {
-				context.cancelExecution("Missing Role! You need to have <@&" + this.roleId + "> to run this script.", Color.orange);
+				context.cancelExecution("Missing Role! You need to have <@&" + this.roleId + "> to run this script.", Color.red);
 				return;
 			}
 		}

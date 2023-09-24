@@ -13,6 +13,7 @@ import com.lukecreator.BonziBot.Script.Model.Data.StatementChannelGet;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementChannelGetFromID;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementChannelGetFromName;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementMemberGet;
+import com.lukecreator.BonziBot.Script.Model.Data.StatementMemberGetBonziData;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementMemberGetFromID;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementMemberGetFromName;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementRoleGet;
@@ -21,6 +22,7 @@ import com.lukecreator.BonziBot.Script.Model.Data.StatementRoleGetFromName;
 import com.lukecreator.BonziBot.Script.Model.Data.StatementServerGet;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitChannel;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitCompare;
+import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitHasData;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitOwner;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitPermission;
 import com.lukecreator.BonziBot.Script.Model.Limiting.StatementLimitRole;
@@ -39,7 +41,9 @@ import com.lukecreator.BonziBot.Script.Model.System.StatementAddVariable;
 import com.lukecreator.BonziBot.Script.Model.System.StatementDivVariable;
 import com.lukecreator.BonziBot.Script.Model.System.StatementModVariable;
 import com.lukecreator.BonziBot.Script.Model.System.StatementMulVariable;
+import com.lukecreator.BonziBot.Script.Model.System.StatementPowVariable;
 import com.lukecreator.BonziBot.Script.Model.System.StatementRandom;
+import com.lukecreator.BonziBot.Script.Model.System.StatementRoundVariable;
 import com.lukecreator.BonziBot.Script.Model.System.StatementSetVariable;
 import com.lukecreator.BonziBot.Script.Model.System.StatementStop;
 import com.lukecreator.BonziBot.Script.Model.System.StatementSubVariable;
@@ -75,14 +79,17 @@ public class EditorCategories {
 		new StatementDescriptor(StatementToInteger.class, "To Integer", "Converts a variable to an integer."),
 		new StatementDescriptor(StatementToDecimal.class, "To Decimal", "Converts a variable to a decimal."),
 		new StatementDescriptor(StatementToBoolean.class, "To True/False", "Converts a variable to a true/false."),
+		new StatementDescriptor(StatementRoundVariable.class, "Round", "Rounds a decimal number to the nearest integer."),
 		new StatementDescriptor(StatementAddVariable.class, "Add", "Add a value to a variable."),
 		new StatementDescriptor(StatementSubVariable.class, "Subtract", "Subtract a value from a variable."),
 		new StatementDescriptor(StatementMulVariable.class, "Multiply", "Muliply a variable with a value."),
 		new StatementDescriptor(StatementDivVariable.class, "Divide", "Divide a variable by a value."),
-		new StatementDescriptor(StatementModVariable.class, "Modulo", "Divide a variable by a value and get its remainder.")
+		new StatementDescriptor(StatementModVariable.class, "Modulo", "Divide a variable by a value and get its remainder."),
+		new StatementDescriptor(StatementPowVariable.class, "Power", "Raise a variable to a power."),
 	};
 	static final StatementDescriptor[] DATA = {
 		new StatementDescriptor(StatementMemberGet.class, "Get Field from Member", "Get a field from a member."),
+		new StatementDescriptor(StatementMemberGetBonziData.class, "Get Bonzi Data from Member", "Get BonziBot data from a member."),
 		new StatementDescriptor(StatementChannelGet.class, "Get Field from Channel", "Get a field from a channel."),
 		new StatementDescriptor(StatementRoleGet.class, "Get Field from Role", "Get a field from a role."),
 		new StatementDescriptor(StatementServerGet.class, "Get Field from Server", "Get a field from this server."),
@@ -105,7 +112,7 @@ public class EditorCategories {
 		new StatementDescriptor(StatementLimitRole.class, "Require Role", "Require user to have role to continue past this statement."),
 		new StatementDescriptor(StatementLimitOwner.class, "Require Owner", "Require user to be owner of server to continue past this statement."),
 		new StatementDescriptor(StatementLimitCompare.class, "Require Comparison", "Only continue the code if a comparison passes."),
-	 // new StatementDescriptor(StatementLimitHasData.class, "Require Data", "Require a key of data in storage to be present to continue."), removed due to useless
+		new StatementDescriptor(StatementLimitHasData.class, "Require Data", "Require a key of data in storage to be present to continue."),
 		new StatementDescriptor(StatementLimitUser.class, "Require User", "Require the executor to have a name or ID to continue."),
 		new StatementDescriptor(StatementLimitChannel.class, "Require Channel", "Require the script to be run in a specific channel to continue."),
 	};
@@ -149,14 +156,14 @@ public class EditorCategories {
 	}
 	public static StatementDescriptor[] getStatementsForCategory(StatementCategory category) {
 		switch(category) {
-		case ACTIONS: 	return ACTIONS;
-		case DATA: 		return DATA;
-		case STORAGE: 	return STORAGE;
-		case LIMITING: 	return LIMITING;
-		case MESSAGES:	return MESSAGING;
-		case ROLES: 	return ROLES;
-		case SYSTEM: 	return SYSTEM;
-		default: 		return null;
+			case ACTIONS: 	return ACTIONS;
+			case DATA: 		return DATA;
+			case STORAGE: 	return STORAGE;
+			case LIMITING: 	return LIMITING;
+			case MESSAGES:	return MESSAGING;
+			case ROLES: 	return ROLES;
+			case SYSTEM: 	return SYSTEM;
+			default: 		return null;
 		}
 	}
 	public static InvocationDescriptor[] getInvocationDescriptors() {

@@ -29,7 +29,7 @@ public class StatementToDecimal implements ScriptStatement {
 	@Override
 	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			caller.getVariableChoice(null, "Variable", "The variable that should be converted to a decimal value.")
+			caller.createVariableChoice(null, "Variable", "The variable that should be converted to a decimal value.")
 		};
 	}
 	

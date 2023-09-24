@@ -12,7 +12,7 @@ import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 
 public class StatementChannelGetFromID implements ScriptStatement {
 	
@@ -28,7 +28,7 @@ public class StatementChannelGetFromID implements ScriptStatement {
 
 	@Override
 	public String getAsCode() {
-		return "ch_getbyid " + this.id + " " + dst;
+		return "ch_getbyid " + this.id + " " + this.dst;
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class StatementChannelGetFromID implements ScriptStatement {
 		
 		DynamicValue tryRead = context.memory.readVariable(this.id);
 		if(tryRead != null)
-			id = tryRead.getConcatString();
+			this.id = tryRead.getConcatString();
 		
 		if(!info.hasGuild) {
 			ScriptExecutor.raiseError(new ScriptError("No server to get channel from... (what?)", this));

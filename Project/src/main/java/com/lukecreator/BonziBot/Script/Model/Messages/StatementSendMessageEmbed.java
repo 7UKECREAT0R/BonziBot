@@ -17,10 +17,10 @@ import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 
 public class StatementSendMessageEmbed implements ScriptStatement {
 	
@@ -42,7 +42,7 @@ public class StatementSendMessageEmbed implements ScriptStatement {
 	@Override
 	public String getAsCode() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("send_embed " + Script.asArgument(channelVariable) + ' ' +
+		sb.append("send_embed " + Script.asArgument(this.channelVariable) + ' ' +
 			Script.asArgument(this.title) + ' ' +
 			Script.asArgument(this.description) + ' ' +
 			Script.asArgument(this.color));
@@ -52,7 +52,7 @@ public class StatementSendMessageEmbed implements ScriptStatement {
 			sb.append(Script.asArgument(this.imageUrl));
 			if(this.imageMode != -1) {
 				sb.append(' ');
-				sb.append(imageMode);
+				sb.append(this.imageMode);
 			}
 		}
 		
@@ -72,7 +72,7 @@ public class StatementSendMessageEmbed implements ScriptStatement {
 				new DropdownItem(2, "Avatar")), null,
 					"Image Size", "The size of the image, if given.").optional(),
 			
-			caller.getVariableChoice("#️⃣", "Channel", "The channel to send the message in.")
+			caller.createVariableChoice("#️⃣", "Channel", "The channel to send the message in.")
 		};
 	}
 

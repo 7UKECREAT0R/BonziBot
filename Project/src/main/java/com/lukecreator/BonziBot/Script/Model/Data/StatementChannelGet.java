@@ -4,8 +4,11 @@ import java.util.ArrayList;
 
 import com.lukecreator.BonziBot.Script.Model.ScriptGetter;
 
-import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+
 
 public class StatementChannelGet extends ScriptGetter {
 	
@@ -26,9 +29,16 @@ public class StatementChannelGet extends ScriptGetter {
 			return ((GuildChannel)channel).getAsMention();
 		}));
 		this.propertyBindings.add(new Binding("Category Name", channel -> {
-			Category category = ((GuildChannel)channel).getParent();
+			Category category;
+			if(channel instanceof TextChannel)
+				category = ((TextChannel)channel).getParentCategory();
+			if(channel instanceof VoiceChannel)
+				category = ((VoiceChannel)channel).getParentCategory();
+			else
+				category = null;
+			
 			if(category == null)
-				return "<no category>";
+				return "";
 			return category.getName();
 		}));
 	}

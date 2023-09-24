@@ -9,13 +9,14 @@ import com.lukecreator.BonziBot.GuiAPI.GuiContainer;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.PrivateChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
-import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionRemoveEvent;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.GenericSelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 
 public class GuiManager {
 	
@@ -23,8 +24,8 @@ public class GuiManager {
 	public HashMap<Long, AllocGuiList> userGuis;
 	
 	public GuiManager() {
-		guildGuis = new HashMap<Long, AllocGuiList>();
-		userGuis = new HashMap<Long, AllocGuiList>();
+		this.guildGuis = new HashMap<Long, AllocGuiList>();
+		this.userGuis = new HashMap<Long, AllocGuiList>();
 	}
 	
 	/**
@@ -43,32 +44,32 @@ public class GuiManager {
 	public void sendAndCreateGui(TextChannel tc, User owner, Gui gui, BonziBot main) {
 		
 		GuiContainer container = new GuiContainer(gui, tc, owner);
-		initGuiIfNot(gui.setParent(container), tc.getJDA(), tc, main);
+		this.initGuiIfNot(gui.setParent(container), tc.getJDA(), tc, main);
 		Guild guild = tc.getGuild();
 		JDA jda = tc.getJDA();
 		long gId = guild.getIdLong();
 		
 		AllocGuiList agl;
-		if(!guildGuis.containsKey(gId)) {
+		if(!this.guildGuis.containsKey(gId)) {
 			agl = new AllocGuiList();
 		} else {
-			agl = guildGuis.get(gId);
+			agl = this.guildGuis.get(gId);
 		}
 		
 		container.sendMessage(jda, gId, main, agl); // Applies automatically.
 	}
 	public void sendAndCreateGui(PrivateChannel pc, Gui gui, BonziBot main) {
 		GuiContainer container = new GuiContainer(gui, pc);
-		initGuiIfNot(gui.setParent(container), pc.getJDA(), pc, main);
+		this.initGuiIfNot(gui.setParent(container), pc.getJDA(), pc, main);
 		User user = pc.getUser();
 		JDA jda = pc.getJDA();
 		long uId = user.getIdLong();
 		
 		AllocGuiList agl;
-		if(!userGuis.containsKey(uId)) {
+		if(!this.userGuis.containsKey(uId)) {
 			agl = new AllocGuiList();
 		} else {
-			agl = userGuis.get(uId);
+			agl = this.userGuis.get(uId);
 		}
 		
 		container.sendMessage(jda, uId, main, agl); // Applies automatically.
@@ -127,11 +128,17 @@ public class GuiManager {
 	}*/
 	
 	// Unused for right now.
-	public void onReactionRemove(GuildMessageReactionRemoveEvent e) {
+	public void onReactionRemove(MessageReactionRemoveEvent e) {
+		if(e.isFromType(ChannelType.TEXT))
+			this._onReactionRemoveGuild(e);
+		else if(e.isFromType(ChannelType.PRIVATE))
+			this._onReactionRemovePrivate(e);
+	}
+	public void _onReactionRemoveGuild(MessageReactionRemoveEvent e) {
 		if(e.getUser().isBot()) return;
 		// unused for now
 	}
-	public void onReactionRemove(PrivateMessageReactionRemoveEvent e) {
+	public void _onReactionRemovePrivate(MessageReactionRemoveEvent e) {
 		if(e.getUser().isBot()) return;
 		// unused for now
 	}
@@ -139,18 +146,18 @@ public class GuiManager {
 	/**
 	 * The current event listener for gui-interactions.
 	 */
-	public void onButtonClick(ButtonClickEvent e) {
+	public void onButtonClick(ButtonInteractionEvent e) {
 		if(e.isFromGuild()) {
 			Guild g = e.getGuild();
 			long gId = g.getIdLong();
 			User clicker = e.getUser();
 			
-			if(!guildGuis.containsKey(gId)) {
+			if(!this.guildGuis.containsKey(gId)) {
 				e.reply(":warning: `The bot has restarted since this was sent. Please open the GUI again!`").setEphemeral(true).queue();
 				return;
 			}
 			
-			AllocGuiList guiList = guildGuis.get(gId);
+			AllocGuiList guiList = this.guildGuis.get(gId);
 			long mId = e.getMessageIdLong();
 			if(!guiList.hasMessageId(mId)) {
 				e.reply(":warning: `This GUI has expired. Please open it again!`").setEphemeral(true).queue();
@@ -158,17 +165,17 @@ public class GuiManager {
 			}
 			
 			guiList.handleInteraction(e, mId, clicker);
-			guildGuis.put(gId, guiList);
+			this.guildGuis.put(gId, guiList);
 		} else {
 			User clicker = e.getUser();
 			long uId = clicker.getIdLong();
 			
-			if(!userGuis.containsKey(uId)) {
+			if(!this.userGuis.containsKey(uId)) {
 				e.reply(":warning: `The bot has restarted since this was sent. Please open the GUI again!`").setEphemeral(true).queue();
 				return;
 			}
 			
-			AllocGuiList guiList = userGuis.get(uId);
+			AllocGuiList guiList = this.userGuis.get(uId);
 			long mId = e.getMessageIdLong();
 			if(!guiList.hasMessageId(mId)) {
 				e.reply(":warning: `This GUI has expired. Please open it again!`").setEphemeral(true).queue();
@@ -176,47 +183,52 @@ public class GuiManager {
 			}
 			
 			guiList.handleInteraction(e, mId, clicker);
-			userGuis.put(uId, guiList);
+			this.userGuis.put(uId, guiList);
 		}
 	}
-	public void onSelectionMenu(SelectionMenuEvent e) {
+	@SuppressWarnings("rawtypes")
+	public void onSelectionMenu(GenericSelectMenuInteractionEvent e) {
+		
+		if(!(e instanceof StringSelectInteractionEvent))
+			return; // dont handle anything other than the old StringSelectInteractionEvent
+		
 		if(e.isFromGuild()) {
 			Guild g = e.getGuild();
 			long gId = g.getIdLong();
 			User clicker = e.getUser();
 			
-			if(!guildGuis.containsKey(gId)) {
+			if(!this.guildGuis.containsKey(gId)) {
 				e.reply(":warning: `The bot has restarted since this was sent. Please open the GUI again!`").setEphemeral(true).queue();
 				return;
 			}
 			
-			AllocGuiList guiList = guildGuis.get(gId);
+			AllocGuiList guiList = this.guildGuis.get(gId);
 			long mId = e.getMessageIdLong();
 			if(!guiList.hasMessageId(mId)) {
 				e.reply(":warning: `This GUI has expired. Please open it again!`").setEphemeral(true).queue();
 				return;
 			}
 			
-			guiList.handleInteraction(e, mId, clicker);
-			guildGuis.put(gId, guiList);
+			guiList.handleInteraction((StringSelectInteractionEvent)e, mId, clicker);
+			this.guildGuis.put(gId, guiList);
 		} else {
 			User clicker = e.getUser();
 			long uId = clicker.getIdLong();
 			
-			if(!userGuis.containsKey(uId)) {
+			if(!this.userGuis.containsKey(uId)) {
 				e.reply(":warning: `The bot has restarted since this was sent. Please open the GUI again!`").setEphemeral(true).queue();
 				return;
 			}
 			
-			AllocGuiList guiList = userGuis.get(uId);
+			AllocGuiList guiList = this.userGuis.get(uId);
 			long mId = e.getMessageIdLong();
 			if(!guiList.hasMessageId(mId)) {
 				e.reply(":warning: `This GUI has expired. Please open it again!`").setEphemeral(true).queue();
 				return;
 			}
 			
-			guiList.handleInteraction(e, mId, clicker);
-			userGuis.put(uId, guiList);
+			guiList.handleInteraction((StringSelectInteractionEvent)e, mId, clicker);
+			this.userGuis.put(uId, guiList);
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package com.lukecreator.BonziBot.Script.Model.Limiting;
 
+import java.awt.Color;
+
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.Script;
@@ -50,9 +52,8 @@ public class StatementLimitOwner implements ScriptStatement {
 		}
 		
 		if(!info.member.isOwner()) {
-			ScriptExecutor.raiseError(new ScriptError("You must be the owner of the server to run this script.", this));
+			context.cancelExecution("You must be the owner of the server to run this script.", Color.red);
 			return;
 		}
 	}
-
 }

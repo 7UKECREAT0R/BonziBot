@@ -40,11 +40,11 @@ public class StatementServerGet extends ScriptGetter {
 			return ((ScriptContextInfo)info).guild.getMemberCount();
 		}));
 		this.propertyBindings.add(new Binding("Member Count", info -> {
-			return new Long(((ScriptContextInfo)info).guild.getMembers()
+			return Long.valueOf(((ScriptContextInfo)info).guild.getMembers()
 				.stream().filter(m -> !m.getUser().isBot()).count());
 		}));
 		this.propertyBindings.add(new Binding("Bot Count", info -> {
-			return new Long(((ScriptContextInfo)info).guild.getMembers()
+			return Long.valueOf(((ScriptContextInfo)info).guild.getMembers()
 				.stream().filter(m -> m.getUser().isBot()).count());
 		}));
 	}

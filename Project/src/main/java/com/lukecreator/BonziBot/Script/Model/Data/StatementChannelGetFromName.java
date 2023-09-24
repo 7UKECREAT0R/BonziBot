@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
+import com.lukecreator.BonziBot.Data.Mention;
+import com.lukecreator.BonziBot.Data.Mention.Type;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
@@ -15,7 +17,7 @@ import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 
 public class StatementChannelGetFromName implements ScriptStatement {
 	
@@ -32,9 +34,9 @@ public class StatementChannelGetFromName implements ScriptStatement {
 	@Override
 	public String getAsCode() {
 		if(this.name.contains(" ") && !this.name.startsWith("\""))
-			return "ch_getbyname \"" + this.name + "\" " + dst;
+			return "ch_getbyname \"" + this.name + "\" " + this.dst;
 		else
-			return "ch_getbyname " + this.name + " " + dst;
+			return "ch_getbyname " + this.name + " " + this.dst;
 	}
 
 	@Override
@@ -74,17 +76,27 @@ public class StatementChannelGetFromName implements ScriptStatement {
 			return;
 		}
 		
-		List<GuildChannel> allChannels = info.guild.getChannels();
+		Mention mention = Mention.parse(by);
 		List<GuildChannel> found = new ArrayList<GuildChannel>();
 		
-		for(GuildChannel channel: allChannels) {
-			if(channel.getName().equalsIgnoreCase(by))
-				found.add(channel);
-		}
-		
-		if(found.isEmpty()) {
-			ScriptExecutor.raiseError(new ScriptError("No channels found named '" + by + "'", this));
-			return;
+		if(mention == null) {
+			List<GuildChannel> allChannels = info.guild.getChannels();
+			
+			for(GuildChannel channel: allChannels) {
+				if(channel.getName().equalsIgnoreCase(by))
+					found.add(channel);
+			}
+			
+			if(found.isEmpty()) {
+				ScriptExecutor.raiseError(new ScriptError("No channels found named '" + by + "'", this));
+				return;
+			}
+		} else {
+			if(mention.type != Type.CHANNEL) {
+				ScriptExecutor.raiseError(new ScriptError("No channels found named '" + by + "'", this));
+				return;
+			}
+			found.add(info.guild.getGuildChannelById(mention.id));
 		}
 		
 		int value = context.memory.createObjectReference(found.get(0));

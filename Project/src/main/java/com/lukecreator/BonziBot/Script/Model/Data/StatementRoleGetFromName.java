@@ -1,8 +1,11 @@
 package com.lukecreator.BonziBot.Script.Model.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
+import com.lukecreator.BonziBot.Data.Mention;
+import com.lukecreator.BonziBot.Data.Mention.Type;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
@@ -31,15 +34,15 @@ public class StatementRoleGetFromName implements ScriptStatement {
 	@Override
 	public String getAsCode() {
 		if(this.name.contains(" ") && !this.name.startsWith("\""))
-			return "role_getbyname \"" + this.name + "\" " + dst;
+			return "role_getbyname \"" + this.name + "\" " + this.dst;
 		else
-			return "role_getbyname " + this.name + " " + dst;
+			return "role_getbyname " + this.name + " " + this.dst;
 	}
 
 	@Override
 	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			caller.getVariableChoice("✍️", "Name", "The name to get a role by."),
+			caller.createVariableChoice("✍️", "Name", "The name to get a role by."),
 			new GuiEditEntryText(new StringArg("dst"), "📩", "Destination Variable", "The variable that the found role will be placed in.")
 		};
 	}
@@ -73,7 +76,17 @@ public class StatementRoleGetFromName implements ScriptStatement {
 			return;
 		}
 		
-		List<Role> found = info.guild.getRolesByName(by, true);
+		List<Role> found = new ArrayList<Role>(info.guild.getRolesByName(by, true));
+		
+		if(found.isEmpty()) {
+			Mention mention = Mention.parse(by);
+			if(mention.type != Type.ROLE) {
+				ScriptExecutor.raiseError(new ScriptError("No members found named '" + by + "'", this));
+				return;
+			}
+			long id = mention.id;
+			found.add(info.guild.getRoleById(id));
+		}
 		
 		if(found.isEmpty()) {
 			ScriptExecutor.raiseError(new ScriptError("No roles found named '" + by + "'", this));

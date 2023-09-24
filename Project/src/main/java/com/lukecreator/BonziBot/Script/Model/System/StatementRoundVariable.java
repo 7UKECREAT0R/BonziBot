@@ -1,35 +1,36 @@
-package com.lukecreator.BonziBot.Script.Model.Storage;
+package com.lukecreator.BonziBot.Script.Model.System;
 
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue;
-import com.lukecreator.BonziBot.Script.Model.PackageStorage;
+import com.lukecreator.BonziBot.Script.Model.DynamicValue.Type;
 import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
-import com.lukecreator.BonziBot.Script.Model.ScriptError;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
 import net.dv8tion.jda.api.entities.Guild;
 
-public class StatementRemoveStorage implements ScriptStatement {
+public class StatementRoundVariable implements ScriptStatement {
 	
 	private static final long serialVersionUID = 1L;
-
-	String key;
+	
+	String variableName;
+	
 	@Override
 	public String getKeyword() {
-		return "s_remove";
+		return "round";
 	}
+	
 	@Override
 	public String getAsCode() {
-		return "s_remove " + Script.asArgument(this.key);
+		return "round " + Script.asArgument(this.variableName);
 	}
 
 	@Override
 	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			caller.createVariableChoice(null, "Key", "The key to remove.")
+			caller.createVariableChoice(null, "Variable", "The variable to round."),
 		};
 	}
 	
@@ -40,25 +41,22 @@ public class StatementRemoveStorage implements ScriptStatement {
 
 	@Override
 	public StatementCategory getCategory() {
-		return StatementCategory.STORAGE;
+		return StatementCategory.SYSTEM;
 	}
 
 	@Override
 	public void parse(Object[] inputs) {
-		this.key = (String)inputs[0];
+		this.variableName = (String)inputs[0];
 	}
 	
 	@Override
 	public void execute(ScriptContextInfo info, ScriptExecutor context) {
+		DynamicValue.Type variableType = context.memory.getVariableType(this.variableName);
 		
-		DynamicValue keyVar = context.memory.readVariable(this.key);
-		if(keyVar == null) {
-			ScriptExecutor.raiseError(new ScriptError("Non-existent variable as key.", this));
-			return;
+		if(variableType == Type.DECIMAL) {
+			double d = context.memory.readVariableDouble(this.variableName);
+			long i = (long)Math.round(d);
+			context.memory.writeVariable(this.variableName, i);
 		}
-		
-		Object object = keyVar.getAsObject(context.memory);
-		long key = PackageStorage.toKey(object);
-		context._script.owningPackage.storage.removeData(key);
 	}
 }

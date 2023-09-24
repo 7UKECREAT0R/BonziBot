@@ -13,10 +13,10 @@ import com.lukecreator.BonziBot.Script.Model.ScriptError;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 
 public class StatementSendTempMessageText implements ScriptStatement {
 	
@@ -33,13 +33,13 @@ public class StatementSendTempMessageText implements ScriptStatement {
 
 	@Override
 	public String getAsCode() {
-		return "send_text_temporary " + Script.asArgument(channelVariable) + ' ' + seconds + ' ' + Script.asArgument(this.text);
+		return "send_text_temporary " + Script.asArgument(this.channelVariable) + ' ' + this.seconds + ' ' + Script.asArgument(this.text);
 	}
 
 	@Override
 	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			caller.getVariableChoice("#️⃣", "Channel", "The channel to send the message in."),
+			caller.createVariableChoice("#️⃣", "Channel", "The channel to send the message in."),
 			new GuiEditEntryText(new IntArg("seconds"), "⏲️", "Seconds to Delete", "The number of seconds until deleting this message."),
 			new GuiEditEntryText(new StringArg("text"), "🖊", "Text to Send", "To include variables, surround in curly brackets: {variable name}")
 		};

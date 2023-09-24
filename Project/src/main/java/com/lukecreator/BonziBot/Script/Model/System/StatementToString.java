@@ -12,8 +12,8 @@ import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 
 public class StatementToString implements ScriptStatement {
 	
@@ -33,7 +33,7 @@ public class StatementToString implements ScriptStatement {
 	@Override
 	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			caller.getVariableChoice(null, "Variable", "The variable that should be converted to a text value.")
+			caller.createVariableChoice(null, "Variable", "The variable that should be converted to a text value.")
 		};
 	}
 	

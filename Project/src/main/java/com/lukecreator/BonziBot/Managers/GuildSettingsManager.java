@@ -18,8 +18,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
@@ -36,32 +37,32 @@ public class GuildSettingsManager implements IStorableData {
 	public GuildSettings getSettings(Guild g) {
 		if(g == null)
 			return null;
-		return getSettings(g.getIdLong());
+		return this.getSettings(g.getIdLong());
 	}
 	public void setSettings(Guild g, GuildSettings gs) {
-		setSettings(g.getIdLong(), gs);
+		this.setSettings(g.getIdLong(), gs);
 	}
 	public GuildSettings getSettings(long gId) {
-		if(settings.containsKey(gId))
-			return settings.get(gId);
+		if(this.settings.containsKey(gId))
+			return this.settings.get(gId);
 		GuildSettings gs = new GuildSettings();
-		settings.put(gId, gs);
+		this.settings.put(gId, gs);
 		return gs;
 	}
 	public void setSettings(long gId, GuildSettings gs) {
-		settings.put(gId, gs);
+		this.settings.put(gId, gs);
 	}
 	
 	@Override
 	public void saveData() {
-		DataSerializer.writeObject(settings, "guildSettings");
+		DataSerializer.writeObject(this.settings, "guildSettings");
 	}
 	@SuppressWarnings("unchecked")
 	@Override
 	public void loadData() throws EOFException {
 		Object o = DataSerializer.retrieveObject("guildSettings");
 		if(o == null) return;
-		settings = (HashMap<Long, GuildSettings>)o;
+		this.settings = (HashMap<Long, GuildSettings>)o;
 	}
 	
 	public void memberJoined(BonziBot bb, GuildMemberJoinEvent e) {
@@ -72,10 +73,10 @@ public class GuildSettingsManager implements IStorableData {
 		GuildSettings settings = this.getSettings(guildId);
 		if(settings.joinRole) {
 			Role role = guild.getRoleById(settings.joinRoleId);
-			TextChannel tc = guild.getDefaultChannel();
+			TextChannel tc = (TextChannel)guild.getDefaultChannel();
 			if(role != null) {
 				try {
-					guild.addRoleToMember(userId, role).queue(null, new ErrorHandler()
+					guild.addRoleToMember(UserSnowflake.fromId(userId), role).queue(null, new ErrorHandler()
 					.ignore(ErrorResponse.UNKNOWN_MEMBER)
 					.handle(ErrorResponse.MISSING_PERMISSIONS, err -> {
 						if(tc != null)

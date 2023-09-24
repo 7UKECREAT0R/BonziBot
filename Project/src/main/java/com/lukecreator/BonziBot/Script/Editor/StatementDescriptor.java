@@ -1,5 +1,8 @@
 package com.lukecreator.BonziBot.Script.Editor;
 
+import java.lang.reflect.InvocationTargetException;
+
+import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Script.Model.ScriptGetter;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
@@ -35,9 +38,17 @@ public class StatementDescriptor {
 		this.desc = desc;
 		
 		try {
-			this.keyword = clazz.newInstance().getKeyword();
+			this.keyword = clazz.getDeclaredConstructor().newInstance().getKeyword();
 		} catch (InstantiationException | IllegalAccessException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
+		} catch (IllegalArgumentException e) {
+			InternalLogger.printError(e);
+		} catch (InvocationTargetException e) {
+			InternalLogger.printError(e);
+		} catch (NoSuchMethodException e) {
+			InternalLogger.printError(e);
+		} catch (SecurityException e) {
+			InternalLogger.printError(e);
 		}
 	}
 	@SuppressWarnings("unchecked")
@@ -54,20 +65,28 @@ public class StatementDescriptor {
 		this.name = name;
 		this.desc = desc;
 		try {
-			this.keyword = clazz.newInstance().getKeyword();
+			this.keyword = clazz.getDeclaredConstructor().newInstance().getKeyword();
 		} catch (InstantiationException | IllegalAccessException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
+		} catch (IllegalArgumentException e) {
+			InternalLogger.printError(e);
+		} catch (InvocationTargetException e) {
+			InternalLogger.printError(e);
+		} catch (NoSuchMethodException e) {
+			InternalLogger.printError(e);
+		} catch (SecurityException e) {
+			InternalLogger.printError(e);
 		}
 	}
-	public ScriptStatement createNewFromClass() throws InstantiationException, IllegalAccessException {
+	public ScriptStatement createNewFromClass() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		if(this.isGetter)
 			return null;
-		return this.internalClass.newInstance();
+		return this.internalClass.getDeclaredConstructor().newInstance();
 	}
-	public ScriptStatement createNewFromGetter(String[] inputs) throws InstantiationException, IllegalAccessException {
+	public ScriptStatement createNewFromGetter(String[] inputs) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		if(!this.isGetter)
 			return null;
-		ScriptGetter getter = this.getter.newInstance();
+		ScriptGetter getter = this.getter.getDeclaredConstructor().newInstance();
 	
 		if(getter.getsObjectFromContext()) {
 			getter.field = inputs[0];

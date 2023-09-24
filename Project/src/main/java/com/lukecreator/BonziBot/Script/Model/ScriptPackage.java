@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  */
 public class ScriptPackage implements Serializable {
 	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 	public static final int MAX_PACKAGES = 10; // 10 * 10 = 100 Total Scripts per-server (Stays below max guild command count)
 	public static final int MAX_SCRIPTS = 10;
 	public static final int MAX_LENGTH_PACKAGE_NAME = 32;
@@ -24,15 +24,16 @@ public class ScriptPackage implements Serializable {
 		return pkgNamePattern.matcher(str).matches();
 	}
 	
-	String packageName;
-	boolean enabled;
-	
+	public PackageStorage storage;
+	public String packageName;
+	public boolean enabled;
 	List<Script> scripts;
 	
 	public ScriptPackage(String name) {
 		this.scripts = new ArrayList<Script>();
 		this.packageName = name;
 		this.enabled = true;
+		this.storage = new PackageStorage();
 	}
 	public List<Script> getScripts() {
 		return this.scripts;
@@ -74,8 +75,10 @@ public class ScriptPackage implements Serializable {
 	}
 	
 	public void addScript(Script script) {
-		if(this.scripts.size() < MAX_SCRIPTS)
+		if(this.scripts.size() < MAX_SCRIPTS) {
+			script.owningPackage = this;
 			this.scripts.add(script);
+		}
 	}
 	public void removeScriptByName(String name) {
 		for(int i = 0; i < this.scripts.size(); i++) {
@@ -93,5 +96,11 @@ public class ScriptPackage implements Serializable {
 		this.scripts.remove(index);
 	}
 	
-	
+	/**
+	 * Ensures that all of this package's scripts have their parents set.
+	 */
+	public void ensureScriptParents() {
+		for(Script script: this.scripts)
+			script.owningPackage = this;
+	}
 }

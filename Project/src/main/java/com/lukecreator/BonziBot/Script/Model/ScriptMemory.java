@@ -13,9 +13,10 @@ import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue.Type;
 
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 
 /**
  * A fixed size span of virtual memory for a script to execute with.
@@ -76,7 +77,7 @@ public class ScriptMemory {
 			if(symbol.type == Type.OBJREF) {
 				DynamicValue value = this.readVariable(symbol);
 				Object referenced = this.getReferencedObject(value);
-				if(referenced instanceof GuildChannel)
+				if(referenced instanceof GuildChannelUnion)
 					replacement = ((GuildChannel)referenced).getAsMention();
 				else if(referenced instanceof Role)
 					replacement = ((Role)referenced).getName();
@@ -163,6 +164,20 @@ public class ScriptMemory {
 	// With this storage method, string reassignment will not be possible without relocating symbols.
 	public void writeExistingObjRef(String name, int refIndex) {
 		this.writeVariable(name, Ints.toByteArray(refIndex), DynamicValue.Type.OBJREF);
+	}
+	public void writeVariableUnknownType(String name, Object value) {
+		if(value instanceof Boolean)
+			this.writeVariable(name, ((Boolean)value).booleanValue());
+		else if(value instanceof Double)
+			this.writeVariable(name, ((Double)value).doubleValue());
+		else if(value instanceof Integer)
+			this.writeVariable(name, ((Integer)value).intValue());
+		else if(value instanceof String)
+			this.writeVariable(name, (String)value);
+		else {
+			int objRef = this.createObjectReference(value);
+			this.writeExistingObjRef(name, objRef);
+		}
 	}
 	public void writeVariable(String name, DynamicValue value) {
 		switch(value.getType()) {
@@ -731,6 +746,87 @@ public class ScriptMemory {
 			break;
 		case STRING:
 			ScriptExecutor.raiseError(new ScriptError("Cannot divide text.", caller));
+			break;
+		case OBJREF:
+			ScriptExecutor.raiseError(new ScriptError("Cannot perform operations with objects (Users, Channels, etc...)", caller));
+			return;
+		default:
+			break;
+		}
+	}
+	public void operationPowConstant(String variableName, DynamicValue value, ScriptStatement caller) {
+		
+		Symbol src = this.getSymbol(variableName);
+		
+		if(src == null) {
+			ScriptExecutor.raiseError(new ScriptError("Undefined symbol '" + variableName + "'", caller));
+			return;
+		}
+		
+		switch(src.type) {
+		case BOOLEAN:
+			ScriptExecutor.raiseError(new ScriptError("Cannot raise a boolean to a power.", caller));
+			break;
+		case DECIMAL:
+			double d = this.readVariableDouble(src);
+			if(value.type == Type.DECIMAL)
+				d = Math.pow(d, value.d);
+			else if(value.type == Type.INT)
+				d = Math.pow(d, value.i);
+			else if(value.type == Type.BOOLEAN)
+				d = Math.pow(d, value.b ? 1 : 0);
+			else if(value.type == Type.STRING) {
+				ScriptExecutor.raiseError(new ScriptError("Cannot raise a decimal to text.", caller));
+				return;
+			} else if(value.type == Type.OBJREF) {
+				ScriptExecutor.raiseError(new ScriptError("Cannot perform operations with objects (Users, Channels, etc...)", caller));
+				return;
+			}
+			this.writeVariable(src.name, d);
+			break;
+		case INT:
+			long i = this.readVariableInt(src);
+			if(value.type == Type.DECIMAL)
+				i = (int)Math.pow(i, value.d);
+			else if(value.type == Type.INT)
+				i *= Math.pow(i, value.i);
+			else if(value.type == Type.BOOLEAN)
+				i *= Math.pow(i, value.b ? 1 : 0);
+			else if(value.type == Type.STRING) {
+				ScriptExecutor.raiseError(new ScriptError("Cannot raise an integer to text.", caller));
+				return;
+			} else if(value.type == Type.OBJREF) {
+				ScriptExecutor.raiseError(new ScriptError("Cannot perform operations with objects (Users, Channels, etc...)", caller));
+				return;
+			}
+			this.writeVariable(src.name, i);
+			break;
+		case STRING:
+			String str = this.readVariableString(src);
+			double factor = str.length();
+			if(value.type == Type.DECIMAL)
+				factor = value.d;
+			else if(value.type == Type.INT)
+				factor = (double)value.i;
+			else if(value.type == Type.BOOLEAN)
+				factor = value.b ? 1.0 : 2.0;
+			else if(value.type == Type.STRING) {
+				ScriptExecutor.raiseError(new ScriptError("Cannot raise text to text.", caller));
+				return;
+			} else if(value.type == Type.OBJREF) {
+				ScriptExecutor.raiseError(new ScriptError("Cannot perform operations with objects (Users, Channels, etc...)", caller));
+				return;
+			}
+			char[] chars = str.toCharArray();
+			int newLen = (int)(str.length() * factor);
+			StringBuilder rebuild = new StringBuilder();
+			int pull = 0;
+			for(int x = 0; x < newLen; x++) {
+				rebuild.append(chars[pull++]);
+				if(pull >= chars.length)
+					pull = 0;
+			}
+			this.writeVariable(src.name, rebuild.toString());
 			break;
 		case OBJREF:
 			ScriptExecutor.raiseError(new ScriptError("Cannot perform operations with objects (Users, Channels, etc...)", caller));

@@ -6,14 +6,14 @@ import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
 import com.lukecreator.BonziBot.Script.Editor.StatementCategory;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue;
 import com.lukecreator.BonziBot.Script.Model.DynamicValue.Type;
+import com.lukecreator.BonziBot.Script.Model.PackageStorage;
+import com.lukecreator.BonziBot.Script.Model.PackageStorage.OutOfBlocksException;
+import com.lukecreator.BonziBot.Script.Model.PackageStorage.StorageException;
 import com.lukecreator.BonziBot.Script.Model.Script;
 import com.lukecreator.BonziBot.Script.Model.ScriptContextInfo;
 import com.lukecreator.BonziBot.Script.Model.ScriptError;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
-import com.lukecreator.BonziBot.Script.Model.ScriptStorage;
-import com.lukecreator.BonziBot.Script.Model.ScriptStorage.OutOfBlocksException;
-import com.lukecreator.BonziBot.Script.Model.ScriptStorage.StorageException;
 
 import net.dv8tion.jda.api.entities.Guild;
 
@@ -26,17 +26,17 @@ public class StatementInitializeStorage implements ScriptStatement {
 	
 	@Override
 	public String getKeyword() {
-		return "storage_intitialize";
+		return "s_intitialize";
 	}
 	@Override
 	public String getAsCode() {
-		return "storage_intitialize " + Script.asArgument(this.key) + " " + Script.asArgument(value.toString());
+		return "s_intitialize " + Script.asArgument(this.key) + " " + Script.asArgument(this.value.toString());
 	}
 
 	@Override
 	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		return new GuiEditEntry[] {
-			caller.getVariableChoice(null, "Key", "The key to initialize."),
+			caller.createVariableChoice(null, "Key", "The key to initialize."),
 			new GuiEditEntryText(new StringArg("value"), null, "Value", "The value/variable to initialize as. This will only be set if this key has no value.")
 		};
 	}
@@ -76,10 +76,10 @@ public class StatementInitializeStorage implements ScriptStatement {
 		
 		Object object = keyVar.getAsObject(context.memory);
 		Object store = toStore.getAsObject(context.memory);
-		long key = ScriptStorage.toKey(object);
+		long key = PackageStorage.toKey(object);
 		
 		try {
-			ScriptStorage storage = context._script.storage;
+			PackageStorage storage = context._script.owningPackage.storage;
 			if(!storage.storage.containsKey(key))
 				storage.putData(key, store);
 		} catch (StorageException e) {

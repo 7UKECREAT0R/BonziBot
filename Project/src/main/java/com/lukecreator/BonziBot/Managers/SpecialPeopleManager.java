@@ -15,8 +15,7 @@ public class SpecialPeopleManager {
 	};
 	final long[] bros = new long[] {
 			239526347972673537l, // Yucky
-			537735335300562975l, // Cwxzy
-			292755668623163399l, // Salty
+			429795795404062720l, // Salty
 			348136128932610058l, // Checken
 			624752943127592976l, // HypixL
 			401913626195263509l, // Zeni
@@ -25,40 +24,40 @@ public class SpecialPeopleManager {
 			258702715943780352l, // Curoa
 			302881384400289792l, // Goldy
 			633411509560541245l, // Fez
-			250381056904003585l  // Bisticeaty
+			288388543535906816l, // 455
 	};
 	
 	public boolean getIsAdmin(long id) {
-		for(long admin: admins) {
+		for(long admin: this.admins) {
 			if(admin == id)
 				return true;
 		}
 		return false;
 	}
 	public boolean getIsAdmin(User u) {
-		return getIsAdmin(u.getIdLong());
+		return this.getIsAdmin(u.getIdLong());
 	}
 	public boolean getIsAdmin(Member m) {
-		return getIsAdmin(m.getUser().getIdLong());
+		return this.getIsAdmin(m.getUser().getIdLong());
 	}
 	public long[] getAdmins() {
-		return admins;
+		return this.admins;
 	}
 	
 	public boolean getIsBro(long id) {
-		for(long bro: bros) {
+		for(long bro: this.bros) {
 			if(bro == id)
 				return true;
 		}
 		return false;
 	}
 	public boolean getIsBro(User u) {
-		return getIsBro(u.getIdLong());
+		return this.getIsBro(u.getIdLong());
 	}
 	public boolean getIsBro(Member m) {
-		return getIsBro(m.getUser().getIdLong());
+		return this.getIsBro(m.getUser().getIdLong());
 	}
 	public long[] getBros() {
-		return bros;
+		return this.bros;
 	}
 }

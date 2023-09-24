@@ -75,7 +75,7 @@ public class StatementLimitPermission implements ScriptStatement {
 			return;
 		
 		if(!member.hasPermission(this.required)) {
-			context.cancelExecution("Missing Permission! You need to have \"" + this.required.getName() + "\" to run this script.", Color.orange);
+			context.cancelExecution("Missing Permission! You need to have \"" + this.required.getName() + "\" to run this script.", Color.red);
 			return;
 		}
 		

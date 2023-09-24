@@ -1,5 +1,7 @@
 package com.lukecreator.BonziBot.Script.Model.Limiting;
 
+import java.awt.Color;
+
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntry;
 import com.lukecreator.BonziBot.GuiAPI.GuiEditEntryText;
@@ -61,11 +63,11 @@ public class StatementLimitUser implements ScriptStatement {
 		try {
 			long id = Long.parseLong(this.thing);
 			if(info.member.getIdLong() != id)
-				context.cancelExecution();
+				context.cancelExecution("The only user that can run this script is <@" + id + '>', Color.red);
 		} catch(NumberFormatException nfe) {
 			User user = info.member.getUser();
 			if(!user.getName().equals(this.thing))
-				context.cancelExecution();
+				context.cancelExecution("The only user that can run this script is <@" + user.getId() + '>', Color.red);
 		}
 		
 	}

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.function.Function;
 
+import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.GuiAPI.DropdownItem;
@@ -23,8 +24,10 @@ public abstract class ScriptGetter implements ScriptStatement {
 	
 	private static final long serialVersionUID = 1L;
 
+	public transient BonziBot bonziInstance;
+	
 	// Hacky serializable function!
-	public interface SerializableFunction<T,R> extends Function<T,R>, Serializable {}
+	public interface SerializableFunction extends Function<Object, Object>, Serializable {}
 	
 	/**
 	 * Names a transformer function which aims to wrap a getter method
@@ -50,9 +53,9 @@ public abstract class ScriptGetter implements ScriptStatement {
 		private static final long serialVersionUID = 1L;
 		
 		public final String name;
-		public final SerializableFunction<Object, Object> transformer;
+		public final SerializableFunction transformer;
 		
-		public Binding(String name, SerializableFunction<Object, Object> transformer) {
+		public Binding(String name, SerializableFunction transformer) {
 			this.name = name;
 			this.transformer = transformer;
 		}
@@ -81,7 +84,7 @@ public abstract class ScriptGetter implements ScriptStatement {
 	
 	@Override
 	public String getKeyword() {
-		return keyword;
+		return this.keyword;
 	}
 
 	@Override
@@ -101,7 +104,7 @@ public abstract class ScriptGetter implements ScriptStatement {
 	@Override
 	public GuiEditEntry[] getArgs(Script caller, Guild server) {
 		int i = 0;
-		String[] _choices = new String[propertyBindings.size()];
+		String[] _choices = new String[this.propertyBindings.size()];
 		for(Binding binding: this.propertyBindings)
 			_choices[i++] = '`' + binding.name + '`';
 		String choices = BonziUtils.stringJoinOr(", ", _choices);
@@ -118,7 +121,7 @@ public abstract class ScriptGetter implements ScriptStatement {
 			};
 		} else {
 			return new GuiEditEntry[] {
-				caller.getVariableChoice("🏀", BonziUtils.titleString(this.nameOfType), "The " + this.nameOfType.toLowerCase() + " to get the data from."),
+				caller.createVariableChoice("🏀", BonziUtils.titleString(this.nameOfType), "The " + this.nameOfType.toLowerCase() + " to get the data from."),
 				new GuiEditEntryChoice(fieldSelector, "🗂️", "Field", "Available options:\n" + choices),
 				new GuiEditEntryText(new StringArg("dst"), "📩", "Destination Variable", "The variable that the data will be placed in.")
 			};
@@ -179,9 +182,8 @@ public abstract class ScriptGetter implements ScriptStatement {
 				Function<Object, Object> func = bind.transformer;
 				// Apply it to the object.
 				Object output = func.apply(obj);
-				// Write as a reference.
-				int refId = context.memory.createObjectReference(output);
-				context.memory.writeExistingObjRef(this.destination, refId);
+				// Write to memory.
+				context.memory.writeVariableUnknownType(this.destination, output);
 				return;
 			}
 		}

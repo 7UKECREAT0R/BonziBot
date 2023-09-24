@@ -17,11 +17,11 @@ import com.lukecreator.BonziBot.NoUpload.Constants;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class TagManager implements IStorableData {
 	
@@ -32,162 +32,162 @@ public class TagManager implements IStorableData {
 	HashMap<Long, List<TagData>> privateTags;
 	
 	public TagManager() {
-		tags = new ArrayList<TagData>();
-		privateTags = new HashMap<Long, List<TagData>>();
-		responseQueue = new HashMap<Long, String>();
-		privateResponseQueue = new HashMap<Long, HashMap<Long, String>>();
+		this.tags = new ArrayList<TagData>();
+		this.privateTags = new HashMap<Long, List<TagData>>();
+		this.responseQueue = new HashMap<Long, String>();
+		this.privateResponseQueue = new HashMap<Long, HashMap<Long, String>>();
 	}
 	public void addToPublicQueue(User user, String tagName) {
-		responseQueue.put(user.getIdLong(), tagName);
+		this.responseQueue.put(user.getIdLong(), tagName);
 	}
 	public boolean userInPublicQueue(User user) {
-		return responseQueue.containsKey(user.getIdLong());
+		return this.responseQueue.containsKey(user.getIdLong());
 	}
 	public String getEditingCommandPublic(User user) {
 		long id = user.getIdLong();
-		if(responseQueue.containsKey(id))
-			return responseQueue.get(id);
+		if(this.responseQueue.containsKey(id))
+			return this.responseQueue.get(id);
 		else return null;
 	}
 	public String removeFromPublicQueue(User user) {
 		long id = user.getIdLong();
-		if(responseQueue.containsKey(id))
-			return responseQueue.remove(id);
+		if(this.responseQueue.containsKey(id))
+			return this.responseQueue.remove(id);
 		return null;
 	}
 	
 	public void addToPrivateQueue(Member m, String tagName) {
-		HashMap<Long, String> queue = getQueueForGuild(m.getGuild());
+		HashMap<Long, String> queue = this.getQueueForGuild(m.getGuild());
 		queue.put(m.getUser().getIdLong(), tagName);
-		setQueueForGuild(m.getGuild(), queue);
+		this.setQueueForGuild(m.getGuild(), queue);
 	}
 	public boolean userInPrivateQueue(Member m) {
-		HashMap<Long, String> queue = getQueueForGuild(m.getGuild());
+		HashMap<Long, String> queue = this.getQueueForGuild(m.getGuild());
 		return queue.containsKey(m.getUser().getIdLong());
 	}
 	public String getEditingCommandPrivate(Member m) {
-		HashMap<Long, String> queue = getQueueForGuild(m.getGuild());
+		HashMap<Long, String> queue = this.getQueueForGuild(m.getGuild());
 		long id = m.getUser().getIdLong();
 		if(queue.containsKey(id))
 			return queue.get(id);
 		else return null;
 	}
 	public String getEditingCommandPrivate(long userId, long guildId) {
-		HashMap<Long, String> queue = getQueueForGuild(guildId);
+		HashMap<Long, String> queue = this.getQueueForGuild(guildId);
 		if(queue.containsKey(userId))
 			return queue.get(userId);
 		else return null;
 	}
 	public String removeFromPrivateQueue(Member m) {
-		HashMap<Long, String> queue = getQueueForGuild(m.getGuild());
+		HashMap<Long, String> queue = this.getQueueForGuild(m.getGuild());
 		long id = m.getUser().getIdLong();
 		if(queue.containsKey(id)) {
 			String out = queue.remove(id);
-			setQueueForGuild(m.getGuild(), queue);
+			this.setQueueForGuild(m.getGuild(), queue);
 			return out;
 		}
 		return null;
 	}
 	public String removeFromPrivateQueue(long userId, long guildId) {
-		HashMap<Long, String> queue = getQueueForGuild(guildId);
+		HashMap<Long, String> queue = this.getQueueForGuild(guildId);
 		if(queue.containsKey(userId)) {
 			String out = queue.remove(userId);
-			setQueueForGuild(guildId, queue);
+			this.setQueueForGuild(guildId, queue);
 			return out;
 		}
 		return null;
 	}
 	private HashMap<Long, String> getQueueForGuild(Guild g) {
 		long id = g.getIdLong();
-		if(!privateResponseQueue.containsKey(id)) {
+		if(!this.privateResponseQueue.containsKey(id)) {
 			HashMap<Long, String> n = new HashMap<Long, String>();
-			privateResponseQueue.put(id, n);
+			this.privateResponseQueue.put(id, n);
 			return n;
 		}
-		return privateResponseQueue.get(id);
+		return this.privateResponseQueue.get(id);
 	}
 	private HashMap<Long, String> getQueueForGuild(long id) {
-		if(!privateResponseQueue.containsKey(id)) {
+		if(!this.privateResponseQueue.containsKey(id)) {
 			HashMap<Long, String> n = new HashMap<Long, String>();
-			privateResponseQueue.put(id, n);
+			this.privateResponseQueue.put(id, n);
 			return n;
 		}
-		return privateResponseQueue.get(id);
+		return this.privateResponseQueue.get(id);
 	}
 	private HashMap<Long, String> setQueueForGuild(Guild g, HashMap<Long, String> queue) {
 		long id = g.getIdLong();
-		return privateResponseQueue.put(id, queue);
+		return this.privateResponseQueue.put(id, queue);
 	}
 	private HashMap<Long, String> setQueueForGuild(long id, HashMap<Long, String> queue) {
-		return privateResponseQueue.put(id, queue);
+		return this.privateResponseQueue.put(id, queue);
 	}
 	
 	public List<TagData> getPublicTags() {
-		return tags;
+		return this.tags;
 	}
 	public List<TagData> getPrivateTags(Guild g) {
 		long id = g.getIdLong();
-		if(privateTags.containsKey(id)) {
-			return privateTags.get(id);
+		if(this.privateTags.containsKey(id)) {
+			return this.privateTags.get(id);
 		} else {
-			privateTags.put(id, new ArrayList<TagData>());
-			return privateTags.get(id);
+			this.privateTags.put(id, new ArrayList<TagData>());
+			return this.privateTags.get(id);
 		}
 	}
 	public List<TagData> getPrivateTags(long gId) {
-		if(privateTags.containsKey(gId)) {
-			return privateTags.get(gId);
+		if(this.privateTags.containsKey(gId)) {
+			return this.privateTags.get(gId);
 		} else {
-			privateTags.put(gId, new ArrayList<TagData>());
-			return privateTags.get(gId);
+			this.privateTags.put(gId, new ArrayList<TagData>());
+			return this.privateTags.get(gId);
 		}
 	}
 	public void setPublicTags(List<TagData> data) {
-		tags = data;
+		this.tags = data;
 	}
 	public void setPrivateTags(List<TagData> data, Guild g) {
 		long id = g.getIdLong();
-		privateTags.put(id, data);
+		this.privateTags.put(id, data);
 	}
 	public void setPrivateTags(List<TagData> data, long gId) {
-		privateTags.put(gId, data);
+		this.privateTags.put(gId, data);
 	}
 	public TagData getTagByName(String name) {
-		for(TagData data: tags) {
+		for(TagData data: this.tags) {
 			if(data.name.equalsIgnoreCase(name))
 				return data;
 		}
 		return null;
 	}
 	public void setTagByName(TagData tag) {
-		for(int i = 0; i < tags.size(); i++) {
-			TagData check = tags.get(i);
+		for(int i = 0; i < this.tags.size(); i++) {
+			TagData check = this.tags.get(i);
 			if(check.name.equalsIgnoreCase(tag.name)) {
-				tags.set(i, tag);
+				this.tags.set(i, tag);
 				return;
 			}
 		}
-		tags.add(tag);
+		this.tags.add(tag);
 	}
 	public void removeTagByName(String name) {
-		for(int i = 0; i < tags.size(); i++) {
-			TagData check = tags.get(i);
+		for(int i = 0; i < this.tags.size(); i++) {
+			TagData check = this.tags.get(i);
 			if(check == null || check.name == null) {
-				tags.remove(i);
+				this.tags.remove(i);
 			}
 			if(check.name.equalsIgnoreCase(name)) {
-				tags.remove(i);
+				this.tags.remove(i);
 				return;
 			}
 		}
 	}
 	public String useTagByName(String name) {
-		for(int i = 0; i < tags.size(); i++) {
-			TagData tag = tags.get(i);
+		for(int i = 0; i < this.tags.size(); i++) {
+			TagData tag = this.tags.get(i);
 			if(tag == null || tag.name == null) continue;
 			if(tag.name.equalsIgnoreCase(name)) {
 				tag.uses++;
-				tags.set(i, tag);
+				this.tags.set(i, tag);
 				return tag.response;
 			}
 		}
@@ -208,12 +208,12 @@ public class TagManager implements IStorableData {
 			TagData check = tags.get(i);
 			if(check.name.equalsIgnoreCase(tag.name)) {
 				tags.set(i, tag);
-				setPrivateTags(tags, g);
+				this.setPrivateTags(tags, g);
 				return;
 			}
 		}
 		tags.add(tag);
-		setPrivateTags(tags, g);
+		this.setPrivateTags(tags, g);
 	}
 	public void setPrivateTagByName(TagData tag, long guildId) {
 		List<TagData> tags = this.getPrivateTags(guildId);
@@ -221,12 +221,12 @@ public class TagManager implements IStorableData {
 			TagData check = tags.get(i);
 			if(check.name.equalsIgnoreCase(tag.name)) {
 				tags.set(i, tag);
-				setPrivateTags(tags, guildId);
+				this.setPrivateTags(tags, guildId);
 				return;
 			}
 		}
 		tags.add(tag);
-		setPrivateTags(tags, guildId);
+		this.setPrivateTags(tags, guildId);
 	}
 	public void removePrivateTagByName(String name, Guild g) {
 		List<TagData> tags = this.getPrivateTags(g);
@@ -261,7 +261,7 @@ public class TagManager implements IStorableData {
 			if(tag.name.equalsIgnoreCase(name)) {
 				tag.uses++;
 				tags.set(i, tag);
-				setPrivateTags(tags, g);
+				this.setPrivateTags(tags, g);
 				return tag.response;
 			}
 		}
@@ -269,7 +269,7 @@ public class TagManager implements IStorableData {
 	}
 	
 	public List<TagData> getPublicTagsOfUser(User u) {
-		return getPublicTagsOfUser(u.getIdLong());
+		return this.getPublicTagsOfUser(u.getIdLong());
 	}
 	public List<TagData> getPublicTagsOfUser(long id) {
 		List<TagData> ret = new ArrayList<TagData>();
@@ -280,7 +280,7 @@ public class TagManager implements IStorableData {
 		return ret;
 	}
 	public List<TagData> getPrivateTagsOfUser(User u, Guild g) {
-		return getPrivateTagsOfUser(u.getIdLong(), g.getIdLong());
+		return this.getPrivateTagsOfUser(u.getIdLong(), g.getIdLong());
 	}
 	public List<TagData> getPrivateTagsOfUser(long id, long gId) {
 		List<TagData> base = this.getPrivateTags(gId);
@@ -293,60 +293,63 @@ public class TagManager implements IStorableData {
 	}
 	
 	// returns if it should block command execution
-	public boolean receiveMessage(GuildMessageReceivedEvent e, BonziBot b) {
-		MessageChannel channel = e.getChannel();
-		Member m = e.getMember();
-		User u = e.getAuthor();
-		
-		String prefix = BonziUtils.getPrefixOrDefault(e, b);
-		
-		if(this.userInPublicQueue(u)) {
-			Message msg = e.getMessage();
-			String tName = this.getEditingCommandPublic(u);
-			TagData tag = TagData.constructFromMessage(tName, msg);
-			this.removeFromPublicQueue(u);
-			this.setTagByName(tag);
+	public boolean receiveMessage(MessageReceivedEvent e, BonziBot b) {
+		if(e.isFromType(ChannelType.TEXT)) {
+			MessageChannelUnion channel = e.getChannel();
+			Member m = e.getMember();
+			User u = e.getAuthor();
 			
-			MessageEmbed me = BonziUtils.successEmbedIncomplete
-				("Successfully created tag!")
-				.setDescription("Use [" + prefix + "taginfo] to modify/delete your tag.").build();
-			channel.sendMessageEmbeds(me).queue();
-			return true;
-		}
-		if(this.userInPrivateQueue(m)) {
-			Message msg = e.getMessage();
-			String tName = this.getEditingCommandPrivate(m);
-			TagData tag = TagData.constructFromMessage(tName, msg);
-			this.removeFromPrivateQueue(m);
-			this.setPrivateTagByName(tag, e.getGuild());
+			String prefix = BonziUtils.getPrefixOrDefault(e, b);
 			
-			MessageEmbed me = BonziUtils.successEmbedIncomplete
-					("Successfully created private tag!")
+			if(this.userInPublicQueue(u)) {
+				Message msg = e.getMessage();
+				String tName = this.getEditingCommandPublic(u);
+				TagData tag = TagData.constructFromMessage(tName, msg);
+				this.removeFromPublicQueue(u);
+				this.setTagByName(tag);
+				
+				MessageEmbed me = BonziUtils.successEmbedIncomplete
+					("Successfully created tag!")
 					.setDescription("Use [" + prefix + "taginfo] to modify/delete your tag.").build();
-			channel.sendMessageEmbeds(me).queue();
-			return true;
-		}
-		
-		return false;
-	}
-	public boolean receiveMessage(PrivateMessageReceivedEvent e) {
-		MessageChannel channel = e.getChannel();
-		User u = e.getAuthor();
-		
-		if(this.userInPublicQueue(u)) {
-			Message msg = e.getMessage();
-			String tName = this.getEditingCommandPublic(u);
-			TagData tag = TagData.constructFromMessage(tName, msg);
-			this.removeFromPublicQueue(u);
-			this.setTagByName(tag);
+				channel.sendMessageEmbeds(me).queue();
+				return true;
+			}
+			if(this.userInPrivateQueue(m)) {
+				Message msg = e.getMessage();
+				String tName = this.getEditingCommandPrivate(m);
+				TagData tag = TagData.constructFromMessage(tName, msg);
+				this.removeFromPrivateQueue(m);
+				this.setPrivateTagByName(tag, e.getGuild());
+				
+				MessageEmbed me = BonziUtils.successEmbedIncomplete
+						("Successfully created private tag!")
+						.setDescription("Use [" + prefix + "taginfo] to modify/delete your tag.").build();
+				channel.sendMessageEmbeds(me).queue();
+				return true;
+			}
 			
-			String prefix = Constants.DEFAULT_PREFIX;
+			return false;
+		} else if(e.isFromType(ChannelType.PRIVATE)) {
+			MessageChannelUnion channel = e.getChannel();
+			User u = e.getAuthor();
 			
-			MessageEmbed me = BonziUtils.successEmbedIncomplete
-				("Successfully created tag!")
-				.setDescription("Use [" + prefix + "taginfo] to modify/delete your tag.").build();
-			channel.sendMessageEmbeds(me).queue();
-			return true;
+			if(this.userInPublicQueue(u)) {
+				Message msg = e.getMessage();
+				String tName = this.getEditingCommandPublic(u);
+				TagData tag = TagData.constructFromMessage(tName, msg);
+				this.removeFromPublicQueue(u);
+				this.setTagByName(tag);
+				
+				String prefix = Constants.DEFAULT_PREFIX;
+				
+				MessageEmbed me = BonziUtils.successEmbedIncomplete
+					("Successfully created tag!")
+					.setDescription("Use [" + prefix + "taginfo] to modify/delete your tag.").build();
+				channel.sendMessageEmbeds(me).queue();
+				return true;
+			}
+
+			return false;
 		}
 		
 		return false;
@@ -355,7 +358,7 @@ public class TagManager implements IStorableData {
 		
 		// privateID can be -1 which indicates its public.
 		boolean isPrivate = privateId != -1;
-		MessageChannel channel = msg.getChannel();
+		MessageChannelUnion channel = msg.getChannel();
 		User u = msg.getAuthor();
 		
 		boolean fromGuild = msg.isFromGuild();
@@ -388,10 +391,10 @@ public class TagManager implements IStorableData {
 	}
 	
 	public void verifyTagValidities() {
-		for(int i = 0; i < tags.size(); i++) {
-			TagData td = tags.get(i);
+		for(int i = 0; i < this.tags.size(); i++) {
+			TagData td = this.tags.get(i);
 			if(td == null || td.name == null) {
-				tags.remove(i);
+				this.tags.remove(i);
 				i--;
 			}
 		}
@@ -400,15 +403,15 @@ public class TagManager implements IStorableData {
 		CustomCommandLegacyLoader ccll = new CustomCommandLegacyLoader();
 		ccll.execute();
 		
-		tags = ccll.resultPublic;
-		privateTags = ccll.resultPrivate;
+		this.tags = ccll.resultPublic;
+		this.privateTags = ccll.resultPrivate;
 		
 		InternalLogger.print("Loaded legacy custom commands.");
 	}
 	@Override
 	public void saveData() {
-		DataSerializer.writeObject(tags, "tags");
-		DataSerializer.writeObject(privateTags, "privateTags");
+		DataSerializer.writeObject(this.tags, "tags");
+		DataSerializer.writeObject(this.privateTags, "privateTags");
 	}
 	@SuppressWarnings("unchecked")
 	@Override
@@ -416,8 +419,8 @@ public class TagManager implements IStorableData {
 		Object o1 = DataSerializer.retrieveObject("tags");
 		Object o2 = DataSerializer.retrieveObject("privateTags");
 		if(o1 != null)
-			tags = (List<TagData>)o1;
+			this.tags = (List<TagData>)o1;
 		if(o2 != null)
-			privateTags = (HashMap<Long, List<TagData>>)o2;
+			this.privateTags = (HashMap<Long, List<TagData>>)o2;
 	}
 }

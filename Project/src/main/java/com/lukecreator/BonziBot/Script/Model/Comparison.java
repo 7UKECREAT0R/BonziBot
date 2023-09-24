@@ -6,12 +6,12 @@ package com.lukecreator.BonziBot.Script.Model;
  */
 public enum Comparison {
 	
-	EQUALS('=', "Equal To"),
-	NOT_EQUAL('≠', "Not Equal To"),
+	EQUAL_TO('=', "Equal To"),
+	NOT_EQUAL_TO('≠', "Not Equal To"),
 	LESS_THAN('<', "Less Than"),
-	LESS_OR_EQUAL('≤', "Less or Equal"),
+	LESS_OR_EQUAL_TO('≤', "Less or Equal"),
 	GREATER_THAN('>', "Greater Than"),
-	GREATER_OR_EQUAL('≥', "Greater or Equal");
+	GREATER_OR_EQUAL_TO('≥', "Greater or Equal");
 	
 	public final char symbol;
 	public final String english;
@@ -26,27 +26,27 @@ public enum Comparison {
 		case "=":
 		case "==":
 		case "EQU":
-			return EQUALS;
+			return EQUAL_TO;
 		case "!=":
 		case "≠":
 		case "NEQ":
-			return NOT_EQUAL;
+			return NOT_EQUAL_TO;
 		case "<":
 		case "LSS":
 			return LESS_THAN;
 		case "<=":
 		case "≤":
 		case "LEQ":
-			return LESS_OR_EQUAL;
+			return LESS_OR_EQUAL_TO;
 		case ">":
 		case "GTR":
 			return GREATER_THAN;
 		case ">=":
 		case "≥":
 		case "GEQ":
-			return GREATER_OR_EQUAL;
+			return GREATER_OR_EQUAL_TO;
 		default:
-			return EQUALS;
+			return EQUAL_TO;
 		}
 	}
 }

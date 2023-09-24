@@ -7,16 +7,19 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.lukecreator.BonziBot.BonziBot;
+import com.lukecreator.BonziBot.BonziUtils;
+import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Data.QuickDraw;
 import com.lukecreator.BonziBot.Data.UserAccount;
 
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 
 /**
  * Passively watch a channel and run quick draws if enabled.
@@ -26,15 +29,16 @@ import net.dv8tion.jda.api.requests.restaction.MessageAction;
 public class QuickDrawManager implements IStorableData {
 	
 	HashMap<Long, QuickDrawProfile> profiles = new HashMap<Long, QuickDrawProfile>();
+	
 	public void tryOptGuild(long guildId) {
-		if(profiles.containsKey(guildId))
+		if(this.profiles.containsKey(guildId))
 			return;
-		profiles.put(guildId, new QuickDrawProfile());
+		this.profiles.put(guildId, new QuickDrawProfile());
 	}
 	public void tryUnoptGuild(long guildId) {
-		if(!profiles.containsKey(guildId))
+		if(!this.profiles.containsKey(guildId))
 			return;
-		profiles.remove(guildId);
+		this.profiles.remove(guildId);
 	}
 	
 	QuickDrawProfile winGame(User winner, TextChannel tc, QuickDrawProfile profile, BonziBot bb) {
@@ -53,53 +57,97 @@ public class QuickDrawManager implements IStorableData {
 		profile.game = null;
 		return profile;
 	}
+	public void spawnQuickDraw(long guildId, TextChannel channel, BonziBot bb) {
+		QuickDraw game = QuickDraw.create(bb);
+		MessageCreateAction action = game.constructMessage(channel);
+		action.queue(msg -> {
+			game.sentMessageId = msg.getIdLong();
+			game.postConstructMessage(msg);
+			
+			// because async state
+			QuickDrawProfile profile2 = this.profiles.get(guildId);
+			profile2.game = game;
+			this.profiles.put(guildId, profile2);
+		}, fail -> {
+			InternalLogger.print("Failed to send.\n" + fail.toString() + "\n\n" + action.toString());
+		});
+	}
+	
 	public void messageReceived(User sender, Message message, BonziBot bb) {
-		TextChannel channel = message.getTextChannel();
-		long gid = channel.getGuild().getIdLong();
-		if(!profiles.containsKey(gid))
+		if(!message.isFromGuild())
 			return;
 		
-		QuickDrawProfile profile = profiles.get(gid);
+		TextChannel channel = message.getChannel().asTextChannel();
+		
+		long gid = channel.getGuild().getIdLong();
+		if(!this.profiles.containsKey(gid))
+			return;
+		
+		QuickDrawProfile profile = this.profiles.get(gid);
 		if(profile.shouldSend(sender.getIdLong())) {
-			QuickDraw game = QuickDraw.create(bb);
-			MessageAction action = game.constructMessage(channel);
-			action.queue(msg -> {
-				game.sentMessageId = msg.getIdLong();
-				game.postConstructMessage(msg);
-				QuickDrawProfile profile2 = profiles.get(gid);
-				profile2.game = game;
-				profiles.put(gid, profile2);
-			});
+			this.spawnQuickDraw(gid, channel, bb);
 		} else if(profile.game != null) {
 			if(profile.game.tryInput(message)) {
 				profile = this.winGame(sender, channel, profile, bb);
 			}
 		}
-		profiles.put(gid, profile);
+		this.profiles.put(gid, profile);
 	}
-	public void reactionReceived(User sender, GuildMessageReactionAddEvent event, BonziBot bb) {
-		TextChannel channel = event.getChannel();
-		long gid = channel.getGuild().getIdLong();
-		if(!profiles.containsKey(gid))
+	public void reactionReceived(User sender, MessageReactionAddEvent event, BonziBot bb) {
+		if(!event.isFromGuild())
 			return;
 		
-		QuickDrawProfile profile = profiles.get(gid);
+		TextChannel channel = event.getChannel().asTextChannel();
+		long gid = channel.getGuild().getIdLong();
+		
+		if(!this.profiles.containsKey(gid))
+			return;
+		
+		QuickDrawProfile profile = this.profiles.get(gid);
+		
 		if(profile.game == null)
 			return;
 		
 		if(event.getMessageIdLong() != profile.game.sentMessageId)
 			return;
 		
-		if(profile.game.tryInput(event.getReactionEmote())) {
+		if(profile.game.tryInput(event.getEmoji())) {
 			profile = this.winGame(sender, channel, profile, bb);
-			profiles.put(gid, profile);
+			this.profiles.put(gid, profile);
+		}
+	}
+	public void buttonReceived(User sender, String data, ButtonInteractionEvent event, BonziBot bb) {
+		if(!event.isFromGuild())
+			return;
+		
+		TextChannel channel = event.getChannel().asTextChannel();
+		long gid = event.getGuild().getIdLong();
+		
+		if(!this.profiles.containsKey(gid))
+			return;
+		
+		QuickDrawProfile profile = this.profiles.get(gid);
+		
+		if(profile.game == null)
+			return;
+		
+		if(event.getMessageIdLong() != profile.game.sentMessageId) {
+			event.replyEmbeds(BonziUtils.failureEmbed("This quick draw has expired!")).setEphemeral(true).queue();
+			return;
+		}
+		
+		if(profile.game.tryInput(event.getButton(), data)) {
+			profile = this.winGame(sender, channel, profile, bb);
+			this.profiles.put(gid, profile);
+		} else {
+			event.deferEdit().queue();
 		}
 	}
 	
 	
 	@Override
 	public void saveData() {
-		DataSerializer.writeObject(profiles.keySet().stream().collect(Collectors.toList()), "qdp.ser"); // quick draw presence
+		DataSerializer.writeObject(this.profiles.keySet().stream().collect(Collectors.toList()), "qdp.ser"); // quick draw presence
 	}
 	@Override
 	public void loadData() throws EOFException {
@@ -136,7 +184,7 @@ class QuickDrawProfile {
 		if(this.totalMessages++ < QUICK_DRAW_DELAY_LOW)
 			return false;
 		
-		int pick = random.nextInt(QUICK_DRAW_DELAY_CHANCE);
+		int pick = this.random.nextInt(QUICK_DRAW_DELAY_CHANCE);
 		if(pick != 0)
 			return false;
 		

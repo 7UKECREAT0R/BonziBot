@@ -19,29 +19,29 @@ import com.lukecreator.BonziBot.NoUpload.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
-import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionAddEvent;
-import net.dv8tion.jda.api.events.message.priv.react.PrivateMessageReactionRemoveEvent;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.entities.emoji.Emoji.Type;
+import net.dv8tion.jda.api.entities.emoji.EmojiUnion;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 
 /**
  * Just handles all things related to reactions.
  */
 public class ReactionManager {
 	
-	public void reactionAddGuild(GuildMessageReactionAddEvent e, BonziBot bb) {
+	public void reactionAddGuild(MessageReactionAddEvent e, BonziBot bb) {
 		this.onReaction(new GenericReactionEvent(e), bb);
 	}
-	public void reactionRemoveGuild(GuildMessageReactionRemoveEvent e, BonziBot bb) {
+	public void reactionRemoveGuild(MessageReactionRemoveEvent e, BonziBot bb) {
 		this.onReaction(new GenericReactionEvent(e), bb);
 	}
-	public void reactionAddPrivate(PrivateMessageReactionAddEvent e, BonziBot bb) {
+	public void reactionAddPrivate(MessageReactionAddEvent e, BonziBot bb) {
 		this.onReaction(new GenericReactionEvent(e), bb);
 	}
-	public void reactionRemovePrivate(PrivateMessageReactionRemoveEvent e, BonziBot bb) {
+	public void reactionRemovePrivate(MessageReactionRemoveEvent e, BonziBot bb) {
 		this.onReaction(new GenericReactionEvent(e), bb);
 	}
 	
@@ -59,14 +59,15 @@ public class ReactionManager {
 		// cant pin in non-guilds
 		if(e.guild == null)
 			return;
-		if(!e.reactionEmote.isEmoji())
+		if(e.reactionEmote.getType() != Type.UNICODE)
 			return;
 		if(e.user.isBot())
 			return;
 		if(!e.added)
 			return;
 		
-		if(e.reactionEmote.getEmoji().equals("📌")) {
+		String unicodeName = e.reactionEmote.asUnicode().getName();
+		if(unicodeName.equals("📌")) {
 			e.retrieveMessage().queue(msg -> {
 				User author = msg.getAuthor();
 				UserAccountManager uam = bb.accounts;
@@ -86,13 +87,13 @@ public class ReactionManager {
 	void checkStars(GenericReactionEvent e, BonziBot bb) {
 		if(e.guild == null)
 			return;
-		if(!e.reactionEmote.isEmoji())
+		if(e.reactionEmote.getType() != Type.UNICODE)
 			return;
 		if(e.user.isBot())
 			return;
 		if(!e.added)
 			return;
-		if(!e.reactionEmote.getEmoji().equals("⭐"))
+		if(!e.reactionEmote.asUnicode().getName().equals("⭐"))
 			return;
 		
 		GuildSettings settings = bb.guildSettings.getSettings(e.guild.getIdLong());
@@ -100,7 +101,8 @@ public class ReactionManager {
 			return;
 		
 		e.retrieveMessage().queue(msg -> {
-			msg.retrieveReactionUsers("⭐").queue(users -> {
+			Emoji starEmoji = Emoji.fromUnicode("⭐");
+			msg.retrieveReactionUsers(starEmoji).queue(users -> {
 				for(User testUser: users)
 					if(testUser.isBot())
 						return;
@@ -112,7 +114,7 @@ public class ReactionManager {
 				
 				int count = users.size();
 				if(count >= settings.starboardLimit) {
-					msg.addReaction("⭐").queue();
+					msg.addReaction(starEmoji).queue();
 					MessageEmbed send = BonziUtils.createStarboardEntry(msg);
 					channel.sendMessageEmbeds(send).queue();
 				}
@@ -123,8 +125,8 @@ public class ReactionManager {
 		
 		// pre-check as much information as humanly possible
 		boolean isPrivate = e.guild == null;
-		boolean isEmoji = e.reactionEmote.isEmoji();
-		String emoji = isEmoji?e.reactionEmote.getEmoji():"";
+		boolean isEmoji = e.reactionEmote.getType() == Type.UNICODE;
+		String emoji = isEmoji ? e.reactionEmote.asUnicode().getName() : "";
 		boolean isUpEmoji = emoji.equals("👍");
 		boolean isDownEmoji = emoji.equals("👎");
 		boolean pollEmoji = isUpEmoji | isDownEmoji;
@@ -140,16 +142,17 @@ public class ReactionManager {
 					= pollMsg.getReactions();
 				int up = 0, down = 0;
 				for(MessageReaction me: reactions) {
-					ReactionEmote emote = me.getReactionEmote();
-					boolean mIsEmoji = emote.isEmoji();
-					String mEmoji = emote.getEmoji();
-					if(mIsEmoji && mEmoji.equals("👍")) {
-						up = me.getCount() - 1;
-						continue;
-					}
-					if(mIsEmoji && mEmoji.equals("👎")) {
-						down = me.getCount() - 1;
-						continue;
+					EmojiUnion emote = me.getEmoji();
+					if(emote.getType() == Type.UNICODE) {
+						String unicode = emote.getName();
+						if(unicode.equals("👍")) {
+							up = me.getCount() - 1;
+							continue;
+						}
+						if(unicode.equals("👎")) {
+							down = me.getCount() - 1;
+							continue;
+						}
 					}
 				}
 				

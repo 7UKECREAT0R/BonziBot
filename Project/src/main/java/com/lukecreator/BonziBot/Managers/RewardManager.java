@@ -1,7 +1,13 @@
 package com.lukecreator.BonziBot.Managers;
 
 import java.io.EOFException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.Data.DataSerializer;
@@ -28,35 +34,35 @@ public class RewardManager implements IStorableData {
 	HashMap<Long, Integer> currentStreak = new HashMap<Long, Integer>();
 	
 	public int getStreak(User u) {
-		return getStreak(u.getIdLong());
+		return this.getStreak(u.getIdLong());
 	}
 	public int getStreak(long l) {
-		if(currentStreak.containsKey(l))
-			return currentStreak.get(l);
+		if(this.currentStreak.containsKey(l))
+			return this.currentStreak.get(l);
 		else return 0;
 	}
 	public long getLastCollection(User u) {
-		return getLastCollection(u.getIdLong());
+		return this.getLastCollection(u.getIdLong());
 	}
 	public long getLastCollection(long id) {
-		if(lastCollection.containsKey(id))
-			return lastCollection.get(id);
+		if(this.lastCollection.containsKey(id))
+			return this.lastCollection.get(id);
 		else return 0l;
 	}
 	public long timeUntilCanClaim(User u) {
-		return timeUntilCanClaim(u.getIdLong());
+		return this.timeUntilCanClaim(u.getIdLong());
 	}
 	public long timeUntilCanClaim(long id) {
 		long now = System.currentTimeMillis();
-		long last = getLastCollection(id);
+		long last = this.getLastCollection(id);
 		long nextClaim = last + (ONE_DAY - ONE_HOUR);
 		return nextClaim - now;
 	}
 	public boolean canClaim(User u) {
-		return canClaim(u.getIdLong());
+		return this.canClaim(u.getIdLong());
 	}
 	public boolean canClaim(long id) {
-		return timeUntilCanClaim(id) <= 0;
+		return this.timeUntilCanClaim(id) <= 0;
 	}
 
 	/**
@@ -64,7 +70,7 @@ public class RewardManager implements IStorableData {
 	 * Returns the amount of coins earned.
 	 */
 	public int claimAs(User u, BonziBot bb) {
-		return claimAs(u.getIdLong(), bb);
+		return this.claimAs(u.getIdLong(), bb);
 	}
 	/**
 	 *   Claim a daily reward as a user.
@@ -72,8 +78,8 @@ public class RewardManager implements IStorableData {
 	 */
 	public int claimAs(long id, BonziBot bb) {
 		
-		long timeLeft = timeUntilCanClaim(id);
-		int streak = getStreak(id);
+		long timeLeft = this.timeUntilCanClaim(id);
+		int streak = this.getStreak(id);
 		if(timeLeft <= -ONE_DAY * 2)
 			streak = 0;
 		
@@ -85,19 +91,38 @@ public class RewardManager implements IStorableData {
 		bb.accounts.setUserAccount(id, acc);
 		
 		streak++;
-		currentStreak.put(id, streak);
-		lastCollection.put(id, System.currentTimeMillis());
+		this.currentStreak.put(id, streak);
+		this.lastCollection.put(id, System.currentTimeMillis());
 		
 		return receive;
 	}
 	public void setLastCollectionTime(long id, long time) {
-		lastCollection.put(id, time);
+		this.lastCollection.put(id, time);
 	}
+	
+	/**
+	 * Get the top users.
+	 * @return
+	 */
+	public List<Entry<Long, Integer>> getTop() {
+		Set<Entry<Long, Integer>> set = this.currentStreak.entrySet();
+		List<Entry<Long, Integer>> list = new ArrayList<Entry<Long, Integer>>(set);
+		Collections.sort(list, new RewardSort());
+		return list;
+	}
+	public class RewardSort implements Comparator<Entry<Long, Integer>> {
+		@Override
+		public int compare(Entry<Long, Integer> o1, Entry<Long, Integer> o2) {
+			return o2.getValue() - o1.getValue();
+		}
+	}
+
+	
 	
 	@Override
 	public void saveData() {
-		DataSerializer.writeObject(lastCollection, FILE_TIMES);
-		DataSerializer.writeObject(currentStreak, FILE_STREAKS);
+		DataSerializer.writeObject(this.lastCollection, FILE_TIMES);
+		DataSerializer.writeObject(this.currentStreak, FILE_STREAKS);
 	}
 	@SuppressWarnings("unchecked")
 	@Override
@@ -106,8 +131,8 @@ public class RewardManager implements IStorableData {
 			o2 = DataSerializer.retrieveObject(FILE_STREAKS);
 		
 		if(o1 != null)
-			lastCollection = (HashMap<Long, Long>) o1;
+			this.lastCollection = (HashMap<Long, Long>) o1;
 		if(o2 != null)
-			currentStreak = (HashMap<Long, Integer>) o2;
+			this.currentStreak = (HashMap<Long, Integer>) o2;
 	}
 }
