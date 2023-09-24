@@ -15,6 +15,7 @@ import com.github.jreddit.retrieval.params.SubmissionSort;
 import com.github.jreddit.utils.restclient.HttpRestClient;
 import com.github.jreddit.utils.restclient.RestClient;
 import com.lukecreator.BonziBot.BonziUtils;
+import com.lukecreator.BonziBot.InternalLogger;
 
 /**
  * Wrapper for interacting with the reddit API.
@@ -43,43 +44,43 @@ public class RedditClient {
 	}
 	
 	public Submission[] getSubmissions(String subreddit) {
-		return getSubmissions(subreddit, 100);
+		return this.getSubmissions(subreddit, 100);
 	}
 	public Submission[] getSubmissions(String subreddit, int count) {
-		Submissions subs = new Submissions(client);
+		Submissions subs = new Submissions(this.client);
 		List<Submission> list = subs.ofSubreddit
 			(subreddit, SubmissionSort.NEW, -1, count, null, null, true);
 		Submission[] array = (Submission[]) list.toArray(new Submission[list.size()]);
 		return array;
 	}
 	public Submission getRandomSubmission(String subreddit) {
-		return getRandomSubmission(subreddit, 100);
+		return this.getRandomSubmission(subreddit, 100);
 	}
 	public Submission getRandomSubmission(String subreddit, int sampleSize) {
-		Submission[] subms = getSubmissions(subreddit, sampleSize);
+		Submission[] subms = this.getSubmissions(subreddit, sampleSize);
 		if(subms.length < 1) return null;
-		int rng = random.nextInt(subms.length);
+		int rng = this.random.nextInt(subms.length);
 		Submission pick = subms[rng];
 		return pick;
 	}
 	public Submission getRandomSubmission(String[] subreddits) {
-		String pick = subreddits[random.nextInt(subreddits.length)];
-		return getRandomSubmission(pick, 100);
+		String pick = subreddits[this.random.nextInt(subreddits.length)];
+		return this.getRandomSubmission(pick, 100);
 	}
 	public Submission getRandomSubmission(String[] subreddits, int sampleSize) {
-		String pick = subreddits[random.nextInt(subreddits.length)];
-		return getRandomSubmission(pick, sampleSize);
+		String pick = subreddits[this.random.nextInt(subreddits.length)];
+		return this.getRandomSubmission(pick, sampleSize);
 	}
 	
 	public SubredditInfo getSubredditInfo(String subreddit) {
 		JSONParser parsing = new JSONParser();
 		try {
-			String url = getSubredditAboutUrl(subreddit);
+			String url = this.getSubredditAboutUrl(subreddit);
 			String content = BonziUtils.getStringFrom(url);
 			JSONObject obj = (JSONObject)parsing.parse(content);
 			return new SubredditInfo(obj);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		} catch(FileNotFoundException e) {
 			return null;
 		}
@@ -88,10 +89,10 @@ public class RedditClient {
 	public String getSubredditInfoString(String subreddit) {
 		String content = "";
 		try {
-			String url = getSubredditAboutUrl(subreddit);
+			String url = this.getSubredditAboutUrl(subreddit);
 			content = BonziUtils.getStringFrom(url);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		}
 		return content;
 	}
@@ -109,9 +110,9 @@ public class RedditClient {
 			JSONArray obj = (JSONArray)parsing.parse(content);
 			return new SubredditPostVideoData((JSONObject)obj.get(0));
 		} catch (ParseException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		}
 		return null;
 	}
