@@ -10,7 +10,7 @@ import com.lukecreator.BonziBot.GuiAPI.GuiDropdown;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiTestMenu extends Gui {
 	
@@ -34,7 +34,7 @@ public class GuiTestMenu extends Gui {
 	public void initialize(JDA jda) {
 		super.initialize(jda);
 		
-		this.elements.add(new GuiDropdown("Favorite Food", "fav", false).addItemsTransform(set, thing -> {
+		this.elements.add(new GuiDropdown("Favorite Food", "fav", false).addItemsTransform(this.set, thing -> {
 			return new DropdownItem(thing, thing.toString());
 		}));
 		this.elements.add(new GuiButton("SEND", ButtonColor.GREEN, "send"));
@@ -55,7 +55,7 @@ public class GuiTestMenu extends Gui {
 	@Override
 	public void onButtonClick(String buttonId, long clickerId, JDA jda) {
 		if(buttonId.equals("send")) {
-			MessageChannel channel = this.parent.getChannel(jda);
+			MessageChannelUnion channel = this.parent.getChannel(jda);
 			channel.sendMessage("YOU PICKED: \"" + this.selected.toString() + "\"").queue();
 		}
 	}

@@ -18,10 +18,10 @@ import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 
 public class GuiRules extends Gui {
 	
@@ -41,16 +41,16 @@ public class GuiRules extends Gui {
 		this.elements.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("b_trash")), "Delete", GuiButton.ButtonColor.RED,  "delete"));
 		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📝"), "Edit", GuiButton.ButtonColor.BLUE, "edit"));
 		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📋"), "Format", GuiButton.ButtonColor.GRAY, "format"));
-		this.rules = this.bonziReference.guildSettings.getSettings(guildId).getRules();
+		this.rules = this.bonziReference.guildSettings.getSettings(this.guildId).getRules();
 	}
 	
 	@Override
 	public Object draw(JDA jda) {
 		EmbedBuilder eb = new EmbedBuilder()
 			.setColor(BonziUtils.COLOR_BONZI_PURPLE)
-			.setTitle(guildName + " Rules Editor")
+			.setTitle(this.guildName + " Rules Editor")
 			.setFooter("Run '/sendrules' to send the message.");
-		String[] lines = rules.getRules();
+		String[] lines = this.rules.getRules();
 		StringBuilder full = new StringBuilder();
 		for(int i = 0; i < lines.length; i++) {
 			full.append((i + 1) + ". " + lines[i] + '\n');
@@ -61,26 +61,26 @@ public class GuiRules extends Gui {
 		desc = BonziUtils.cutOffString(desc, MessageEmbed.TEXT_MAX_LENGTH);
 		eb.setDescription(desc);
 		
-		Emote trash = EmoteCache.getEmoteByName("b_trash");
+		RichCustomEmoji trash = EmoteCache.getEmoteByName("b_trash");
 		eb.addField("🆕 Add Rule", "Add a new rule to the end of the list.", false);
 		eb.addField(trash.getAsMention() + " Delete Rule", "Delete a rule by its number.", false);
 		eb.addField("📝 Edit Rule", "Edit a rule by its number.", false);
-		eb.addField("📋 Formatting: `" + rules.getFormatting().name() + "`", "The formatting of each rule. Click to scroll through the options.", false);
+		eb.addField("📋 Formatting: `" + this.rules.getFormatting().name() + "`", "The formatting of each rule. Click to scroll through the options.", false);
 		return eb.build();
 	}
 	
 	@Override
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
-		MessageChannel channel = this.parent.getChannel(jda);
+		MessageChannelUnion channel = this.parent.getChannel(jda);
 		GuildSettingsManager gsm = this.bonziReference.guildSettings;
-		GuildSettings settings = gsm.getSettings(guildId);
+		GuildSettings settings = gsm.getSettings(this.guildId);
 		
 		if(channel == null)
 			return;
 		
 		if(actionId.equals("return")) {
 			// Back button.
-			this.parent.setActiveGui(new GuiGuildSettingsPage2(guildId, guildName), jda);
+			this.parent.setActiveGui(new GuiGuildSettingsPage2(this.guildId, this.guildName), jda);
 			return;
 		}
 		
@@ -117,7 +117,7 @@ public class GuiRules extends Gui {
 		}
 		if(actionId.equals("delete")) {
 			// Delete
-			int rCount = rules.getRulesCount();
+			int rCount = this.rules.getRulesCount();
 			if(rCount < 1) {
 				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("There's no rules yet to delete."), 3);
 				return;
@@ -170,7 +170,7 @@ public class GuiRules extends Gui {
 			return;
 		}
 		if(actionId.equals("edit")) {
-			int rCount = rules.getRulesCount();
+			int rCount = this.rules.getRulesCount();
 			
 			if(rCount < 1) {
 				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("There's no rules yet to edit."), 3);
@@ -223,19 +223,19 @@ public class GuiRules extends Gui {
 		}
 		if(actionId.equals("format")) {
 			// Formatting
-			rules.scrollFormatting();
-			settings.setRules(rules);
-			gsm.setSettings(guildId, settings);
+			this.rules.scrollFormatting();
+			settings.setRules(this.rules);
+			gsm.setSettings(this.guildId, settings);
 			
 			// Update existing rules message, if any.
-			Guild guild = jda.getGuildById(guildId);
-			rules.retrieveRulesMessage(jda, guildId, edit -> {
+			Guild guild = jda.getGuildById(this.guildId);
+			this.rules.retrieveRulesMessage(jda, this.guildId, edit -> {
 				MessageEmbed newRules = BonziUtils.generateRules
 					(settings, guild, this.bonziReference).build();
 				edit.editMessageEmbeds(newRules).queue();
 			}, fail -> {
-				settings.setRules(rules);
-				gsm.setSettings(guildId, settings);
+				settings.setRules(this.rules);
+				gsm.setSettings(this.guildId, settings);
 			});
 			
 			this.parent.redrawMessage(jda);

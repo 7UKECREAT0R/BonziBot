@@ -21,7 +21,6 @@ public class GuiUserTags extends GuiPaging {
 	boolean privateTags;
 	long userId;
 	String userName,
-		fullUserName,
 		avatarUrl;
 	long privateGuildId;
 	TagData[] contents;
@@ -35,7 +34,6 @@ public class GuiUserTags extends GuiPaging {
 		this.privateGuildId = privateGuildId;
 		this.userId = u.getIdLong();
 		this.userName = u.getName();
-		this.fullUserName = u.getAsTag();
 		this.avatarUrl = u.getEffectiveAvatarUrl();
 		
 		List<TagData> allTags;
@@ -72,9 +70,9 @@ public class GuiUserTags extends GuiPaging {
 		
 		// Draw the embed.
 		EmbedBuilder eb = new EmbedBuilder();
-		eb.setAuthor(userName, null, avatarUrl);
+		eb.setAuthor(this.userName, null, this.avatarUrl);
 		eb.setColor(Color.magenta);
-		if(none) {
+		if(this.none) {
 			if(this.privateTags)
 				eb.setTitle("This user hasn't made any tags here in this server yet.");
 			else
@@ -82,7 +80,7 @@ public class GuiUserTags extends GuiPaging {
 		} else {
 			int len = this.contents.length;
 			int per = PER_PAGE > len ? len : PER_PAGE;
-			String tEnding = none ? "" : (" (" + per + "/" + len + " shown)");
+			String tEnding = this.none ? "" : (" (" + per + "/" + len + " shown)");
 			if(this.privateTags)
 				eb.setTitle(this.userName + "'s top tags in this server! " + tEnding);
 			else

@@ -12,7 +12,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 /**
  * User has just sworn and is now on the verge of extinction.
@@ -37,7 +38,7 @@ public class LogEntrySwearMessage extends LogEntry {
 		input.setDescription("Sender: <@" + this.sender + '>');
 		
 		String display = "```\n" + this.content + "\n```";
-		if(attachments > 0)
+		if(this.attachments > 0)
 			display = "🖼️ " + this.attachments + BonziUtils.plural(" Attachment", this.attachments) + "\n" + display;
 		
 		input.addField("Content:", display, false);
@@ -63,11 +64,11 @@ public class LogEntrySwearMessage extends LogEntry {
 	}
 
 	@Override
-	public void performActionUndo(BonziBot bb, ButtonClickEvent event) {
+	public void performActionUndo(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionWarn(BonziBot bb, ButtonClickEvent event) {
+	public void performActionWarn(BonziBot bb, ButtonInteractionEvent event) {
 		String preview = BonziUtils.cutOffString(this.content, 50);
 		String warnFor = "Violating filter: \"" + preview + "\"";
 		
@@ -76,24 +77,24 @@ public class LogEntrySwearMessage extends LogEntry {
 		UserAccount account = bb.accounts.getUserAccount(user);
 
 		warnUser(account, user, guild, warnFor);
-		setOriginalFooter(event, "Warned by " + event.getUser().getAsTag());
+		setOriginalFooter(event, "Warned by " + event.getUser().getName());
 	}
 	@Override
-	public void performActionMute(BonziBot bb, ButtonClickEvent event) {
+	public void performActionMute(BonziBot bb, ButtonInteractionEvent event) {
 		// TODO prompt for timeout length
 	}
 	@Override
-	public void performActionKick(BonziBot bb, ButtonClickEvent event) {
+	public void performActionKick(BonziBot bb, ButtonInteractionEvent event) {
 		Guild guild = event.getGuild();
 		
-		guild.kick(String.valueOf(this.sender))
+		guild.kick(UserSnowflake.fromId(this.sender))
 			.reason(Credible.create(event.getUser().getIdLong()))
 			.queue(null, fail -> {});
 		
-		setOriginalFooter(event, "Kicked by " + event.getUser().getAsTag());
+		setOriginalFooter(event, "Kicked by " + event.getUser().getName());
 	}
 	@Override
-	public void performActionBan(BonziBot bb, ButtonClickEvent event) {
+	public void performActionBan(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 }

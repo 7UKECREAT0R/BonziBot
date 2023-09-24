@@ -12,7 +12,7 @@ import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 /**
  * GUI which allows dynamic building of a set of editable fields, all wrapping the arg parsing API.
@@ -57,7 +57,7 @@ public class GuiEditDialog extends Gui {
 		this.fields = entries;
 		this.setFields = new boolean[entries.length];
 		for(int i = 0; i < entries.length; i++)
-			setFields[i] = entries[i].valueGiven();
+			this.setFields[i] = entries[i].valueGiven();
 	}
 	public GuiEditDialog(@Nullable Gui returnTo, String title, @Nonnull GuiEditEntry...entries) {
 		this.returnTo = returnTo;
@@ -66,7 +66,7 @@ public class GuiEditDialog extends Gui {
 		this.fields = entries;
 		this.setFields = new boolean[entries.length];
 		for(int i = 0; i < entries.length; i++)
-			setFields[i] = entries[i].valueGiven();
+			this.setFields[i] = entries[i].valueGiven();
 	}
 	public GuiEditDialog after(Consumer<Output> action) {
 		this.onClosed = action;
@@ -172,7 +172,7 @@ public class GuiEditDialog extends Gui {
 	@Override
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		
-		MessageChannel channel = this.parent.getChannel(jda);
+		MessageChannelUnion channel = this.parent.getChannel(jda);
 		
 		if(actionId.equals("submit")) {
 			// Cancel if all fields haven't been set.
@@ -183,10 +183,10 @@ public class GuiEditDialog extends Gui {
 					return;
 				}
 			Output output = new Output(false, this);
-			selfClose(output, jda);
+			this.selfClose(output, jda);
 		} else if(actionId.equals("cancel")) {
 			Output output = new Output(true, this);
-			selfClose(output, jda);
+			this.selfClose(output, jda);
 		} else {
 			// This is a request to set/edit a field.
 			// Search for it and signal the event waiter.
@@ -218,8 +218,8 @@ public class GuiEditDialog extends Gui {
 	}
 	
 	public void selfClose(Output output, JDA jda) {
-		if(returnTo != null)
-			this.parent.setActiveGui(returnTo, jda);
+		if(this.returnTo != null)
+			this.parent.setActiveGui(this.returnTo, jda);
 		else {
 			this.parent.delete(jda);
 		}

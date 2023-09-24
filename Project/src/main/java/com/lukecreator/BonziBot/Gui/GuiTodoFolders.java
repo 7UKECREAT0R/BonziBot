@@ -14,8 +14,8 @@ import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiTodoFolders extends Gui {
 	
@@ -59,7 +59,7 @@ public class GuiTodoFolders extends Gui {
 		if(this.deleteMode) {
 			eb.setDescription("Removing folder(s)...");
 		} else {
-			if(slash)
+			if(this.slash)
 				eb.setDescription("To open a folder: `/todolist <folder name>`");
 			else
 				eb.setDescription("To open a folder: `" + this.prefixOfLocation + "todolist <folder name>`");
@@ -166,7 +166,7 @@ public class GuiTodoFolders extends Gui {
 				});
 			}
 			if(actionId.equals("remove")) {
-				MessageChannel ch = this.parent.getChannel(jda);
+				MessageChannelUnion ch = this.parent.getChannel(jda);
 				if(this.folders.size() < 1) {
 					BonziUtils.sendTempMessage(ch, BonziUtils.failureEmbed("There are no folders to remove!"), 3);
 					return;

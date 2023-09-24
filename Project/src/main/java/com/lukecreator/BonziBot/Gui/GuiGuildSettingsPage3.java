@@ -28,13 +28,16 @@ public class GuiGuildSettingsPage3 extends Gui {
 	@Override
 	public void initialize(JDA jda) {
 		GuildSettingsManager mgr = this.bonziReference.guildSettings;
-		GuildSettings settings = mgr.getSettings(guildId);
+		GuildSettings settings = mgr.getSettings(this.guildId);
 		this.reinitialize(settings);
 	}
 	public void reinitialize(GuildSettings settings) {
 		this.elements.clear();
+		
+		boolean lvling = settings.levellingEnabled;
 		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "lastpage"));
 		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🌟"), "Starboard", GuiButton.ButtonColor.GRAY, "starboard"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📈"), lvling?"Disable Levelling":"Enable Levelling", lvling?GuiButton.ButtonColor.RED:GuiButton.ButtonColor.GREEN, "levelling"));
 	}
 	
 	@Override
@@ -45,7 +48,7 @@ public class GuiGuildSettingsPage3 extends Gui {
 			BonziUtils.COLOR_BONZI_PURPLE);
 		
 		GuildSettings settings = this.bonziReference
-			.guildSettings.getSettings(guildId);
+			.guildSettings.getSettings(this.guildId);
 		
 		boolean starboardEnabled = settings.starboard != 0l;
 		int starboardLimit = settings.starboardLimit;
@@ -55,15 +58,17 @@ public class GuiGuildSettingsPage3 extends Gui {
 			starboardDesc = "<#" + settings.starboard + "> with `" + starboardLimit + "` reactions.\n" + starboardDesc;
 		menu.addField("🌟 Starboard: " + starboard, starboardDesc, false);
 		
+		boolean lvling = settings.levellingEnabled;
+		String levellingTitle = lvling ? "`✅ ENABLED`" : "`🔳 DISABLED`";
+		String levellingDesc = "Choose if users should gain XP for talking in this server.";
+		menu.addField("📈 Levelling: " + levellingTitle, levellingDesc, false);
+		
 		menu.setFooter("Page 3/3");
 		return menu.build();
 	}
 	
 	@Override
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
-		//GuildSettingsManager gsm = this.bonziReference.guildSettings;
-		//GuildSettings settings = gsm.getSettings(guildId);
-		
 		if(actionId.equals("lastpage")) {
 			Gui next = new GuiGuildSettingsPage2(this.guildId, this.guildName);
 			this.parent.setActiveGui(next, jda);
@@ -73,6 +78,16 @@ public class GuiGuildSettingsPage3 extends Gui {
 		if(actionId.equals("starboard")) {
 			GuiStarboard gui = new GuiStarboard(this.guildId, this.guildName);
 			this.parent.setActiveGui(gui, jda);
+			return;
+		}
+		
+		GuildSettingsManager gsm = this.bonziReference.guildSettings;
+		GuildSettings settings = gsm.getSettings(this.guildId);
+		
+		if(actionId.equals("levelling")) {
+			settings.levellingEnabled = !settings.levellingEnabled;
+			this.reinitialize(settings);
+			this.parent.redrawMessage(jda);
 			return;
 		}
 	}

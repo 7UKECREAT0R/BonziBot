@@ -7,7 +7,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 public class LogEntryClearCommand extends LogEntry {
 	
@@ -33,7 +33,7 @@ public class LogEntryClearCommand extends LogEntry {
 	
 	@Override
 	public MessageEmbed toEmbed(EmbedBuilder input) {
-		input.setTitle(this.count + BonziUtils.plural(" Message", count) + " Cleared");
+		input.setTitle(this.count + BonziUtils.plural(" Message", this.count) + " Cleared");
 		input.setDescription("Cleared by: <@" + this.clearer + ">");
 		return input.build();
 	}
@@ -52,23 +52,23 @@ public class LogEntryClearCommand extends LogEntry {
 	}
 
 	@Override
-	public void performActionUndo(BonziBot bb, ButtonClickEvent event) {
+	public void performActionUndo(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionWarn(BonziBot bb, ButtonClickEvent event) {
+	public void performActionWarn(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionMute(BonziBot bb, ButtonClickEvent event) {
+	public void performActionMute(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionKick(BonziBot bb, ButtonClickEvent event) {
+	public void performActionKick(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionBan(BonziBot bb, ButtonClickEvent event) {
+	public void performActionBan(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 

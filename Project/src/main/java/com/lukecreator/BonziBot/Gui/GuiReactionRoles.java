@@ -23,9 +23,9 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiReactionRoles extends Gui {
 	
@@ -92,7 +92,7 @@ public class GuiReactionRoles extends Gui {
 			if(size >= MAX_ITEMS)
 				return;
 			
-			MessageChannel channel = this.parent.getChannel(jda);
+			MessageChannelUnion channel = this.parent.getChannel(jda);
 			Guild guild = jda.getGuildById(this.parent.guildId);
 			Member member = guild.getMemberById(clickerId);
 			
@@ -150,7 +150,7 @@ public class GuiReactionRoles extends Gui {
 			
 			ReactionRole[] finalItems = this.getItems();
 			BonziBot bb = this.bonziReference;
-			MessageChannel channel = this.parent.getChannel(jda);
+			MessageChannelUnion channel = this.parent.getChannel(jda);
 			
 			MessageEmbed me = BonziUtils.createReactionRolesMenu(this.text, finalItems);
 			

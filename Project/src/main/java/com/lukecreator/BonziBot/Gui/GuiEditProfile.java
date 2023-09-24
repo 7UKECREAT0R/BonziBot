@@ -19,7 +19,7 @@ import com.lukecreator.BonziBot.NoUpload.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message.Attachment;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiEditProfile extends Gui {
 	
@@ -42,7 +42,7 @@ public class GuiEditProfile extends Gui {
 	public Object draw(JDA jda) {
 		
 		UserAccountManager uam = this.bonziReference.accounts;
-		UserAccount account = uam.getUserAccount(userId);
+		UserAccount account = uam.getUserAccount(this.userId);
 		
 		String bio = account.bio;
 		TimeZone timezone = account.timeZone;
@@ -74,8 +74,8 @@ public class GuiEditProfile extends Gui {
 		
 		UserAccountManager uam = this.bonziReference.accounts;
 		EventWaiterManager ewm = this.bonziReference.eventWaiter;
-		UserAccount account = uam.getUserAccount(userId);
-		MessageChannel channel = this.parent.getChannel(jda);
+		UserAccount account = uam.getUserAccount(this.userId);
+		MessageChannelUnion channel = this.parent.getChannel(jda);
 		
 		if(actionId.equals("bio")) {
 			EmbedBuilder eb = BonziUtils.successEmbedIncomplete("🖊️ Send your bio in chat.");

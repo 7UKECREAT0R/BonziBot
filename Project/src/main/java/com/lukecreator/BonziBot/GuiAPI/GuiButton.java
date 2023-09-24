@@ -4,6 +4,7 @@ import com.lukecreator.BonziBot.Data.GenericEmoji;
 
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 
 /**
  * A button in a GUI. Can have colors, be enabled/disabled, or act as a newline.
@@ -16,7 +17,40 @@ public class GuiButton extends GuiElement {
 		BLUE,
 		GREEN,
 		GRAY,
-		RED
+		RED;
+		
+		public static ButtonColor fromDiscord(ButtonStyle style) {
+			switch(style) {
+			case DANGER:
+				return RED;
+			case LINK:
+				return GRAY;
+			case PRIMARY:
+				return BLUE;
+			case SECONDARY:
+				return GRAY;
+			case SUCCESS:
+				return GREEN;
+			case UNKNOWN:
+				return GRAY;
+			default:
+				return RED;
+			}
+		}
+		public ButtonStyle toDiscord() {
+			switch(this) {
+			case BLUE:
+				return ButtonStyle.PRIMARY;
+			case GRAY:
+				return ButtonStyle.SECONDARY;
+			case GREEN:
+				return ButtonStyle.SUCCESS;
+			case RED:
+				return ButtonStyle.DANGER;
+			default:
+				return ButtonStyle.UNKNOWN;
+			}
+		}
 	}
 	
 	GenericEmoji icon;

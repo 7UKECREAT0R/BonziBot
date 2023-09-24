@@ -34,8 +34,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiMusic extends Gui {
 	
@@ -56,7 +56,14 @@ public class GuiMusic extends Gui {
 		"okay you guys can go home now!",
 		"alright yall i gotta take a break",
 		"music is gone",
-		"no more songz (ono)"
+		"no more songz (ono)",
+		"i'm outta here!",
+		"\\*doing back flips\\*",
+		"alright, who did it",
+		"finally, i am freed",
+		"dang you guys listen to some weird stuff",
+		"catch yall later",
+		"my mac n cheese is done"
 	};
 	static String getStoppedMessage() {
 		int index = BonziUtils.randomInt(STOPPED_MESSAGES.length);
@@ -140,10 +147,19 @@ public class GuiMusic extends Gui {
 	}
 	/**
 	 * Just calls enableAnimation with the right timings.
+	 * @param totalMs The total number of milliseconds this next song is.
 	 */
-	public void animate() {
-		this.enableAnimation(5, 240);
+	public void animate(long totalMs, long playerOffset) {
+		int totalSeconds = (int)(totalMs / 1000l);
+		int totalOffset = (int)(playerOffset / 1000l);
+		int timeBetweenEachChange = totalSeconds / BAR_LENGTH;
+		
+		if(timeBetweenEachChange < 2)
+			timeBetweenEachChange = 2;
+		
+		this.enableAnimation(timeBetweenEachChange, totalSeconds - totalOffset);
 	}
+	
 	private void close(JDA jda) {
 		// stops the player entirely and clears queue
 		this.queue.stop();
@@ -165,7 +181,6 @@ public class GuiMusic extends Gui {
 	@Override
 	public void initialize(JDA jda) {
 		this.parent.globalWhitelist = true;
-		this.animate();
 		this.reinitialize();
 	}
 	public void reinitialize() {
@@ -194,6 +209,7 @@ public class GuiMusic extends Gui {
 		this.elements.add(dropdown);
 		
 		this.elements.add(new GuiButton("Add Song", ButtonColor.GREEN, "addsong"));
+		this.elements.add(new GuiButton("Add Video", ButtonColor.GREEN, "addvideo"));
 		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("✖️"), "CLOSE", ButtonColor.RED, "bye"));
 	}
 	
@@ -279,7 +295,7 @@ public class GuiMusic extends Gui {
 			
 			this.lastAction = "Song restarted by " + userName;
 			this.parent.redrawMessage(jda);
-			this.animate();
+			this.animate(playing.getDuration(), 0L);
 			return;
 		}
 		if(buttonId.equals("seekback")) {
@@ -294,7 +310,7 @@ public class GuiMusic extends Gui {
 			
 			this.lastAction = userName + " skipped back 10 seconds";
 			this.parent.redrawMessage(jda);
-			this.animate();
+			this.animate(playing.getDuration(), position);
 			return;
 		}
 		if(buttonId.equals("toggle")) {
@@ -307,7 +323,9 @@ public class GuiMusic extends Gui {
 				this.disableAnimation();
 			} else {
 				this.lastAction = "Resumed by " + userName;
-				this.animate();
+				
+				AudioTrack playing = this.queue.player.getPlayingTrack();
+				this.animate(playing.getDuration(), playing.getPosition());
 			}
 			
 			this.reinitialize();
@@ -327,17 +345,21 @@ public class GuiMusic extends Gui {
 			this.lastAction = userName + " skipped forward 10 seconds";
 			
 			this.parent.redrawMessage(jda);
-			this.animate();
+			this.animate(playing.getDuration(), position);
 			return;
 		}
 		if(buttonId.equals("skip")) {
 			AudioTrack playing = this.queue.player.getPlayingTrack();
-			this.queue.next(playing);
+			boolean startedAnother = this.queue.next(playing);
 			
-			this.lastAction = userName + " skipped the song";
+			if(startedAnother) {
+				this.lastAction = userName + " skipped the song";
+				this.animate(this.queue.player.getPlayingTrack().getDuration(), 0L);
+			} else {
+				this.lastAction = userName + " skipped the last song";
+			}
 			
 			this.parent.redrawMessage(jda);
-			this.animate();
 			return;
 		}
 		
@@ -345,7 +367,7 @@ public class GuiMusic extends Gui {
 		// big guys
 		
 		if(buttonId.equals("addsong")) {
-			MessageChannel channel = this.parent.getChannel(jda);
+			MessageChannelUnion channel = this.parent.getChannel(jda);
 			channel.sendMessageEmbeds(BonziUtils.quickEmbed("Add Song", "Send the URL or title of the song...", Color.orange).build()).queue(msg1 -> {
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
 				ewm.waitForResponse(clickerId, response -> {
@@ -368,7 +390,7 @@ public class GuiMusic extends Gui {
 								selfReference.lastAction = userName + " added '" + track.getInfo().title + "'";
 								selfReference.reinitialize();
 								selfReference.parent.redrawMessage(jda);
-								selfReference.animate();
+								selfReference.animate(track.getDuration(), 0L);
 							} catch (QueueOutOfRoomException e) {
 								MessageEmbed me = BonziUtils.failureEmbed(EmbedBuilder.ZERO_WIDTH_SPACE, "The queue's full right now!");
 								channel.sendMessageEmbeds(me).queue(msg -> {
@@ -379,14 +401,19 @@ public class GuiMusic extends Gui {
 						@Override
 						public void playlistLoaded(AudioPlaylist playlist) {
 							int count = 0;
+							AudioTrack first = null;
+							
 							try {
 								List<AudioTrack> list = playlist.getTracks();
 								count = list.size();
-								AudioTrack first = playlist.getSelectedTrack();
+								first = playlist.getSelectedTrack();
 								if(first != null) {
 									list.remove(first);
 									queueReference.queue(first);
+								} else if(!list.isEmpty()) {
+									first = list.get(0);
 								}
+								
 								for(AudioTrack track: list)
 									queueReference.queue(track);
 							} catch (QueueOutOfRoomException e) {
@@ -396,7 +423,9 @@ public class GuiMusic extends Gui {
 								selfReference.lastAction = userName + " added " + count + " songs";
 								selfReference.reinitialize();
 								selfReference.parent.redrawMessage(jda);
-								selfReference.animate();
+								
+								if(first != null)
+									selfReference.animate(first.getDuration(), 0L);
 							}
 						}
 						@Override
@@ -437,7 +466,7 @@ public class GuiMusic extends Gui {
 						Search.List request = this.bonziReference.youtube.search().list("snippet");
 						SearchListResponse _results = request
 							.setKey(Constants.YTAPI_KEY)
-							.setMaxResults(1l)
+							.setMaxResults(1L)
 							.setQ(url)
 							.setVideoCategoryId("10") // music
 							.setType("video")
@@ -459,8 +488,129 @@ public class GuiMusic extends Gui {
 				});
 			});;
 		}
+		if(buttonId.equals("addvideo")) {
+			MessageChannelUnion channel = this.parent.getChannel(jda);
+			channel.sendMessageEmbeds(BonziUtils.quickEmbed("Add Video", "Send the URL or title of the video...", Color.orange).build()).queue(msg1 -> {
+				EventWaiterManager ewm = this.bonziReference.eventWaiter;
+				ewm.waitForResponse(clickerId, response -> {
+					msg1.delete().queue();
+					response.delete().queue(null, fail -> {});
+					
+					String url = response.getContentRaw();
+					AudioPlayerManager apm = this.bonziReference.audioPlayerManager;
+					boolean validUrl = Constants.URL_REGEX_COMPILED.matcher(url).matches();
+					
+					// references for handler to use
+					final MusicQueue queueReference = this.queue;
+					final GuiMusic selfReference = this;
+					
+					AudioLoadResultHandler resultHandler = new AudioLoadResultHandler() {
+						@Override
+						public void trackLoaded(AudioTrack track) {
+							try {
+								queueReference.queue(track);
+								selfReference.lastAction = userName + " added '" + track.getInfo().title + "'";
+								selfReference.reinitialize();
+								selfReference.parent.redrawMessage(jda);
+								selfReference.animate(track.getDuration(), 0L);
+							} catch (QueueOutOfRoomException e) {
+								MessageEmbed me = BonziUtils.failureEmbed(EmbedBuilder.ZERO_WIDTH_SPACE, "The queue's full right now!");
+								channel.sendMessageEmbeds(me).queue(msg -> {
+									msg.delete().queueAfter(3, TimeUnit.SECONDS);
+								});
+							}
+						}
+						@Override
+						public void playlistLoaded(AudioPlaylist playlist) {
+							int count = 0;
+							AudioTrack first = null;
+							
+							try {
+								List<AudioTrack> list = playlist.getTracks();
+								count = list.size();
+								first = playlist.getSelectedTrack();
+								if(first != null) {
+									list.remove(first);
+									queueReference.queue(first);
+								} else if(!list.isEmpty()) {
+									first = list.get(0);
+								}
+								for(AudioTrack track: list)
+									queueReference.queue(track);
+							} catch (QueueOutOfRoomException e) {
+								// ignoring these since it could be common with big playlists
+								return;
+							} finally {
+								selfReference.lastAction = userName + " added " + count + " songs";
+								selfReference.reinitialize();
+								selfReference.parent.redrawMessage(jda);
+								
+								if(first != null)
+									selfReference.animate(first.getDuration(), 0L);
+							}
+						}
+						@Override
+						public void noMatches() {
+							MessageEmbed me = BonziUtils.failureEmbed("Invalid Video", "This isn't a supported song/video.");
+							channel.sendMessageEmbeds(me).queue(msg -> {
+								msg.delete().queueAfter(4, TimeUnit.SECONDS);
+							});
+						}
+						@Override
+						public void loadFailed(FriendlyException exception) {
+							switch(exception.severity) {
+							case COMMON:
+								MessageEmbed fail = BonziUtils.failureEmbed("Load Failed", "This song might be unavailable in the United States or age restricted.");
+								channel.sendMessageEmbeds(fail).queue(msg -> {
+									msg.delete().queueAfter(6, TimeUnit.SECONDS);
+								});
+								break;
+							case FAULT:
+							case SUSPICIOUS:
+								MessageEmbed failBig = BonziUtils.failureEmbed("Load Failed Bigtime (Report This)", exception.getMessage());
+								channel.sendMessageEmbeds(failBig).queue();
+								break;
+							default:
+								break;
+							}
+
+						}
+					};
+					
+					if(validUrl) {
+						apm.loadItemOrdered(this.queue, url, resultHandler);
+						return;
+					}
+					
+					try {
+						BonziUtils.sendTempMessage(channel, "Searching youtube for `" + url + "`...", 3);
+						Search.List request = this.bonziReference.youtube.search().list("snippet");
+						SearchListResponse _results = request
+							.setKey(Constants.YTAPI_KEY)
+							.setMaxResults(1L)
+							.setQ(url)
+							.setType("video")
+							.execute();
+						List<SearchResult> results = _results.getItems();
+						if(results.isEmpty()) {
+							BonziUtils.sendTempMessage(channel, "No results found.", 3);
+							return;
+						}
+						SearchResult result = results.get(0);
+						String id = result.getId().getVideoId();
+						String findUrl = "https://www.youtube.com/watch?v=" + id;
+						apm.loadItemOrdered(this.queue, findUrl, resultHandler);
+						return;
+					} catch (IOException e) {
+						channel.sendMessage("Everything blew up.\n```" + e.toString() + "```").queue();
+						return;
+					}
+				});
+			});;
+		}
+		
 		if(buttonId.equals("bye")) {
-			MessageChannel channel = this.parent.getChannel(jda);
+			MessageChannelUnion channel = this.parent.getChannel(jda);
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
 			ewm.getConfirmation(clickerId, channel, "Close the music player? This will clear the queue.", b -> {
 				if(!b) {

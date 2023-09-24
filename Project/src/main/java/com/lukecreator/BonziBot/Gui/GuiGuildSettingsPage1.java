@@ -21,10 +21,10 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiGuildSettingsPage1 extends Gui {
 	
@@ -43,7 +43,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 	@Override
 	public void initialize(JDA jda) {
 		GuildSettingsManager mgr = this.bonziReference.guildSettings;
-		GuildSettings settings = mgr.getSettings(guildId);
+		GuildSettings settings = mgr.getSettings(this.guildId);
 		this.reinitialize(settings);
 	}
 	public void reinitialize(GuildSettings settings) {
@@ -74,9 +74,9 @@ public class GuiGuildSettingsPage1 extends Gui {
 			+ "a button to toggle/enter an option.",
 			BonziUtils.COLOR_BONZI_PURPLE);
 		
-		Guild guild = jda.getGuildById(guildId);
+		Guild guild = jda.getGuildById(this.guildId);
 		GuildSettings settings = this.bonziReference
-			.guildSettings.getSettings(guildId);
+			.guildSettings.getSettings(this.guildId);
 		FilterLevel filter = settings.filter;
 		
 		String emoji = this.emojiForFilter(filter);
@@ -137,23 +137,21 @@ public class GuiGuildSettingsPage1 extends Gui {
 	
 	@Override
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
-		GuildSettingsManager gsm = this
-			.bonziReference.guildSettings;
-		GuildSettings settings = gsm.getSettings(guildId);
+		GuildSettingsManager gsm = this.bonziReference.guildSettings;
+		GuildSettings settings = gsm.getSettings(this.guildId);
 		
 		if(actionId.equals("filter")) {
 			// Filtering setting
 			settings.cycleFilter();
-			gsm.setSettings(guildId, settings);
+			gsm.setSettings(this.guildId, settings);
 			Rules rules = settings.getRules();
-			Guild guild = jda.getGuildById(guildId);
-			rules.retrieveRulesMessage(jda, guildId, edit -> {
+			Guild guild = jda.getGuildById(this.guildId);
+			rules.retrieveRulesMessage(jda, this.guildId, edit -> {
 				MessageEmbed newRules = BonziUtils.generateRules
 					(settings, guild, this.bonziReference).build();
 				edit.editMessageEmbeds(newRules).queue();
 			}, fail -> {
 				settings.setRules(rules);
-				gsm.setSettings(guildId, settings);
 			});
 			this.reinitialize(settings);
 			this.parent.redrawMessage(jda);
@@ -161,13 +159,12 @@ public class GuiGuildSettingsPage1 extends Gui {
 		}
 		if(actionId.equals("customfilter")) {
 			// Custom filter
-			Gui next = new GuiCustomFilter(guildId, guildName, this);
+			Gui next = new GuiCustomFilter(this.guildId, this.guildName, this);
 			this.parent.setActiveGui(next, jda);
 		}
 		if(actionId.equals("tag")) {
 			// Tags enabled
 			settings.enableTags = !settings.enableTags;
-			gsm.setSettings(guildId, settings);
 			this.reinitialize(settings);
 			this.parent.redrawMessage(jda);
 			return;
@@ -175,7 +172,6 @@ public class GuiGuildSettingsPage1 extends Gui {
 		if(actionId.equals("tagprivacy")) {
 			// Tag privacy
 			settings.privateTags = !settings.privateTags;
-			gsm.setSettings(guildId, settings);
 			this.reinitialize(settings);
 			this.parent.redrawMessage(jda);
 			return;
@@ -184,13 +180,12 @@ public class GuiGuildSettingsPage1 extends Gui {
 			// Logging
 			if(settings.loggingEnabled) {
 				settings.loggingEnabled = false;
-				gsm.setSettings(guildId, settings);
 				this.reinitialize(settings);
 				this.parent.redrawMessage(jda);
 			} else {
 				CommandArg tca = new TextChannelArg("");
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
-				MessageChannel mc = this.parent.getChannel(jda);
+				MessageChannelUnion mc = this.parent.getChannel(jda);
 				mc.sendMessageEmbeds(BonziUtils.quickEmbed("Turning on Logging...",
 					"Mention the channel you want logs to go into!", Color.gray).build()).queue(sent -> {
 						long sentId = sent.getIdLong();
@@ -199,7 +194,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 							TextChannel tc = (TextChannel)object;
 							settings.loggingEnabled = true;
 							settings.loggingChannelCached = tc.getIdLong();
-							gsm.setSettings(guildId, settings);
+							gsm.setSettings(this.guildId, settings);
 							this.reinitialize(settings);
 							this.parent.redrawMessage(jda);
 							BonziUtils.sendTempMessage(mc, BonziUtils.successEmbed("Logging is now enabled in #" + tc.getName() + "!"), 3);
@@ -211,20 +206,19 @@ public class GuiGuildSettingsPage1 extends Gui {
 		if(actionId.equals("botcommands")) {
 			// Bot commands
 			settings.botCommandsEnabled = !settings.botCommandsEnabled;
-			gsm.setSettings(guildId, settings);
 			this.reinitialize(settings);
 			this.parent.redrawMessage(jda);
 			return;
 		}
 		if(actionId.equals("joinmessage")) {
 			// Join messages
-			GuiJoinLeaveMessages gui = new GuiJoinLeaveMessages(guildId, guildName, false);
+			GuiJoinLeaveMessages gui = new GuiJoinLeaveMessages(this.guildId, this.guildName, false);
 			this.parent.setActiveGui(gui, jda);
 			return;
 		}
 		if(actionId.equals("leavemessage")) {
 			// Leave messages
-			GuiJoinLeaveMessages gui = new GuiJoinLeaveMessages(guildId, guildName, true);
+			GuiJoinLeaveMessages gui = new GuiJoinLeaveMessages(this.guildId, this.guildName, true);
 			this.parent.setActiveGui(gui, jda);
 			return;
 		}
@@ -232,13 +226,12 @@ public class GuiGuildSettingsPage1 extends Gui {
 			// Join role
 			if(settings.joinRole) {
 				settings.joinRole = false;
-				gsm.setSettings(guildId, settings);
 				this.reinitialize(settings);
 				this.parent.redrawMessage(jda);
 			} else {
 				CommandArg tca = new RoleArg("");
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
-				MessageChannel mc = this.parent.getChannel(jda);
+				MessageChannelUnion mc = this.parent.getChannel(jda);
 				mc.sendMessageEmbeds(BonziUtils.quickEmbed("Turning on Join Role...",
 					"Mention or send the ID of the role you want to be given to new members.", Color.gray).build()).queue(sent -> {
 					long sentId = sent.getIdLong();
@@ -247,7 +240,7 @@ public class GuiGuildSettingsPage1 extends Gui {
 						Role role = (Role)object;
 						settings.joinRole = true;
 						settings.joinRoleId = role.getIdLong();
-						gsm.setSettings(guildId, settings);
+						gsm.setSettings(this.guildId, settings);
 						
 						// concern message
 						boolean concernH = false; // hierarchy

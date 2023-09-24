@@ -11,9 +11,9 @@ import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.channel.voice.VoiceChannelDeleteEvent;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 public class LogEntryVoiceChannelRemove extends LogEntry {
 	
@@ -38,13 +38,13 @@ public class LogEntryVoiceChannelRemove extends LogEntry {
 
 	@Override
 	public void loadData(Object dataStructure, BonziBot bb, Consumer<LogEntry> _success, Consumer<Throwable> _failure) {
-		if(!(dataStructure instanceof VoiceChannelDeleteEvent))
+		if(!(dataStructure instanceof ChannelDeleteEvent))
 			return;
 		
-		VoiceChannelDeleteEvent event = (VoiceChannelDeleteEvent)dataStructure;
+		ChannelDeleteEvent event = (ChannelDeleteEvent)dataStructure;
 		Guild guild = event.getGuild();
 		
-		VoiceChannel tc = event.getChannel();
+		VoiceChannel tc = event.getChannel().asVoiceChannel();
 		this.name = tc.getName();
 		this.position = tc.getPositionRaw();
 		
@@ -68,7 +68,7 @@ public class LogEntryVoiceChannelRemove extends LogEntry {
 	}
 
 	@Override
-	public void performActionUndo(BonziBot bb, ButtonClickEvent event) {
+	public void performActionUndo(BonziBot bb, ButtonInteractionEvent event) {
 		Guild guild = event.getGuild();
 		
 		guild.createVoiceChannel(this.name)
@@ -76,23 +76,23 @@ public class LogEntryVoiceChannelRemove extends LogEntry {
 			.reason(Credible.create(event.getUser().getIdLong()))
 			.queue();
 		
-		setOriginalFooter(event, "Undone by " + event.getUser().getAsTag() + ". Settings were not restored.");
+		setOriginalFooter(event, "Undone by " + event.getUser().getName() + ". Settings were not restored.");
 	}
 
 	@Override
-	public void performActionWarn(BonziBot bb, ButtonClickEvent event) {
+	public void performActionWarn(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionMute(BonziBot bb, ButtonClickEvent event) {
+	public void performActionMute(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionKick(BonziBot bb, ButtonClickEvent event) {
+	public void performActionKick(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionBan(BonziBot bb, ButtonClickEvent event) {
+	public void performActionBan(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 }

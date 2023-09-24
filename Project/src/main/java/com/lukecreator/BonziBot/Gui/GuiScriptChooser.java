@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.lukecreator.BonziBot.BonziUtils;
+import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
@@ -29,8 +30,9 @@ import com.lukecreator.BonziBot.Script.Model.ScriptPackage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 /**
  * Allows you to choose a script inside a package to edit.
@@ -110,7 +112,7 @@ public class GuiScriptChooser extends Gui {
 	@Override
 	public void onButtonClick(String buttonId, long clickerId, JDA jda) {
 		
-		MessageChannel channel = this.parent.getChannel(jda);
+		MessageChannelUnion channel = this.parent.getChannel(jda);
 		
 		if(buttonId.equals("back")) {
 			this.previous.initialize(jda); // reset selection box
@@ -162,7 +164,8 @@ public class GuiScriptChooser extends Gui {
 				return;
 			}
 			
-			channel.sendFile(file).queue(finished -> {
+			FileUpload upload = FileUpload.fromData(file, file.toPath().getFileName().toString());
+			channel.sendFiles(upload).queue(finished -> {
 				this.nextStorageReport = System.currentTimeMillis() + 5000; // 5s
 				file.delete();
 			}, failed -> {
@@ -234,9 +237,9 @@ public class GuiScriptChooser extends Gui {
 			file.close();
 			return new File(fileName);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			InternalLogger.printError(e);
 		} finally {
 			if(file != null) {
 				file.close();

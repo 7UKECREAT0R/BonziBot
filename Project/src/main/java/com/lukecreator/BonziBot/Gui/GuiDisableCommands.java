@@ -22,9 +22,9 @@ import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 
 public class GuiDisableCommands extends Gui {
 	
@@ -42,7 +42,7 @@ public class GuiDisableCommands extends Gui {
 		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
 		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🆕"), "Add Command", GuiButton.ButtonColor.BLUE, "new"));
 		this.elements.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("b_trash")), "Remove Command", GuiButton.ButtonColor.RED,  "delete"));
-		this.disabledCommands = this.bonziReference.guildSettings.getSettings(guildId).disabledCommands;
+		this.disabledCommands = this.bonziReference.guildSettings.getSettings(this.guildId).disabledCommands;
 		if(this.disabledCommands == null)
 			this.disabledCommands = new ArrayList<Integer>();
 	}
@@ -51,7 +51,7 @@ public class GuiDisableCommands extends Gui {
 	public Object draw(JDA jda) {
 		EmbedBuilder eb = new EmbedBuilder()
 			.setColor(BonziUtils.COLOR_BONZI_PURPLE)
-			.setTitle(guildName + " Disabled Commands");
+			.setTitle(this.guildName + " Disabled Commands");
 		
 		CommandSystem cmds = this.bonziReference.commands;
 		List<Command> commands = this.disabledCommands.stream().map(id -> {
@@ -64,7 +64,7 @@ public class GuiDisableCommands extends Gui {
 			if(cmd == null)
 				full.append(++i + ". [outdated entry]" + '\n');
 			else
-				full.append(++i + ". " + cmd.unicodeIcon + " " + cmd.name + '\n');
+				full.append(++i + ". " + cmd.icon.toString() + " " + cmd.name + '\n');
 		}
 		String desc = full.toString();
 		if(desc.length() > 0)
@@ -72,7 +72,7 @@ public class GuiDisableCommands extends Gui {
 		desc = BonziUtils.cutOffString(desc, MessageEmbed.TEXT_MAX_LENGTH);
 		eb.setDescription(desc);
 		
-		Emote trash = EmoteCache.getEmoteByName("b_trash");
+		RichCustomEmoji trash = EmoteCache.getEmoteByName("b_trash");
 		eb.addField("🆕 Add Command", "Add a new command to the blacklist", false);
 		eb.addField(trash.getAsMention() + " Remove Command", "Remove a command from the blacklist.", false);
 		return eb.build();
@@ -80,16 +80,16 @@ public class GuiDisableCommands extends Gui {
 	
 	@Override
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
-		MessageChannel channel = this.parent.getChannel(jda);
+		MessageChannelUnion channel = this.parent.getChannel(jda);
 		GuildSettingsManager gsm = this.bonziReference.guildSettings;
-		GuildSettings settings = gsm.getSettings(guildId);
+		GuildSettings settings = gsm.getSettings(this.guildId);
 		
 		if(channel == null)
 			return;
 		
 		if(actionId.equals("return")) {
 			// Back button.
-			this.parent.setActiveGui(new GuiGuildSettingsPage2(guildId, guildName), jda);
+			this.parent.setActiveGui(new GuiGuildSettingsPage2(this.guildId, this.guildName), jda);
 			return;
 		}
 		
@@ -128,7 +128,7 @@ public class GuiDisableCommands extends Gui {
 					}
 					this.disabledCommands.add(pick.id);
 					settings.disabledCommands = this.disabledCommands;
-					gsm.setSettings(guildId, settings);
+					gsm.setSettings(this.guildId, settings);
 					
 					msg.delete().queue();
 					response.delete().queue();
@@ -148,7 +148,7 @@ public class GuiDisableCommands extends Gui {
 				// Only one possibility.
 				this.disabledCommands.remove(0);
 				settings.disabledCommands = this.disabledCommands;
-				gsm.setSettings(guildId, settings);
+				gsm.setSettings(this.guildId, settings);
 				this.parent.redrawMessage(jda);
 				return;
 			} else {
@@ -173,7 +173,7 @@ public class GuiDisableCommands extends Gui {
 							this.disabledCommands.remove(index);
 						}
 						settings.disabledCommands = this.disabledCommands;
-						gsm.setSettings(guildId, settings);
+						gsm.setSettings(this.guildId, settings);
 						this.parent.redrawMessage(msg.getJDA());
 						return;
 					});

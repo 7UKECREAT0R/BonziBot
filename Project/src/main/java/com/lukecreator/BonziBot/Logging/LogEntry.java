@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageEmbed.Footer;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 /**
  * Abstraction of a "log entry"
@@ -92,7 +92,7 @@ public abstract class LogEntry implements Serializable {
 	
 	@Override
 	public String toString() {
-		return type.toString() + ", messageId: " + messageId + ", self: " + this.getClass().getName();
+		return this.type.toString() + ", messageId: " + this.messageId + ", self: " + this.getClass().getName();
 	}
 	
 	/**
@@ -100,7 +100,7 @@ public abstract class LogEntry implements Serializable {
 	 * @param hook
 	 * @param footer
 	 */
-	public static void setOriginalFooter(ButtonClickEvent event, String footer) {
+	public static void setOriginalFooter(ButtonInteractionEvent event, String footer) {
 		event.getHook().retrieveOriginal().queue(msg -> {
 			MessageEmbed me = msg.getEmbeds().get(0);
 			EmbedBuilder eb = new EmbedBuilder(me);
@@ -146,9 +146,9 @@ public abstract class LogEntry implements Serializable {
 	public abstract void loadData(Object dataStructure, BonziBot bb, Consumer<LogEntry> _success, Consumer<Throwable> _failure);
 
 	// Actions
-	public abstract void performActionUndo(BonziBot bb, ButtonClickEvent event);
-	public abstract void performActionWarn(BonziBot bb, ButtonClickEvent event);
-	public abstract void performActionMute(BonziBot bb, ButtonClickEvent event);
-	public abstract void performActionKick(BonziBot bb, ButtonClickEvent event);
-	public abstract void performActionBan(BonziBot bb, ButtonClickEvent event);
+	public abstract void performActionUndo(BonziBot bb, ButtonInteractionEvent event);
+	public abstract void performActionWarn(BonziBot bb, ButtonInteractionEvent event);
+	public abstract void performActionMute(BonziBot bb, ButtonInteractionEvent event);
+	public abstract void performActionKick(BonziBot bb, ButtonInteractionEvent event);
+	public abstract void performActionBan(BonziBot bb, ButtonInteractionEvent event);
 }

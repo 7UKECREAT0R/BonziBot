@@ -52,7 +52,7 @@ public class GuiHelpMenuCategory extends GuiPaging {
 	@Override
 	public Object draw(JDA jda) {
 		
-		String catName = category.name;
+		String catName = this.category.name;
 		User u = jda.getUserById(this.parent.ownerId);
 		
 		EmbedBuilder eb;
@@ -63,8 +63,8 @@ public class GuiHelpMenuCategory extends GuiPaging {
 		int index = this.currentPage - 1;
 		int start = index * GuiHelpMenu.CPP;
 		int end = start + GuiHelpMenu.CPP;
-		if(end > allCommands.length)
-			end = allCommands.length;
+		if(end > this.allCommands.length)
+			end = this.allCommands.length;
 		
 		String prefix = this.prefixOfLocation;
 		if(prefix == null)
@@ -73,8 +73,8 @@ public class GuiHelpMenuCategory extends GuiPaging {
 		int subCat = -1;
 		
 		for(int i = start; i < end; i++) {
-			Command current = allCommands[i];
-			String icon = current.unicodeIcon;
+			Command current = this.allCommands[i];
+			String icon = current.icon.toString();
 			String name = current.name;
 			String desc = current.description;
 			String cmdName = current.getFilteredCommandName();
@@ -96,7 +96,7 @@ public class GuiHelpMenuCategory extends GuiPaging {
 		}
 		
 		if((this.maxPage - this.minPage) > 0)
-			eb.setFooter("Page " + this.getPageString() + " - React to see other pages.");
+			eb.setFooter("Page " + this.getPageString());
 		else eb.setFooter("This is all the available commands.");
 		
 		return eb.build();

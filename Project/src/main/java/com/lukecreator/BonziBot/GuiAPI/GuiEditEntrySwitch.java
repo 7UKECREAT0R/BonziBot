@@ -21,7 +21,7 @@ public class GuiEditEntrySwitch extends GuiEditEntry {
 
 	@Override
 	public Object getValue() {
-		return new Boolean(this.value);
+		return Boolean.valueOf(this.value);
 	}
 
 	@Override

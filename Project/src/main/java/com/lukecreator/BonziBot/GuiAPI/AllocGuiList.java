@@ -5,7 +5,7 @@ import java.util.List;
 
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 
 /**
  * Limit one per Entity, represents a imited
@@ -78,7 +78,8 @@ public class AllocGuiList {
 			return;
 		}
 	}
-	public void handleInteraction(SelectMenuInteractionEvent event, long messageId, User executor) {
+	
+	public void handleInteraction(StringSelectInteractionEvent event, long messageId, User executor) {
 		for(int i = 0; i < this.guis.size(); i++) {
 			GuiContainer gui = this.guis.get(i);
 			if(!gui.hasSentMessage)

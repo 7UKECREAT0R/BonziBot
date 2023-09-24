@@ -21,8 +21,8 @@ import com.lukecreator.BonziBot.Script.Model.ScriptPackage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiScriptPackages extends Gui {
 	
@@ -84,7 +84,7 @@ public class GuiScriptPackages extends Gui {
 	@Override
 	public void onButtonClick(String buttonId, long clickerId, JDA jda) {
 		
-		MessageChannel channel = this.parent.getChannel(jda);
+		MessageChannelUnion channel = this.parent.getChannel(jda);
 		
 		if(buttonId.equals("create")) {
 			if(this.packages.size() >= ScriptPackage.MAX_PACKAGES) {

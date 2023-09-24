@@ -1,7 +1,7 @@
 package com.lukecreator.BonziBot.Logging;
 
-import net.dv8tion.jda.api.entities.Emoji;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 /**
  * Buttons appended to specific log messages.
@@ -15,11 +15,11 @@ public enum LogButtons {
 	KICK	(1 << 3, "logkick"), 	// 01000
 	BAN 	(1 << 4, "logban"); 	// 10000
 	
-	public static final Emoji EMOJI_UNDO = Emoji.fromEmote("punish_undo", 923694865420800070l, false);
-	public static final Emoji EMOJI_WARN = Emoji.fromEmote("punish_warn", 923694865429184632l, false);
-	public static final Emoji EMOJI_MUTE = Emoji.fromEmote("punish_mute", 923694952351957112l, false);
-	public static final Emoji EMOJI_KICK = Emoji.fromEmote("punish_kick", 923694865307549748l, false);
-	public static final Emoji EMOJI_BAN = Emoji.fromEmote("punish_ban", 923694865156542486l, false);
+	public static final Emoji EMOJI_UNDO = Emoji.fromCustom("punish_undo", 923694865420800070l, false);
+	public static final Emoji EMOJI_WARN = Emoji.fromCustom("punish_warn", 923694865429184632l, false);
+	public static final Emoji EMOJI_MUTE = Emoji.fromCustom("punish_mute", 923694952351957112l, false);
+	public static final Emoji EMOJI_KICK = Emoji.fromCustom("punish_kick", 923694865307549748l, false);
+	public static final Emoji EMOJI_BAN = Emoji.fromCustom("punish_ban", 923694865156542486l, false);
 	
 	public static final Button UNDO_BUTTON = Button.primary(UNDO.protocol, "UNDO").withEmoji(EMOJI_UNDO);
 	public static final Button WARN_BUTTON = Button.secondary(WARN.protocol, "WARN").withEmoji(EMOJI_WARN);

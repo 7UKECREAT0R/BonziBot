@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 
 /**
  * A dropdown menu in a GUI. Supports single or multi-select.
@@ -153,13 +154,15 @@ public class GuiDropdown extends GuiElement {
 	public ItemComponent toDiscord(boolean enabled) {
 		if(this._items.isEmpty())
 			return null;
-		SelectMenu menu = SelectMenu.create(this.id)
+		
+		SelectMenu menu = StringSelectMenu.create(this.id)
 			.setPlaceholder(this.placeholder)
 			.setDisabled(!enabled)
 			.addOptions(this._items.toDiscord())
 			.setMinValues(this.getMinItems())
 			.setMaxValues(this.getMaxItems())
 			.build();
+		
 		return menu;
 	}
 

@@ -13,7 +13,7 @@ import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiTagEditing extends Gui {
 	
@@ -44,7 +44,7 @@ public class GuiTagEditing extends Gui {
 	
 	@Override
 	public Object draw(JDA jda) {
-		return startEmbed.build();
+		return this.startEmbed.build();
 	}
 	
 	@Override
@@ -54,23 +54,23 @@ public class GuiTagEditing extends Gui {
 		if(actionId.equals("edit")) {
 			BonziBot ref = this.bonziReference;
 			EventWaiterManager waiter = ref.eventWaiter;
-			MessageChannel channel = this.parent.getChannel(jda);
+			MessageChannelUnion channel = this.parent.getChannel(jda);
 			
-			if(isEditing) {
-				isEditing = false;
-				startEmbed.setColor(Color.magenta);
+			if(this.isEditing) {
+				this.isEditing = false;
+				this.startEmbed.setColor(Color.magenta);
 				channel.sendMessageEmbeds(BonziUtils.quickEmbed("No longer editing this command.",
 						"You can send messages again!", Color.green).build()).queue(mm -> {
 							mm.delete().queueAfter(3, TimeUnit.SECONDS);
 						});
 				waiter.stopWaitingForResponse(this.parent.ownerId);
-				if(sentEditingMessage != -1) {
-					channel.deleteMessageById(sentEditingMessage).queue();
-					sentEditingMessage = -1;
+				if(this.sentEditingMessage != -1) {
+					channel.deleteMessageById(this.sentEditingMessage).queue();
+					this.sentEditingMessage = -1;
 				}
 			} else {
-				isEditing = true;
-				startEmbed.setColor(Color.white);
+				this.isEditing = true;
+				this.startEmbed.setColor(Color.white);
 				channel.sendMessageEmbeds(BonziUtils.quickEmbed("The next message you send will be the new response.",
 						"Hit the edit button again to cancel editing.", Color.white).build()).queue(sent -> {
 							sentEditingMessage = sent.getIdLong();
@@ -89,14 +89,14 @@ public class GuiTagEditing extends Gui {
 		// Delete
 		if(actionId.equals("delete")) {
 			
-			if(isPrivate)
-				this.bonziReference.tags.removePrivateTagByName(tagName, guildId);
-			else this.bonziReference.tags.removeTagByName(tagName);
+			if(this.isPrivate)
+				this.bonziReference.tags.removePrivateTagByName(this.tagName, this.guildId);
+			else this.bonziReference.tags.removeTagByName(this.tagName);
 			
-			startEmbed = new EmbedBuilder();
-			startEmbed.setTitle("Tag was deleted.");
-			startEmbed.setDescription("Previous name: " + tagName);
-			startEmbed.setColor(Color.red);
+			this.startEmbed = new EmbedBuilder();
+			this.startEmbed.setTitle("Tag was deleted.");
+			this.startEmbed.setDescription("Previous name: " + this.tagName);
+			this.startEmbed.setColor(Color.red);
 			this.parent.disable(jda);
 			this.parent.redrawMessage(jda);
 		}

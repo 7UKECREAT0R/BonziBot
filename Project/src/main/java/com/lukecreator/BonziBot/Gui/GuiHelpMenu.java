@@ -34,7 +34,7 @@ public class GuiHelpMenu extends Gui {
 		case "c2": return CommandCategory.MODERATION;
 		case "c3": return CommandCategory.UTILITIES;
 		case "c4": return CommandCategory.MUSIC;
-		case "c5": return CommandCategory.UPGRADE;
+		case "c5": return CommandCategory.TECHNICAL;
 		case "c6": return CommandCategory._HIDDEN;
 		// should NEVER happen since it's
 		// undefined to be anything else.
@@ -50,7 +50,7 @@ public class GuiHelpMenu extends Gui {
 		this.elements.add(new GuiNewline());
 		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🛠️"), "c3"));
 		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🎵"), "c4"));
-		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🚀"), "c5"));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("💻"), "c5"));
 		if(this.adminMode)
 			this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🛡️"), "c6"));
 	}
@@ -69,7 +69,7 @@ public class GuiHelpMenu extends Gui {
 		eb.addField("👮 Moderator", "Moderate and enforce your server law.", true);
 		eb.addField("🛠️ Utilities", "Other commands that you can spruce up your server with.", true);
 		eb.addField("🎵 Music", "Blast music with your friends at 2AM or set the mood.", true);
-		eb.addField("🚀 Upgrades", "Let your members upgrade the server to unlock extra-cool features!", true);
+		eb.addField("💻 Technical", "Special commands for technical people (not really).", true);
 		eb.setFooter("Click the page you want to view.");
 		if(this.adminMode) eb.addField("🛡 Admin (Hidden)", "Admin commands.", true);
 		return eb.build();
@@ -77,7 +77,7 @@ public class GuiHelpMenu extends Gui {
 	
 	@Override
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
-		CommandCategory c = fromButtonId(actionId);
+		CommandCategory c = this.fromButtonId(actionId);
 		GuiHelpMenuCategory menu = new GuiHelpMenuCategory(c, this.bonziReference);
 		this.parent.setActiveGui(menu, jda);
 	}

@@ -8,7 +8,8 @@ import com.lukecreator.BonziBot.Data.Credible;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 public class LogEntryTempBan extends LogEntry {
 	
@@ -62,30 +63,30 @@ public class LogEntryTempBan extends LogEntry {
 	}
 
 	@Override
-	public void performActionUndo(BonziBot bb, ButtonClickEvent event) {
+	public void performActionUndo(BonziBot bb, ButtonInteractionEvent event) {
 		event.getGuild()
-			.unban(String.valueOf(this.banned))
+			.unban(UserSnowflake.fromId(this.banned))
 			.reason(Credible.create(event.getUser()))
 			.queue(success -> {
 				bb.bans.unban(event.getGuild().getIdLong(), this.banned);
 			}, fail -> {});
 		
-		LogEntry.setOriginalFooter(event, "Undone by " + event.getUser().getAsTag());
+		LogEntry.setOriginalFooter(event, "Undone by " + event.getUser().getName());
 	}
 	@Override
-	public void performActionWarn(BonziBot bb, ButtonClickEvent event) {
+	public void performActionWarn(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionMute(BonziBot bb, ButtonClickEvent event) {
+	public void performActionMute(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionKick(BonziBot bb, ButtonClickEvent event) {
+	public void performActionKick(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionBan(BonziBot bb, ButtonClickEvent event) {
+	public void performActionBan(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 }

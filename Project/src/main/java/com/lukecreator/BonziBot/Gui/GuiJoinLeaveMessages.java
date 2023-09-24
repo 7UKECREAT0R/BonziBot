@@ -19,8 +19,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiJoinLeaveMessages extends Gui {
 	
@@ -35,8 +35,8 @@ public class GuiJoinLeaveMessages extends Gui {
 		this.guildId = guildId;
 		this.guildName = guildName;
 		this.leave = leaveMessages;
-		keyword = leave ? "Leave" : "Join";
-		keywordl = keyword.toLowerCase();
+		this.keyword = this.leave ? "Leave" : "Join";
+		this.keywordl = this.keyword.toLowerCase();
 	}
 	
 	GuiButton bOn = new GuiButton(GenericEmoji.fromEmoji("🖱️"), "Enable", GuiButton.ButtonColor.GREEN, "toggle");
@@ -47,20 +47,20 @@ public class GuiJoinLeaveMessages extends Gui {
 	public void initialize(JDA jda) {
 		
 		GuildSettingsManager mgr = this.bonziReference.guildSettings;
-		GuildSettings settings = mgr.getSettings(guildId);
+		GuildSettings settings = mgr.getSettings(this.guildId);
 		this.reinitialize(settings);
 	}
 	public void reinitialize(GuildSettings settings) {
-		boolean enabled = leave ? settings.leaveMessages : settings.joinMessages;
-		boolean embeds = leave ? settings.leaveMessageIsEmbed : settings.joinMessageIsEmbed;
+		boolean enabled = this.leave ? settings.leaveMessages : settings.joinMessages;
+		boolean embeds = this.leave ? settings.leaveMessageIsEmbed : settings.joinMessageIsEmbed;
 		this.elements.clear();
 		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
-		this.elements.add(enabled ? bOff : bOn);
+		this.elements.add(enabled ? this.bOff : this.bOn);
 		this.elements.add(new GuiButton("Test", GuiButton.ButtonColor.BLUE, "test").asEnabled(enabled));
 		this.elements.add(new GuiNewline());
 		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🗨️"), "Set Message...", GuiButton.ButtonColor.BLUE, "message").asEnabled(enabled));
 		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("#️⃣"), "Set Channel...", GuiButton.ButtonColor.BLUE,  "channel").asEnabled(enabled));
-		this.elements.add((embeds ? eOff : eOn).asEnabled(enabled));
+		this.elements.add((embeds ? this.eOff : this.eOn).asEnabled(enabled));
 		this.elements.add(new GuiNewline());
 	}
 	
@@ -68,15 +68,15 @@ public class GuiJoinLeaveMessages extends Gui {
 	public Object draw(JDA jda) {
 		
 		EmbedBuilder menu = BonziUtils.quickEmbed
-			(this.guildName, "Server Settings - " + keyword
+			(this.guildName, "Server Settings - " + this.keyword
 			+ " Messages", BonziUtils.COLOR_BONZI_PURPLE);
 		
 		GuildSettingsManager mgr = this.bonziReference.guildSettings;
-		GuildSettings settings = mgr.getSettings(guildId);
-		boolean enabled = leave ? settings.leaveMessages : settings.joinMessages;
-		boolean isEmbed = leave ? settings.leaveMessageIsEmbed : settings.joinMessageIsEmbed;
-		String msg = enabled ? leave ? settings.leaveMessage : settings.joinMessage : null;
-		long channelId = enabled ? leave ? settings.leaveMessageChannel : settings.joinMessageChannel : 0l;
+		GuildSettings settings = mgr.getSettings(this.guildId);
+		boolean enabled = this.leave ? settings.leaveMessages : settings.joinMessages;
+		boolean isEmbed = this.leave ? settings.leaveMessageIsEmbed : settings.joinMessageIsEmbed;
+		String msg = enabled ? this.leave ? settings.leaveMessage : settings.joinMessage : null;
+		long channelId = enabled ? this.leave ? settings.leaveMessageChannel : settings.joinMessageChannel : 0l;
 		TextChannel tc = jda.getTextChannelById(channelId);
 		String channelMnt = tc != null ? tc.getAsMention() : null;
 		
@@ -87,8 +87,8 @@ public class GuiJoinLeaveMessages extends Gui {
 			channelMnt = "Not set.";
 		
 		String statusDesc = enabled ? 
-			  "Click to disable " + keywordl + " messages in this server."
-			: "Click to enable " + keywordl + " messages in this server.";
+			  "Click to disable " + this.keywordl + " messages in this server."
+			: "Click to enable " + this.keywordl + " messages in this server.";
 		
 		menu.addField("🖱️ Status: `" + (enabled?"✅ ENABLED`":"🔳 DISABLED`"), statusDesc, false);
 		
@@ -96,7 +96,7 @@ public class GuiJoinLeaveMessages extends Gui {
 			menu.addField("🗨️ Message", msg, false);
 			menu.addField("#️⃣ Channel", channelMnt, false);
 			menu.addField("📰 Use Embed? `" + (isEmbed?"🟩 YES`":"🟥 NO`"),
-				"Whether the " + keywordl + " messages should be placed in an embed or not.", false);
+				"Whether the " + this.keywordl + " messages should be placed in an embed or not.", false);
 		}
 		
 		return menu.build();
@@ -106,26 +106,26 @@ public class GuiJoinLeaveMessages extends Gui {
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		
 		GuildSettingsManager mgr = this.bonziReference.guildSettings;
-		GuildSettings settings = mgr.getSettings(guildId);
+		GuildSettings settings = mgr.getSettings(this.guildId);
 		
 		if(actionId.equals("return")) {
 			// Back button.
 			
 			if(this.didEnable && (!this.setChannel || !this.setMessage)) {
-				MessageChannel channel = this.parent.getChannel(jda);
+				MessageChannelUnion channel = this.parent.getChannel(jda);
 				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed(
 					"Warning: You haven't set this up completely yet!",
-					keyword + " messages won't work until you set both the message and the channel they go into!"), 5);
+					this.keyword + " messages won't work until you set both the message and the channel they go into!"), 5);
 				return;
 			}
 			
-			this.parent.setActiveGui(new GuiGuildSettingsPage1(guildId, guildName), jda);
+			this.parent.setActiveGui(new GuiGuildSettingsPage1(this.guildId, this.guildName), jda);
 			return;
 		}
 		
 		if(actionId.equals("toggle")) {
 			// Enable/Disable
-			if(leave) {
+			if(this.leave) {
 				settings.leaveMessages = !settings.leaveMessages;
 				if(settings.leaveMessages)
 					this.didEnable = true;
@@ -147,17 +147,17 @@ public class GuiJoinLeaveMessages extends Gui {
 			}
 			
 			this.reinitialize(settings);
-			mgr.setSettings(guildId, settings);
+			mgr.setSettings(this.guildId, settings);
 			this.parent.redrawMessage(jda);
 			return;
 		}
 		
 		if(actionId.equals("message")) {
 			
-			MessageChannel channel = this.parent.getChannel(jda);
+			MessageChannelUnion channel = this.parent.getChannel(jda);
 			
-			if(!(leave ? settings.leaveMessages : settings.joinMessages)) {
-				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("Enable " + keywordl + " messages first!"), 3);
+			if(!(this.leave ? settings.leaveMessages : settings.joinMessages)) {
+				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("Enable " + this.keywordl + " messages first!"), 3);
 				return;
 			}
 			
@@ -166,11 +166,10 @@ public class GuiJoinLeaveMessages extends Gui {
 				this.bonziReference.eventWaiter;
 			long owner = this.parent.ownerId;
 			EmbedBuilder eb = BonziUtils.quickEmbed(
-					"What should the " + keywordl + " message be?",
+					"What should the " + this.keywordl + " message be?",
 					"Feel free to attach an image too!", Color.orange);
 			eb.addField("Use these variables to spruce it up!",
-				  "`(user)` - The user's name without numbers.\n"
-				+ "`(tag)` - The user's name and numbers.\n"
+				  "`(user)` - The user's name.\n"
 				+ "`(server)` - The server's name.\n"
 				+ "`(members)` - The member count.\n"
 				+ "`(date)` - The current date.\n"
@@ -184,14 +183,14 @@ public class GuiJoinLeaveMessages extends Gui {
 						if(text.length() + aUrl.length() < Message.MAX_CONTENT_LENGTH)
 							text = text + "\n" + aUrl;
 					}
-					if(leave)
+					if(this.leave)
 						settings.leaveMessage = text;
 					else settings.joinMessage = text;
 					this.setMessage = true;
 					
 					sent.delete().queue();
 					message.delete().queue();
-					mgr.setSettings(guildId, settings);
+					mgr.setSettings(this.guildId, settings);
 					this.parent.redrawMessage(message.getJDA());
 					return;
 				});
@@ -202,28 +201,28 @@ public class GuiJoinLeaveMessages extends Gui {
 		
 		if(actionId.equals("channel")) {
 			
-			MessageChannel channel = this.parent.getChannel(jda);
+			MessageChannelUnion channel = this.parent.getChannel(jda);
 			
-			if(!(leave ? settings.leaveMessages : settings.joinMessages)) {
-				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("Enable " + keywordl + " messages first!"), 3);
+			if(!(this.leave ? settings.leaveMessages : settings.joinMessages)) {
+				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("Enable " + this.keywordl + " messages first!"), 3);
 				return;
 			}
 			
 			EventWaiterManager waiter = this.bonziReference.eventWaiter;
 			long owner = this.parent.ownerId;
 			EmbedBuilder eb = BonziUtils.quickEmbed("Mention a channel...",
-					"This will be where " + keywordl + " messages will be sent to!", Color.orange);
+					"This will be where " + this.keywordl + " messages will be sent to!", Color.orange);
 			channel.sendMessageEmbeds(eb.build()).queue(sent -> {
 				waiter.waitForArgument(owner, new TextChannelArg(""), _textChannel -> {
 					TextChannel tc = (TextChannel)_textChannel;
 					long tcId = tc.getIdLong();
-					if(leave)
+					if(this.leave)
 						settings.leaveMessageChannel = tcId;
 					else settings.joinMessageChannel = tcId;
 					this.setChannel = true;
 					
 					sent.delete().queue();
-					mgr.setSettings(guildId, settings);
+					mgr.setSettings(this.guildId, settings);
 					this.parent.redrawMessage(tc.getJDA());
 					return;
 				});
@@ -233,20 +232,20 @@ public class GuiJoinLeaveMessages extends Gui {
 		
 		if(actionId.equals("embed")) {
 			
-			MessageChannel channel = this.parent.getChannel(jda);
+			MessageChannelUnion channel = this.parent.getChannel(jda);
 			
-			if(!(leave ? settings.leaveMessages : settings.joinMessages)) {
-				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("Enable " + keywordl + " messages first!"), 3);
+			if(!(this.leave ? settings.leaveMessages : settings.joinMessages)) {
+				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("Enable " + this.keywordl + " messages first!"), 3);
 				return;
 			}
 			
-			if(leave)
+			if(this.leave)
 				settings.leaveMessageIsEmbed = !settings.leaveMessageIsEmbed;
 			else
 				settings.joinMessageIsEmbed = !settings.joinMessageIsEmbed;
 			
 			this.reinitialize(settings);
-			mgr.setSettings(guildId, settings);
+			mgr.setSettings(this.guildId, settings);
 			this.parent.redrawMessage(jda);
 			return;
 		}

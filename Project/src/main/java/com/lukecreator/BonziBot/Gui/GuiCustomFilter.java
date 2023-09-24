@@ -15,8 +15,8 @@ import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiCustomFilter extends Gui {
 	
@@ -39,7 +39,7 @@ public class GuiCustomFilter extends Gui {
 	@Override
 	public void initialize(JDA jda) {
 		GuildSettings settings = this.bonziReference
-				.guildSettings.getSettings(guildId);
+				.guildSettings.getSettings(this.guildId);
 		List<String> customFilter = settings.customFilter;
 		this.reinitialize(customFilter);
 	}
@@ -60,7 +60,7 @@ public class GuiCustomFilter extends Gui {
 	public Object draw(JDA jda) {
 		BonziBot bb = this.bonziReference;
 		GuildSettings settings = bb
-			.guildSettings.getSettings(guildId);
+			.guildSettings.getSettings(this.guildId);
 		List<String> customFilter = settings.customFilter;
 		
 		EmbedBuilder menu = BonziUtils.quickEmbed
@@ -97,7 +97,7 @@ public class GuiCustomFilter extends Gui {
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		GuildSettingsManager gsm = this.bonziReference.guildSettings;
 		EventWaiterManager waiter = this.bonziReference.eventWaiter;
-		GuildSettings settings = gsm.getSettings(guildId);
+		GuildSettings settings = gsm.getSettings(this.guildId);
 		List<String> customFilter = settings.customFilter;
 		
 		if(this.deleteMode) {
@@ -131,7 +131,7 @@ public class GuiCustomFilter extends Gui {
 			if(actionId.equals("delete")) {
 				customFilter.remove(this.deleteCursor);
 				settings.customFilter = customFilter;
-				gsm.setSettings(guildId, settings);
+				gsm.setSettings(this.guildId, settings);
 				
 				if(customFilter.size() > 0) {
 					if(this.deleteCursor > 0)
@@ -151,7 +151,7 @@ public class GuiCustomFilter extends Gui {
 			}
 			if(actionId.equals("new")) {
 				// Add
-				MessageChannel ch = this.parent.getChannel(jda);
+				MessageChannelUnion ch = this.parent.getChannel(jda);
 				if(customFilter.size() > MAX_FILTER_COUNT) {
 					ch.sendMessageEmbeds(BonziUtils.failureEmbed(
 						"You can only have " + MAX_FILTER_COUNT + " items in your custom filter!",
@@ -178,7 +178,7 @@ public class GuiCustomFilter extends Gui {
 						}
 						customFilter.add(text);
 						settings.customFilter = customFilter;
-						gsm.setSettings(guildId, settings);
+						gsm.setSettings(this.guildId, settings);
 						this.reinitialize(customFilter);
 						this.parent.redrawMessage(message.getJDA());
 					});
@@ -186,7 +186,7 @@ public class GuiCustomFilter extends Gui {
 			}
 			if(actionId.equals("remove")) {
 				// Remove
-				MessageChannel ch = this.parent.getChannel(jda);
+				MessageChannelUnion ch = this.parent.getChannel(jda);
 				if(customFilter.size() < 1) {
 					BonziUtils.sendTempMessage(ch, BonziUtils.failureEmbed("There are no words to remove!"), 3);
 					return;

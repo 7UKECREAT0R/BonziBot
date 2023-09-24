@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import com.lukecreator.BonziBot.BonziBot;
 import com.lukecreator.BonziBot.Data.Modifier;
 
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 /**
@@ -21,6 +21,6 @@ public interface MessageHandler {
 	public void handleGuildMessage(BonziBot bb, MessageReceivedEvent e, Modifier[] modifiers);
 	public void handlePrivateMessage(BonziBot bb, MessageReceivedEvent e);
 	
-	public boolean appliesInChannel(MessageChannel channel);
+	public boolean appliesInChannel(MessageChannelUnion channel);
 	public boolean appliesInModifiers(Modifier[] modifiers);
 }

@@ -51,13 +51,14 @@ public class DropdownItem {
 	
 	/**
 	 * Convert this DropdownItem to a JDA supported format.
-	 * Automatically selects if internally cached as selected.
+	 * Automatically selects if internally cached as selected
 	 * @return
 	 */
 	public SelectOption toDiscord() {
 		SelectOption option = SelectOption.of(this.text, this.id)
 			.withDescription(this.description)
 			.withDefault(this.selected);
+		
 		if(this.emoji != null)
 			option = option.withEmoji(this.emoji.toEmoji());
 		

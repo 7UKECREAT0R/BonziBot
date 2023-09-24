@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 public class LogEntryNicknameChange extends LogEntry {
 	
@@ -39,12 +39,12 @@ public class LogEntryNicknameChange extends LogEntry {
 		input.setTitle("Nickname Changed");
 		input.setDescription("User: <@" + this.user + ">\n");
 		
-		String old = (oldNickname == null ? defaultName : oldNickname).replace("`", "\\`");
-		String now = (newNickname == null ? defaultName : newNickname).replace("`", "\\`");
+		String old = (this.oldNickname == null ? this.defaultName : this.oldNickname).replace("`", "\\`");
+		String now = (this.newNickname == null ? this.defaultName : this.newNickname).replace("`", "\\`");
 		String change = "`" + old + "` ➜ `" + now + "`";
 		
 		input.addField("Change:", change, false);
-		input.addField("Changed by:", "<@" + changer + '>', false);
+		input.addField("Changed by:", "<@" + this.changer + '>', false);
 		
 		return input.build();
 	}
@@ -86,7 +86,7 @@ public class LogEntryNicknameChange extends LogEntry {
 	}
 
 	@Override
-	public void performActionUndo(BonziBot bb, ButtonClickEvent event) {
+	public void performActionUndo(BonziBot bb, ButtonInteractionEvent event) {
 		Guild guild = event.getGuild();
 		Member target = guild.getMemberById(this.user);
 		
@@ -94,11 +94,11 @@ public class LogEntryNicknameChange extends LogEntry {
 			.reason(Credible.create(this.user))
 			.queue(null, fail -> {});
 		
-		setOriginalFooter(event, "Undone by " + event.getUser().getAsTag());
+		setOriginalFooter(event, "Undone by " + event.getUser().getName());
 	}
 
 	@Override
-	public void performActionWarn(BonziBot bb, ButtonClickEvent event) {
+	public void performActionWarn(BonziBot bb, ButtonInteractionEvent event) {
 		String effectiveNickname = this.newNickname == null ? this.defaultName : this.newNickname;
 		String warnFor = "Setting nickname to \"" + effectiveNickname + "\"";
 		
@@ -107,21 +107,21 @@ public class LogEntryNicknameChange extends LogEntry {
 		UserAccount account = bb.accounts.getUserAccount(user);
 
 		warnUser(account, user, guild, warnFor);
-		setOriginalFooter(event, "Warned by " + event.getUser().getAsTag());
+		setOriginalFooter(event, "Warned by " + event.getUser().getName());
 	}
 
 	@Override
-	public void performActionMute(BonziBot bb, ButtonClickEvent event) {
+	public void performActionMute(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 
 	@Override
-	public void performActionKick(BonziBot bb, ButtonClickEvent event) {
+	public void performActionKick(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 
 	@Override
-	public void performActionBan(BonziBot bb, ButtonClickEvent event) {
+	public void performActionBan(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 

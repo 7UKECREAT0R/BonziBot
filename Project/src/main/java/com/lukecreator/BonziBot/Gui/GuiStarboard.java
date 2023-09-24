@@ -15,8 +15,8 @@ import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiStarboard extends Gui {
 	
@@ -37,7 +37,7 @@ public class GuiStarboard extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		GuildSettings settings = this.bonziReference.guildSettings.getSettings(guildId);
+		GuildSettings settings = this.bonziReference.guildSettings.getSettings(this.guildId);
 		this.enabled = settings.starboard != 0l;
 		this.starboardChannel = settings.starboard;
 		this.starboardLimit = settings.starboardLimit;
@@ -47,10 +47,10 @@ public class GuiStarboard extends Gui {
 		this.elements.clear();
 		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬅️"), "return"));
 		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("#️⃣"), "Channel", GuiButton.ButtonColor.BLUE, "channel"));
-		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🔼"), "limitup").asEnabled(enabled));
-		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🔽"), "limitdown").asEnabled(enabled));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🔼"), "limitup").asEnabled(this.enabled));
+		this.elements.add(GuiButton.singleEmoji(GenericEmoji.fromEmoji("🔽"), "limitdown").asEnabled(this.enabled));
 		this.elements.add(new GuiNewline());
-		this.elements.add(new GuiButton("Disable", GuiButton.ButtonColor.RED, "disable").asEnabled(enabled));
+		this.elements.add(new GuiButton("Disable", GuiButton.ButtonColor.RED, "disable").asEnabled(this.enabled));
 	}
 	
 	@Override
@@ -61,11 +61,11 @@ public class GuiStarboard extends Gui {
 			.setFooter("Add a message to the starboard every time enough users react to it with ⭐!");
 		
 		String channelDesc = "Enable starboard by setting the channel starred messages go into.";
-		if(enabled)
+		if(this.enabled)
 			channelDesc = "<#" + this.starboardChannel + ">\n" + channelDesc;
 		eb.addField("#️⃣ Channel", channelDesc, false);
 		
-		if(enabled)
+		if(this.enabled)
 			eb.addField("🔼🔽 Limit", "Current limit: `" + this.starboardLimit + "`\nNumber of reactions needed to star a message.", false);
 		return eb.build();
 	}
@@ -73,17 +73,17 @@ public class GuiStarboard extends Gui {
 	@Override
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		GuildSettingsManager gsm = this.bonziReference.guildSettings;
-		GuildSettings settings = gsm.getSettings(guildId);
+		GuildSettings settings = gsm.getSettings(this.guildId);
 		
 		if(actionId.equals("return")) {
-			this.parent.setActiveGui(new GuiGuildSettingsPage3(guildId, guildName), jda);
+			this.parent.setActiveGui(new GuiGuildSettingsPage3(this.guildId, this.guildName), jda);
 			return;
 		}
 		
 		if(actionId.equals("channel")) {
 			CommandArg tca = new TextChannelArg("");
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
-			MessageChannel mc = this.parent.getChannel(jda);
+			MessageChannelUnion mc = this.parent.getChannel(jda);
 			mc.sendMessageEmbeds(BonziUtils.quickEmbed(this.enabled ? "Changing starboard channel..." : "Enabling starboard...",
 				"Send the channel you want starred messages to magically appear in!", Color.gray).build()).queue(sent -> {
 				ewm.waitForArgument(this.parent.ownerId, tca, object -> {
@@ -104,7 +104,7 @@ public class GuiStarboard extends Gui {
 			if(this.starboardLimit > LIMIT_MAX)
 				this.starboardLimit = LIMIT_MIN;
 			settings.starboardLimit = this.starboardLimit;
-			gsm.setSettings(guildId, settings);
+			gsm.setSettings(this.guildId, settings);
 			this.parent.redrawMessage(jda);
 		}
 		if(actionId.equals("limitdown")) {
@@ -112,14 +112,14 @@ public class GuiStarboard extends Gui {
 			if(this.starboardLimit < LIMIT_MIN)
 				this.starboardLimit = LIMIT_MAX;
 			settings.starboardLimit = this.starboardLimit;
-			gsm.setSettings(guildId, settings);
+			gsm.setSettings(this.guildId, settings);
 			this.parent.redrawMessage(jda);
 		}
 		if(actionId.equals("disable")) {
 			this.enabled = false;
 			this.starboardChannel = 0l;
 			settings.starboard = 0l;
-			gsm.setSettings(guildId, settings);
+			gsm.setSettings(this.guildId, settings);
 			this.reinitialize();
 			this.parent.redrawMessage(jda);
 		}

@@ -5,10 +5,10 @@ import com.lukecreator.BonziBot.Data.Modifier;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class PremiumOnlyMessageHandler implements MessageHandler {
@@ -35,7 +35,7 @@ public class PremiumOnlyMessageHandler implements MessageHandler {
 	}
 
 	@Override
-	public boolean appliesInChannel(MessageChannel channel) {
+	public boolean appliesInChannel(MessageChannelUnion channel) {
 		return channel.getType() == ChannelType.TEXT;
 	}
 

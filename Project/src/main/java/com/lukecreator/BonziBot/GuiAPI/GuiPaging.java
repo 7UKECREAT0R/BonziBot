@@ -12,25 +12,25 @@ import net.dv8tion.jda.api.JDA;
 public class GuiPaging extends Gui {
 	
 	public int getMinPage() {
-		return minPage;
+		return this.minPage;
 	}
 	public int getMaxPage() {
-		return maxPage;
+		return this.maxPage;
 	}
 	public int getPage() {
-		return currentPage;
+		return this.currentPage;
 	}
 	public boolean getPagingEnabled() {
-		return pagingEnabled;
+		return this.pagingEnabled;
 	}
 	public String getPageString() {
-		return this.currentPage + "/" + this.maxPage;
+		return this.currentPage + " / " + this.maxPage;
 	}
 	
 	protected boolean pagingEnabled = true;
 	protected int minPage = 1;
 	protected int maxPage = 10;
-	protected int currentPage = minPage;
+	protected int currentPage = this.minPage;
 	
 	public GuiPaging() {}
 	
@@ -50,14 +50,14 @@ public class GuiPaging extends Gui {
 		boolean right = actionId.equals("pageright");
 		
 		if(left) {
-			if(--currentPage < minPage) {
-				currentPage = minPage;
+			if(--this.currentPage < this.minPage) {
+				this.currentPage = this.minPage;
 				return;
 			}
 		}
 		if(right) {
-			if(++currentPage > maxPage) {
-				currentPage = maxPage;
+			if(++this.currentPage > this.maxPage) {
+				this.currentPage = this.maxPage;
 				return;
 			}
 		}
@@ -67,7 +67,7 @@ public class GuiPaging extends Gui {
 			button0.asEnabled(this.currentPage > this.minPage);
 			GuiButton button1 = (GuiButton)this.elements.get(1);
 			button1.asEnabled(this.currentPage < this.maxPage);
-			parent.redrawMessage(jda);
+			this.parent.redrawMessage(jda);
 		}
 	}
 }

@@ -24,10 +24,11 @@ import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptPackage;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 /**
@@ -171,17 +172,20 @@ public class DefaultMessageHandler implements MessageHandler {
 					String content = msg.getContentRaw();
 					if(method.isInText(content)) {
 						ScriptExecutor executor = script.code.createExecutor();
-						TextChannel tc = (TextChannel)e.getChannel();
-						int member = executor.memory.createObjectReference(e.getMember());
-						int channel = executor.memory.createObjectReference((GuildChannel)tc);
-						executor.memory.writeExistingObjRef("member", member);
-						executor.memory.writeExistingObjRef("channel", channel);
+						MessageChannelUnion tc = e.getChannel();
 						
-						ScriptContextInfo context = new ScriptContextInfo(content, null, null, null, msg, tc,
-							e.getJDA(), bb, e.getAuthor(), e.getMember(), e.getGuild(), settings);
-						
-						executor.run(context);
-						return;
+						if(tc.getType() == ChannelType.TEXT) {
+							int member = executor.memory.createObjectReference(e.getMember());
+							int channel = executor.memory.createObjectReference((GuildChannel)tc);
+							executor.memory.writeExistingObjRef("member", member);
+							executor.memory.writeExistingObjRef("channel", channel);
+							
+							ScriptContextInfo context = new ScriptContextInfo(content, null, null, null, msg, tc.asTextChannel(),
+								e.getJDA(), bb, e.getAuthor(), e.getMember(), e.getGuild(), settings);
+							
+							executor.run(context);
+							return;
+						}
 					}
 				}
 			}
@@ -259,7 +263,7 @@ public class DefaultMessageHandler implements MessageHandler {
 		
 		if(bb.commands.onTextInput(info.setBonziBot(bb)))
 			return;
-		else {
+		else if(settings.levellingEnabled) {
 			boolean xp = true;
 			for(Modifier mod1: modifiers)
 				xp &= (mod1 != Modifier.NO_XP);
@@ -292,7 +296,7 @@ public class DefaultMessageHandler implements MessageHandler {
 	}
 	
 	@Override
-	public boolean appliesInChannel(MessageChannel channel) {
+	public boolean appliesInChannel(MessageChannelUnion channel) {
 		return true;
 	}
 	@Override

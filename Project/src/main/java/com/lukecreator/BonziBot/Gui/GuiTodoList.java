@@ -15,7 +15,7 @@ import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 /**
  * Add/remove items from a to-do list.
@@ -46,11 +46,11 @@ public class GuiTodoList extends GuiPaging {
 		this.elements.clear();
 		super.initialize(jda);
 		this.elements.add(new GuiNewline());
-		this.elements.add(new GuiButton("Finished", GuiButton.ButtonColor.GREEN, "done").asEnabled(folder.size() > 0 && this.currentPage == 1));
-		this.elements.add(new GuiButton("Push Down", GuiButton.ButtonColor.GRAY, "push").asEnabled(folder.size() > 0));
+		this.elements.add(new GuiButton("Finished", GuiButton.ButtonColor.GREEN, "done").asEnabled(this.folder.size() > 0 && this.currentPage == 1));
+		this.elements.add(new GuiButton("Push Down", GuiButton.ButtonColor.GRAY, "push").asEnabled(this.folder.size() > 0));
 		this.elements.add(new GuiNewline());
 		
-		this.elements.add(new GuiButton("Add Item", GuiButton.ButtonColor.BLUE, "add").asEnabled(folder.size() < TodoFolder.MAX_ITEMS));
+		this.elements.add(new GuiButton("Add Item", GuiButton.ButtonColor.BLUE, "add").asEnabled(this.folder.size() < TodoFolder.MAX_ITEMS));
 		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("🖼️"), "Set Icon", GuiButton.ButtonColor.BLUE, "icon"));
 	}
 	
@@ -58,16 +58,16 @@ public class GuiTodoList extends GuiPaging {
 	public Object draw(JDA jda) {
 		EmbedBuilder eb = new EmbedBuilder();
 		eb.setColor(BonziUtils.COLOR_BONZI_PURPLE);
-		eb.setTitle("Todo-List: " + folder.toString());
+		eb.setTitle("Todo-List: " + this.folder.toString());
 		
 		if(this.empty) {
 			eb.setDescription("No to-do items are in this folder yet! Press 'Add Item' to add some stuff to your list!");
 			eb.setFooter("No items... yet");
 		} else {
-			int count = folder.size();
+			int count = this.folder.size();
 			int shown = count > PER_PAGE ? PER_PAGE : count;
 			eb.setDescription("Showing " + shown + "/" + count);
-			TodoItem[] _items = folder.getItems();
+			TodoItem[] _items = this.folder.getItems();
 			TodoItem[] items = new TodoItem[PER_PAGE];
 			int page = this.currentPage - 1;
 			int startIndex = page * PER_PAGE;
@@ -97,34 +97,34 @@ public class GuiTodoList extends GuiPaging {
 	@Override
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		
-		if(actionId.equals("pageleft") && pagingEnabled) {
-			if(--currentPage < minPage)
-				currentPage = minPage;
+		if(actionId.equals("pageleft") && this.pagingEnabled) {
+			if(--this.currentPage < this.minPage)
+				this.currentPage = this.minPage;
 			else {
 				this.reinitialize(jda);
-				parent.redrawMessage(jda);
+				this.parent.redrawMessage(jda);
 			}
 		}
-		if(actionId.equals("pageright") && pagingEnabled) {
-			if(++currentPage > maxPage)
-				currentPage = maxPage;
+		if(actionId.equals("pageright") && this.pagingEnabled) {
+			if(++this.currentPage > this.maxPage)
+				this.currentPage = this.maxPage;
 			else {
 				this.reinitialize(jda);
-				parent.redrawMessage(jda);
+				this.parent.redrawMessage(jda);
 			}
 		}
 		
-		MessageChannel channel = this.parent.getChannel(jda);
+		MessageChannelUnion channel = this.parent.getChannel(jda);
 		
 		if(actionId.equals("done")) {
-			if(folder.size() < 1) {
+			if(this.folder.size() < 1) {
 				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("No items to be done with."), 3);
 				return;
 			}
 			
-			folder.complete();
+			this.folder.complete();
 			
-			int count = folder.size();
+			int count = this.folder.size();
 			if(count < 1)
 				this.empty = true;
 			
@@ -136,7 +136,7 @@ public class GuiTodoList extends GuiPaging {
 			
 			TodoList list = this.bonziReference
 				.todolists.getTodoList(executorId);
-			list.setFolder(folder);
+			list.setFolder(this.folder);
 			this.bonziReference.todolists
 				.setTodoList(executorId, list);
 			
@@ -145,16 +145,16 @@ public class GuiTodoList extends GuiPaging {
 			return;
 		}
 		if(actionId.equals("push")) {
-			if(folder.size() < 1) {
+			if(this.folder.size() < 1) {
 				BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("No items to push down."), 3);
 				return;
 			}
 			
-			folder.shiftUp();
+			this.folder.shiftUp();
 			
 			TodoList list = this.bonziReference
 				.todolists.getTodoList(executorId);
-			list.setFolder(folder);
+			list.setFolder(this.folder);
 			this.bonziReference.todolists
 				.setTodoList(executorId, list);
 			

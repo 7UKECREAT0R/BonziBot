@@ -10,10 +10,10 @@ import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 public class LogEntryTextChannelRemove extends LogEntry {
 	
@@ -39,13 +39,13 @@ public class LogEntryTextChannelRemove extends LogEntry {
 
 	@Override
 	public void loadData(Object dataStructure, BonziBot bb, Consumer<LogEntry> _success, Consumer<Throwable> _failure) {
-		if(!(dataStructure instanceof TextChannelDeleteEvent))
+		if(!(dataStructure instanceof ChannelDeleteEvent))
 			return;
 		
-		TextChannelDeleteEvent event = (TextChannelDeleteEvent)dataStructure;
+		ChannelDeleteEvent event = (ChannelDeleteEvent)dataStructure;
 		Guild guild = event.getGuild();
 		
-		TextChannel tc = event.getChannel();
+		TextChannel tc = (TextChannel)event.getChannel();
 		this.name = tc.getName();
 		this.topic = tc.getTopic();
 		this.position = tc.getPositionRaw();
@@ -73,7 +73,7 @@ public class LogEntryTextChannelRemove extends LogEntry {
 	}
 
 	@Override
-	public void performActionUndo(BonziBot bb, ButtonClickEvent event) {
+	public void performActionUndo(BonziBot bb, ButtonInteractionEvent event) {
 		Guild guild = event.getGuild();
 		
 		guild.createTextChannel(this.name)
@@ -82,26 +82,26 @@ public class LogEntryTextChannelRemove extends LogEntry {
 			.reason(Credible.create(event.getUser().getIdLong()))
 			.queue();
 		
-		setOriginalFooter(event, "Undone by " + event.getUser().getAsTag() + ". Messages could not be restored.");
+		setOriginalFooter(event, "Undone by " + event.getUser().getName() + ". Messages could not be restored.");
 	}
 
 	@Override
-	public void performActionWarn(BonziBot bb, ButtonClickEvent event) {
+	public void performActionWarn(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 
 	@Override
-	public void performActionMute(BonziBot bb, ButtonClickEvent event) {
+	public void performActionMute(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 
 	@Override
-	public void performActionKick(BonziBot bb, ButtonClickEvent event) {
+	public void performActionKick(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 
 	@Override
-	public void performActionBan(BonziBot bb, ButtonClickEvent event) {
+	public void performActionBan(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 

@@ -13,8 +13,8 @@ import com.lukecreator.BonziBot.Managers.EventWaiterManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiCalculator extends Gui {
 	
@@ -93,7 +93,7 @@ public class GuiCalculator extends Gui {
 		if(actionId.equals("friends")) {
 			if(!this.inGuild)
 				return;
-			MessageChannel mc = this.parent.getChannel(jda);
+			MessageChannelUnion mc = this.parent.getChannel(jda);
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
 			
 			mc.sendMessageEmbeds(BonziUtils.quickEmbed("Mention somebody!", "Add your bros to the calculator session!",

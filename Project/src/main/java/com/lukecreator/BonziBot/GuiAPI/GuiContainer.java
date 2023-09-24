@@ -11,16 +11,19 @@ import com.lukecreator.BonziBot.BonziUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.PrivateChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.requests.restaction.MessageEditAction;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 /**
  * Base Gui class. Represents a message containing a Gui.
@@ -76,7 +79,10 @@ public class GuiContainer {
 		this.userDmId = pc.getUser().getIdLong();
 		this.ownerId = pc.getUser().getIdLong();
 	}
-	private MessageAction components(MessageAction in) {
+	private MessageCreateAction components(MessageCreateAction in) {
+		return BonziUtils.appendComponents(in, this.gui);
+	}
+	private MessageEditAction components(MessageEditAction in) {
 		return BonziUtils.appendComponents(in, this.gui);
 	}
 	
@@ -119,8 +125,12 @@ public class GuiContainer {
 				this.components(tc.sendMessageEmbeds(((EmbedBuilder)drawn).build())).queue(success);
 			if(drawn instanceof String)
 				this.components(tc.sendMessage((String)drawn)).queue(success);
-			if(drawn instanceof File)
-				this.components(tc.sendFile((File)drawn)).queue(fileSuccess);
+			if(drawn instanceof File) {
+				File drawnFile = (File)drawn;
+				FileUpload upload = FileUpload.fromData(drawnFile,
+					drawnFile.toPath().getFileName().toString());
+				this.components(tc.sendFiles(upload)).queue(fileSuccess);
+			}
 		} else {
 			
 			User user = jda.getUserById(this.userDmId);
@@ -136,8 +146,12 @@ public class GuiContainer {
 							this.components(pc.sendMessageEmbeds(((EmbedBuilder)drawn).build())).queue(success);
 						if(drawn instanceof String)
 							this.components(pc.sendMessage((String)drawn)).queue(success);
-						if(drawn instanceof File)
-							this.components(pc.sendFile((File)drawn)).queue(fileSuccess);
+						if(drawn instanceof File) {
+							File drawnFile = (File)drawn;
+							FileUpload upload = FileUpload.fromData(drawnFile,
+								drawnFile.toPath().getFileName().toString());
+							this.components(pc.sendFiles(upload)).queue(fileSuccess);
+						}
 					} else {
 						u.openPrivateChannel().queue(p -> {
 							long privateChannelId = p.getIdLong();
@@ -148,8 +162,12 @@ public class GuiContainer {
 								this.components(p.sendMessageEmbeds(((EmbedBuilder)drawn).build())).queue(success);
 							if(drawn instanceof String)
 								this.components(p.sendMessage((String)drawn)).queue(success);
-							if(drawn instanceof File)
-								this.components(p.sendFile((File)drawn)).queue(fileSuccess);
+							if(drawn instanceof File) {
+								File drawnFile = (File)drawn;
+								FileUpload upload = FileUpload.fromData(drawnFile,
+									drawnFile.toPath().getFileName().toString());
+								this.components(p.sendFiles(upload)).queue(fileSuccess);
+							}
 						});
 					}
 				});
@@ -164,8 +182,12 @@ public class GuiContainer {
 						this.components(pc.sendMessageEmbeds(((EmbedBuilder)drawn).build())).queue(success);
 					if(drawn instanceof String)
 						this.components(pc.sendMessage((String)drawn)).queue(success);
-					if(drawn instanceof File)
-						this.components(pc.sendFile((File)drawn)).queue(fileSuccess);
+					if(drawn instanceof File) {
+						File drawnFile = (File)drawn;
+						FileUpload upload = FileUpload.fromData(drawnFile,
+							drawnFile.toPath().getFileName().toString());
+						this.components(pc.sendFiles(upload)).queue(fileSuccess);
+					}
 				} else {
 					user.openPrivateChannel().queue(p -> {
 						long privateChannelId = p.getIdLong();
@@ -176,8 +198,12 @@ public class GuiContainer {
 							this.components(p.sendMessageEmbeds(((EmbedBuilder)drawn).build())).queue(success);
 						if(drawn instanceof String)
 							this.components(p.sendMessage((String)drawn)).queue(success);
-						if(drawn instanceof File)
-							this.components(p.sendFile((File)drawn)).queue(fileSuccess);
+						if(drawn instanceof File) {
+							File drawnFile = (File)drawn;
+							FileUpload upload = FileUpload.fromData(drawnFile,
+								drawnFile.toPath().getFileName().toString());
+							this.components(p.sendFiles(upload)).queue(fileSuccess);
+						}
 					});
 				}
 			}
@@ -246,132 +272,11 @@ public class GuiContainer {
 			}
 		}
 	}
-	/**
-	 * im sorry for cursing your eyes
-	 */
-	/*public void resetAllReactions(JDA jda) {
-		if(!hasSentMessage) return;
-		if(messageId == -1) return;
-		
-		if(isGuild) {
-			Guild g = jda.getGuildById(guildId);
-			TextChannel tc = g.getTextChannelById(channelId);
-			tc.retrieveMessageById(messageId).queue(m -> {
-				m.clearReactions().queue(v -> {
-					for(GuiButton gb: gui.buttons) {
-						gb.icon.react(m);
-					}
-				});
-			});
-		} else {
-			User sender = jda.getUserById(userDmId);
-			if(sender == null) {
-				jda.retrieveUserById(userDmId).queue(u -> {
-					if(u.hasPrivateChannel() && BonziUtils.userPrivateChannels.containsKey(userDmId)) {
-						long cId = BonziUtils.userPrivateChannels.get(userDmId);
-						PrivateChannel pc = u.getJDA().getPrivateChannelById(cId);
-						pc.retrieveMessageById(messageId).queue(m -> {
-							for(MessageReaction r: m.getReactions())
-								if(r.isSelf()) r.removeReaction().queue();
-							for(GuiButton gb: gui.buttons)
-								gb.icon.react(m);
-						});
-					} else {
-						u.openPrivateChannel().queue(p -> {
-							long privateChannelId = p.getIdLong();
-							BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
-							p.retrieveMessageById(messageId).queue(m -> {
-								for(MessageReaction r: m.getReactions())
-									if(r.isSelf()) r.removeReaction().queue();
-								for(GuiButton gb: gui.buttons)
-									gb.icon.react(m);
-							});
-						});
-					}
-				});
-			} else {
-				if(sender.hasPrivateChannel() && BonziUtils.userPrivateChannels.containsKey(userDmId)) {
-					long cId = BonziUtils.userPrivateChannels.get(userDmId);
-					PrivateChannel pc = sender.getJDA().getPrivateChannelById(cId);
-					pc.retrieveMessageById(messageId).queue(m -> {
-						for(MessageReaction r: m.getReactions())
-							if(r.isSelf()) r.removeReaction().queue();
-						for(GuiButton gb: gui.buttons)
-							gb.icon.react(m);
-					});
-				} else {
-					sender.openPrivateChannel().queue(p -> {
-						long privateChannelId = p.getIdLong();
-						BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
-						p.retrieveMessageById(messageId).queue(m -> {
-							for(MessageReaction r: m.getReactions())
-								if(r.isSelf()) r.removeReaction().queue();
-							for(GuiButton gb: gui.buttons)
-								gb.icon.react(m);
-						});
-					});
-				}
-			}
-		}
-	}
-	public void removeAllReactions(JDA jda) {
-		if(!hasSentMessage) return;
-		if(messageId == -1) return;
-		
-		if(isGuild) {
-			Guild g = jda.getGuildById(guildId);
-			TextChannel tc = g.getTextChannelById(channelId);
-			tc.retrieveMessageById(messageId).queue(m -> {
-				m.clearReactions().queue();
-			});
-		} else {
-			User sender = jda.getUserById(userDmId);
-			if(sender == null) {
-				jda.retrieveUserById(userDmId).queue(u -> {
-					if(u.hasPrivateChannel() && BonziUtils.userPrivateChannels.containsKey(userDmId)) {
-						long cId = BonziUtils.userPrivateChannels.get(userDmId);
-						PrivateChannel pc = u.getJDA().getPrivateChannelById(cId);
-						pc.retrieveMessageById(messageId).queue(m -> {
-							for(MessageReaction r: m.getReactions())
-								if(r.isSelf()) r.removeReaction().queue();
-						});
-					} else {
-						u.openPrivateChannel().queue(p -> {
-							long privateChannelId = p.getIdLong();
-							BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
-							p.retrieveMessageById(messageId).queue(m -> {
-								for(MessageReaction r: m.getReactions())
-									if(r.isSelf()) r.removeReaction().queue();
-							});
-						});
-					}
-				});
-			} else {
-				if(sender.hasPrivateChannel() && BonziUtils.userPrivateChannels.containsKey(userDmId)) {
-					long cId = BonziUtils.userPrivateChannels.get(userDmId);
-					PrivateChannel pc = sender.getJDA().getPrivateChannelById(cId);
-					pc.retrieveMessageById(messageId).queue(m -> {
-						for(MessageReaction r: m.getReactions())
-							if(r.isSelf()) r.removeReaction().queue();
-					});
-				} else {
-					sender.openPrivateChannel().queue(p -> {
-						long privateChannelId = p.getIdLong();
-						BonziUtils.userPrivateChannels.put(userDmId, privateChannelId);
-						p.retrieveMessageById(messageId).queue(m -> {
-							for(MessageReaction r: m.getReactions())
-								if(r.isSelf()) r.removeReaction().queue();
-						});
-					});
-				}
-			}
-		}
-	}*/
 	
-	public MessageChannel getChannel(JDA jda) {
+	public MessageChannelUnion getChannel(JDA jda) {
 		if(this.isGuild) {
 			Guild g = jda.getGuildById(this.guildId);
-			return g.getTextChannelById(this.channelId);
+			return (MessageChannelUnion)g.getTextChannelById(this.channelId);
 		}
 		
 		// dm and message has been sent there so the
@@ -379,7 +284,7 @@ public class GuiContainer {
 		User u = jda.getUserById(this.userDmId);
 		PrivateChannel cached = BonziUtils
 			.getCachedPrivateChannel(u);
-		return cached; // rarely could be null
+		return (MessageChannelUnion)cached; // rarely could be null
 	}
 	public void retrieveMessage(JDA jda, Consumer<Message> receive) {
 		if(this.isGuild) {
@@ -464,7 +369,8 @@ public class GuiContainer {
 		event.deferEdit().queue();
 		this.gui.receiveActionButton(event.getComponentId(), event.getUser().getIdLong(), event.getJDA());
 	}
-	public void onAction(SelectMenuInteractionEvent event) {
+	
+	public void onAction(StringSelectInteractionEvent event) {
 		if(!this.enabled) {
 			event.reply(":x: `This GUI has been disabled.`").setEphemeral(true).queue();
 			return;
@@ -481,6 +387,8 @@ public class GuiContainer {
 		}
 		
 		event.deferEdit().queue();
-		this.gui.receiveActionSelect(event.getComponentId(), event.getSelectedOptions(), event.getUser().getIdLong(), event.getJDA());
+		
+		List<SelectOption> selected = event.getSelectedOptions();
+		this.gui.receiveActionSelect(event.getComponentId(), selected, event.getUser().getIdLong(), event.getJDA());
 	}
 }

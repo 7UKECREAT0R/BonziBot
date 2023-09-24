@@ -11,8 +11,9 @@ import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.guild.GuildBanEvent;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 public class LogEntryBan extends LogEntry {
 	
@@ -34,7 +35,7 @@ public class LogEntryBan extends LogEntry {
 			return null;
 		
 		input.setTitle("User was Banned.");
-		if(reason == null)
+		if(this.reason == null)
 			input.setDescription("Name: <@" + this.bannedId + '>');
 		else {
 			input.setDescription(
@@ -78,28 +79,28 @@ public class LogEntryBan extends LogEntry {
 	}
 
 	@Override
-	public void performActionUndo(BonziBot bb, ButtonClickEvent event) {
+	public void performActionUndo(BonziBot bb, ButtonInteractionEvent event) {
 		event.getGuild()
-			.unban(String.valueOf(this.bannedId))
+			.unban(UserSnowflake.fromId(this.bannedId))
 			.reason(Credible.create(event.getUser()))
 			.queue(null, fail -> {});
 		
-		LogEntry.setOriginalFooter(event, "Undone by " + event.getUser().getAsTag());
+		LogEntry.setOriginalFooter(event, "Undone by " + event.getUser().getName());
 	}
 	@Override
-	public void performActionWarn(BonziBot bb, ButtonClickEvent event) {
+	public void performActionWarn(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionMute(BonziBot bb, ButtonClickEvent event) {
+	public void performActionMute(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionKick(BonziBot bb, ButtonClickEvent event) {
+	public void performActionKick(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 	@Override
-	public void performActionBan(BonziBot bb, ButtonClickEvent event) {
+	public void performActionBan(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 }

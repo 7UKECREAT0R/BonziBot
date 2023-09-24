@@ -73,7 +73,7 @@ public abstract class Gui {
 	protected BonziBot bonziReference;
 	boolean initialized = false;
 	public boolean wasInitialized() {
-		return initialized;
+		return this.initialized;
 	}
 	public boolean isDisabled() {
 		if(this.parent == null)
@@ -81,8 +81,8 @@ public abstract class Gui {
 		return !this.parent.getEnabled();
 	}
 	public void hiddenInit(JDA jda, Guild g, BonziBot b) {
-		if(elements == null) {
-			elements = new ArrayList<GuiElement>();
+		if(this.elements == null) {
+			this.elements = new ArrayList<GuiElement>();
 		}
 		this.prefixOfLocation = b.guildSettings.getSettings(g).getPrefix();
 		this.bonziReference = b;
@@ -90,8 +90,8 @@ public abstract class Gui {
 		this.initialized = true;
 	}
 	public void hiddenInit(JDA jda, User u, BonziBot b) {
-		if(elements == null) {
-			elements = new ArrayList<GuiElement>();
+		if(this.elements == null) {
+			this.elements = new ArrayList<GuiElement>();
 		}
 		this.prefixOfLocation = Constants.DEFAULT_PREFIX;
 		this.bonziReference = b;
@@ -106,12 +106,12 @@ public abstract class Gui {
 		.build();
 	
 	public Gui(GuiContainer parent, JDA jda, Guild g, BonziBot b) {
-		elements = new ArrayList<GuiElement>();
+		this.elements = new ArrayList<GuiElement>();
 		this.parent = parent;
 		this.hiddenInit(jda, g, b);
 	}
 	public Gui(GuiContainer parent, JDA jda, User u, BonziBot b) {
-		elements = new ArrayList<GuiElement>();
+		this.elements = new ArrayList<GuiElement>();
 		this.parent = parent;
 		this.hiddenInit(jda, u, b);
 	}
@@ -149,7 +149,11 @@ public abstract class Gui {
 	 */
 	public void receiveActionSelect(String actionId, List<SelectOption> selected, long executorId, JDA jda) {
 		
-		List<String> _selectedIds = selected.stream().map(option -> option.getValue()).collect(Collectors.toList());
+		List<String> _selectedIds = selected
+			.stream()
+			.map(option -> option.getValue())
+			.collect(Collectors.toList());
+		
 		String[] selectedIds = (String[])_selectedIds.toArray(new String[_selectedIds.size()]);
 		
 		// Find the correct GuiDropdown.

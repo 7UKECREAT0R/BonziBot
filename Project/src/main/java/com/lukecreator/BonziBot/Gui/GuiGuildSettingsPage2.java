@@ -19,8 +19,8 @@ import com.lukecreator.BonziBot.NoUpload.Constants;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiGuildSettingsPage2 extends Gui {
 	
@@ -131,7 +131,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 		
 		if(actionId.equals("prefix")) {
 			EventWaiterManager ewm = this.bonziReference.eventWaiter;
-			MessageChannel mc = this.parent.getChannel(jda);
+			MessageChannelUnion mc = this.parent.getChannel(jda);
 			mc.sendMessageEmbeds(BonziUtils.quickEmbed("Setting Alternate Prefix...",
 				"Send the new alt-prefix here (max " + Constants.MAX_PREFIX_LENGTH + " characters):", Color.gray).build()).queue(sent -> {
 					long sentId = sent.getIdLong();
@@ -184,7 +184,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 			} else {
 				CommandArg tca = new TextChannelArg("");
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
-				MessageChannel mc = this.parent.getChannel(jda);
+				MessageChannelUnion mc = this.parent.getChannel(jda);
 				mc.sendMessageEmbeds(BonziUtils.quickEmbed("Turning on Ban Appeals...",
 					"Send the channel you want ban appeals to go into for review!\n*Users can only appeal if banned using __Bonzi's ban command__.*", Color.gray).build()).queue(sent -> {
 					ewm.waitForArgument(this.parent.ownerId, tca, object -> {
@@ -210,7 +210,7 @@ public class GuiGuildSettingsPage2 extends Gui {
 				this.parent.redrawMessage(jda);
 			} else {
 				EventWaiterManager ewm = this.bonziReference.eventWaiter;
-				MessageChannel mc = this.parent.getChannel(jda);
+				MessageChannelUnion mc = this.parent.getChannel(jda);
 				mc.sendMessageEmbeds(BonziUtils.quickEmbed("Turning on Ban Messages...",
 					"Users who are banned with __Bonzi's ban command__ will be messaged this.\n"
 					+ "Insert these variables to customize the message:\n"

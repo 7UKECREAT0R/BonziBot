@@ -1,8 +1,10 @@
 package com.lukecreator.BonziBot.Gui;
 
 import java.awt.Color;
+import java.lang.reflect.InvocationTargetException;
 
 import com.lukecreator.BonziBot.BonziUtils;
+import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.TimeSpan;
 import com.lukecreator.BonziBot.CommandAPI.EnumArg;
 import com.lukecreator.BonziBot.CommandAPI.StringArg;
@@ -27,8 +29,8 @@ import com.lukecreator.BonziBot.Script.Model.ScriptStatementCollection;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
@@ -96,10 +98,22 @@ public class GuiNewScript extends Gui {
 			try {
 				return new DropdownItem(descriptor.createNew(), descriptor.name).withDescription(descriptor.desc);
 			} catch (InstantiationException e) {
-				e.printStackTrace();
+				InternalLogger.printError(e);
 				return null;
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				InternalLogger.printError(e);
+				return null;
+			} catch (IllegalArgumentException e) {
+				InternalLogger.printError(e);
+				return null;
+			} catch (InvocationTargetException e) {
+				InternalLogger.printError(e);
+				return null;
+			} catch (NoSuchMethodException e) {
+				InternalLogger.printError(e);
+				return null;
+			} catch (SecurityException e) {
+				InternalLogger.printError(e);
 				return null;
 			}
 		});
@@ -206,7 +220,7 @@ public class GuiNewScript extends Gui {
 			return;
 		}
 		
-		MessageChannel channel = this.parent.getChannel(jda);
+		MessageChannelUnion channel = this.parent.getChannel(jda);
 		EventWaiterManager ewm = this.bonziReference.eventWaiter;
 		long id = this.parent.ownerId;
 		

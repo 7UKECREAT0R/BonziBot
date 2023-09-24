@@ -22,11 +22,11 @@ import com.lukecreator.BonziBot.Managers.GuiManager;
 import com.lukecreator.BonziBot.Managers.UserAccountManager;
 
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.PrivateChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuiProfile extends Gui {
 	
@@ -56,7 +56,7 @@ public class GuiProfile extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		if(self)
+		if(this.self)
 			this.elements.add(new GuiButton(GenericEmoji.fromEmoji("📝"), "Edit Profile", GuiButton.ButtonColor.GRAY, "modify"));
 	}
 	
@@ -64,11 +64,11 @@ public class GuiProfile extends Gui {
 	public Object draw(JDA jda) {
 		
 		UserAccountManager uam = this.bonziReference.accounts;
-		UserAccount account = uam.getUserAccount(userId);
+		UserAccount account = uam.getUserAccount(this.userId);
 		
 		Color favColor = account.favoriteColor;
 		String bgImageUrl = account.backgroundImage;
-		User target = jda.getUserById(userId);
+		User target = jda.getUserById(this.userId);
 		String avatarUrl = target.getEffectiveAvatarUrl();
 		
 		Font nameFont = new Font(FontLoader.BEBAS_FONT, 0, NAME_FONT_SIZE);
@@ -207,11 +207,11 @@ public class GuiProfile extends Gui {
 	@Override
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
 		if(actionId.equals("modify")) {
-			Gui theGui = new GuiEditProfile(userId);
+			Gui theGui = new GuiEditProfile(this.userId);
 			BonziBot bb = this.bonziReference;
 			GuiManager guis = bb.guis;
 			
-			MessageChannel channel = this.parent.getChannel(jda);
+			MessageChannelUnion channel = this.parent.getChannel(jda);
 			ChannelType type = channel.getType();
 			
 			channel.deleteMessageById(this.parent.messageId).queue();

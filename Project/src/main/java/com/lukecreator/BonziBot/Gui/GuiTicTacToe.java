@@ -6,6 +6,7 @@ import com.lukecreator.BonziBot.BonziUtils;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
 import com.lukecreator.BonziBot.GuiAPI.GuiButton;
+import com.lukecreator.BonziBot.GuiAPI.GuiButton.ButtonColor;
 import com.lukecreator.BonziBot.GuiAPI.GuiNewline;
 
 import net.dv8tion.jda.api.JDA;
@@ -58,22 +59,22 @@ public class GuiTicTacToe extends Gui {
 	
 	@Override
 	public void initialize(JDA jda) {
-		this.parent.ownerWhitelist.add(opponentId);
+		this.parent.ownerWhitelist.add(this.opponentId);
 		this.reinitialize();
 	}
 	public void reinitialize() {
 		this.elements.clear();
 		for(int y = 0; y < 3; y++) {
 			for(int x = 0; x < 3; x++) {
-				this.elements.add(buttonForTile(x, y));
+				this.elements.add(this.buttonForTile(x, y));
 			}
 			if(y != 2)
 				this.elements.add(new GuiNewline());
 		}
 	}
 	GuiButton buttonForTile(int x, int y) {
-		Tile tile = grid[x][y];
-		String actionId = encode(x, y);
+		Tile tile = this.grid[x][y];
+		String actionId = this.encode(x, y);
 		
 		GuiButton.ButtonColor color = GuiButton.ButtonColor.GRAY;
 		
@@ -94,14 +95,14 @@ public class GuiTicTacToe extends Gui {
 		}
 		
 		switch(tile) {
-		case NONE:
-			return new GuiButton(" ", color, actionId);
-		case O:
-			return GuiButton.singleEmoji(GenericEmoji.fromEmoji("⭕"), actionId).withColor(color); 
-		case X:
-			return GuiButton.singleEmoji(GenericEmoji.fromEmoji("❌"), actionId).withColor(color); 
-		default:
-			return new GuiButton("error", GuiButton.ButtonColor.RED, actionId);
+			case NONE:
+				return GuiButton.singleEmoji(GenericEmoji.fromEmoji("⬛"), actionId).withColor(ButtonColor.GRAY);
+			case O:
+				return GuiButton.singleEmoji(GenericEmoji.fromEmoji("⭕"), actionId).withColor(color); 
+			case X:
+				return GuiButton.singleEmoji(GenericEmoji.fromEmoji("❌"), actionId).withColor(color); 
+			default:
+				return new GuiButton("error", GuiButton.ButtonColor.RED, actionId);
 		}
 	}
 	
@@ -111,19 +112,19 @@ public class GuiTicTacToe extends Gui {
 			if(this.tie) {
 				return "`The tic-tac-toe ended in a tie.`";
 			} else {
-				return winner + "` won the tic-tac-toe!`";
+				return this.winner + "` won the tic-tac-toe!`";
 			}
 		} else {
-			String a = turn == Turn.OWNER ? user : opponent;
-			String b = turn == Turn.OWNER ? "❌" : "⭕";
+			String a = this.turn == Turn.OWNER ? this.user : this.opponent;
+			String b = this.turn == Turn.OWNER ? "❌" : "⭕";
 			return "" + a + "`'s turn! (" + b + ")`";
 		}
 	}
 	
 	@Override
 	public void onButtonClick(String actionId, long executorId, JDA jda) {
-		if(ended) return;
-		Point clicked = decode(actionId);
+		if(this.ended) return;
+		Point clicked = this.decode(actionId);
 		if(clicked == null)
 			return;
 		int x = clicked.x;
@@ -133,14 +134,14 @@ public class GuiTicTacToe extends Gui {
 		if(y > 2) y = 2;
 		if(y < 0) y = 0;
 		
-		if(grid[x][y] != Tile.NONE)
+		if(this.grid[x][y] != Tile.NONE)
 			return;
 		
-		long allowed = this.turn == Turn.OWNER ? userId : opponentId;
+		long allowed = this.turn == Turn.OWNER ? this.userId : this.opponentId;
 		if(executorId != allowed)
 			return;
 		
-		grid[x][y] = this.turn == Turn.OWNER ? Tile.X : Tile.O;
+		this.grid[x][y] = this.turn == Turn.OWNER ? Tile.X : Tile.O;
 		this.turn = this.turn == Turn.OWNER ? Turn.OPPONENT : Turn.OWNER;
 		
 		this.tryEndGame();
@@ -156,7 +157,7 @@ public class GuiTicTacToe extends Gui {
 		String part = in.substring(3);
 		char a = part.charAt(0);
 		char b = part.charAt(1);
-		return new Point(charToInt(a), charToInt(b));
+		return new Point(this.charToInt(a), this.charToInt(b));
 	}
 	int charToInt(char c) {
 		return (int)(c - '0');
@@ -165,10 +166,10 @@ public class GuiTicTacToe extends Gui {
 	void tryEndGame() {
 		// Horizontal
 		for(int y = 0; y < 3; y++) {
-			if(grid[0][y] == grid[1][y]
-			&& grid[1][y] == grid[2][y]
-			&& grid[0][y] != Tile.NONE) {
-				this.winner = grid[0][y] == Tile.X ? user : opponent;
+			if(this.grid[0][y] == this.grid[1][y]
+			&& this.grid[1][y] == this.grid[2][y]
+			&& this.grid[0][y] != Tile.NONE) {
+				this.winner = this.grid[0][y] == Tile.X ? this.user : this.opponent;
 				this.ended = true;
 				this.tie = false;
 				this.scheme = WinScheme.HORIZONTAL;
@@ -179,10 +180,10 @@ public class GuiTicTacToe extends Gui {
 		
 		// Vertical
 		for(int x = 0; x < 3; x++) {
-			if(grid[x][0] == grid[x][1]
-			&& grid[x][1] == grid[x][2]
-			&& grid[x][0] != Tile.NONE) {
-				this.winner = grid[x][0] == Tile.X ? user : opponent;
+			if(this.grid[x][0] == this.grid[x][1]
+			&& this.grid[x][1] == this.grid[x][2]
+			&& this.grid[x][0] != Tile.NONE) {
+				this.winner = this.grid[x][0] == Tile.X ? this.user : this.opponent;
 				this.ended = true;
 				this.tie = false;
 				this.scheme = WinScheme.VERTICAL;
@@ -192,20 +193,20 @@ public class GuiTicTacToe extends Gui {
 		}
 		
 		// Diagonals
-		if(grid[0][0] == grid[1][1]
-		&& grid[1][1] == grid[2][2]
-		&& grid[0][0] != Tile.NONE) {
-			this.winner = grid[0][0] == Tile.X ? user : opponent;
+		if(this.grid[0][0] == this.grid[1][1]
+		&& this.grid[1][1] == this.grid[2][2]
+		&& this.grid[0][0] != Tile.NONE) {
+			this.winner = this.grid[0][0] == Tile.X ? this.user : this.opponent;
 			this.ended = true;
 			this.tie = false;
 			this.scheme = WinScheme.DIAGONAL_DSC;
 			this.winOffset = 0;
 			return;
 		}
-		if(grid[0][2] == grid[1][1]
-		&& grid[1][1] == grid[2][0]
-		&& grid[0][2] != Tile.NONE) {
-			this.winner = grid[0][2] == Tile.X ? user : opponent;
+		if(this.grid[0][2] == this.grid[1][1]
+		&& this.grid[1][1] == this.grid[2][0]
+		&& this.grid[0][2] != Tile.NONE) {
+			this.winner = this.grid[0][2] == Tile.X ? this.user : this.opponent;
 			this.ended = true;
 			this.tie = false;
 			this.scheme = WinScheme.DIAGONAL_ASC;
@@ -218,7 +219,7 @@ public class GuiTicTacToe extends Gui {
 		esc_tie:
 		for(int x = 0; x < 3; x++) {
 			for(int y = 0; y < 3; y++) {
-				if(grid[x][y] == Tile.NONE) {
+				if(this.grid[x][y] == Tile.NONE) {
 					allUsed = false;
 					break esc_tie;
 				}

@@ -1,7 +1,9 @@
 package com.lukecreator.BonziBot.Gui;
 
 import java.awt.Color;
+import java.lang.reflect.InvocationTargetException;
 
+import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.GuiAPI.DropdownItem;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
@@ -182,9 +184,17 @@ public class GuiScriptEditor extends Gui {
 				});
 				this.parent.setActiveGui(dialog, jda);
 			} catch (InstantiationException e) {
-				e.printStackTrace();
+				InternalLogger.printError(e);
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				InternalLogger.printError(e);
+			} catch (IllegalArgumentException e) {
+				InternalLogger.printError(e);
+			} catch (InvocationTargetException e) {
+				InternalLogger.printError(e);
+			} catch (NoSuchMethodException e) {
+				InternalLogger.printError(e);
+			} catch (SecurityException e) {
+				InternalLogger.printError(e);
 			}
 			
 			return;

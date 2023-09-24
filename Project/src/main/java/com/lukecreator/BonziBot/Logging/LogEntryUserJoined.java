@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 public class LogEntryUserJoined extends LogEntry {
 	
@@ -27,8 +27,8 @@ public class LogEntryUserJoined extends LogEntry {
 	public MessageEmbed toEmbed(EmbedBuilder input) {
 		input.setTitle("User Joined Server");
 		input.setAuthor(this.fullName, null, this.avatar);
-		input.setDescription("Name: `" + fullName + "`\n"
-				+ "ID: `" + id + '`');
+		input.setDescription("Name: `" + this.fullName + "`\n"
+				+ "ID: `" + this.id + '`');
 		return input.build();
 	}
 
@@ -40,7 +40,7 @@ public class LogEntryUserJoined extends LogEntry {
 		GuildMemberJoinEvent event = (GuildMemberJoinEvent)dataStructure;
 		User user = event.getUser();
 		
-		this.fullName = user.getAsTag();
+		this.fullName = user.getName();
 		this.avatar = user.getEffectiveAvatarUrl();
 		this.id = user.getIdLong();
 		
@@ -48,27 +48,27 @@ public class LogEntryUserJoined extends LogEntry {
 	}
 
 	@Override
-	public void performActionUndo(BonziBot bb, ButtonClickEvent event) {
+	public void performActionUndo(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 
 	@Override
-	public void performActionWarn(BonziBot bb, ButtonClickEvent event) {
+	public void performActionWarn(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 
 	@Override
-	public void performActionMute(BonziBot bb, ButtonClickEvent event) {
+	public void performActionMute(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 
 	@Override
-	public void performActionKick(BonziBot bb, ButtonClickEvent event) {
+	public void performActionKick(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 
 	@Override
-	public void performActionBan(BonziBot bb, ButtonClickEvent event) {
+	public void performActionBan(BonziBot bb, ButtonInteractionEvent event) {
 		return;
 	}
 
