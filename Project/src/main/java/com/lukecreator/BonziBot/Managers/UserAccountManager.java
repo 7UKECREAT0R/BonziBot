@@ -10,7 +10,6 @@ import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Data.UserAccount;
 import com.lukecreator.BonziBot.Handling.DefaultMessageHandler;
-import com.lukecreator.BonziBot.Legacy.UserAccountLegacyLoader;
 
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -75,10 +74,6 @@ public class UserAccountManager implements IStorableData {
 	}
 	
 	// Data
-	public void loadLegacy() {
-		this.accounts = UserAccountLegacyLoader.execute();
-		InternalLogger.print("Loaded legacy user accounts.");
-	}
 	@Override
 	public void saveData() {
 		DataSerializer.writeObject(this.accounts, "modernaccounts");

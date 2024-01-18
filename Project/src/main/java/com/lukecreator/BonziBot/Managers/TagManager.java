@@ -11,7 +11,6 @@ import com.lukecreator.BonziBot.InternalLogger;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.IStorableData;
 import com.lukecreator.BonziBot.Data.TagData;
-import com.lukecreator.BonziBot.Legacy.CustomCommandLegacyLoader;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -398,15 +397,6 @@ public class TagManager implements IStorableData {
 				i--;
 			}
 		}
-	}
-	public void loadLegacy() {
-		CustomCommandLegacyLoader ccll = new CustomCommandLegacyLoader();
-		ccll.execute();
-		
-		this.tags = ccll.resultPublic;
-		this.privateTags = ccll.resultPrivate;
-		
-		InternalLogger.print("Loaded legacy custom commands.");
 	}
 	@Override
 	public void saveData() {

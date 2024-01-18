@@ -214,75 +214,75 @@ public class ScriptCache {
 	}
 
 	/**
-	 * Register all scripts in BonziBot to the caching system.
-	 * 
-	 * @param manager
-	 */
+	 * Register all scripts in BonziBot to the caching system
+     */
 	public static void registerAll(ScriptManager manager, JDA jda) {
 
-		HashMap<Long, List<Command>> existingCommands = new HashMap<Long, List<Command>>();
+		HashMap<Long, List<Command>> existingCommands = new HashMap<>();
 		Set<Entry<Long, List<ScriptPackage>>> entries = manager.packages.entrySet();
 
-		for (Entry<Long, List<ScriptPackage>> entry : entries) {
-			long guildId = entry.getKey().longValue();
+		synchronized (entries) {
+			for (Entry<Long, List<ScriptPackage>> entry : entries) {
+				long guildId = entry.getKey();
 
-			if (!existingCommands.containsKey(guildId)) {
-				Guild guild = jda.getGuildById(guildId);
-				if (guild == null)
-					continue;
-				try {
-					List<Command> fetch = guild.retrieveCommands().complete();
-					existingCommands.put(guildId, fetch);
-				} catch (ErrorResponseException e) {
-					InternalLogger.printError(
-							"Ignoring script command register because guild " + guild.getName() + " ("
-									+ guild.getIdLong() + ") is not authorized with applications.commands",
-							Severity.WARN);
-					continue;
-				}
-			}
-
-			List<Command> existing = existingCommands.get(guildId);
-
-			List<ScriptPackage> scriptPackages = entry.getValue();
-			for (ScriptPackage pkg : scriptPackages) {
-				List<Script> scripts = pkg.getScripts();
-				for (Script script : scripts) {
-					// Evaluate script.
-					script.owningPackage = pkg;
-					InvocationMethod method = script.method;
-					Implementation impl = method.getImplementation();
-
-					if (impl == Implementation.COMMAND) {
-						InvocationCommand invokeCmd = (InvocationCommand) method;
-						registerCommand((InvocationCommand) method);
-						if (existing.stream().anyMatch(cmd -> cmd.getIdLong() == invokeCmd._commandId)) {
-							if (DEBUG_MESSAGES)
-								InternalLogger.print("Scripting - NOT registering command: " + invokeCmd.commandName
-										+ ", id: " + invokeCmd._commandId + "; already exists");
-							continue;
-						}
+				if (!existingCommands.containsKey(guildId)) {
+					Guild guild = jda.getGuildById(guildId);
+					if (guild == null)
+						continue;
+					try {
+						List<Command> fetch = guild.retrieveCommands().complete();
+						existingCommands.put(guildId, fetch);
+					} catch (ErrorResponseException e) {
+						InternalLogger.printError(
+								"Ignoring script command register because guild " + guild.getName() + " ("
+										+ guild.getIdLong() + ") is not authorized with applications.commands",
+								Severity.WARN);
 						continue;
 					}
+				}
 
-					switch (impl) {
-					case BUTTON:
-						registerButton(pkg, script);
-						break;
-					case JOIN:
-						registerJoinGuild(guildId);
-						break;
-					case LEAVE:
-						registerLeaveGuild(guildId);
-						break;
-					case PHRASE:
-						registerPhraseGuild(guildId);
-						break;
-					case TIMED:
-						registerTimer(guildId, (InvocationTimed) method, pkg, script);
-						break;
-					default:
-						break;
+				List<Command> existing = existingCommands.get(guildId);
+
+				List<ScriptPackage> scriptPackages = entry.getValue();
+				for (ScriptPackage pkg : scriptPackages) {
+					List<Script> scripts = pkg.getScripts();
+					for (Script script : scripts) {
+						// Evaluate script.
+						script.owningPackage = pkg;
+						InvocationMethod method = script.method;
+						Implementation impl = method.getImplementation();
+
+						if (impl == Implementation.COMMAND) {
+							InvocationCommand invokeCmd = (InvocationCommand) method;
+							registerCommand((InvocationCommand) method);
+							if (existing.stream().anyMatch(cmd -> cmd.getIdLong() == invokeCmd._commandId)) {
+								if (DEBUG_MESSAGES)
+									InternalLogger.print("Scripting - NOT registering command: " + invokeCmd.commandName
+											+ ", id: " + invokeCmd._commandId + "; already exists");
+								continue;
+							}
+							continue;
+						}
+
+						switch (impl) {
+							case BUTTON:
+								registerButton(pkg, script);
+								break;
+							case JOIN:
+								registerJoinGuild(guildId);
+								break;
+							case LEAVE:
+								registerLeaveGuild(guildId);
+								break;
+							case PHRASE:
+								registerPhraseGuild(guildId);
+								break;
+							case TIMED:
+								registerTimer(guildId, (InvocationTimed) method, pkg, script);
+								break;
+							default:
+								break;
+						}
 					}
 				}
 			}

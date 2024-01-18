@@ -34,12 +34,12 @@ public class ScriptManager implements IStorableData {
 	
 	public boolean onScriptTrigger(SlashCommandInteractionEvent event, BonziBot bb) {
 		long commandId = event.getCommandIdLong();
-		List<ScriptPackage> pkgs = this.packages.get(event.getGuild().getIdLong());
+		List<ScriptPackage> localPackages = this.packages.get(event.getGuild().getIdLong());
 		
-		if(pkgs == null)
+		if(localPackages == null)
 			return false;
 		
-		for(ScriptPackage pkg: pkgs) {
+		for(ScriptPackage pkg: localPackages) {
 			if(!pkg.isEnabled())
 				continue;
 			List<Script> scripts = pkg.getScripts();
@@ -111,7 +111,7 @@ public class ScriptManager implements IStorableData {
 		Optional<ScriptPackage> _match = pkgs.stream().filter(pkg ->
 			pkg.getName().equalsIgnoreCase(packageName)).findFirst();
 		
-		if(!_match.isPresent() || !_match.get().isEnabled())
+		if(_match.isEmpty() || !_match.get().isEnabled())
 			return false;	// no response
 		
 		ScriptPackage match = _match.get();

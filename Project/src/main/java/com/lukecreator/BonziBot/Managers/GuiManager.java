@@ -188,9 +188,8 @@ public class GuiManager {
 	}
 	@SuppressWarnings("rawtypes")
 	public void onSelectionMenu(GenericSelectMenuInteractionEvent e) {
-		
 		if(!(e instanceof StringSelectInteractionEvent))
-			return; // dont handle anything other than the old StringSelectInteractionEvent
+			return; // don't handle anything other than the old StringSelectInteractionEvent
 		
 		if(e.isFromGuild()) {
 			Guild g = e.getGuild();

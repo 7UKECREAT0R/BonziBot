@@ -32,22 +32,22 @@ public class RewardManager implements IStorableData {
 	// User ID, Streak
 	HashMap<Long, Long> lastCollection = new HashMap<Long, Long>();
 	HashMap<Long, Integer> currentStreak = new HashMap<Long, Integer>();
-	
+
+	public void setStreak(User u, int streak) { this.setStreak(u.getIdLong(), streak); }
+	public void setStreak(long l, int streak) {
+		this.currentStreak.put(l, streak);
+	}
 	public int getStreak(User u) {
 		return this.getStreak(u.getIdLong());
 	}
 	public int getStreak(long l) {
-		if(this.currentStreak.containsKey(l))
-			return this.currentStreak.get(l);
-		else return 0;
+        return this.currentStreak.getOrDefault(l, 0);
 	}
 	public long getLastCollection(User u) {
 		return this.getLastCollection(u.getIdLong());
 	}
 	public long getLastCollection(long id) {
-		if(this.lastCollection.containsKey(id))
-			return this.lastCollection.get(id);
-		else return 0l;
+        return this.lastCollection.getOrDefault(id, 0L);
 	}
 	public long timeUntilCanClaim(User u) {
 		return this.timeUntilCanClaim(u.getIdLong());

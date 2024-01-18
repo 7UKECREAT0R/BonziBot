@@ -122,7 +122,6 @@ public class ReactionManager {
 		});
 	}
 	void checkPolls(GenericReactionEvent e) {
-		
 		// pre-check as much information as humanly possible
 		boolean isPrivate = e.guild == null;
 		boolean isEmoji = e.reactionEmote.getType() == Type.UNICODE;
