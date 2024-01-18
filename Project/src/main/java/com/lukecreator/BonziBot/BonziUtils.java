@@ -1390,9 +1390,11 @@ public class BonziUtils {
 	public static void sendCommandDisabled(Command cmd, CommandExecutionInfo info) {
 		MessageEmbed me = failureEmbed("this command is disabled here.");
 		if(info.isSlashCommand)
-			info.slashCommand.replyEmbeds(me).queue();
+			info.slashCommand.replyEmbeds(me).setEphemeral(true).queue();
 		else
-			info.channel.sendMessageEmbeds(me).queue();
+			info.channel.sendMessageEmbeds(me).queue(msg -> {
+				msg.delete().queueAfter(3, TimeUnit.SECONDS);
+			});
 	}
 	public static void sendAwaitingConfirmation(CommandExecutionInfo info) {
 		EmbedBuilder eb = quickEmbed(
@@ -1472,8 +1474,8 @@ public class BonziUtils {
 				eb.setImage(a.getUrl());
 			else {
 				int size = att.size();
-				String plur = plural("Attachment", size);
-				eb.appendDescription("\n🗃️ " + size + " " + plur);
+				String pluralString = plural("Attachment", size);
+				eb.appendDescription("\n🗃️ " + size + " " + pluralString);
 			}
 		}
 		eb.appendDescription("\n[Jump to Message](" + msg.getJumpUrl() + ")");

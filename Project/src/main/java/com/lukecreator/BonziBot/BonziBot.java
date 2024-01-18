@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.security.auth.login.LoginException;
 
+import org.jetbrains.annotations.NotNull;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.reflections.Reflections;
@@ -163,7 +164,7 @@ public class BonziBot extends ListenerAdapter {
 	public static final MessageHandler DEFAULT_MESSAGE_HANDLER = new DefaultMessageHandler();
 	
 	MessageHandler[] messageHandlers = new MessageHandler[0];
-	List<IStorableData> storableData = new ArrayList<IStorableData>();
+	List<IStorableData> storableData = new ArrayList<>();
 	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
 	public GuildSettingsManager guildSettings = new GuildSettingsManager();
 	public ReactionRoleManager reactionRoles = new ReactionRoleManager();
@@ -360,19 +361,10 @@ public class BonziBot extends ListenerAdapter {
 				this.threadPool.scheduleAtFixedRate(run,
 					info.getInitial(), info.getDelay(), info.getUnit());
 			}
-		} catch(InstantiationException ie) {
+		} catch(InstantiationException | IllegalAccessException ie) {
 			InternalLogger.printError(ie);
 			error = true;
-		} catch(IllegalAccessException iae) {
-			InternalLogger.printError(iae);
-			error = true;
-		} catch (IllegalArgumentException e) {
-			InternalLogger.printError(e);
-		} catch (InvocationTargetException e) {
-			InternalLogger.printError(e);
-		} catch (NoSuchMethodException e) {
-			InternalLogger.printError(e);
-		} catch (SecurityException e) {
+		} catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			InternalLogger.printError(e);
 		} finally {
 			if(error)
@@ -528,7 +520,7 @@ public class BonziBot extends ListenerAdapter {
 			return;
 		}
 		if(parts[0].equals(QuickDraw.BUTTON_PROTOCOL)) {
-			String part2 = parts.length == 0 ? "" : parts[1];
+			String part2 = parts.length < 2 ? "" : parts[1];
 			this.quickDraw.buttonReceived(event.getUser(), part2, event, this);
 			return;
 		}
@@ -541,6 +533,7 @@ public class BonziBot extends ListenerAdapter {
 		
 		if(channel.getType() == ChannelType.TEXT) {
 			Guild guild = event.getGuild();
+			assert guild != null;
 			GuildSettings settings = this.guildSettings.getSettings(guild);
 			if(settings.loggingEnabled && channel.getIdLong() == settings.loggingChannelCached) {
 				// yes this is probably a logging button
@@ -587,7 +580,6 @@ public class BonziBot extends ListenerAdapter {
 		
 		this.guis.onButtonClick(event);
 	}
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void onGenericSelectMenuInteraction(GenericSelectMenuInteractionEvent event) {
 		this.guis.onSelectionMenu(event);
@@ -642,19 +634,11 @@ public class BonziBot extends ListenerAdapter {
 					continue;
 				for(Script script: pkg.getScripts()) {
 					InvocationMethod _method = script.method;
+					Member member = e.getMember();
 					if(_method.getImplementation() != Implementation.JOIN)
 						continue;
-					
-					ScriptExecutor executor = script.code.createExecutor();
-					int member = executor.memory.createObjectReference(e.getMember());
-					executor.memory.writeExistingObjRef("member", member);
-					
-					GuildSettings settings = this.guildSettings.getSettings(guildId);
-					ScriptContextInfo context = new ScriptContextInfo(null, null, null, null, null, null,
-						e.getJDA(), this, e.getUser(), e.getMember(), e.getGuild(), settings);
-					
-					executor.run(context);
-					return;
+
+					runScript(guildId, script, e.getJDA(), e.getUser(), member, e.getGuild());
 				}
 			}
 		}
@@ -677,19 +661,11 @@ public class BonziBot extends ListenerAdapter {
 					continue;
 				for(Script script: pkg.getScripts()) {
 					InvocationMethod _method = script.method;
+					Member member = e.getMember();
 					if(_method.getImplementation() != Implementation.LEAVE)
 						continue;
-					
-					ScriptExecutor executor = script.code.createExecutor();
-					int member = executor.memory.createObjectReference(e.getMember());
-					executor.memory.writeExistingObjRef("member", member);
-					
-					GuildSettings settings = this.guildSettings.getSettings(guildId);
-					ScriptContextInfo context = new ScriptContextInfo(null, null, null, null, null, null,
-						e.getJDA(), this, e.getUser(), e.getMember(), e.getGuild(), settings);
-					
-					executor.run(context);
-					return;
+
+					runScript(guildId, script, e.getJDA(), e.getUser(), member, e.getGuild());
 				}
 			}
 		}
@@ -702,9 +678,22 @@ public class BonziBot extends ListenerAdapter {
 		// Send a leave message.
 		this.guildSettings.memberLeft(this, e);
 	}
+
+	private void runScript(long guildId, Script script, JDA jda, User user, Member actualMember, Guild guild) {
+		ScriptExecutor executor = script.code.createExecutor();
+		int member = executor.memory.createObjectReference(actualMember);
+		executor.memory.writeExistingObjRef("member", member);
+
+		GuildSettings settings = this.guildSettings.getSettings(guildId);
+		ScriptContextInfo context = new ScriptContextInfo(null, null, null, null, null, null,
+				jda, this, user, actualMember, guild, settings);
+
+		executor.run(context);
+    }
+
 	@Override
 	public void onMessageReactionAdd(MessageReactionAddEvent e) {
-		if(e.isFromGuild()) {
+		if(e.isFromType(ChannelType.TEXT)) {
 			// reaction roles
 			this.reactionRoles.handleEvent(e, this);
 			
@@ -728,7 +717,7 @@ public class BonziBot extends ListenerAdapter {
 	}
 	@Override
 	public void onMessageReactionRemove(MessageReactionRemoveEvent e) {
-		if(e.isFromGuild()) {
+		if(e.isFromType(ChannelType.TEXT)) {
 			// Send a message to and update GUIs. (UNUSED)
 			this.guis.onReactionRemove(e);
 			
@@ -802,11 +791,17 @@ public class BonziBot extends ListenerAdapter {
     	Guild guild = e.getGuild();
     	Member self = guild.getSelfMember();
     	GuildVoiceState state = self.getVoiceState();
-    	
+
+		if(state == null)
+			return;
     	if(!state.inAudioChannel())
     		return;
     	
     	AudioChannel channel = state.getChannel();
+
+		if(channel == null)
+			return;
+
     	List<Member> session = channel.getMembers();
     	int usersInVoice = session.size();
     	
