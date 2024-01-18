@@ -24,6 +24,8 @@ import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptPackage;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Mentions;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -33,7 +35,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 /**
  * The default message handler. Gets all events related to messages.
- * @see {@link BonziBot.DEFAULT_MESSAGE_HANDLER}
  * @author Lukec
  */
 public class DefaultMessageHandler implements MessageHandler {
@@ -151,13 +152,27 @@ public class DefaultMessageHandler implements MessageHandler {
 		if(bb.tags.receiveMessage(e, bb))
 			return;
 		Message msg = e.getMessage();
+		List<Member> mentionedMember = msg.getMentions().getMembers();
 		if(bb.eventWaiter.onMessage(e.getMessage()))
 			return;
 		
 		long guildId = e.getGuild().getIdLong();
-		
 		GuildSettings settings = bb.guildSettings.getSettings(guildId);
-		
+
+		// Check for bot pings and respond with the prefix/info
+		/*if(mentionedMember.size() == 1 && mentionedMember.get(0).getIdLong() == Constants.BONZI_ID) {
+			EmbedBuilder eb = new EmbedBuilder()
+					.setColor(BonziUtils.COLOR_BONZI_PURPLE)
+					.setTitle("Hi, I'm Bonzi!");
+			StringBuilder description = eb.getDescriptionBuilder();
+			String prefix = settings.getPrefix();
+			description.append("My current prefix is `")
+					.append(prefix)
+					.append("`, though you should probably use slash commands with `/`!");
+			e.getChannel().sendMessageEmbeds(eb.build()).queue();
+			return;
+		}*/
+
 		// Run 'phrase' scripts.
 		if(ScriptCache.shouldCheckPhraseScripts(guildId)) {
 			List<ScriptPackage> packages = bb.scripts.getPackages(guildId);
@@ -279,20 +294,22 @@ public class DefaultMessageHandler implements MessageHandler {
 	}
 	@Override
 	public void handlePrivateMessage(BonziBot bb, MessageReceivedEvent e) {
-		if(e.getAuthor().isBot()) return;
-		if(bb.tags.receiveMessage(e, bb)) return;
-		if(bb.eventWaiter.onMessage(e.getMessage())) return;
+		if(e.getAuthor().isBot())
+			return;
+		if(bb.tags.receiveMessage(e, bb))
+			return;
+		if(bb.eventWaiter.onMessage(e.getMessage()))
+			return;
 		
 		// cache the channel ID for future use
 		// (used in BonziUtils.messageUser(...))
-		long pcid = e.getChannel().getIdLong();
-		long uid = e.getAuthor().getIdLong();
-		BonziUtils.userPrivateChannels.put(uid, pcid);
+		long privateChannelId = e.getChannel().getIdLong();
+		long userId = e.getAuthor().getIdLong();
+		BonziUtils.userPrivateChannels.put(userId, privateChannelId);
 		
 		// run a command, if any
 		CommandExecutionInfo info = new CommandExecutionInfo(e);
-		if(bb.commands.onTextInput(info.setBonziBot(bb)))
-			return;
+		bb.commands.onTextInput(info.setBonziBot(bb));
 	}
 	
 	@Override
