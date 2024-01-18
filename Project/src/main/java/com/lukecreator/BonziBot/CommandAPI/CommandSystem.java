@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import org.reflections.Reflections;
 
 import com.lukecreator.BonziBot.BonziBot;
@@ -140,10 +141,11 @@ public class CommandSystem {
 	}
 	/**
 	 * Parse slash-command input and redirect it to the right command.
-	 * @param event
-	 * @return
 	 */
-	public boolean onInput(SlashCommandInteractionEvent event, BonziBot bb) {
+	public void onInput(SlashCommandInteractionEvent event, BonziBot bb) {
+		if(event.getChannelType() != ChannelType.TEXT)
+			return;
+
 		String name = event.getName();
 		List<OptionMapping> _args = event.getOptions();
 		OptionMapping[] args = new OptionMapping[_args.size()];
@@ -173,15 +175,17 @@ public class CommandSystem {
 							break;
 						}
 					}
-					if(!good)
-						return false;
+					if(!good) {
+						BonziUtils.sendCommandDisabled(cmd, info);
+						return;
+					}
 				}
 				List<Integer> disabled = info.settings.disabledCommands;
 				if(disabled != null) {
 					for(int test: disabled) {
 						if(test == cmd.id) {
 							BonziUtils.sendCommandDisabled(cmd, info);
-							return false;
+							return;
 						}
 					}
 				}
@@ -204,7 +208,7 @@ public class CommandSystem {
 					String input = mapping.getAsString();
 					if(!arg.isWordParsable(input, event.getGuild())) {
 						BonziUtils.sendUsage(cmd, info, false, arg);
-						return false;
+						return;
 					}
 				}
 			}
@@ -218,7 +222,7 @@ public class CommandSystem {
 			info.setCommandData(cmd.getFilteredCommandName(), new String[args.length], cpa);
 			
 			if(!this.checkQualifications(cmd, info))
-				return false;
+				return;
 			
 			// Set cooldown.
 			if(cmd.hasCooldown) {
@@ -229,9 +233,8 @@ public class CommandSystem {
 			
 			// Should be good to execute.
 			cmd.run(info);
-			return true;
+			return;
 		}
-		return false;
 	}
 	public List<Command> getRegisteredCommands() {
 		return this.commands;
@@ -284,13 +287,15 @@ public class CommandSystem {
 							break;
 						}
 					}
-					if(!good)
+					if(!good) {
+						BonziUtils.sendCommandDisabled(cmd, info);
 						return false;
+					}
 				}
 				List<Integer> disabled = info.settings.disabledCommands;
 				if(disabled != null) {
 					for(Integer test: disabled) {
-						if(test.intValue() == cmd.id) {
+						if(test == cmd.id) {
 							BonziUtils.sendCommandDisabled(cmd, info);
 							return false;
 						}
@@ -308,7 +313,7 @@ public class CommandSystem {
 			if(!this.checkQualifications(cmd, info))
 				return false;
 			
-			// Set cooldown.
+			// Set cool-down.
 			if(cmd.hasCooldown) {
 				CooldownManager cm = info.bonzi.cooldowns;
 				long userId = info.executor.getIdLong();

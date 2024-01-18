@@ -42,7 +42,7 @@ public class UserAccount implements Serializable {
 	
 	public static final long REP_DELAY = 24 * 60 * 60 * 1000;
 	private int reputation; // Given by other users every 24 hours.
-	private long nextAllowedRep = 0l; // Time when this user can next rep a profile.
+	private long nextAllowedRep = 0L; // Time when this user can next rep a profile.
 	
 	// Opting stuff. Required for a lot of botlists.
 	public boolean optOutDms = false;
@@ -76,7 +76,7 @@ public class UserAccount implements Serializable {
 		}
 	}
 	
-	public static long MAX_COINS = 1000000000000000000l;
+	public static long MAX_COINS = 1000000000000000000L;
 	public long getCoins() {
 		return this.coins;
 	}

@@ -12,7 +12,7 @@ import com.lukecreator.BonziBot.InternalLogger.Severity;
 
 public class DataSerializer {
 	
-	public static final String baseDataPath = "/home/pi/";
+	public static final String baseDataPath = "/home/lukec/";
 	public static String currentPath = baseDataPath;
 	public static boolean backup = false;
 	

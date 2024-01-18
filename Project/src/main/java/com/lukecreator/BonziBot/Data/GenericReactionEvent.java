@@ -25,81 +25,41 @@ public class GenericReactionEvent {
 	public final long responseNumber;
 	
 	public GenericReactionEvent(MessageReactionAddEvent e) {
-		if(e.isFromType(ChannelType.TEXT)) {
-			this.jda = e.getJDA();
-			this.added = true;
-			this.channel = e.getChannel();
+		if(e.isFromGuild())
 			this.guild = e.getGuild();
-			this.user = e.getUser();
-			this.userIdLong = this.user.getIdLong();
-			this.messageIdLong = e.getMessageIdLong();
-			this.reaction = e.getReaction();
-			this.reactionEmote = e.getEmoji();
-			this.responseNumber = e.getResponseNumber();
-		} else if(e.isFromType(ChannelType.PRIVATE)) {
-			this.jda = e.getJDA();
-			this.added = true;
-			this.channel = e.getChannel();
+        else
 			this.guild = null;
-			this.user = e.getUser();
-			this.userIdLong = this.user.getIdLong();
-			this.messageIdLong = e.getMessageIdLong();
-			this.reaction = e.getReaction();
-			this.reactionEmote = e.getEmoji();
-			this.responseNumber = e.getResponseNumber();
-		} else {
-			this.jda = null;
-			this.added = false;
-			this.channel = null;
-			this.guild = null;
-			this.user = null;
-			this.userIdLong = 0l;
-			this.messageIdLong = 0l;
-			this.reaction = null;
-			this.reactionEmote = null;
-			this.responseNumber = 0l;
-		}
+
+		this.jda = e.getJDA();
+		this.added = true;
+		this.channel = e.getChannel();
+		this.user = e.getUser();
+		this.userIdLong = this.user.getIdLong();
+		this.messageIdLong = e.getMessageIdLong();
+		this.reaction = e.getReaction();
+		this.reactionEmote = e.getEmoji();
+		this.responseNumber = e.getResponseNumber();
 	}
 	public GenericReactionEvent(MessageReactionRemoveEvent e) {
-		if(e.isFromType(ChannelType.TEXT)) {
-			this.jda = e.getJDA();
-			this.added = false;
-			this.channel = e.getChannel();
+		if(e.isFromGuild())
 			this.guild = e.getGuild();
-			this.user = e.getUser();
-			this.userIdLong = this.user.getIdLong();
-			this.messageIdLong = e.getMessageIdLong();
-			this.reaction = e.getReaction();
-			this.reactionEmote = e.getEmoji();
-			this.responseNumber = e.getResponseNumber();
-		} else if(e.isFromType(ChannelType.PRIVATE)) {
-			this.jda = e.getJDA();
-			this.added = false;
-			this.channel = e.getChannel();
+		else
 			this.guild = null;
-			this.user = e.getUser();
-			this.userIdLong = this.user.getIdLong();
-			this.messageIdLong = e.getMessageIdLong();
-			this.reaction = e.getReaction();
-			this.reactionEmote = e.getEmoji();
-			this.responseNumber = e.getResponseNumber();
-		} else {
-			this.jda = null;
-			this.added = false;
-			this.channel = null;
-			this.guild = null;
-			this.user = null;
-			this.userIdLong = 0l;
-			this.messageIdLong = 0l;
-			this.reaction = null;
-			this.reactionEmote = null;
-			this.responseNumber = 0l;
-		}
+
+		this.jda = e.getJDA();
+		this.added = false;
+		this.channel = e.getChannel();
+		this.user = e.getUser();
+		this.userIdLong = this.user.getIdLong();
+		this.messageIdLong = e.getMessageIdLong();
+		this.reaction = e.getReaction();
+		this.reactionEmote = e.getEmoji();
+		this.responseNumber = e.getResponseNumber();
 	}
 	
     public RestAction<Message> retrieveMessage()
     {
-    	if(this.messageIdLong == 0l)
+    	if(this.messageIdLong == 0L)
     		return null;
         return this.channel.retrieveMessageById(this.messageIdLong);
     }
