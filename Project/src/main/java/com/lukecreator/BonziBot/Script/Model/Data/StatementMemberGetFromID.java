@@ -11,8 +11,10 @@ import com.lukecreator.BonziBot.Script.Model.ScriptError;
 import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.*;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StatementMemberGetFromID implements ScriptStatement {
 	
@@ -61,12 +63,17 @@ public class StatementMemberGetFromID implements ScriptStatement {
 		
 		DynamicValue tryRead = context.memory.readVariable(this.id);
 		if(tryRead != null)
-			id = tryRead.getConcatString();
+			str = tryRead.getConcatString();
 		
 		if(!info.hasGuild) {
 			ScriptExecutor.raiseError(new ScriptError("No server to get member from... (what?)", this));
 			return;
 		}
+
+		Pattern pattern = Message.MentionType.USER.getPattern();
+		Matcher matcher = pattern.matcher(str);
+		if(matcher.matches())
+			str = matcher.group(1);
 		
 		try {
 			Member gotten = info.guild.getMemberById(str);
@@ -80,8 +87,7 @@ public class StatementMemberGetFromID implements ScriptStatement {
 			context.memory.writeExistingObjRef(this.dst, value);
 		} catch(NumberFormatException exc) {
 			ScriptExecutor.raiseError(new ScriptError("Couldn't parse ID '" + str + "'", this));
-			return;
-		}
+        }
 	}
 
 }

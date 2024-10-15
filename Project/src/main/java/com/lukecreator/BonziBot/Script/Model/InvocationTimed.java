@@ -25,7 +25,7 @@ public class InvocationTimed implements InvocationMethod {
 	}
 	public long getCooldownRemaining(long userId) {
 		if(this.userDelays.containsKey(userId)) {
-			return this.userDelays.get(userId).longValue() - System.currentTimeMillis();
+			return this.userDelays.get(userId) - System.currentTimeMillis();
 		} else {
 			return -1;
 		}

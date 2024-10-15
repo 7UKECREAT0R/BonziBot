@@ -12,7 +12,11 @@ import com.lukecreator.BonziBot.Script.Model.ScriptExecutor;
 import com.lukecreator.BonziBot.Script.Model.ScriptStatement;
 
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StatementChannelGetFromID implements ScriptStatement {
 	
@@ -61,12 +65,17 @@ public class StatementChannelGetFromID implements ScriptStatement {
 		
 		DynamicValue tryRead = context.memory.readVariable(this.id);
 		if(tryRead != null)
-			this.id = tryRead.getConcatString();
+			str = tryRead.getConcatString();
 		
 		if(!info.hasGuild) {
 			ScriptExecutor.raiseError(new ScriptError("No server to get channel from... (what?)", this));
 			return;
 		}
+
+		Pattern pattern = Message.MentionType.CHANNEL.getPattern();
+		Matcher matcher = pattern.matcher(str);
+		if(matcher.matches())
+			str = matcher.group(1);
 		
 		try {
 			GuildChannel gotten = info.guild.getGuildChannelById(str);

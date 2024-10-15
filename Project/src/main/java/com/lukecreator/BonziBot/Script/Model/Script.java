@@ -45,6 +45,7 @@ public class Script implements Serializable {
 	public final String name;	// The name of the script.
 	
 	// The package that owns this script.
+	// This is set on bot startup :)
 	public transient ScriptPackage owningPackage;
 	
 	// Code information.

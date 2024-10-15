@@ -26,7 +26,7 @@ public class StatementLimitUser implements ScriptStatement {
 
 	@Override
 	public String getAsCode() {
-		return "require_user";
+		return "require_user " + this.thing;
 	}
 	
 	String thing;
@@ -67,7 +67,7 @@ public class StatementLimitUser implements ScriptStatement {
 		} catch(NumberFormatException nfe) {
 			User user = info.member.getUser();
 			if(!user.getName().equals(this.thing))
-				context.cancelExecution("The only user that can run this script is <@" + user.getId() + '>', Color.red);
+				context.cancelExecution("The only user that can run this script is <@" + this.thing + '>', Color.red);
 		}
 		
 	}

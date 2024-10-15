@@ -187,9 +187,9 @@ public class DynamicValue implements Serializable {
 		case BOOLEAN:
 			return String.valueOf(this.b);
 		case DECIMAL:
-			return BonziUtils.comma(this.d);
+			return String.valueOf(this.d);
 		case INT:
-			return BonziUtils.comma(this.i);
+			return String.valueOf(this.i);
 		case STRING:
 			return this.s;
 		case OBJREF:
