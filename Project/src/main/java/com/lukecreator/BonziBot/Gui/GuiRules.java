@@ -186,7 +186,7 @@ public class GuiRules extends Gui {
 				IntArg arg1 = new IntArg("");
 				ewm.waitForArgument(this.parent.ownerId, arg1, number -> {
 					msg1.delete().queue();
-					int index = ((Integer)number).intValue() - 1;
+					int index = (Integer) number - 1;
 					if(index >= rCount || index < 0) {
 						BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("Number was out of bounds. Cancelled operation."), 4);
 						return;

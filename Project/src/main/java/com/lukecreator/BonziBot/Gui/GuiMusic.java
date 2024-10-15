@@ -10,6 +10,7 @@ import com.google.api.services.youtube.YouTube.Search;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.lukecreator.BonziBot.BonziUtils;
+import com.lukecreator.BonziBot.Data.EmoteCache;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 import com.lukecreator.BonziBot.GuiAPI.DropdownItem;
 import com.lukecreator.BonziBot.GuiAPI.Gui;
@@ -51,19 +52,22 @@ public class GuiMusic extends Gui {
 	public static final GenericEmoji PLAY = GenericEmoji.fromEmote(904922767881818172l, false);
 	
 	static final String[] STOPPED_MESSAGES = {
-		"listening party's over!",
-		"music player gone!",
-		"okay you guys can go home now!",
-		"alright yall i gotta take a break",
-		"music is gone",
-		"no more songz (ono)",
-		"i'm outta here!",
-		"\\*doing back flips\\*",
-		"alright, who did it",
-		"finally, i am freed",
-		"dang you guys listen to some weird stuff",
-		"catch yall later",
-		"my mac n cheese is done"
+			"listening party's over!",
+			"music player gone!",
+			"okay you guys can go home now!",
+			"alright yall i gotta take a break",
+			"music is gone",
+			"no more songz (ono)",
+			"i'm outta here!",
+			"\\*doing back flips\\*",
+			"alright, who did it",
+			"finally, i am freed",
+			"dang you guys listen to some weird stuff",
+			"catch yall later",
+			"my mac n cheese is done",
+			"yall got... tastes",
+			"now playing Literally Nothing",
+			"buh bye"
 	};
 	static String getStoppedMessage() {
 		int index = BonziUtils.randomInt(STOPPED_MESSAGES.length);
@@ -150,8 +154,8 @@ public class GuiMusic extends Gui {
 	 * @param totalMs The total number of milliseconds this next song is.
 	 */
 	public void animate(long totalMs, long playerOffset) {
-		int totalSeconds = (int)(totalMs / 1000l);
-		int totalOffset = (int)(playerOffset / 1000l);
+		int totalSeconds = (int)(totalMs / 1000L);
+		int totalOffset = (int)(playerOffset / 1000L);
 		int timeBetweenEachChange = totalSeconds / BAR_LENGTH;
 		
 		if(timeBetweenEachChange < 2)
@@ -208,8 +212,9 @@ public class GuiMusic extends Gui {
 		dropdown.setSelectedIndex(this.queue.playMode.ordinal());
 		this.elements.add(dropdown);
 		
-		this.elements.add(new GuiButton("Add Song", ButtonColor.GREEN, "addsong"));
-		this.elements.add(new GuiButton("Add Video", ButtonColor.GREEN, "addvideo"));
+		
+		this.elements.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("youtube")), "Add Song", ButtonColor.GREEN, "addsong"));
+		this.elements.add(new GuiButton(GenericEmoji.fromEmote(EmoteCache.getEmoteByName("youtube")), "Add Video", ButtonColor.GREEN, "addvideo"));
 		this.elements.add(new GuiButton(GenericEmoji.fromEmoji("✖️"), "CLOSE", ButtonColor.RED, "bye"));
 	}
 	
@@ -234,7 +239,7 @@ public class GuiMusic extends Gui {
 		if(track == null) {
 			barString = buildEmptyBar();
 			playingString = buildTrackString(null);
-			// stop animating, theres no point
+			// stop animating, there's no point
 			this.disableAnimation();
 		} else {
 			double current = track.getPosition();
@@ -374,7 +379,7 @@ public class GuiMusic extends Gui {
 					msg1.delete().queue();
 					response.delete().queue(null, fail -> {});
 					
-					String url = response.getContentRaw();
+					String url = response.getContentRaw().replace("`", "");
 					AudioPlayerManager apm = this.bonziReference.audioPlayerManager;
 					boolean validUrl = Constants.URL_REGEX_COMPILED.matcher(url).matches();
 					
@@ -439,14 +444,15 @@ public class GuiMusic extends Gui {
 						public void loadFailed(FriendlyException exception) {
 							switch(exception.severity) {
 							case COMMON:
-								MessageEmbed fail = BonziUtils.failureEmbed("Load Failed", "This song might be unavailable in the United States or age restricted.");
+								MessageEmbed fail = BonziUtils.failureEmbed("Load Failed", "This song might be unavailable in the United States or age restricted; error code:\n```"
+									+ exception + "\n```");
 								channel.sendMessageEmbeds(fail).queue(msg -> {
 									msg.delete().queueAfter(6, TimeUnit.SECONDS);
 								});
 								break;
 							case FAULT:
 							case SUSPICIOUS:
-								MessageEmbed failBig = BonziUtils.failureEmbed("Load Failed Bigtime (Report This)", exception.getMessage());
+								MessageEmbed failBig = BonziUtils.failureEmbed("Load Failed bigtime; error code:", "```\n" + exception + "\n```");
 								channel.sendMessageEmbeds(failBig).queue();
 								break;
 							default:
@@ -470,10 +476,11 @@ public class GuiMusic extends Gui {
 							.setQ(url)
 							.setVideoCategoryId("10") // music
 							.setType("video")
+							.setOrder("relevance")
 							.execute();
 						List<SearchResult> results = _results.getItems();
 						if(results.isEmpty()) {
-							BonziUtils.sendTempMessage(channel, "No results found.", 3);
+							BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("No results found.", "For search query:\n`" + url + "`"), 3);
 							return;
 						}
 						SearchResult result = results.get(0);
@@ -482,7 +489,7 @@ public class GuiMusic extends Gui {
 						apm.loadItemOrdered(this.queue, findUrl, resultHandler);
 						return;
 					} catch (IOException e) {
-						channel.sendMessage("Everything blew up.\n```" + e.toString() + "```").queue();
+						channel.sendMessage("Everything blew up.\n```" + e + "```").queue();
 						return;
 					}
 				});
@@ -560,14 +567,15 @@ public class GuiMusic extends Gui {
 						public void loadFailed(FriendlyException exception) {
 							switch(exception.severity) {
 							case COMMON:
-								MessageEmbed fail = BonziUtils.failureEmbed("Load Failed", "This song might be unavailable in the United States or age restricted.");
+								MessageEmbed fail = BonziUtils.failureEmbed("Load Failed", "This song might be unavailable in the United States or age restricted; error code:\n```"
+										+ exception + "\n```");
 								channel.sendMessageEmbeds(fail).queue(msg -> {
 									msg.delete().queueAfter(6, TimeUnit.SECONDS);
 								});
 								break;
 							case FAULT:
 							case SUSPICIOUS:
-								MessageEmbed failBig = BonziUtils.failureEmbed("Load Failed Bigtime (Report This)", exception.getMessage());
+								MessageEmbed failBig = BonziUtils.failureEmbed("Load Failed bigtime; error code:", "```\n" + exception + "\n```");
 								channel.sendMessageEmbeds(failBig).queue();
 								break;
 							default:
@@ -589,11 +597,12 @@ public class GuiMusic extends Gui {
 							.setKey(Constants.YTAPI_KEY)
 							.setMaxResults(1L)
 							.setQ(url)
+							.setOrder("relevance")
 							.setType("video")
 							.execute();
 						List<SearchResult> results = _results.getItems();
 						if(results.isEmpty()) {
-							BonziUtils.sendTempMessage(channel, "No results found.", 3);
+							BonziUtils.sendTempMessage(channel, BonziUtils.failureEmbed("No results found.", "For search query:\n`" + url + "`"), 3);
 							return;
 						}
 						SearchResult result = results.get(0);
@@ -602,7 +611,7 @@ public class GuiMusic extends Gui {
 						apm.loadItemOrdered(this.queue, findUrl, resultHandler);
 						return;
 					} catch (IOException e) {
-						channel.sendMessage("Everything blew up.\n```" + e.toString() + "```").queue();
+						channel.sendMessage("Everything blew up.\n```" + e + "```").queue();
 						return;
 					}
 				});

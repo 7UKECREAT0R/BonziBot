@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 public class EmoteCache {
 	
 	// Persistent collection of stale objects
-	private static List<RichCustomEmoji> collection = new ArrayList<RichCustomEmoji>();
+	private static final List<RichCustomEmoji> collection = new ArrayList<RichCustomEmoji>();
 	
 	public static long getAmount() {
 		return collection.size();
@@ -21,9 +21,7 @@ public class EmoteCache {
 	
 	public static void appendGuildEmotes(Guild g) {
 		SnowflakeCacheView<RichCustomEmoji> emotes = g.getEmojiCache();
-		emotes.forEach(cacheItem -> {
-			collection.add(cacheItem);
-		});
+		emotes.forEach(collection::add);
 	}
 	public static void appendEmote(RichCustomEmoji e) {
 		collection.add(e);

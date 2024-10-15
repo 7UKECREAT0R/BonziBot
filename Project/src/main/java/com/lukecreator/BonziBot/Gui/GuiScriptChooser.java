@@ -1,10 +1,8 @@
 package com.lukecreator.BonziBot.Gui;
 
 import java.awt.Color;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -211,8 +209,7 @@ public class GuiScriptChooser extends Gui {
 	
 	/**
 	 * Export this package's storage to a text file. Returns the file, if any.
-	 * @param invokerId
-	 * @return
+	 * @return The file to be uploaded, if successful. Null if failed.
 	 */
 	public File exportStorage() {
 		PrintWriter file = null;
@@ -221,7 +218,7 @@ public class GuiScriptChooser extends Gui {
 		String fileName = DataSerializer.baseDataPath + EXPORTS_FOLDER + fileNameWithoutExt;
 		
 		try {
-			file = new PrintWriter(fileName, "UTF-8");
+			file = new PrintWriter(fileName, StandardCharsets.UTF_8);
 			PackageStorage storage = this.thePackage.storage;
 			Set<Map.Entry<Long, StorageEntry>> rows = storage.storage.entrySet();
 			
@@ -236,9 +233,7 @@ public class GuiScriptChooser extends Gui {
 			
 			file.close();
 			return new File(fileName);
-		} catch (FileNotFoundException e) {
-			InternalLogger.printError(e);
-		} catch (UnsupportedEncodingException e) {
+		} catch (IOException e) {
 			InternalLogger.printError(e);
 		} finally {
 			if(file != null) {

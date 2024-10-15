@@ -36,7 +36,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 public class GuiNewScript extends Gui {
 	
-	class SetterField {
+	static class SetterField {
 		String value;
 		String name;
 		boolean set;
@@ -97,26 +97,12 @@ public class GuiNewScript extends Gui {
 		this.methodDropdown.addItemsTransform(EditorCategories.getInvocationDescriptors(), descriptor -> {
 			try {
 				return new DropdownItem(descriptor.createNew(), descriptor.name).withDescription(descriptor.desc);
-			} catch (InstantiationException e) {
-				InternalLogger.printError(e);
-				return null;
-			} catch (IllegalAccessException e) {
-				InternalLogger.printError(e);
-				return null;
-			} catch (IllegalArgumentException e) {
-				InternalLogger.printError(e);
-				return null;
-			} catch (InvocationTargetException e) {
-				InternalLogger.printError(e);
-				return null;
-			} catch (NoSuchMethodException e) {
-				InternalLogger.printError(e);
-				return null;
-			} catch (SecurityException e) {
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException |
+                     InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				InternalLogger.printError(e);
 				return null;
 			}
-		});
+        });
 		this.reinitialize();
 	}
 	public void reinitialize() {
@@ -196,11 +182,11 @@ public class GuiNewScript extends Gui {
 		
 		if(buttonId.equals("create")) {
 			if(!this.canFinish())
-				return; // if u did this u a hacker
+				return; // if you did this u a hacker
 			
 			if(this.script.method instanceof InvocationCommand) {
 				// Add to guild commands before registering into the cache.
-				// This ensures it obtains a valid id from discord before being applied.
+				// This ensures it gets a valid id from discord before being applied.
 				Guild guild = jda.getGuildById(this.parent.guildId);
 				CommandData upload = ((InvocationCommand)this.script.method).toDiscord();
 				guild.upsertCommand(upload).queue(command -> {

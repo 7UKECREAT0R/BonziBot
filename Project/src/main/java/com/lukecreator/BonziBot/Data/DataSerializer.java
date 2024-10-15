@@ -17,8 +17,10 @@ public class DataSerializer {
 	public static boolean backup = false;
 	
 	static String ensureSuffix(String path) {
-		if(path.endsWith(".ser")) return path;
-		else return path + ".ser";
+		if(path.endsWith(".ser"))
+			return path;
+		else
+			return path + ".ser";
 	}
 	static String applyFlags(String path) {
 		if(backup)

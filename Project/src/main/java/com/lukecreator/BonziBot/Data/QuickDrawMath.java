@@ -75,11 +75,12 @@ public class QuickDrawMath extends QuickDraw {
 			return true;
 		}
 		
-		// failsafe incase they dont know
+		// failsafe in case they don't know
 		if(this.twentyOne && input.equals("19")) {
 			this.reward = 0;
+			message.getChannel().sendMessageEmbeds(BonziUtils.failureEmbed("You stupid")).queue();
 			message.delete().queue(null, fail -> {});
-			return true;
+			return false;
 		}
 		
 		return false;

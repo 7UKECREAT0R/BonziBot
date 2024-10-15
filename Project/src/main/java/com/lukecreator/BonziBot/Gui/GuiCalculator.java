@@ -23,7 +23,7 @@ public class GuiCalculator extends Gui {
 		ADD, SUB, MUL, DIV
 	}
 	
-	List<String> addedFriends = new ArrayList<String>();
+	List<String> addedFriends = new ArrayList<>();
 	boolean inGuild;
 	public GuiCalculator(boolean inGuild) {
 		this.inGuild = inGuild;
@@ -205,8 +205,8 @@ public class GuiCalculator extends Gui {
 	void combineValues() {
 		switch(this.operation) {
 		case ADD:
-			if(this.value == 9 && this.buffer == 10)
-				this.buffer = 21;
+			if(this.value == 9.0 && this.buffer == 10.0)
+				this.buffer = 21.0;
 			else
 				this.buffer = this.value + this.buffer;
 			break;

@@ -120,7 +120,6 @@ public class SteamCache {
 			if(distance < bestDistance) {
 				bestDistance = distance;
 				bestTitle = release;
-				InternalLogger.print("Narrowed search to " + distance + ", title: " + release.appSearch);
 			}
 		}
 		
