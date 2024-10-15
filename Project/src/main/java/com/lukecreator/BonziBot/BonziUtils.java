@@ -200,7 +200,7 @@ public class BonziUtils {
 		// append final word to buffer, if any
 		String temp = word.toString();
 		word = new StringBuilder();
-		if(temp.length() > 0)
+		if(!temp.isEmpty())
 			strings.add(temp);
 		
 		// return words as array
@@ -215,13 +215,23 @@ public class BonziUtils {
 		else
 			return pluralForm(s);
 	}
+	/**
+	 * Make a word plural (add s to end) depending on a count.
+	 */
+	public static String plural(String s, long count) {
+		if(count==1 || count==-1)
+			return s;
+		else
+			return pluralForm(s);
+	}
 	static String[] postfixes = new String[] { "s", "sh", "ch", "x", "z", "o" };
 	static char[] vowels = new char[] { 'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y' };
 	
 	/**
-	 * Returns if a character is an English vowel, regardless of case.
-	 * @param c
-	 * @return
+	 * Determines if a given character is a vowel.
+	 *
+	 * @param c the character to be checked
+	 * @return true if the character is a vowel, false otherwise
 	 */
 	public static boolean isVowel(char c) {
 		for(char vowel: vowels)
@@ -230,9 +240,10 @@ public class BonziUtils {
 		return false;
 	}
 	/**
-	 * Returns if a character is an English consonant, regardless of case.
-	 * @param c
-	 * @return
+	 * Checks if the given character is a consonant.
+	 *
+	 * @param c the character to be checked
+	 * @return true if the character is a consonant, false otherwise
 	 */
 	public static boolean isConsonant(char c) {
 		for(char vowel: vowels)
@@ -637,9 +648,7 @@ public class BonziUtils {
 	/**
 	 * Get the generic emoji for a specific integer.
 	 * Guaranteed that <code>isGeneric == true</code>
-	 * @param number
-	 * @return
-	 */
+     */
 	public static GenericEmoji getEmojiForNumberG(int number) {
 		String emoji = getEmojiForNumber(number);
 		return GenericEmoji.fromEmoji(emoji);
@@ -647,18 +656,14 @@ public class BonziUtils {
 	/**
 	 * Get the generic emoji for a specific character.
 	 * Guaranteed that <code>isGeneric == true</code>
-	 * @param number
-	 * @return
-	 */
+     */
 	public static GenericEmoji getEmojiForCharacterG(char c) {
 		String emoji = getEmojiForCharacter(c);
 		return GenericEmoji.fromEmoji(emoji);
 	}
 	/**
 	 * Get the emoji for a specific integer.
-	 * @param number
-	 * @return
-	 */
+     */
 	public static String getEmojiForNumber(int number) {
 		switch(number) {
 		case 0:
@@ -688,9 +693,7 @@ public class BonziUtils {
 	}
 	/**
 	 * Get the emoji for a specific character. Returns '❓' if invalid.
-	 * @param c
-	 * @return
-	 */
+     */
 	public static String getEmojiForCharacter(char c) {
 		c = Character.toLowerCase(c);
 		switch(c) {
@@ -781,8 +784,6 @@ public class BonziUtils {
 	}
 	/**
 	 * Count the amount of a certain character in a string.
-	 * @param search
-	 * @param c
 	 * @return The amount of times <b>c</b> occurs in <b>search</b>.
 	 */
 	public static int countChars(String search, char c) {
@@ -1231,7 +1232,7 @@ public class BonziUtils {
 			rowWidth += width;
 		}
 		
-		if(row.size() > 0)
+		if(!row.isEmpty())
 			rows.add(ActionRow.of(row));
 		
 		return in.setComponents(rows);

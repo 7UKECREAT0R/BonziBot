@@ -4,14 +4,18 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.security.auth.login.LoginException;
 
+import com.lukecreator.BonziBot.CommandAPI.*;
+import com.lukecreator.BonziBot.Managers.*;
+import dev.lavalink.youtube.YoutubeAudioSourceManager;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.interactions.AutoCompleteQuery;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.jetbrains.annotations.NotNull;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
@@ -24,12 +28,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.lukecreator.BonziBot.InternalLogger.Severity;
 import com.lukecreator.BonziBot.Async.AutoRepeat;
-import com.lukecreator.BonziBot.CommandAPI.ChoiceArg;
-import com.lukecreator.BonziBot.CommandAPI.Command;
-import com.lukecreator.BonziBot.CommandAPI.CommandArg;
 import com.lukecreator.BonziBot.CommandAPI.CommandArg.ArgType;
-import com.lukecreator.BonziBot.CommandAPI.CommandSystem;
-import com.lukecreator.BonziBot.CommandAPI.EnumArg;
 import com.lukecreator.BonziBot.Data.AllocationList;
 import com.lukecreator.BonziBot.Data.DataSerializer;
 import com.lukecreator.BonziBot.Data.EmoteCache;
@@ -63,31 +62,6 @@ import com.lukecreator.BonziBot.Logging.LogEntryUserJoined;
 import com.lukecreator.BonziBot.Logging.LogEntryUserLeft;
 import com.lukecreator.BonziBot.Logging.LogEntryVoiceChannelCreate;
 import com.lukecreator.BonziBot.Logging.LogEntryVoiceChannelRemove;
-import com.lukecreator.BonziBot.Managers.AppealsManager;
-import com.lukecreator.BonziBot.Managers.BanManager;
-import com.lukecreator.BonziBot.Managers.CooldownManager;
-import com.lukecreator.BonziBot.Managers.CountingManager;
-import com.lukecreator.BonziBot.Managers.EventWaiterManager;
-import com.lukecreator.BonziBot.Managers.FunnyChannelManager;
-import com.lukecreator.BonziBot.Managers.GridManager;
-import com.lukecreator.BonziBot.Managers.GuiManager;
-import com.lukecreator.BonziBot.Managers.GuildSettingsManager;
-import com.lukecreator.BonziBot.Managers.LoggingManager;
-import com.lukecreator.BonziBot.Managers.LotteryManager;
-import com.lukecreator.BonziBot.Managers.MusicManager;
-import com.lukecreator.BonziBot.Managers.MuteManager;
-import com.lukecreator.BonziBot.Managers.QuickDrawManager;
-import com.lukecreator.BonziBot.Managers.ReactionManager;
-import com.lukecreator.BonziBot.Managers.ReactionRoleManager;
-import com.lukecreator.BonziBot.Managers.RepManager;
-import com.lukecreator.BonziBot.Managers.RewardManager;
-import com.lukecreator.BonziBot.Managers.ScriptCache;
-import com.lukecreator.BonziBot.Managers.ScriptManager;
-import com.lukecreator.BonziBot.Managers.SpecialPeopleManager;
-import com.lukecreator.BonziBot.Managers.TagManager;
-import com.lukecreator.BonziBot.Managers.TodoListManager;
-import com.lukecreator.BonziBot.Managers.UpgradeManager;
-import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import com.lukecreator.BonziBot.Music.MusicQueue;
 import com.lukecreator.BonziBot.NoUpload.Constants;
 import com.lukecreator.BonziBot.Script.Model.InvocationMethod;
@@ -126,7 +100,6 @@ import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.channel.update.ChannelUpdateTopicEvent;
 import net.dv8tion.jda.api.events.guild.GuildBanEvent;
-import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
@@ -165,9 +138,10 @@ public class BonziBot extends ListenerAdapter {
 	
 	MessageHandler[] messageHandlers = new MessageHandler[0];
 	List<IStorableData> storableData = new ArrayList<>();
-	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(0);
+	ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors());
 	public GuildSettingsManager guildSettings = new GuildSettingsManager();
 	public ReactionRoleManager reactionRoles = new ReactionRoleManager();
+	public AutocompleteManager autocomplete = new AutocompleteManager(this);
 	public EventWaiterManager eventWaiter = new EventWaiterManager();
 	public SpecialPeopleManager special = new SpecialPeopleManager();
 	public UserAccountManager accounts = new UserAccountManager();
@@ -203,18 +177,19 @@ public class BonziBot extends ListenerAdapter {
 	
 	public BonziBot(boolean test) throws LoginException {
 		this.builder = JDABuilder.create(
-			GatewayIntent.GUILD_VOICE_STATES,
-			GatewayIntent.GUILD_MEMBERS,
-			GatewayIntent.GUILD_MESSAGES,
-			GatewayIntent.GUILD_MESSAGE_REACTIONS,
-			GatewayIntent.DIRECT_MESSAGES,
-			GatewayIntent.DIRECT_MESSAGE_REACTIONS,
-			GatewayIntent.MESSAGE_CONTENT,
-			GatewayIntent.GUILD_EMOJIS_AND_STICKERS
+				GatewayIntent.GUILD_VOICE_STATES,
+				GatewayIntent.GUILD_MEMBERS,
+				GatewayIntent.GUILD_MESSAGES,
+				GatewayIntent.GUILD_MESSAGE_REACTIONS,
+				GatewayIntent.DIRECT_MESSAGES,
+				GatewayIntent.DIRECT_MESSAGE_REACTIONS,
+				GatewayIntent.MESSAGE_CONTENT,
+				GatewayIntent.GUILD_EMOJIS_AND_STICKERS
 		).disableCache(
-			CacheFlag.ACTIVITY,
-			CacheFlag.ONLINE_STATUS,
-			CacheFlag.CLIENT_STATUS
+				CacheFlag.ACTIVITY,
+				CacheFlag.ONLINE_STATUS,
+				CacheFlag.CLIENT_STATUS,
+				CacheFlag.SCHEDULED_EVENTS
 		);
 		
 		this.test = test;
@@ -246,20 +221,19 @@ public class BonziBot extends ListenerAdapter {
 				continue;
 			
 			SlashCommandData data = Commands.slash(command.getSlashCommandName(), command.description);
-			List<OptionData> allArgs = new ArrayList<OptionData>(allCommands.size());
+			List<OptionData> allArgs = new ArrayList<>(allCommands.size());
 			
 			if(command.userRequiredPermissions != null && command.userRequiredPermissions.length > 0)
 				data.setDefaultPermissions(DefaultMemberPermissions.enabledFor(command.userRequiredPermissions));
 			
 			if(command.args != null && command.args.getArgs() != null) {
 				for(CommandArg arg: command.args.getArgs()) {
-					OptionData option = new OptionData(arg.type.nativeOption,
-						arg.argName.toLowerCase().replace(' ', '-'), arg.isOptional() ?
-						"optional" : "required",
-						!arg.isOptional());
-					
+
+					OptionData option = getOptionData(arg);
+
 					if(arg.type == ArgType.Enum) {
-						EnumArg e = (EnumArg)arg;
+                        assert arg instanceof EnumArg;
+                        EnumArg e = (EnumArg)arg;
 						@SuppressWarnings("rawtypes")
 						Enum[] values = e.getValues();
 						Choice[] choices = new Choice[e.validTypes];
@@ -274,25 +248,46 @@ public class BonziBot extends ListenerAdapter {
 						}
 						option.addChoices(choices);
 					} else if(arg.type == ArgType.Choice) {
-						String[] strs = ((ChoiceArg)arg).getValues();
-						Choice[] choices = new Choice[strs.length];
-						for(int i = 0; i < strs.length; i++)
-							choices[i] = new Choice(strs[i].toLowerCase(), i);
+                        assert arg instanceof ChoiceArg;
+                        String[] choiceStrings = ((ChoiceArg)arg).getValues();
+						Choice[] choices = new Choice[choiceStrings.length];
+						for(int i = 0; i < choiceStrings.length; i++)
+							choices[i] = new Choice(choiceStrings[i].toLowerCase(), i);
 						option.addChoices(choices);
 					}
 					allArgs.add(option);
 				}
 			}
 			data.addOptions(allArgs);
-			InternalLogger.print("Register command: " + data.toData().toString());
+			InternalLogger.print("Register command: " + data.toData());
 			action = action.addCommands(data);
 		}
 		action.queue();
 	}
-	
+
+	@NotNull
+	private static OptionData getOptionData(CommandArg arg) {
+		OptionType optionType = arg.type.nativeOption;
+
+		// if it's an IntArg, there's a chance the input is 'all'
+		if(arg instanceof IntArg) {
+			if(((IntArg) arg).getSupportsAll())
+				optionType = OptionType.STRING;
+		}
+
+		OptionData option = new OptionData(optionType,
+			arg.argName.toLowerCase().replace(' ', '-'), arg.isOptional() ?
+			"optional" : "required",
+			!arg.isOptional());
+
+		if(arg.type == ArgType.StringAutocomplete)
+			option.setAutoComplete(true);
+		return option;
+	}
+
 	void setupMessageHandlers() {
 		this.messageHandlers = new MessageHandler[] {
-				// auxilliary handlers
+				// auxiliary handlers
 			new CountingMessageHandler(),		// Counting Game Modifier
 			new RPGMessageHandler(),			// RPG Modifier
 			new PicturesOnlyMessageHandler(),	// Pictures Only Modifier
@@ -385,7 +380,11 @@ public class BonziBot extends ListenerAdapter {
 		
 		try {
 			// setup audio
-			AudioSourceManagers.registerRemoteSources(this.audioPlayerManager);
+			// 2024 update: exclude deprecated built-in YouTube source manager and use v2 from lavalink-devs
+			YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager(false, true, true);
+			this.audioPlayerManager.registerSourceManager(youtube);
+			// noinspection deprecation
+			AudioSourceManagers.registerRemoteSources(this.audioPlayerManager, com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager.class);
 			
 			// compile regex patterns
 			Constants.compileRegex();
@@ -496,7 +495,7 @@ public class BonziBot extends ListenerAdapter {
 	
 	// Events
 	@Override
-	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+	public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 		if(ScriptCache.shouldCheckScripts(event)) {
 			if(this.scripts.onScriptTrigger(event, this))
 				return;
@@ -515,21 +514,20 @@ public class BonziBot extends ListenerAdapter {
 		
 		// Check for hardcoded protocols
 		String[] parts = id.split(":");
-		if(parts[0].equals("_appeal")) {
-			this.appeals.processButtonEvent(parts, this, event);
-			return;
-		}
-		if(parts[0].equals(QuickDraw.BUTTON_PROTOCOL)) {
-			String part2 = parts.length < 2 ? "" : parts[1];
-			this.quickDraw.buttonReceived(event.getUser(), part2, event, this);
-			return;
-		}
-		if(parts[0].equals(TicketProtocol.PROTOCOL)) {
-			// TODO
-			return;
-		}
-		
-		MessageChannel channel = event.getChannel();
+        switch (parts[0]) {
+            case "_appeal":
+                this.appeals.processButtonEvent(parts, this, event);
+                return;
+            case QuickDraw.BUTTON_PROTOCOL:
+                String part2 = parts.length < 2 ? "" : parts[1];
+                this.quickDraw.buttonReceived(event.getUser(), part2, event, this);
+                return;
+            case TicketProtocol.PROTOCOL:
+                // TODO
+                return;
+        }
+
+        MessageChannel channel = event.getChannel();
 		
 		if(channel.getType() == ChannelType.TEXT) {
 			Guild guild = event.getGuild();
@@ -581,7 +579,7 @@ public class BonziBot extends ListenerAdapter {
 		this.guis.onButtonClick(event);
 	}
 	@Override
-	public void onGenericSelectMenuInteraction(GenericSelectMenuInteractionEvent event) {
+	public void onGenericSelectMenuInteraction(@NotNull GenericSelectMenuInteractionEvent event) {
 		this.guis.onSelectionMenu(event);
 	}
 	@Override
@@ -618,10 +616,6 @@ public class BonziBot extends ListenerAdapter {
 				continue;
 			handler.handlePrivateMessage(this, e);
 		}
-	}
-	@Override
-	public void onGuildJoin(GuildJoinEvent e) {
-		// ahhhHH
 	}
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent e) {
@@ -677,6 +671,28 @@ public class BonziBot extends ListenerAdapter {
 		
 		// Send a leave message.
 		this.guildSettings.memberLeft(this, e);
+	}
+	@Override
+	public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
+		Guild guild = event.getGuild(); // may be null
+		AutoCompleteQuery query = event.getInteraction().getFocusedOption();
+		String key = query.getName();
+		String value = query.getValue();
+		
+		String[] results = this.autocomplete.provideResults(guild, key, value);
+		if(results == null || results.length == 0) {
+			event.replyChoiceStrings().queue();
+			return;
+		}
+
+		if (results.length > 25) {
+			// sort by the best match and prune
+			Arrays.sort(results, Comparator.comparingInt(s -> LevenshteinDistance.getDefaultInstance().apply(value, s)));
+			String[] prunedResults = Arrays.copyOfRange(results, 0, 25);
+			event.replyChoiceStrings(prunedResults).queue();
+		}
+		
+		event.replyChoiceStrings(results).queue();
 	}
 
 	private void runScript(long guildId, Script script, JDA jda, User user, Member actualMember, Guild guild) {
@@ -735,7 +751,7 @@ public class BonziBot extends ListenerAdapter {
 		}
 	}
 	@Override
-	public void onGuildVoiceUpdate(GuildVoiceUpdateEvent e) {
+	public void onGuildVoiceUpdate(@NotNull GuildVoiceUpdateEvent e) {
 		FunnyChannelManager.funnyChannels(this, e);
 	}
 	@Override
@@ -815,8 +831,8 @@ public class BonziBot extends ListenerAdapter {
     }
 	
 	// Logging Events
-	public static HashMap<Long, List<Long>> banCache = new HashMap<Long, List<Long>>();
-	public static List<Long> dontLogDeletion = new ArrayList<Long>();
+	public static HashMap<Long, List<Long>> banCache = new HashMap<>();
+	public static List<Long> dontLogDeletion = new ArrayList<>();
 	@Override
 	public void onGuildBan(GuildBanEvent e) {
 		long id = e.getGuild().getIdLong();
@@ -930,10 +946,10 @@ public class BonziBot extends ListenerAdapter {
 				
 				if(muted == null) {
 					// Silently remove the muted role because it's been deleted.
-					settings.mutedRole = 0l;
+					settings.mutedRole = 0L;
 					this.guildSettings.setSettings(guild, settings);
 				} else {
-					tc.getManager().putPermissionOverride(muted, 0l,
+					tc.getManager().putPermissionOverride(muted, 0L,
 						Permission.MESSAGE_SEND.getRawValue() |
 						Permission.MESSAGE_ADD_REACTION.getRawValue() |
 						Permission.MESSAGE_ATTACH_FILES.getRawValue()).queue();
