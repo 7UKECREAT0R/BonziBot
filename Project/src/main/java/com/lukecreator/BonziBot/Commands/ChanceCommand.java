@@ -26,18 +26,20 @@ public class ChanceCommand extends Command {
 		this.name = "Chance";
 		this.icon = GenericEmoji.fromEmoji("🎲");
 		this.description = "You'll have a 50/50 chance to double your input or lose it all!";
-		this.args = new CommandArgCollection(new IntArg("amount"));
+		this.args = new CommandArgCollection(new IntArg("amount").supportAll());
 		this.category = CommandCategory.COINS;
 	}
 	
 	@Override
 	public void run(CommandExecutionInfo e) {
-		
 		User u = e.executor;
 		UserAccountManager uam = e.bonzi.accounts;
 		UserAccount account = uam.getUserAccount(u);
 		
-		int amount = e.args.getInt("amount");
+		long amount = e.args.getIsAll("amount") ?
+				account.getCoins() :
+				e.args.getInt("amount");
+		
 		long balance = account.getCoins();
 		String amountString = BonziUtils.comma(amount);
 		String balanceString = BonziUtils.comma(balance);

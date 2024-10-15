@@ -26,7 +26,7 @@ public class SubtractCoinsCommand extends Command {
 
 	@Override
 	public void run(CommandExecutionInfo e) {
-		int amount = e.args.getInt("amount");
+		long amount = e.args.getInt("amount");
 		User target = e.args.argSpecified("target") ? e.args.getUser("target") : e.executor;
 		
 		UserAccountManager uam = e.bonzi.accounts;
@@ -36,6 +36,5 @@ public class SubtractCoinsCommand extends Command {
 		long now = ua.getCoins();
 		uam.setUserAccount(target, ua);
 		e.channel.sendMessage("completed. " + target.getName() + "'s balance: " + before + " -> " + now).queue();
-		return;
-	}
+    }
 }

@@ -25,7 +25,7 @@ public class PayCommand extends Command {
 		this.description = "Pay another user with coins!";
 		this.args = new CommandArgCollection(
 			new UserArg("receiver"),
-			new IntArg("amount"));
+			new IntArg("amount").supportAll());
 		this.category = CommandCategory.COINS;
 	}
 	
@@ -35,15 +35,12 @@ public class PayCommand extends Command {
 		UserAccountManager uam = e.bonzi.accounts;
 		UserAccount receiveAccount = uam.getUserAccount(target);
 		UserAccount senderAccount = uam.getUserAccount(e.executor);
-		int amount = e.args.getInt("amount");
+		long amount = e.args.getIsAll("amount") ? senderAccount.getCoins() : e.args.getInt("amount");
 		
 		// Validation
 		if(target.isBot()) {
-			MessageEmbed msg = BonziUtils.failureEmbed("bro iunno if you want to gift a bot coins...");
-			if(e.isSlashCommand)
-				e.slashCommand.replyEmbeds(msg).queue();
-			else
-				e.channel.sendMessageEmbeds(msg).queue();
+			MessageEmbed msg = BonziUtils.failureEmbed("bro I dunno if you want to gift a bot coins...");
+			e.reply(msg);
 			return;
 		}
 		if(amount < 0) {

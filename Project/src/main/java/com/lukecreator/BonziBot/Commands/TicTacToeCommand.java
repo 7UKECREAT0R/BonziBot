@@ -26,7 +26,7 @@ public class TicTacToeCommand extends Command {
 		this.description = "Play Tic-Tac-Toe with someone!";
 		this.args = new CommandArgCollection(new UserArg("opponent").optional());
 		this.category = CommandCategory.FUN;
-		this.setCooldown(20000);
+		this.setCooldown(BonziUtils.getMsForSeconds(20));
 	}
 
 	@Override
@@ -36,22 +36,20 @@ public class TicTacToeCommand extends Command {
 		EventWaiterManager ewm = e.bonzi.eventWaiter;
 		
 		if(chosen) {
-			User opponent = chosen ? e.args.getUser("opponent") : null;
+			User opponent = e.args.getUser("opponent");
 			EmbedBuilder eb = new EmbedBuilder()
 				.setColor(BonziUtils.COLOR_BONZI_PURPLE)
 				.setTitle("❌ TIC-TAC-TOE DUEL ⭕")
 				.setDescription(e.executor.getAsMention() +
 					" has requested to duel with " + opponent.getAsMention()
 					+ " in a game of tic-tac-toe!");
-			Consumer<String> onAccept = (str -> {
+			Consumer<String> onAccept = str -> {
 				if(str.equals("tttaccept")){
 					GuiTicTacToe gui = new GuiTicTacToe(e.executor, opponent);
 					BonziUtils.sendGui(e, gui);
-				} else {
-					e.channel.sendMessageEmbeds(BonziUtils.failureEmbed(opponent.getName() + " rejected the tic-tac-toe duel.")).queue();
-					return;
-				}
-			});
+				} else
+                    e.channel.sendMessageEmbeds(BonziUtils.failureEmbed(opponent.getName() + " rejected the tic-tac-toe duel.")).queue();
+			};
 			if(e.isSlashCommand) {
 				ewm.waitForAction(opponent, e.slashCommand.replyEmbeds(eb.build()).setEphemeral(false), onAccept,
 					new GuiButton("ACCEPT", GuiButton.ButtonColor.GREEN, "tttaccept"),

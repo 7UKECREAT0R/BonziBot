@@ -19,7 +19,7 @@ public class XpForLevelCommand extends Command {
 
 	@Override
 	public void run(CommandExecutionInfo e) {
-		int level = e.args.getInt("level");
+		int level = (int) e.args.getInt("level");
 		int xp = BonziUtils.calculateXpForLevel(level);
 		String com = BonziUtils.comma(xp);
 		e.channel.sendMessage("`" + com + " XP` needed for level `" + level + "`").queue();

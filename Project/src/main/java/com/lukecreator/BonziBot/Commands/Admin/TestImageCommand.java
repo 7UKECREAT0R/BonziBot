@@ -40,7 +40,7 @@ public class TestImageCommand extends Command {
 		Color bgColor = e.args.getColor("BG Color");
 		Color fgColor = e.args.getColor("Text Color");
 		String fontName = e.args.getString("Font Name");
-		int fontSize = e.args.getInt("Font Size");
+		int fontSize = (int) e.args.getInt("Font Size");
 		String text = e.args.getString("Text");
 		
 		long start = System.currentTimeMillis();

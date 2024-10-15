@@ -8,6 +8,8 @@ import com.lukecreator.BonziBot.CommandAPI.CommandCategory;
 import com.lukecreator.BonziBot.CommandAPI.CommandExecutionInfo;
 import com.lukecreator.BonziBot.Data.GenericEmoji;
 
+import java.awt.*;
+
 public class SaveFilesCommand extends Command {
 
 	public SaveFilesCommand() {
@@ -22,9 +24,13 @@ public class SaveFilesCommand extends Command {
 
 	@Override
 	public void run(CommandExecutionInfo e) {
-		boolean backup = e.args.argSpecified("backup")?
-			e.args.getBoolean("backup") : false;
-		
+		boolean backup = e.args.argSpecified("backup") && e.args.getBoolean("backup");
+
+		e.channel.sendMessageEmbeds(BonziUtils.quickEmbed(
+				backup ?
+					"Saving... (backup)" :
+					"Saving...", 
+				"this might take a little while", Color.GRAY).build()).queue();
 		e.bonzi.saveData();
 		
 		if(backup) {

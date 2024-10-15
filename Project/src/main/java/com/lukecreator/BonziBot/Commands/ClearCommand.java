@@ -37,7 +37,7 @@ public class ClearCommand extends Command {
 
 	@Override
 	public void run(CommandExecutionInfo e) {
-		int amount = e.args.getInt("amount");
+		int amount = (int) e.args.getInt("amount");
 		boolean limit = e.args.argSpecified("limit");
 		long limitUser = limit ? e.args.getUser("limit").getIdLong() : 0l;
 		TextChannel channel = e.tChannel;

@@ -19,13 +19,13 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 public class SlotsCommand extends Command {
 	
 	Random rand = new Random();
-	enum Slot {
+	public enum Slot {
 		Banana("🍌"),
 		Apple("🍎"),
 		Cherry("🍒"),
 		Lemon("🍋");
 		
-		public String icon;
+		public final String icon;
 		Slot(String icon) {
 			this.icon = icon;
 		}
@@ -36,14 +36,17 @@ public class SlotsCommand extends Command {
 		this.name = "Slots";
 		this.icon = GenericEmoji.fromEmoji("🎰");
 		this.description = "Play slots, what else needs to be explained?";
-		this.args = new CommandArgCollection(new IntArg("amount"));
+		this.args = new CommandArgCollection(new IntArg("amount").supportAll());
 		this.category = CommandCategory.COINS;
 	}
 
 	@Override
 	public void run(CommandExecutionInfo e) {
+		UserAccountManager uam = e.bonzi.accounts;
+		UserAccount acc = uam.getUserAccount(e.executor);
+		long balance = acc.getCoins();
+		long amount = e.args.getIsAll("amount") ? balance : e.args.getInt("amount");
 		
-		int amount = e.args.getInt("amount");
 		if(amount == 0) {
 			MessageEmbed me = BonziUtils.failureEmbed("no 0 is allowd");
 			if(e.isSlashCommand)
@@ -59,10 +62,6 @@ public class SlotsCommand extends Command {
 				e.channel.sendMessageEmbeds(me).queue();
 			return;
 		}
-		
-		UserAccountManager uam = e.bonzi.accounts;
-		UserAccount acc = uam.getUserAccount(e.executor);
-		long balance = acc.getCoins();
 		if(amount > balance) {
 			MessageEmbed me = BonziUtils.failureEmbed("You can't afford that!");
 			if(e.isSlashCommand)
@@ -82,10 +81,10 @@ public class SlotsCommand extends Command {
 		}
 		
 		int wins = this.getWins(picks);
-		double mult = 1.5 * wins;
-		double dTotalWon = amount * mult;
-		int totalWon = (int)Math.round(dTotalWon);
-		int won = totalWon - amount; 
+		double multiplied = 1.5 * wins;
+		double dTotalWon = amount * multiplied;
+		long totalWon = Math.round(dTotalWon);
+		long won = totalWon - amount; 
 		String wonS = BonziUtils.comma(won);
 		
 		if(wins > 0)
@@ -121,7 +120,7 @@ public class SlotsCommand extends Command {
 		if(wins == 0) {
 			details = "You lost " + amountS + " coins.";
 		} else {
-			details = mult + "x Multiplier! +" + wonS + " coins!";
+			details = multiplied + "x Multiplier! +" + wonS + " coins!";
 		}
 		
 		EmbedBuilder eb = new EmbedBuilder();

@@ -13,7 +13,6 @@ import com.lukecreator.BonziBot.Managers.UserAccountManager;
 import net.dv8tion.jda.api.entities.User;
 
 public class AddCoinsCommand extends Command {
-
 	public AddCoinsCommand() {
 		this.subCategory = 1;
 		this.name = "Add Coins";
@@ -26,7 +25,7 @@ public class AddCoinsCommand extends Command {
 
 	@Override
 	public void run(CommandExecutionInfo e) {
-		int amount = e.args.getInt("amount");
+		long amount = e.args.getInt("amount");
 		User target = e.args.argSpecified("target") ? e.args.getUser("target") : e.executor;
 		
 		UserAccountManager uam = e.bonzi.accounts;

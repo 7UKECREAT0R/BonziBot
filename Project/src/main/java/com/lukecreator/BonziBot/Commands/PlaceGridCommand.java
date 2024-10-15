@@ -28,8 +28,8 @@ public class PlaceGridCommand extends Command {
 	@Override
 	public void run(CommandExecutionInfo e) {
 		
-		int x = e.args.getInt("x");
-		int y = e.args.getInt("y");
+		int x = (int) e.args.getInt("x");
+		int y = (int) e.args.getInt("y");
 		GridManager.TileType pixel = (TileType)e.args.get("pixel");
 		
 		long time = e.bonzi.grid.timeLeft(e.executor);

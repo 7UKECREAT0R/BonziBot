@@ -12,7 +12,7 @@ public class ManageDailyCommand extends Command {
 	}
     public ManageDailyCommand() {
         this.subCategory = 1;
-        this.name = "ManageDailyCommand";
+        this.name = "ManageDaily";
         this.icon = GenericEmoji.fromEmoji("�");
         this.description = "Manage different aspects of people's daily rewards in dire circumstances.";
         this.args = new CommandArgCollection(
@@ -26,7 +26,7 @@ public class ManageDailyCommand extends Command {
     @Override
     public void run(CommandExecutionInfo e) {
 		DailySubcommand subcommand = (DailySubcommand)e.args.get("subcommand");
-		int amount = e.args.argSpecified("amount") ? e.args.getInt("amount") : 0;
+		int amount = e.args.argSpecified("amount") ? (int)e.args.getInt("amount") : 0;
 
         var accounts = e.bonzi.accounts.getAccounts().keySet();
 		RewardManager rm = e.bonzi.rewards;

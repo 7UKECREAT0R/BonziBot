@@ -46,14 +46,14 @@ public class LightshotCommand extends Command {
 	
 	@Override
 	public void run(CommandExecutionInfo e) {
-		int count = e.args.argSpecified("amount") ? e.args.getInt("amount") : 1;
+		long count = e.args.argSpecified("amount") ? e.args.getInt("amount") : 1L;
 		
 		if(PROGRESS) {
 			e.channel.sendMessage("thingy already in progress!").queue();
 			return;
 		}
 		
-		if(count > 100) {
+		if(count > 100L) {
 			e.channel.sendMessage("whoah bro slow down u gotta do less than 100").queue();
 			return;
 		}
@@ -62,8 +62,8 @@ public class LightshotCommand extends Command {
 		for(int i = 0; i < count; i++) {
 			String urlID = this.buildUrlID();
 			if(i + 1 == count)
-				e.channel.sendMessage("https://prnt.sc/" + urlID).queueAfter((i + 1) * 1100, TimeUnit.MILLISECONDS, msg -> { PROGRESS = false; });
-			else e.channel.sendMessage("https://prnt.sc/" + urlID).queueAfter((i + 1) * 1100, TimeUnit.MILLISECONDS);
+				e.channel.sendMessage("https://prnt.sc/" + urlID).queueAfter((i + 1) * 1100L, TimeUnit.MILLISECONDS, msg -> { PROGRESS = false; });
+			else e.channel.sendMessage("https://prnt.sc/" + urlID).queueAfter((i + 1) * 1100L, TimeUnit.MILLISECONDS);
 		}
 	}
 }
