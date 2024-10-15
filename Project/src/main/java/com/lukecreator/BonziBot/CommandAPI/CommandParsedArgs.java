@@ -42,22 +42,34 @@ public class CommandParsedArgs {
 	public Object get(String name) {
 		return data.get(name);
 	}
-	public int getInt(String name) {
+
+	/**
+	 * Returns a boolean representing if this argument was specified and was 'all'.
+	 * @param name The name of the argument to get.
+	 * @return True if 'all' was specified in place of an integer.
+	 */
+	public boolean getIsAll(String name) {
+		Object o = data.get(name);
+		if(o == null)
+			return false;
+        return o instanceof IntArg.All;
+    }
+	public long getInt(String name) {
 		Object o = data.get(name);
 		if(o == null) return 0;
 		if(o instanceof Long)
 			return ((Long)o).intValue();
-		return ((Integer)o).intValue();
+		return (Integer) o;
 	}
 	public float getFloat(String name) {
 		Object o = data.get(name);
 		if(o == null) return 0.0F;
-		return ((Float)o).floatValue();
+		return (Float) o;
 	}
 	public boolean getBoolean(String name) {
 		Object o = data.get(name);
 		if(o == null) return false;
-		return ((Boolean)o).booleanValue();
+		return (Boolean) o;
 	}
 	public String getString(String name) {
 		Object o = data.get(name);

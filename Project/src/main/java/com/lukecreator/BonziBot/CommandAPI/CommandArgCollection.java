@@ -68,7 +68,7 @@ public class CommandArgCollection {
 	
 	/**
 	 * Builds a usage string[] based off of this CommandArgCollection.
-	 *       The array is incase multiple combinations exist.
+	 *       The array is in case multiple combinations exist.
 	 */
 	public String[] buildUsage(String prefix, String commandName) {
 		
@@ -170,9 +170,11 @@ public class CommandArgCollection {
 			case CHANNEL:
 				cmd.object = mapping.getAsChannel();
 				break;
+			/*
 			case INTEGER:
 				cmd.object = mapping.getAsLong();
 				break;
+			*/ // now uses string input type for handling 'all' and cases of suffixes
 			case ROLE:
 				cmd.object = mapping.getAsRole();
 				break;
@@ -180,7 +182,14 @@ public class CommandArgCollection {
 				cmd.object = mapping.getAsUser();
 				break;
 			default:
-				cmd.object = mapping.getAsString();
+				if(baseType == ArgType.Int) {
+					IntArg intArg = (IntArg)cmd;
+					intArg.parseWord(mapping.getAsString(), jda, exec, g);
+					clone[search] = intArg;
+					continue;
+				} else {
+					cmd.object = mapping.getAsString();
+				}
 			}
 			clone[search] = cmd;
 		}
@@ -188,10 +197,13 @@ public class CommandArgCollection {
 		return new CommandParsedArgs(clone, false);
 	}
 	/**
-	 * Parses an array of words. Ensure the words array does
-	 *  not contain the prefix part of the command message.
-	 *  
-	 *  g can be null sometimes if it's in a DM.
+	 * Parses the given array of words into a CommandParsedArgs object.
+	 *
+	 * @param words The array of words to parse.
+	 * @param jda The JDA instance.
+	 * @param exec The User who executed the command.
+	 * @param g The Guild where the command was executed.
+	 * @return The CommandParsedArgs object containing the parsed arguments.
 	 */
 	public CommandParsedArgs parse(String[] words, JDA jda, User exec, Guild g) {
 		

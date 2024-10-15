@@ -16,9 +16,10 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 public abstract class CommandArg {
 	
 	public enum ArgType {
-		Int(OptionType.INTEGER, false),
+		Int(OptionType.STRING, true),
 		Float(OptionType.INTEGER, false),
 		String(OptionType.STRING, false),
+		StringAutocomplete(OptionType.STRING, false),
 		StringRem(OptionType.STRING, false),
 		Boolean(OptionType.BOOLEAN, false),
 		User(OptionType.USER, false),
@@ -31,8 +32,8 @@ public abstract class CommandArg {
 		Array(OptionType.UNKNOWN, false),
 		Emoji(OptionType.STRING, true);
 		
-		public OptionType nativeOption;	// Input information for slash commands.
-		public boolean formatValidate;	// Use bonzi-sided input validation for slash command arguments.
+		public final OptionType nativeOption;	// Input information for slash commands.
+		public final boolean formatValidate;	// Use bonzi-sided input validation for slash command arguments.
 		
 		private ArgType(OptionType nativeOption, boolean formatValidate) {
 			this.nativeOption = nativeOption;
@@ -101,8 +102,6 @@ public abstract class CommandArg {
 	/**
 	 * {@link #toString()}s this object in the way implemented by this
 	 * specific CommandArg. If null is passed in, null will be returned.
-	 * @param obj
-	 * @return
 	 */
 	public String stringify(Object obj) {
 		if(obj == null)
@@ -112,48 +111,42 @@ public abstract class CommandArg {
 	
 	/**
 	 * Clone this CommandArg into a new object.
-	 * @return
 	 */
 	public CommandArg createNew() {
 		Class<? extends CommandArg> clazz = this.getClass();
 		try {
+			CommandArg arg;
+			
 			if(this.type == ArgType.Enum) {
 				EnumArg selfEnum = (EnumArg)this;
-				Constructor<?> cnst = clazz.getConstructor(String.class, Class.class);
-				CommandArg arg = (CommandArg)cnst.newInstance(this.argName, selfEnum.baseClass);
-				arg.optional = this.optional;
-				arg.object = null; // default
+				Constructor<?> constructor = clazz.getConstructor(String.class, Class.class);
+				arg = (CommandArg)constructor.newInstance(this.argName, selfEnum.baseClass);
 				return arg;
 			} else if(this.type == ArgType.Choice) {
 				String[] choices = ((ChoiceArg)this).choices;
 				String[] copy = new String[choices.length];
-				for(int i = 0; i < choices.length; i++)
-					copy[i] = new String(choices[i]);
-				Constructor<?> cnst = clazz.getConstructor(String.class, String[].class);
-				CommandArg arg = (CommandArg)cnst.newInstance(this.argName, copy);
-				arg.optional = this.optional;
-				arg.object = null; // default
+                System.arraycopy(choices, 0, copy, 0, choices.length);
+				Constructor<?> constructor = clazz.getConstructor(String.class, String[].class);
+				arg = (CommandArg)constructor.newInstance(this.argName, copy);
 				return arg;
+			} else if(this.type == ArgType.Int) {
+				Constructor<?> constructor = clazz.getConstructor(String.class);
+				IntArg intArg = (IntArg)constructor.newInstance(this.argName);
+				assert this instanceof IntArg;
+				intArg.supportsAll = ((IntArg)this).supportsAll;
+				arg = intArg;
 			} else {
-				Constructor<?> cnst = clazz.getConstructor(String.class);
-				CommandArg arg = (CommandArg)cnst.newInstance(this.argName);
-				arg.optional = this.optional;
-				arg.object = null; // default
-				return arg;
+				Constructor<?> constructor = clazz.getConstructor(String.class);
+				arg = (CommandArg)constructor.newInstance(this.argName);
 			}
-		} catch (InstantiationException e) {
-			InternalLogger.printError(e);
-		} catch (IllegalAccessException e) {
-			InternalLogger.printError(e);
-		} catch (NoSuchMethodException e) {
-			InternalLogger.printError(e);
-		} catch (SecurityException e) {
-			InternalLogger.printError(e);
-		} catch (IllegalArgumentException e) {
-			InternalLogger.printError(e);
-		} catch (InvocationTargetException e) {
+			
+			arg.optional = this.optional;
+			arg.object = null; // default
+			return arg;
+		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException |
+                 IllegalArgumentException | InvocationTargetException e) {
 			InternalLogger.printError(e);
 		}
-		return null;
+        return null;
 	}
 }
