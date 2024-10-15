@@ -31,12 +31,29 @@ import net.dv8tion.jda.api.utils.FileUpload;
 public class GuiContainer {
 	
 	private boolean enabled = true;
-	
+
+	/**
+	 * The ID of the owner of this GUI. If globalWhitelist is off and the interacting user is not present in
+	 * ownerWhitelist, the user will be blocked from using the GUI.
+	 */
 	public long ownerId;
+	/**
+	 * If enabled, all users will be able to use this GUI with no restrictions.
+	 */
 	public boolean globalWhitelist = false;
+	/**
+	 * The list of users who are allowed to interact with this GUI, on top of the ownerId. If globalWhitelist is
+	 * enabled, this list does nothing.
+	 */
 	public List<Long> ownerWhitelist = new ArrayList<Long>();
-	
+
+	/**
+	 * Is this GUI in a guild?
+	 */
 	public boolean isGuild = false;
+	/**
+	 * Is this GUI in a private message?
+	 */
 	public boolean isDm = false;
 	
 	// Message Stuff
@@ -300,7 +317,6 @@ public class GuiContainer {
 	}
 	/**
 	 * Delete this GUI from Discord.
-	 * @param jda
 	 */
 	public void delete(JDA jda) {
 		this.enabled = false;
@@ -360,7 +376,7 @@ public class GuiContainer {
 		if(this.ownerId != event.getUser().getIdLong() && !this.globalWhitelist) {
 			// check whitelist
 			for(Long wl: this.ownerWhitelist)
-				if(event.getUser().getIdLong() == wl.longValue())
+				if(event.getUser().getIdLong() == wl)
 					break nevermind;
 			event.reply(":x: `This GUI was opened by someone else.`").setEphemeral(true).queue();
 			return;
@@ -380,7 +396,7 @@ public class GuiContainer {
 		if(this.ownerId != event.getUser().getIdLong() && !this.globalWhitelist) {
 			// check whitelist
 			for(Long wl: this.ownerWhitelist)
-				if(event.getUser().getIdLong() == wl.longValue())
+				if(event.getUser().getIdLong() == wl)
 					break nevermind;
 			event.reply(":x: `This GUI was opened by someone else.`").setEphemeral(true).queue();
 			return;

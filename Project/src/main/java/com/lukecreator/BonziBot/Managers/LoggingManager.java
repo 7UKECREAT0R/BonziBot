@@ -114,7 +114,6 @@ public class LoggingManager implements IStorableData {
 		if(channel == null)
 			return;
 		
-		System.out.println("Attempting to log: " + entry.toString());
 		this.log(channel, entry);
 	}
 	public void tryLog(long guildId, BonziBot bb, LogEntry entry, JDA jda) {
@@ -122,7 +121,6 @@ public class LoggingManager implements IStorableData {
 		if(channel == null)
 			return;
 		
-		System.out.println("Attempting to log: " + entry.toString());
 		this.log(channel, entry);
 	}
 	

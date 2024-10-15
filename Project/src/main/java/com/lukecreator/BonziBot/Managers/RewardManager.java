@@ -79,11 +79,12 @@ public class RewardManager implements IStorableData {
 	public int claimAs(long id, BonziBot bb) {
 		
 		long timeLeft = this.timeUntilCanClaim(id);
+		
 		int streak = this.getStreak(id);
 		if(timeLeft <= -ONE_DAY * 2)
 			streak = 0;
 		
-		int bonus = streak * STREAK_REWARDS;
+		int bonus = streak * streak; // Holy cow power of 2??????
 		int receive = BASE_COINS + bonus;
 		
 		UserAccount acc = bb.accounts.getUserAccount(id);
@@ -102,8 +103,7 @@ public class RewardManager implements IStorableData {
 	
 	/**
 	 * Get the top users.
-	 * @return
-	 */
+     */
 	public List<Entry<Long, Integer>> getTop() {
 		Set<Entry<Long, Integer>> set = this.currentStreak.entrySet();
 		List<Entry<Long, Integer>> list = new ArrayList<Entry<Long, Integer>>(set);

@@ -1,5 +1,6 @@
 package com.lukecreator.BonziBot.Handling;
 
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
 import com.lukecreator.BonziBot.BonziBot;
@@ -21,13 +22,26 @@ public class PicturesOnlyMessageHandler implements MessageHandler {
 			return; // Found attachment.
 		
 		String content = msg.getContentRaw();
-		Matcher matcher = Constants.IMAGE_URL_REGEX_COMPILED.matcher(content);
-		if(matcher.find())
+		Matcher imageUrlMatcher = Constants.IMAGE_URL_REGEX_COMPILED.matcher(content);
+		if(imageUrlMatcher.find())
 			return; // Found image URL.
-		
+
+		Matcher urlMatcher = Constants.URL_REGEX_COMPILED.matcher(content);
+		if (urlMatcher.find())
+		{
+			// found a URL, don't know if it's an image or not.
+			// give it five seconds to embed and try again.
+			long messageId = e.getMessageIdLong();
+			e.getGuildChannel().retrieveMessageById(messageId).delay(3, TimeUnit.SECONDS).queue(reretrievedMessage -> {
+				if (reretrievedMessage.getEmbeds().isEmpty()) {
+					reretrievedMessage.delete().queue(null, COLLISION_IGNORE);
+				}
+			});
+			return;
+        }
+
 		msg.delete().queue(null, COLLISION_IGNORE);
-		return;
-	}
+    }
 
 	@Override
 	public void handlePrivateMessage(BonziBot bb, MessageReceivedEvent e) {

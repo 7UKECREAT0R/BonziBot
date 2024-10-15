@@ -9,22 +9,22 @@ import net.dv8tion.jda.api.entities.User;
 public class SpecialPeopleManager {
 	
 	final long[] admins = new long[] {
-			415316679610859520l, // Giraffey
-			214183045278728202l, // Luke
-			206395494648381443l  // Zipdip
+            415316679610859520L, // Giraffey
+            214183045278728202L, // Luke
+            206395494648381443L  // Zipdip
 	};
 	final long[] bros = new long[] {
-			239526347972673537l, // Yucky
-			429795795404062720l, // Salty
-			348136128932610058l, // Checken
-			624752943127592976l, // HypixL
-			401913626195263509l, // Zeni
-			798235629145292842l, // Onyx2D
-			473375262973624333l, // Plasma
-			258702715943780352l, // Curoa
-			302881384400289792l, // Goldy
-			633411509560541245l, // Fez
-			288388543535906816l, // 455
+            239526347972673537L, // Yucky
+            429795795404062720L, // Salty
+            348136128932610058L, // Checken
+            624752943127592976L, // HypixL
+            401913626195263509L, // Zeni
+            798235629145292842L, // Onyx2D
+            473375262973624333L, // Plasma
+            258702715943780352L, // Curoa
+            302881384400289792L, // Goldy
+            633411509560541245L, // Fez
+            288388543535906816L, // 455
 	};
 	
 	public boolean getIsAdmin(long id) {

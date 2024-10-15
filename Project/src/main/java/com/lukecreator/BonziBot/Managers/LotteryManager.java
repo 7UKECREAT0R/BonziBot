@@ -16,8 +16,8 @@ public class LotteryManager implements IStorableData {
 	
 	public static final String FILE = "lottery";
 	public static final int TICKET_COST = 10;
-	public static final int RESET_TO = 1000;
-	public static final int WIN_CHANCE = 10000;
+	public static final int RESET_TO = 1_000_000;
+	public static final int WIN_CHANCE = /* one in: */ 10_000;
 	public static final String S_TICKET_COST = BonziUtils.comma(TICKET_COST);
 	public static final String S_RESET_TO = BonziUtils.comma(RESET_TO);
 	public static final String S_WIN_CHANCE = BonziUtils.comma(WIN_CHANCE);
@@ -28,31 +28,37 @@ public class LotteryManager implements IStorableData {
 	public int getLottery() {
 		return lottery;
 	}
-	public void incrementLottery() {
-		
-	}
+	
 	/**
 	 * Buy a lottery ticket for this user. Automatically
 	 * sets their coins, and returns if they won or not.
 	 * Also returns the winnings or losses. (pos or neg)
 	 */
-	public Tuple<Boolean, Integer> doLottery(User buyer, BonziBot bonzi) {
+	public Tuple<Boolean, Integer> doLottery(User buyer, BonziBot bonzi, int numberOfRolls) {
 		UserAccount ua = bonzi.accounts.getUserAccount(buyer);
 		long coins = ua.getCoins();
 		
-		boolean win = rand.nextInt(WIN_CHANCE) == 0;
-		int winnings = win ? lottery : -10;
-		coins += winnings;
+		int winnings = 0;
+		boolean win = false;
 		
-		if(win)
-			lottery = RESET_TO;
-		else
+		for(int i = 0; i < numberOfRolls; i++) {
+			win = rand.nextInt(WIN_CHANCE) == 0;
+			
+            if (win) {
+				winnings += lottery;
+				lottery = RESET_TO;
+				break;
+			} else 
+				winnings -= TICKET_COST;
+			
 			lottery += TICKET_COST;
+		}
 		
+		coins += winnings;
 		ua.setCoins(coins);
 		bonzi.accounts.setUserAccount(buyer, ua);
-		
-		return new Tuple<Boolean, Integer>(win, winnings);
+
+		return new Tuple<>(win, winnings);
 	}
 	
 	@Override
